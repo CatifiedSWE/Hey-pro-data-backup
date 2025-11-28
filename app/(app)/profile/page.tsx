@@ -186,7 +186,7 @@ export default function Profile() {
                   style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                 >
                   <div className="flex-none ">
-                    <AboutSectionComponent title="About" about={profile.about} />
+                    <AboutSectionComponent title="About" about={profile?.bio || ''} onUpdate={refetch} />
                   </div>
                   <div className="flex-none ">
                     <VisaSection visaType={''} visaIssueBy={''} visaExpData={''} />
