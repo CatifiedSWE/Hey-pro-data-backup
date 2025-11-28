@@ -3,21 +3,32 @@
 
 import React, { useEffect, useRef, useState } from "react"
 import Image from "next/image"
-import { Calendar as CalendarIcon, Edit2, LinkIcon, MapPin } from "lucide-react"
+import { Calendar as CalendarIcon, Edit2, LinkIcon, MapPin, Upload } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { ProfileProgress } from "@/app/(app)/profile/components/profileProgress"
-import { ProfileDataTypes } from "@/types"
 import { countries } from "@/lib/countries"
+import { toast } from "sonner"
+import { useProfile, type ProfileData, type LinkData } from "@/hooks/useProfile"
 
 import AvalableDilog from "./Avalable"
 import LinksDialog from "./Links"
 import ProfileEditor from "./ProfileEdit"
 import { CalendarDialog } from "./calendar"
 
-export default function ShortProfile({ Profile }: { Profile: ProfileDataTypes }) {
+interface ShortProfileProps {
+  profile: ProfileData | null;
+  links: LinkData[];
+  onPhotoUpload: (file: File, type: 'profile' | 'banner') => Promise<void>;
+}
+
+export default function ShortProfile({ profile, links, onPhotoUpload }: ShortProfileProps) {
     const [coverImageHovered, setCoverImageHovered] = useState(false)
+    const [uploadingBanner, setUploadingBanner] = useState(false)
+    const [uploadingProfile, setUploadingProfile] = useState(false)
     const filterScrollRef = useRef<HTMLDivElement>(null)
+    const bannerInputRef = useRef<HTMLInputElement>(null)
+    const profileInputRef = useRef<HTMLInputElement>(null)
 
     const nationality = countries.find((country) => country.code === Profile.countryCode)?.name ?? Profile.countryCode ?? "Unknown"
     const locationDescriptor = [nationality, Profile.persionalDetails.location?.trim()].filter(Boolean).join(" • ")
