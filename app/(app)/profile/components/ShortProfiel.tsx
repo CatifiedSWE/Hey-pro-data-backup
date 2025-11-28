@@ -30,23 +30,89 @@ export default function ShortProfile({ profile, links, onPhotoUpload }: ShortPro
     const bannerInputRef = useRef<HTMLInputElement>(null)
     const profileInputRef = useRef<HTMLInputElement>(null)
 
-    const nationality = countries.find((country) => country.code === Profile.countryCode)?.name ?? Profile.countryCode ?? "Unknown"
-    const locationDescriptor = [nationality, Profile.persionalDetails.location?.trim()].filter(Boolean).join(" • ")
-    const highlightedRoles = Profile.roles.slice(0, 6)
-    const extraRecommendations = Math.max(Profile.recomendPeoples.length - 2, 0)
-    const primaryLink = Profile.persionalDetails.links[0]?.url ?? ""
+    // Get display name - use alias if available, otherwise use regular name
+    const displayName = profile?.alias_first_name && profile?.alias_surname
+        ? `${profile.alias_first_name} ${profile.alias_surname}`
+        : profile?.first_name && profile?.surname
+            ? `${profile.first_name} ${profile.surname}`
+            : 'User Profile';
+
+    const nationality = profile?.country || "Unknown";
+    const locationDescriptor = [nationality, profile?.city?.trim()].filter(Boolean).join(" • ");
+    
+    const primaryLink = links[0]?.url ?? "";
     const linkSummary = (() => {
         if (!primaryLink) return "No links added"
         try {
             const host = new URL(primaryLink).hostname.replace(/^www\./, "")
-            const extra = Profile.persionalDetails.links.length - 1
+            const extra = links.length - 1
             const icon = <LinkIcon className="h-5 w-5" color="#FA6E80" />
             return extra > 0 ? <>{icon} {host} & {extra} other link{extra > 1 ? "s" : ""}</> : host
         } catch {
-            const extra = Profile.persionalDetails.links.length - 1
+            const extra = links.length - 1
             return extra > 0 ? `${primaryLink} & ${extra} other link${extra > 1 ? "s" : ""}` : primaryLink
         }
     })()
+
+    const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Validate file type
+        if (!['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(file.type)) {
+            toast.error('Please upload a valid image file (JPEG, PNG, WebP)');
+            return;
+        }
+
+        // Validate file size (2MB)
+        if (file.size > 2 * 1024 * 1024) {
+            toast.error('File size must be less than 2MB');
+            return;
+        }
+
+        setUploadingBanner(true);
+        try {
+            await onPhotoUpload(file, 'banner');
+            toast.success('Banner updated successfully!');
+        } catch (error) {
+            toast.error('Failed to upload banner');
+        } finally {
+            setUploadingBanner(false);
+            if (bannerInputRef.current) {
+                bannerInputRef.current.value = '';
+            }
+        }
+    };
+
+    const handleProfilePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Validate file type
+        if (!['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(file.type)) {
+            toast.error('Please upload a valid image file (JPEG, PNG, WebP)');
+            return;
+        }
+
+        // Validate file size (2MB)
+        if (file.size > 2 * 1024 * 1024) {
+            toast.error('File size must be less than 2MB');
+            return;
+        }
+
+        setUploadingProfile(true);
+        try {
+            await onPhotoUpload(file, 'profile');
+            toast.success('Profile photo updated successfully!');
+        } catch (error) {
+            toast.error('Failed to upload profile photo');
+        } finally {
+            setUploadingProfile(false);
+            if (profileInputRef.current) {
+                profileInputRef.current.value = '';
+            }
+        }
+    };
 
 
     const updateFilterScrollState = () => {
