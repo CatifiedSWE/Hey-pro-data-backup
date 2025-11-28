@@ -84,85 +84,81 @@ export default function ProfileEditor({ profile, trigger }: EditProfileInfoProps
 
                 <div className="flex-1  overflow-y-auto px-6 sm:px-8 md:px-10">
                     <div className="space-y-6">
-                        {/* Name */}
+                        {/* First Name */}
                         <div className="space-y-2 flex flex-col">
-                            <label className="text-base font-normal">Name</label>
+                            <label className="text-base font-normal">First Name</label>
                             <Input
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
+                                value={firstName}
+                                onChange={(e) => setFirstName(e.target.value)}
                                 className="h-12 rounded-2xl border-gray-400 focus:border-none focus:outline-none focus:ring-none text-base"
+                                placeholder="Enter your first name"
                             />
                         </div>
 
-                        {/* Alias name */}
+                        {/* Surname */}
                         <div className="space-y-2">
-                            <label className="text-base font-normal">Alias name</label>
+                            <label className="text-base font-normal">Surname</label>
                             <Input
-                                value={aliasName}
-                                onChange={(e) => setAliasName(e.target.value)}
+                                value={surname}
+                                onChange={(e) => setSurname(e.target.value)}
                                 className="h-12 rounded-2xl border-gray-400 text-base"
+                                placeholder="Enter your surname"
                             />
                         </div>
 
-                        {/* Short about */}
+                        {/* Alias First Name */}
                         <div className="space-y-2">
-                            <label className="text-base font-normal">Short about</label>
+                            <label className="text-base font-normal">Alias First Name (Optional)</label>
+                            <Input
+                                value={aliasFirstName}
+                                onChange={(e) => setAliasFirstName(e.target.value)}
+                                className="h-12 rounded-2xl border-gray-400 text-base"
+                                placeholder="Enter display name if different"
+                            />
+                        </div>
+
+                        {/* Alias Surname */}
+                        <div className="space-y-2">
+                            <label className="text-base font-normal">Alias Surname (Optional)</label>
+                            <Input
+                                value={aliasSurname}
+                                onChange={(e) => setAliasSurname(e.target.value)}
+                                className="h-12 rounded-2xl border-gray-400 text-base"
+                                placeholder="Enter display surname if different"
+                            />
+                        </div>
+
+                        {/* Bio */}
+                        <div className="space-y-2">
+                            <label className="text-base font-normal">Bio</label>
                             <Textarea
-                                value={shortAbout}
-                                onChange={(e) => setShortAbout(e.target.value)}
+                                value={bio}
+                                onChange={(e) => setBio(e.target.value)}
                                 className="min-h-[100px] rounded-2xl border-gray-400 text-base resize-none"
+                                placeholder="Tell us about yourself..."
                             />
                         </div>
 
-                        {/* Location */}
+                        {/* Country */}
                         <div className="space-y-2">
-                            <label className="text-base font-normal">Location</label>
+                            <label className="text-base font-normal">Country</label>
                             <Input
-                                value={location}
-                                onChange={(e) => setLocation(e.target.value)}
+                                value={country}
+                                onChange={(e) => setCountry(e.target.value)}
                                 className="h-12 rounded-2xl border-gray-400 text-base"
+                                placeholder="Enter your country"
                             />
                         </div>
 
-                        {/* Links */}
-                        <div className="space-y-3">
-                            <label className="text-base font-normal">Links</label>
-                            {links.map((link, index) => (
-                                <div key={index} className="space-y-2 pb-3 border-b last:border-b-0">
-                                    <div className="flex items-center justify-between">
-                                        <Input
-                                            placeholder="Label (e.g., Website, Instagram)"
-                                            value={link.label}
-                                            defaultValue={link.label}
-                                            onChange={(e) => handleLinkChange(index, "label", e.target.value)}
-                                            className="h-12 rounded-2xl border-gray-400 text-base"
-                                        />
-                                        {links.length > 0 && (
-                                            <Button
-                                                size="icon"
-                                                variant="ghost"
-                                                onClick={() => handleRemoveLink(index)}
-                                                className="ml-2 h-10 w-10 rounded-full hover:bg-destructive/10"
-                                            >
-                                                <X className="h-4 w-4 text-destructive" />
-                                            </Button>
-                                        )}
-                                    </div>
-                                    <Input
-                                        placeholder="URL"
-                                        value={link.url}
-                                        onChange={(e) => handleLinkChange(index, "url", e.target.value)}
-                                        className="h-12 rounded-2xl border-gray-400 text-base"
-                                    />
-                                </div>
-                            ))}
-                            <Button
-                                variant="outline"
-                                onClick={handleAddLink}
-                                className="w-full h-12 rounded-2xl border-gray-400 text-base bg-transparent"
-                            >
-                                Add Link
-                            </Button>
+                        {/* City */}
+                        <div className="space-y-2">
+                            <label className="text-base font-normal">City</label>
+                            <Input
+                                value={city}
+                                onChange={(e) => setCity(e.target.value)}
+                                className="h-12 rounded-2xl border-gray-400 text-base"
+                                placeholder="Enter your city"
+                            />
                         </div>
                     </div>
                 </div>
