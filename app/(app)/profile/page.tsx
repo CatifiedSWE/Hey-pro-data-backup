@@ -147,6 +147,7 @@ export default function Profile() {
     about: <AboutSection key="about" bio={profile?.bio || ''} />,
     skills: <SkillsSection key="skills" />,
     credits: <CreditsSection key="credits" />,
+    recommendations: <RecommendationsComponent key="recommendations" recommendations={recommendations} onUpdate={refetch} />,
   }
 
   return (
