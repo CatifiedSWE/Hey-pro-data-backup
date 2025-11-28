@@ -41,16 +41,21 @@ import { Button } from "@/components/ui/button";
 import ShortProfile from "./components/ShortProfiel";
 import Highlights from "./components/Highlights";
 import CreditsSection from "./components/CreditView";
-import { profileData, highlightsData } from "@/data/profile";
+import { highlightsData } from "@/data/profile";
 import SlateView from "./components/slate";
 import AddNewSkill from "./components/add-new-skill";
 import { RoleDialog } from "./components/role";
+import { useProfile } from "@/hooks/useProfile";
+import { toast } from "sonner";
 
 export default function Profile() {
   const [activeTab, setActiveTab] = useState<"profile" | "slate">("profile")
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
+  
+  // Use the profile hook for real data
+  const { profile, links, loading, error, uploadPhoto } = useProfile();
 
   const handleScroll = () => {
     if (scrollContainerRef.current) {
