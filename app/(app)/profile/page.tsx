@@ -346,6 +346,7 @@ function SortableItem({ id }: { id: SectionType }) {
     about: "About",
     skills: "Skills",
     credits: "Credits",
+    recommendations: "Recommendations",
   }
 
   return (
