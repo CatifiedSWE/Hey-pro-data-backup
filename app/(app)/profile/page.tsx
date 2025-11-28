@@ -42,6 +42,7 @@ import ShortProfile from "./components/ShortProfiel";
 import Highlights from "./components/Highlights";
 import CreditsSection from "./components/CreditView";
 import RecommendationsComponent from "./components/recommendation";
+import ResumePortfolio from "./components/ResumePortfolio";
 import { highlightsData } from "@/data/profile";
 import SlateView from "./components/slate";
 import AddNewSkill from "./components/add-new-skill";
