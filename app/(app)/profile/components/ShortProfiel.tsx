@@ -141,28 +141,43 @@ export default function ShortProfile({ profile, links, onPhotoUpload }: ShortPro
                 onMouseLeave={() => setCoverImageHovered(false)}
             >
                 <div className="relative sm:h-[150px] h-[88px] w-full overflow-hidden rounded-[20px]">
-                    <Image
-                        src={Profile.backgroundAvtar}
-                        alt="Cover image"
-                        fill
-                        sizes="600px"
-                        className="object-cover"
+                    {profile?.banner_photo_url ? (
+                        <Image
+                            src={profile.banner_photo_url}
+                            alt="Cover image"
+                            fill
+                            sizes="600px"
+                            className="object-cover"
+                        />
+                    ) : (
+                        <div className="w-full h-full bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC]" />
+                    )}
+                    <input 
+                        ref={bannerInputRef}
+                        type="file" 
+                        accept="image/jpeg,image/jpg,image/png,image/webp" 
+                        id="cover-image-upload" 
+                        className="hidden" 
+                        onChange={handleBannerUpload}
                     />
-                    <input type="file" accept="image/*" id="cover-image-upload" className="hidden" />
                     <div
                         className={`absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-[20px] bg-black/60 text-center text-white transition-opacity ${coverImageHovered ? "opacity-100" : "opacity-0"}`}
                     >
                         <p className="text-sm font-semibold">Replace Banner Image</p>
-                        <span className="text-xs opacity-80">Optimal dimensions: 3000x759px</span>
+                        <span className="text-xs opacity-80">Optimal dimensions: 3000x759px (Max 2MB)</span>
                         <div className="flex gap-3">
                             <label htmlFor="cover-image-upload">
-                                <Button variant="default" className="rounded-full bg-[#FA6E80] hover:bg-[#FA6E80]" asChild>
-                                    <span className="cursor-pointer">Replace Image</span>
+                                <Button 
+                                    variant="default" 
+                                    className="rounded-full bg-[#FA6E80] hover:bg-[#FA6E80]" 
+                                    disabled={uploadingBanner}
+                                    asChild
+                                >
+                                    <span className="cursor-pointer">
+                                        {uploadingBanner ? 'Uploading...' : 'Replace Image'}
+                                    </span>
                                 </Button>
                             </label>
-                            <Button variant="ghost" className="rounded-full border border-white text-white">
-                                Remove
-                            </Button>
                         </div>
                     </div>
                 </div>
