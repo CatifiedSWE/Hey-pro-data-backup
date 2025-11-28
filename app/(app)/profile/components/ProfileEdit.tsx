@@ -5,36 +5,25 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { X } from "lucide-react"
 import { toast } from "sonner"
-
-interface LinkField {
-    label: string
-    url: string
-}
-
-interface ProfileData {
-    availability: string;
-    name: string;
-    aliasName: string;
-    shortAbout: string;
-    location: string;
-    links: LinkField[];
-}
+import apiCalling from "@/lib/apiCalling"
+import type { ProfileData } from "@/hooks/useProfile"
 
 interface EditProfileInfoProps {
-    initialProfile: ProfileData;
+    profile: ProfileData | null;
     trigger: React.ReactNode;
 }
 
-export default function ProfileEditor({ initialProfile, trigger }: EditProfileInfoProps) {
+export default function ProfileEditor({ profile, trigger }: EditProfileInfoProps) {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [availability, setAvailability] = useState(initialProfile.availability)
-    const [name, setName] = useState(initialProfile.name)
-    const [aliasName, setAliasName] = useState(initialProfile.aliasName)
-    const [shortAbout, setShortAbout] = useState(initialProfile.shortAbout)
-    const [location, setLocation] = useState(initialProfile.location)
-    const [links, setLinks] = useState<LinkField[]>(initialProfile.links)
+    const [saving, setSaving] = useState(false);
+    const [firstName, setFirstName] = useState(profile?.first_name || '')
+    const [surname, setSurname] = useState(profile?.surname || '')
+    const [aliasFirstName, setAliasFirstName] = useState(profile?.alias_first_name || '')
+    const [aliasSurname, setAliasSurname] = useState(profile?.alias_surname || '')
+    const [bio, setBio] = useState(profile?.bio || '')
+    const [city, setCity] = useState(profile?.city || '')
+    const [country, setCountry] = useState(profile?.country || '')
 
     const handleAddLink = () => {
         toast.success("Link Added!")
