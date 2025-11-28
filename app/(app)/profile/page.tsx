@@ -143,15 +143,15 @@ export default function Profile() {
   }
 
   const sectionComponents = {
-    about: <AboutSection key="about" Profile={profile} />,
-    skills: <SkillsSection key="skills" Profile={profile} />,
-    credits: <CreditsSection key="credits" Profile={profile} />,
+    about: <AboutSection key="about" bio={profile?.bio || ''} />,
+    skills: <SkillsSection key="skills" />,
+    credits: <CreditsSection key="credits" />,
   }
 
   return (
     <section className="relative mx-auto flex w-full max-w-[1180px] flex-col items-center gap-8 px-3 xs:px-4 sm:px-6 lg:flex-row lg:items-start lg:justify-center lg:gap-12 pt-6 pb-20">
       <main className="flex w-full max-w-[600px] flex-col space-y-4">
-        <ShortProfile Profile={profile} />
+        <ShortProfile profile={profile} links={links} onPhotoUpload={handlePhotoUpload} />
         <div className="w-full bg-slate-200 h-px sm:h-[1px] mb-5" />
 
         <div className="space-y-2 mx-auto w-full">
