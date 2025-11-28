@@ -169,14 +169,16 @@ export default function ProfileEditor({ profile, trigger }: EditProfileInfoProps
                         onClick={handleCancel}
                         variant="outline"
                         className="flex-1 py-3 h-15 text-lg border-2 border-[#FA6E80] text-[#FA6E80]  rounded-2xl bg-transparent"
+                        disabled={saving}
                     >
                         Cancel
                     </Button>
                     <Button
                         onClick={handleSaveChanges}
                         className="flex-1 py-3 h-15 text-lg bg-[#FA6E80] text-white rounded-2xl"
+                        disabled={saving}
                     >
-                        Save
+                        {saving ? 'Saving...' : 'Save'}
                     </Button>
                 </div>
             </DialogContent>
