@@ -99,16 +99,18 @@
   - [x] Special character restriction
   - [x] Save functionality
   - [x] Toast notifications
-  - [ ] **⚠️ API Integration Needed** - Currently saves locally only
+  - [x] **✅ API Integration Complete** - Saves to database via PATCH /api/profile
 
-**Status:** ⚠️ PARTIALLY IMPLEMENTED (UI complete, API integration needed)  
+**Status:** ✅ FULLY IMPLEMENTED  
 **API Endpoint:** `PATCH /api/profile` (bio field)  
 **Location:** `/app/app/(app)/profile/components/About.tsx`
 
-**Notes:**
-- Component exists and works for display
-- Edit dialog functional with validation
-- **TODO:** Connect save to API endpoint `/api/profile` to persist bio changes
+**Implementation Details:**
+- Component displays and edits bio text
+- Edit dialog with validation and error handling
+- Connected to `PATCH /api/profile` endpoint
+- Updates profile data on save with loading states
+- Triggers profile refresh after successful save
 
 ---
 
