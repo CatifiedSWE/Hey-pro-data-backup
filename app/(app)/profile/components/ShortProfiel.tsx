@@ -240,70 +240,23 @@ export default function ShortProfile({ profile, links, onPhotoUpload }: ShortPro
             <div className="flex sm:mt-10 -mt-10 flex-col gap-4 px-4 sm:px-[58px]">
                 <div className="space-y-2">
                     <div className="flex flex-wrap items-center gap-4">
-                        <h1 className="text-[22px] font-semibold leading-[33px] text-black">{Profile.persionalDetails.name}</h1>
-                        {Profile.recomendPeoples.length > 0 && (
-                            <div className="flex items-center gap-3">
-                                <div className="flex -space-x-3">
-                                    {Profile.recomendPeoples.slice(0, 3).map((person, index) => (
-                                        <Image
-                                            key={`${person.imgUrl}-${index}`}
-                                            src={person.imgUrl}
-                                            alt="Referred profile"
-                                            width={32}
-                                            height={32}
-                                            className="h-8 w-8 rounded-full border-2 border-white object-cover"
-                                        />
-                                    ))}
-                                    {extraRecommendations > 0 && (
-                                        <span className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-white text-xs font-semibold text-[#444444]">
-                                            +{extraRecommendations}
-                                        </span>
-                                    )}
-                                </div>
-                                <span className="text-xs font-semibold text-[#FA6E80]">
-                                    +{Math.max(Profile.recomendPeoples.length, 0)} Referrals
-                                </span>
-                            </div>
-                        )}
+                        <h1 className="text-[22px] font-semibold leading-[33px] text-black">{displayName}</h1>
                     </div>
-                    <p className="text-sm text-[#181818]">
-                        {(() => {
-                            const sentences = Profile.positions
-                                .flatMap(pos =>
-                                    pos
-                                        .split(/(?<=[.!?])\s+/)
-                                        .map(s => s.trim())
-                                )
-                                .filter(Boolean);
+                    {profile?.bio && (
+                        <p className="text-sm text-[#181818] line-clamp-2">
+                            {profile.bio}
+                        </p>
+                    )}
+                </div>
 
-                            return sentences.map((s, i) => (
-                                <React.Fragment key={i}>
-                                    {s}
-                                    {i < sentences.length - 1 && <br />}
-                                </React.Fragment>
-                            ));
-                        })()}
+                {profile?.day_rate && (
+                    <p className="text-[14px] leading-[21px] text-[#181818]">
+                        Day Rate: {profile.day_rate_currency || 'USD'} {profile.day_rate}
                     </p>
-                </div>
-
-                <div className="flex flex-wrap gap-2">
-                    {highlightedRoles.map((role) => (
-                        <span
-                            key={role}
-                            className="flex items-center rounded-[29px] h-[19px] bg-[#FA6E80] px-4 py-1 text-[10px] font-[400] tracking-wide text-white"
-                        >
-                            {role}
-                        </span>
-                    ))}
-                </div>
-
-
-
-                <p className="text-[14px] leading-[21px] text-[#181818]">{Profile.persionalDetails.shortAbout}</p>
-                <p className="text-[14px] leading-[21px] text-[#181818]">140+ Awards were received</p>
+                )}
 
                 <LinksDialog
-                    links={Profile.persionalDetails.links}
+                    links={links}
                     triggerClassName="h-auto justify-start p-0 -ml-4 text-[12px] font-medium text-[#31A7AC] hover:bg-transparent"
                     triggerLabel={linkSummary}
                 />
