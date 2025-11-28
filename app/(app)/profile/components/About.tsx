@@ -13,14 +13,16 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner"
 import { cn } from "@/lib/utils";
+import apiCalling from "@/lib/apiCalling";
 
-export default function AboutSectionComponent({ icon, title, about: initialAbout, className }: { icon?: React.ReactNode, title: string, about: string, className?: string }) {
+export default function AboutSectionComponent({ icon, title, about: initialAbout, className, onUpdate }: { icon?: React.ReactNode, title: string, about: string, className?: string, onUpdate?: () => void }) {
     const [isOpen, setIsOpen] = useState(false);
     const [about, setAbout] = useState(initialAbout || "This is the about section. It contains information about the user. It can be edited by clicking the edit button.");
     const [error, setError] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
     const finalTitle = title
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         // 1. Check if data has changed
@@ -39,10 +41,33 @@ export default function AboutSectionComponent({ icon, title, about: initialAbout
             return;
         }
 
-        setError(null)
-        // console.log("Submitting data:", { title: finalTitle, about });
-        toast.success(`${finalTitle} updated successfully!`);
-        setIsOpen(false);
+        setError(null);
+        setIsLoading(true);
+
+        try {
+            // Save to API
+            const response = await apiCalling({
+                method: 'post',
+                route: '/profile',
+                data: { bio: about }
+            });
+
+            if (response.status) {
+                toast.success(`${finalTitle} updated successfully!`);
+                setIsOpen(false);
+                // Call onUpdate callback to refresh profile data
+                if (onUpdate) {
+                    onUpdate();
+                }
+            } else {
+                toast.error(response.message || 'Failed to update about section');
+            }
+        } catch (err) {
+            console.error('Error updating about:', err);
+            toast.error('Failed to update about section');
+        } finally {
+            setIsLoading(false);
+        }
     }
 
     return (
