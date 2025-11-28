@@ -181,7 +181,7 @@ export default function LinksDialog({ links, triggerClassName, triggerLabel }: L
                 </Button>
             </DialogTrigger>
 
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="sm:max-w-md max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="text-lg font-bold">Profile Links</DialogTitle>
                 </DialogHeader>
@@ -190,26 +190,54 @@ export default function LinksDialog({ links, triggerClassName, triggerLabel }: L
                     {links.map((link, idx) => {
                         const href = link.url ?? ""
                         const isMail = href.startsWith("mailto:")
+                        const isEditing = editingId === link.id;
+
+                        if (isEditing) {
+                            return (
+                                <div key={link.id} className="space-y-2 p-3 border rounded-md">
+                                    <Input
+                                        value={editLabel}
+                                        onChange={(e) => setEditLabel(e.target.value)}
+                                        placeholder="Label"
+                                        className="h-10"
+                                    />
+                                    <Input
+                                        value={editUrl}
+                                        onChange={(e) => setEditUrl(e.target.value)}
+                                        placeholder="URL"
+                                        className="h-10"
+                                    />
+                                    <div className="flex gap-2">
+                                        <Button
+                                            size="sm"
+                                            onClick={() => handleEditLink(link.id)}
+                                            disabled={saving}
+                                            className="flex-1"
+                                        >
+                                            {saving ? 'Saving...' : 'Save'}
+                                        </Button>
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={() => setEditingId(null)}
+                                            disabled={saving}
+                                        >
+                                            Cancel
+                                        </Button>
+                                    </div>
+                                </div>
+                            );
+                        }
+
                         return (
                             <div
-                                key={idx}
-                                className="flex items-center justify-between gap-3 p-3 rounded-md hover:bg-muted cursor-pointer"
-                                onClick={() => handleClick(href, idx)}
-                                onDoubleClick={(e) => handleDoubleClick(e, href, idx)}
-                                role="button"
-                                tabIndex={0}
-                                onKeyDown={(e) => {
-                                    if (e.key === "Enter") handleClick(href, idx)
-                                    if (e.key === "c" && (e.ctrlKey || e.metaKey)) {
-                                        e.preventDefault()
-                                            ; (async () => {
-                                                try { await navigator.clipboard.writeText(href); setCopiedIndex(idx); setTimeout(() => setCopiedIndex(null), 1500) } catch { }
-                                            })()
-                                    }
-                                }}
+                                key={link.id}
+                                className="flex items-center justify-between gap-3 p-3 rounded-md hover:bg-muted"
                             >
-                                <div className="flex items-center gap-3">
-                                    {/* icon selection reused from outer scope */}
+                                <div className="flex items-center gap-3 flex-1 cursor-pointer"
+                                    onClick={() => handleClick(href, idx)}
+                                    onDoubleClick={(e) => handleDoubleClick(e, href, idx)}
+                                >
                                     <span className="text-muted-foreground">
                                         {(() => {
                                             try {
@@ -234,10 +262,76 @@ export default function LinksDialog({ links, triggerClassName, triggerLabel }: L
                                     {copiedIndex === idx && (
                                         <span className="text-sm text-green-600">Copied!</span>
                                     )}
+                                    <Button
+                                        size="icon"
+                                        variant="ghost"
+                                        onClick={() => startEdit(link)}
+                                        className="h-8 w-8"
+                                    >
+                                        <Edit className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                        size="icon"
+                                        variant="ghost"
+                                        onClick={() => handleDeleteLink(link.id)}
+                                        disabled={saving}
+                                        className="h-8 w-8 text-destructive"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
                                 </div>
                             </div>
                         )
                     })}
+
+                    {/* Add New Link Form */}
+                    {isAddingNew ? (
+                        <div className="space-y-2 p-3 border rounded-md bg-muted/50">
+                            <Input
+                                value={newLabel}
+                                onChange={(e) => setNewLabel(e.target.value)}
+                                placeholder="Label (e.g., LinkedIn, Portfolio)"
+                                className="h-10"
+                            />
+                            <Input
+                                value={newUrl}
+                                onChange={(e) => setNewUrl(e.target.value)}
+                                placeholder="URL"
+                                className="h-10"
+                            />
+                            <div className="flex gap-2">
+                                <Button
+                                    size="sm"
+                                    onClick={handleAddLink}
+                                    disabled={saving}
+                                    className="flex-1"
+                                >
+                                    {saving ? 'Adding...' : 'Add Link'}
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                        setIsAddingNew(false);
+                                        setNewLabel('');
+                                        setNewUrl('');
+                                    }}
+                                    disabled={saving}
+                                >
+                                    Cancel
+                                </Button>
+                            </div>
+                        </div>
+                    ) : (
+                        <Button
+                            variant="outline"
+                            onClick={() => setIsAddingNew(true)}
+                            className="w-full"
+                        >
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add Link
+                        </Button>
+                    )}
                 </div>
             </DialogContent>
         </Dialog>
