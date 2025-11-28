@@ -207,7 +207,7 @@ export default function ShortProfile({ profile, links, onPhotoUpload }: ShortPro
 
             <div className="absolute right-4 top-[98px]  sm:top-[200px] flex items-center gap-3">
                 <ProfileEditor
-                    initialProfile={Profile.persionalDetails}
+                    profile={profile}
                     trigger={
                         <Button
                             className="h-[28px] w-[28px] mt-2 rounded-full bg-[#31A7AC] text-white shadow-[0_4px_16px_rgba(49,167,172,0.35)] hover:bg-[#27939f]"
@@ -225,10 +225,7 @@ export default function ShortProfile({ profile, links, onPhotoUpload }: ShortPro
                 </div>
                 <div className="flex items-center gap-2  bg-white px-4 py-2 text-[#34A353] ">
                     <span className="h-2.5 w-2.5 rounded-full bg-[#34A353]" />
-                    <AvalableDilog
-                        initialProfile={Profile.persionalDetails}
-                        triggerClassName="h-auto border-none bg-transparent p-0 text-[11px] font-[400] text-[#34A353] hover:bg-transparent"
-                    />
+                    <span className="text-[11px] font-[400] text-[#34A353]">Available</span>
                 </div>
                 <CalendarDialog
                     triggerClassName="flex h-[40px] items-center gap-2 rounded-full border-none bg-[#31A7AC] px-4 py-0 text-[11px] font-[400] text-white  hover:bg-[#27939f]"
