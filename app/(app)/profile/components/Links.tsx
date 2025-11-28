@@ -78,6 +78,93 @@ export default function LinksDialog({ links, triggerClassName, triggerLabel }: L
         }
     }
 
+    const handleAddLink = async () => {
+        if (!newLabel || !newUrl) {
+            toast.error('Please fill in both label and URL');
+            return;
+        }
+
+        setSaving(true);
+        try {
+            const response = await apiCalling({
+                method: 'post',
+                route: '/profile/links',
+                data: { label: newLabel, url: newUrl, sort_order: links.length }
+            });
+
+            if (response.status) {
+                toast.success('Link added successfully!');
+                setNewLabel('');
+                setNewUrl('');
+                setIsAddingNew(false);
+                window.location.reload();
+            } else {
+                toast.error(response.message || 'Failed to add link');
+            }
+        } catch (error) {
+            toast.error('Failed to add link');
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleEditLink = async (id: string) => {
+        if (!editLabel || !editUrl) {
+            toast.error('Please fill in both label and URL');
+            return;
+        }
+
+        setSaving(true);
+        try {
+            const response = await apiCalling({
+                method: 'post',
+                route: '/profile/links',
+                data: { id, label: editLabel, url: editUrl }
+            });
+
+            if (response.status) {
+                toast.success('Link updated successfully!');
+                setEditingId(null);
+                window.location.reload();
+            } else {
+                toast.error(response.message || 'Failed to update link');
+            }
+        } catch (error) {
+            toast.error('Failed to update link');
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleDeleteLink = async (id: string) => {
+        if (!confirm('Are you sure you want to delete this link?')) return;
+
+        setSaving(true);
+        try {
+            const response = await apiCalling({
+                method: 'delete',
+                route: `/profile/links?id=${id}`
+            });
+
+            if (response.status) {
+                toast.success('Link deleted successfully!');
+                window.location.reload();
+            } else {
+                toast.error(response.message || 'Failed to delete link');
+            }
+        } catch (error) {
+            toast.error('Failed to delete link');
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const startEdit = (link: LinkData) => {
+        setEditingId(link.id);
+        setEditLabel(link.label);
+        setEditUrl(link.url);
+    };
+
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
