@@ -1,7 +1,7 @@
 "use client"
 import React, { type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
-import { LinkIcon, Linkedin, Twitter, Github, Globe, Mail, Facebook, Youtube } from "lucide-react";
+import { LinkIcon, Linkedin, Twitter, Github, Globe, Mail, Facebook, Youtube, Plus, X, Edit, Trash2 } from "lucide-react";
 import {
     Dialog,
     DialogContent,
@@ -9,10 +9,14 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
+import apiCalling from "@/lib/apiCalling"
+import type { LinkData } from "@/hooks/useProfile"
 
 interface LinksDialogProps {
-    links: { label: string; url: string }[]
+    links: LinkData[]
     triggerClassName?: string
     triggerLabel?: ReactNode
 }
@@ -21,6 +25,13 @@ export default function LinksDialog({ links, triggerClassName, triggerLabel }: L
 
     const [open, setOpen] = React.useState(false)
     const [copiedIndex, setCopiedIndex] = React.useState<number | null>(null)
+    const [editingId, setEditingId] = React.useState<string | null>(null)
+    const [isAddingNew, setIsAddingNew] = React.useState(false)
+    const [newLabel, setNewLabel] = React.useState('')
+    const [newUrl, setNewUrl] = React.useState('')
+    const [editLabel, setEditLabel] = React.useState('')
+    const [editUrl, setEditUrl] = React.useState('')
+    const [saving, setSaving] = React.useState(false)
     const timersRef = React.useRef<Record<number, number | null>>({})
     const urlIcons = {
         "linkedin": <Linkedin className="h-5 w-5" />,
