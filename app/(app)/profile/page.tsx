@@ -28,7 +28,7 @@ import {
 import { CSS } from "@dnd-kit/utilities"
 import { HighlightCard } from "@/app/(app)/profile/components/Highlights"
 import HighlightsText from "@/app/(app)/profile/components/highlights-text"
-type SectionType = "about" | "skills" | "credits"
+type SectionType = "about" | "skills" | "credits" | "recommendations"
 import React, { useState, useRef, useEffect } from "react";
 import AboutSectionComponent from "./components/About";
 import VisaSection from "./components/visa";
@@ -41,6 +41,7 @@ import { Button } from "@/components/ui/button";
 import ShortProfile from "./components/ShortProfiel";
 import Highlights from "./components/Highlights";
 import CreditsSection from "./components/CreditView";
+import RecommendationsComponent from "./components/recommendation";
 import { highlightsData } from "@/data/profile";
 import SlateView from "./components/slate";
 import AddNewSkill from "./components/add-new-skill";
