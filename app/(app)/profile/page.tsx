@@ -56,7 +56,7 @@ export default function Profile() {
   const [showRightArrow, setShowRightArrow] = useState(true);
   
   // Use the profile hook for real data
-  const { profile, links, loading, error, uploadPhoto, refetch } = useProfile();
+  const { profile, links, recommendations, loading, error, uploadPhoto, refetch } = useProfile();
 
   const handleScroll = () => {
     if (scrollContainerRef.current) {
