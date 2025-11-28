@@ -184,13 +184,25 @@ export default function ShortProfile({ profile, links, onPhotoUpload }: ShortPro
             </div>
             <div className="absolute inset-x-0 top-[38px] sm:top-[108px] left-[9px] sm:left-[58px] flex justify-start">
                 <div
-                    className="relative flex h-[112px] w-[112px] items-center justify-center"
+                    className="relative flex h-[112px] w-[112px] items-center justify-center group cursor-pointer"
+                    onClick={() => profileInputRef.current?.click()}
                 >
-
-                    <ProfileProgress value={Profile.profileCompletion} imageUrl={Profile.avtar} className="rounded-full" />
-
+                    <ProfileProgress 
+                        value={profile?.profile_completion_percentage || 0} 
+                        imageUrl={profile?.profile_photo_url || '/image (2).png'} 
+                        className="rounded-full" 
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Upload className="h-6 w-6 text-white" />
+                    </div>
+                    <input 
+                        ref={profileInputRef}
+                        type="file" 
+                        accept="image/jpeg,image/jpg,image/png,image/webp" 
+                        className="hidden" 
+                        onChange={handleProfilePhotoUpload}
+                    />
                 </div>
-
             </div>
 
             <div className="absolute right-4 top-[98px]  sm:top-[200px] flex items-center gap-3">
