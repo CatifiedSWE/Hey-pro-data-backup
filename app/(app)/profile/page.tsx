@@ -81,7 +81,7 @@ export default function Profile() {
   }, []);
 
   const highlights = highlightsData
-  const [sectionOrder, setSectionOrder] = useState<SectionType[]>(["about", "skills", "credits"])
+  const [sectionOrder, setSectionOrder] = useState<SectionType[]>(["about", "skills", "credits", "recommendations"])
   const [isReorderDialogOpen, setIsReorderDialogOpen] = useState(false)
 
   const handlePhotoUpload = async (file: File, type: 'profile' | 'banner') => {
