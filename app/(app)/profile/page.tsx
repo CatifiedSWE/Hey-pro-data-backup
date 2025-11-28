@@ -78,10 +78,50 @@ export default function Profile() {
     container?.addEventListener('scroll', handleScroll);
     return () => container?.removeEventListener('scroll', handleScroll);
   }, []);
-  const profile = profileData
+
   const highlights = highlightsData
   const [sectionOrder, setSectionOrder] = useState<SectionType[]>(["about", "skills", "credits"])
   const [isReorderDialogOpen, setIsReorderDialogOpen] = useState(false)
+
+  const handlePhotoUpload = async (file: File, type: 'profile' | 'banner') => {
+    const result = await uploadPhoto(file, type);
+    if (!result.success) {
+      toast.error(result.message || 'Failed to upload photo');
+    }
+  };
+
+  // Show loading state
+  if (loading) {
+    return (
+      <section className="relative mx-auto flex w-full max-w-[1180px] flex-col items-center gap-8 px-3 xs:px-4 sm:px-6 lg:flex-row lg:items-start lg:justify-center lg:gap-12 pt-6 pb-20">
+        <div className="flex w-full max-w-[600px] flex-col space-y-4">
+          <div className="animate-pulse">
+            <div className="h-[150px] bg-gray-200 rounded-[20px]"></div>
+            <div className="mt-4 space-y-2">
+              <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+              <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <section className="relative mx-auto flex w-full max-w-[1180px] flex-col items-center gap-8 px-3 xs:px-4 sm:px-6 lg:flex-row lg:items-start lg:justify-center lg:gap-12 pt-6 pb-20">
+        <div className="flex w-full max-w-[600px] flex-col space-y-4">
+          <div className="text-center p-8">
+            <p className="text-red-500">{error}</p>
+            <Button onClick={() => window.location.reload()} className="mt-4">
+              Retry
+            </Button>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   const sensors = useSensors(
     useSensor(PointerSensor),
