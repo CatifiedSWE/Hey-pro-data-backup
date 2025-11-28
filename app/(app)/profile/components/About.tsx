@@ -108,9 +108,11 @@ export default function AboutSectionComponent({ icon, title, about: initialAbout
                     </div>
                     <DialogFooter className="flex flex-row ">
                         <DialogClose asChild>
-                            <Button type="button" variant="outline" className="rounded-[16px] h-[44px] w-[128px]">Cancel</Button>
+                            <Button type="button" variant="outline" className="rounded-[16px] h-[44px] w-[128px]" disabled={isLoading}>Cancel</Button>
                         </DialogClose>
-                        <Button type="submit" className="rounded-[16px] h-[44px]">Save changes</Button>
+                        <Button type="submit" className="rounded-[16px] h-[44px]" disabled={isLoading}>
+                            {isLoading ? 'Saving...' : 'Save changes'}
+                        </Button>
                     </DialogFooter>
                 </form>
             </DialogContent>
