@@ -25,44 +25,48 @@ export default function ProfileEditor({ profile, trigger }: EditProfileInfoProps
     const [city, setCity] = useState(profile?.city || '')
     const [country, setCountry] = useState(profile?.country || '')
 
-    const handleAddLink = () => {
-        toast.success("Link Added!")
-        setLinks([...links, { label: "", url: "" }])
-    }
+    const handleSaveChanges = async () => {
+        setSaving(true);
+        try {
+            const response = await apiCalling({
+                method: 'post',
+                route: '/profile',
+                data: {
+                    first_name: firstName,
+                    surname: surname,
+                    alias_first_name: aliasFirstName || null,
+                    alias_surname: aliasSurname || null,
+                    bio: bio,
+                    city: city,
+                    country: country
+                }
+            });
 
-    const handleRemoveLink = (index: number) => {
-        toast.success("Link Removed!")
-        setLinks(links.filter((_, i) => i !== index))
-    }
-
-    const handleLinkChange = (index: number, field: "label" | "url", value: string) => {
-        const newLinks = [...links]
-        newLinks[index][field] = value
-        setLinks(newLinks)
-    }
-
-    const handleSaveChanges = () => {
-        const updatedProfile: ProfileData = {
-            availability,
-            name,
-            aliasName,
-            shortAbout,
-            location,
-            links,
-        };
-        console.log(updatedProfile);
-        setIsDialogOpen(false);
-        toast.success("Profile updated successfully!");
+            if (response.status) {
+                toast.success("Profile updated successfully!");
+                setIsDialogOpen(false);
+                // Refresh the page to show updated data
+                window.location.reload();
+            } else {
+                toast.error(response.message || "Failed to update profile");
+            }
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            toast.error("Failed to update profile");
+        } finally {
+            setSaving(false);
+        }
     }
 
     const handleCancel = () => {
         // Reset state to initial values
-        setAvailability(initialProfile.availability);
-        setName(initialProfile.name);
-        setAliasName(initialProfile.aliasName);
-        setShortAbout(initialProfile.shortAbout);
-        setLocation(initialProfile.location);
-        setLinks(initialProfile.links);
+        setFirstName(profile?.first_name || '');
+        setSurname(profile?.surname || '');
+        setAliasFirstName(profile?.alias_first_name || '');
+        setAliasSurname(profile?.alias_surname || '');
+        setBio(profile?.bio || '');
+        setCity(profile?.city || '');
+        setCountry(profile?.country || '');
         setIsDialogOpen(false);
     }
 
