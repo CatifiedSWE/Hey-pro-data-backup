@@ -191,8 +191,15 @@ export default function LinksDialog({ links, triggerClassName, triggerLabel, onU
             });
 
             if (promises.length > 0) {
-                await Promise.all(promises);
-                toast.success('Changes saved successfully');
+                const results = await Promise.all(promises);
+                const failed = results.filter(r => !r.status);
+                
+                if (failed.length > 0) {
+                    console.error('Failed requests:', failed);
+                    toast.error('Some changes failed to save');
+                } else {
+                    toast.success('Changes saved successfully');
+                }
             }
             
             if (onUpdate) onUpdate();
