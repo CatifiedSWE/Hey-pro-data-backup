@@ -135,8 +135,13 @@ export default function LinksDialog({ links, triggerClassName, triggerLabel, onU
 
             if (response.status) {
                 toast.success('Link updated successfully!');
+                // Update local state
+                setLocalLinks(localLinks.map(link => 
+                    link.id === id ? { ...link, label: editLabel, url: editUrl } : link
+                ));
                 setEditingId(null);
-                window.location.reload();
+                // Call onUpdate to refresh parent data if provided
+                if (onUpdate) onUpdate();
             } else {
                 toast.error(response.message || 'Failed to update link');
             }
