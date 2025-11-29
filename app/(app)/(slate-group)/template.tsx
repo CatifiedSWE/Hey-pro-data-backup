@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
-import { BookmarkIcon, HelpCircle, SettingsIcon, UserRound, Search } from "lucide-react";
+import { BookmarkIcon, HelpCircle, SettingsIcon, UserRound } from "lucide-react";
 
 export default function AppLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     interface SimilarAccount {
@@ -109,38 +109,22 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
 
     return (
         <div className="min-h-screen bg-gray-50/50">
-            {/* Header Section */}
-            <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-gray-100">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between h-16">
-                        <div className="flex items-center gap-4">
-                            <span className="text-xl font-bold bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC] bg-clip-text text-transparent">
-                                SLATE
-                            </span>
-                            <div className="hidden md:block h-6 w-[1px] bg-gray-200"></div>
-                            <span className="hidden md:block text-sm text-gray-500">Your professional feed</span>
-                        </div>
-                        <div className="flex-1 max-w-md mx-4 hidden md:block">
-                            <div className="relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                                <input 
-                                    type="text" 
-                                    placeholder="Search posts..." 
-                                    className="w-full pl-10 pr-4 py-2 bg-gray-100 border-none rounded-full text-sm focus:ring-2 focus:ring-[#FA6E80]/20 outline-none transition-all"
-                                />
-                            </div>
-                        </div>
-                    </div>
+            {/* Header Title Only - Removed Search/Nav as requested */}
+            <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-2">
+                <div className="flex items-center gap-4">
+                    <span className="text-xl font-bold bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC] bg-clip-text text-transparent">
+                        SLATE
+                    </span>
                 </div>
-                <div className="h-[1px] w-full bg-gradient-to-r from-[#31A7AC] via-[#6A89BE] to-[#FA6E80] opacity-30" />
+                <div className="h-[1px] w-full bg-gradient-to-r from-[#31A7AC] via-[#6A89BE] to-[#FA6E80] opacity-30 mt-4" />
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8">
+            <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8 items-start">
                     
-                    {/* Left Sidebar - Profile */}
-                    <div className="hidden md:block md:col-span-4 lg:col-span-3">
-                        <div className="sticky top-24 space-y-6">
+                    {/* Left Sidebar - Profile - STICKY */}
+                    <div className="hidden md:block md:col-span-4 lg:col-span-3 sticky top-4 h-[calc(100vh-2rem)] overflow-y-auto no-scrollbar">
+                        <div className="space-y-6 pb-4">
                             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                                 {/* Cover Image */}
                                 <div className="h-24 w-full relative bg-gray-100">
@@ -216,22 +200,19 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                         </div>
                     </div>
 
-                    {/* Main Content - Feed */}
-                    <div className="col-span-1 md:col-span-8 lg:col-span-6">
+                    {/* Main Content - Feed - SCROLLABLE */}
+                    <div className="col-span-1 md:col-span-8 lg:col-span-6 min-h-screen">
                         <div className="max-w-xl mx-auto">
                             {children}
                         </div>
                     </div>
 
-                    {/* Right Sidebar - Suggestions */}
-                    <div className="hidden lg:block lg:col-span-3">
-                        <div className="sticky top-24">
+                    {/* Right Sidebar - Suggestions - STICKY */}
+                    <div className="hidden lg:block lg:col-span-3 sticky top-4 h-[calc(100vh-2rem)] overflow-y-auto no-scrollbar">
+                        <div className="pb-4">
                             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
                                 <div className="flex items-center justify-between mb-4">
-                                    <h3 className="font-bold text-gray-900">View Profiles</h3>
-                                    <Link href="/explore" className="text-xs font-medium text-[#FA6E80] hover:underline">
-                                        View all
-                                    </Link>
+                                    <h3 className="font-bold text-gray-900 text-[#FA6E80]">View Profiles</h3>
                                 </div>
                                 
                                 <div className="space-y-4">
