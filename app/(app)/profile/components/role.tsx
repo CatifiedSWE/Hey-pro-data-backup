@@ -14,11 +14,16 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Plus, X } from "lucide-react"
-import { useProfile } from "@/hooks/useProfile"
 import { toast } from "sonner"
+import { RoleData } from "@/hooks/useProfile"
 
-export function RoleDialog() {
-    const { roles, addRole, deleteRole } = useProfile()
+interface RoleDialogProps {
+    roles: RoleData[];
+    onAddRole: (role: string, sort_order?: number) => Promise<{ success: boolean; message: string }>;
+    onDeleteRole: (id: string) => Promise<{ success: boolean; message: string }>;
+}
+
+export function RoleDialog({ roles, onAddRole, onDeleteRole }: RoleDialogProps) {
     const [newRole, setNewRole] = useState("")
     const [open, setOpen] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -44,7 +49,7 @@ export function RoleDialog() {
         }
 
         setIsSubmitting(true)
-        const result = await addRole(value, roles.length)
+        const result = await onAddRole(value, roles.length)
         setIsSubmitting(false)
 
         if (result.success) {
@@ -56,7 +61,7 @@ export function RoleDialog() {
     }
 
     const handleRemoveRole = async (id: string) => {
-        const result = await deleteRole(id)
+        const result = await onDeleteRole(id)
         if (result.success) {
             toast.success("Role removed successfully")
         } else {
