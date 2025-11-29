@@ -61,7 +61,7 @@ ls -la /app/.env.local
 
 **Command:**
 ```bash
-cd /app && yarn tsc --noEmit
+cd /app && npx tsc --noEmit
 ```
 
 **Result:** ✅ Done in 8.63s - No errors
