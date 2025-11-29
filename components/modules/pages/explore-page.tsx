@@ -76,11 +76,11 @@ const tags = [
   "Writer"
 ];
 
-export default function ExplorePage({
-  projectsCardData,
-}: {
+interface ExplorePageProps {
   projectsCardData: ProjectCardType[];
-}) {
+}
+
+export default function ExplorePage({ projectsCardData }: ExplorePageProps) {
   const [projects, setProjects] = useState<ProjectCardType[]>(projectsCardData);
   const [filterTags, setFilterTags] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
