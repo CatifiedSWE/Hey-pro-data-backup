@@ -85,7 +85,7 @@ export default function Profile() {
   const [isReorderDialogOpen, setIsReorderDialogOpen] = useState(false)
   
   // Use the profile hook for real data
-  const { profile, links, recommendations, roles, loading, error, uploadPhoto, refetch } = useProfile();
+  const { profile, links, recommendations, roles, loading, error, uploadPhoto, refetch, addRole, deleteRole } = useProfile();
 
   // Drag and drop sensors - MUST be called before any conditional returns
   const sensors = useSensors(
@@ -224,7 +224,7 @@ export default function Profile() {
                   </div>
 
                   <div className="flex-none">
-                    <RoleDialog />
+                    <RoleDialog roles={roles} onAddRole={addRole} onDeleteRole={deleteRole} />
                   </div>
                   <div className="flex-none ">
                     <AvalableCountryForTravel availableCountries={(profile as ExtendedProfileData)?.AvailableCountriesForTravel || []} />
