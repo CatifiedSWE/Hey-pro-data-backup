@@ -88,16 +88,41 @@ export async function POST(request: NextRequest) {
       .from('profile-photos')
       .getPublicUrl(filePath);
 
+    const publicUrl = publicUrlData.publicUrl;
+
+    // Update user profile in database
+    const updateField = type === 'banner' ? 'banner_photo_url' : 'profile_photo_url';
+    
+    const { error: dbError } = await supabase
+      .from('user_profiles')
+      .update({ 
+        [updateField]: publicUrl,
+        updated_at: new Date().toISOString()
+      })
+      .eq('user_id', user.id);
+
+    if (dbError) {
+      console.error('Database update error:', dbError);
+      // We still return success for the upload, but maybe warn?
+      // Or fail? If we fail, the user might retry.
+      // But the file is uploaded.
+      // Let's return error so the frontend knows something went wrong.
+      return NextResponse.json(
+        errorResponse('File uploaded but failed to update profile', dbError.message),
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json(
       successResponse(
         {
-          url: publicUrlData.publicUrl,
+          url: publicUrl,
           path: filePath,
           size: file.size,
           mimeType: file.type,
           type: photoType
         },
-        'Profile photo uploaded successfully'
+        'Profile photo uploaded and updated successfully'
       ),
       { status: 200 }
     );

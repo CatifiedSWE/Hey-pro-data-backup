@@ -217,9 +217,8 @@ export const useProfile = () => {
       const data = await response.json();
 
       if (data.success && data.data?.url) {
-        // Update profile with new photo URL
-        const fieldName = type === 'banner' ? 'banner_photo_url' : 'profile_photo_url';
-        await updateProfile({ [fieldName]: data.data.url });
+        // Profile is already updated by the API now, just refetch to get new data
+        await fetchProfile();
         return { success: true, url: data.data.url };
       } else {
         return { success: false, message: data.error || 'Failed to upload photo' };
@@ -228,7 +227,7 @@ export const useProfile = () => {
       console.error('Error uploading photo:', err);
       return { success: false, message: 'Failed to upload photo' };
     }
-  }, [updateProfile]);
+  }, [fetchProfile]);
 
   // Initial load
   useEffect(() => {
