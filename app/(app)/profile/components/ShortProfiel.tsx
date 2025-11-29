@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { ProfileProgress } from "@/app/(app)/profile/components/profileProgress"
 import { countries } from "@/lib/countries"
 import { toast } from "sonner"
-import { useProfile, type ProfileData, type LinkData } from "@/hooks/useProfile"
+import { useProfile, type ProfileData, type LinkData, type RoleData } from "@/hooks/useProfile"
 
 import AvalableDilog from "./Avalable"
 import LinksDialog from "./Links"
@@ -19,10 +19,11 @@ import { CalendarDialog } from "./calendar"
 interface ShortProfileProps {
   profile: ProfileData | null;
   links: LinkData[];
+  roles?: RoleData[];
   onPhotoUpload: (file: File, type: 'profile' | 'banner') => Promise<{ success: boolean; message?: string; url?: string }>;
 }
 
-export default function ShortProfile({ profile, links, onPhotoUpload }: ShortProfileProps) {
+export default function ShortProfile({ profile, links, roles = [], onPhotoUpload }: ShortProfileProps) {
     const [coverImageHovered, setCoverImageHovered] = useState(false)
     const [uploadingBanner, setUploadingBanner] = useState(false)
     const [uploadingProfile, setUploadingProfile] = useState(false)
@@ -254,6 +255,20 @@ export default function ShortProfile({ profile, links, onPhotoUpload }: ShortPro
                         <p className="text-sm text-[#181818] line-clamp-2">
                             {profile.bio}
                         </p>
+                    )}
+                    
+                    {/* Roles Display */}
+                    {roles && roles.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mt-3">
+                            {roles.map((role) => (
+                                <span 
+                                    key={role.id} 
+                                    className="inline-flex items-center rounded-[10px] bg-[#FA6E80] px-3 py-1 text-sm font-medium text-white"
+                                >
+                                    {role.role_name}
+                                </span>
+                            ))}
+                        </div>
                     )}
                 </div>
 
