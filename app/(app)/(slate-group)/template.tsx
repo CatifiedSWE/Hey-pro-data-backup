@@ -107,20 +107,30 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
         ],
     };
 
+    const gradientStyle = {
+        background: "linear-gradient(90deg, #FA6E80 0%, #6A89BE 41.52%, #85AAB7 62.27%, #31A7AC 103.79%)"
+    };
+
     return (
         <div className="min-h-screen bg-gray-50/50">
-            {/* Header Title Only - Removed Search/Nav as requested */}
-            <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-2">
-                <div className="flex items-center gap-4">
-                    <span className="text-xl font-bold bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC] bg-clip-text text-transparent">
+            {/* Header Section - Aligned side by side with specific dimensions */}
+            <div className="max-w-[959px] mx-auto px-4 sm:px-0 mt-[104px] mb-6">
+                <div className="flex items-center gap-[20px]">
+                    <span 
+                        className="text-xl font-bold bg-clip-text text-transparent uppercase tracking-widest shrink-0"
+                        style={{ ...gradientStyle, WebkitBackgroundClip: "text" }}
+                    >
                         SLATE
                     </span>
+                    <div 
+                        className="h-[1px] w-full"
+                        style={gradientStyle}
+                    />
                 </div>
-                <div className="h-[1px] w-full bg-gradient-to-r from-[#31A7AC] via-[#6A89BE] to-[#FA6E80] opacity-30 mt-4" />
             </div>
 
-            <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8 items-start">
+            <div className="max-w-[959px] mx-auto px-4 sm:px-0 pb-6">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
                     
                     {/* Left Sidebar - Profile - STICKY */}
                     <div className="hidden md:block md:col-span-4 lg:col-span-3 sticky top-4 h-[calc(100vh-2rem)] overflow-y-auto no-scrollbar">
@@ -190,7 +200,10 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                                     {/* Invite Button */}
                                     <div className="mt-6">
                                         <Button className="w-full bg-white hover:bg-gray-50 text-gray-900 border border-gray-200 shadow-sm rounded-xl h-10 font-medium transition-all hover:shadow-md group">
-                                            <span className="bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC] bg-clip-text text-transparent group-hover:opacity-80">
+                                            <span 
+                                                className="bg-clip-text text-transparent group-hover:opacity-80"
+                                                style={{ ...gradientStyle, WebkitBackgroundClip: "text" }}
+                                            >
                                                 Send Invite
                                             </span>
                                         </Button>
@@ -212,7 +225,12 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                         <div className="pb-4">
                             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
                                 <div className="flex items-center justify-between mb-4">
-                                    <h3 className="font-bold text-gray-900 text-[#FA6E80]">View Profiles</h3>
+                                    <h3 
+                                        className="font-bold bg-clip-text text-transparent"
+                                        style={{ ...gradientStyle, WebkitBackgroundClip: "text" }}
+                                    >
+                                        View Profiles
+                                    </h3>
                                 </div>
                                 
                                 <div className="space-y-4">

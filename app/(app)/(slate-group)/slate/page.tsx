@@ -9,10 +9,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function SlatePage() {
     const router = useRouter();
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const checkAuth = async () => {
+            /*
             const { data: { session } } = await supabase.auth.getSession();
             
             if (!session) {
@@ -61,6 +62,7 @@ export default function SlatePage() {
             } catch (error) {
                 router.push('/login');
             }
+            */
         };
         
         checkAuth();
