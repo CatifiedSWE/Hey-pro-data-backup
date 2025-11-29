@@ -288,6 +288,7 @@ export default function ShortProfile({ profile, links, roles = [], onPhotoUpload
                     links={links}
                     triggerClassName="h-auto justify-start p-0 text-[12px] font-medium text-[#31A7AC] hover:bg-transparent"
                     triggerLabel={linkSummary}
+                    onUpdate={onLinksUpdate}
                 />
             </div>
         </section>
