@@ -112,7 +112,7 @@ export const useProfile = () => {
   const updateProfile = useCallback(async (data: Partial<ProfileData>) => {
     try {
       const response = await apiCalling({
-        method: 'post',
+        method: 'patch',
         route: '/profile',
         data
       });
@@ -198,7 +198,7 @@ export const useProfile = () => {
       formData.append('file', file);
       formData.append('type', type);
 
-      const response = await fetch('/api/v1/upload/profile-photo', {
+      const response = await fetch('/api/upload/profile-photo', {
         method: 'POST',
         body: formData,
         headers: {

@@ -85,7 +85,7 @@ export default function ResumePortfolio({
                 });
             }, 200);
 
-            const response = await fetch(`/api/v1/upload/${type}`, {
+            const response = await fetch(`/api/upload/${type}`, {
                 method: 'POST',
                 body: formData,
                 headers: {
