@@ -35,6 +35,7 @@ export default function LinksDialog({ links, triggerClassName, triggerLabel, onU
     const [saving, setSaving] = React.useState(false)
     const [localLinks, setLocalLinks] = React.useState<LinkData[]>(links)
     const timersRef = React.useRef<Record<number, number | null>>({})
+    
     const urlIcons = {
         "linkedin": <Linkedin className="h-5 w-5" />,
         "github": <Github className="h-5 w-5" />,
@@ -44,8 +45,15 @@ export default function LinksDialog({ links, triggerClassName, triggerLabel, onU
         "youtube": <Youtube className="h-5 w-5" />,
         "other": <Globe className="h-5 w-5" />,
     }
+
+    // Sync localLinks when dialog opens
+    React.useEffect(() => {
+        if (open) {
+            setLocalLinks(links);
+        }
+    }, [open, links]);
+
     const handleClick = (href: string, idx: number) => {
-        // Delay opening to allow double-click to cancel it
         if (timersRef.current[idx]) {
             window.clearTimeout(timersRef.current[idx]!)
             timersRef.current[idx] = null
@@ -57,20 +65,17 @@ export default function LinksDialog({ links, triggerClassName, triggerLabel, onU
     }
 
     const handleDoubleClick = (e: React.MouseEvent, href: string, idx: number) => {
-        // Cancel pending single-click open
         if (timersRef.current[idx]) {
             window.clearTimeout(timersRef.current[idx]!)
             timersRef.current[idx] = null
         }
         e.preventDefault()
         e.stopPropagation()
-        // copy to clipboard
         if (navigator.clipboard) {
             navigator.clipboard.writeText(href).then(() => {
                 setCopiedIndex(idx)
                 setTimeout(() => setCopiedIndex(null), 1500)
             }).catch(() => {
-                // fallback: create textarea (rare)
                 const ta = document.createElement("textarea")
                 ta.value = href
                 document.body.appendChild(ta)
@@ -80,102 +85,41 @@ export default function LinksDialog({ links, triggerClassName, triggerLabel, onU
         }
     }
 
-    const handleAddLink = async () => {
+    const handleAddLink = () => {
         if (!newLabel || !newUrl) {
             toast.error('Please fill in both label and URL');
             return;
         }
 
-        setSaving(true);
-        try {
-            const response = await apiCalling({
-                method: 'post',
-                route: '/profile/links',
-                data: { label: newLabel, url: newUrl, sort_order: localLinks.length }
-            });
-
-            if (response.status) {
-                toast.success('Link added successfully!');
-                // Update local state with the new link
-                const newLink: LinkData = {
-                    id: response.data?.id || String(Date.now()),
-                    label: newLabel,
-                    url: newUrl,
-                    sort_order: localLinks.length
-                };
-                setLocalLinks([...localLinks, newLink]);
-                setNewLabel('');
-                setNewUrl('');
-                setIsAddingNew(false);
-                // Call onUpdate to refresh parent data if provided
-                if (onUpdate) onUpdate();
-            } else {
-                toast.error(response.message || 'Failed to add link');
-            }
-        } catch (error) {
-            toast.error('Failed to add link');
-        } finally {
-            setSaving(false);
-        }
+        const newLink: LinkData = {
+            id: `temp-${Date.now()}`,
+            label: newLabel,
+            url: newUrl,
+            sort_order: localLinks.length,
+            user_id: links[0]?.user_id || '' 
+        };
+        
+        setLocalLinks([...localLinks, newLink]);
+        setNewLabel('');
+        setNewUrl('');
+        setIsAddingNew(false);
     };
 
-    const handleEditLink = async (id: string) => {
+    const handleEditLink = (id: string) => {
         if (!editLabel || !editUrl) {
             toast.error('Please fill in both label and URL');
             return;
         }
 
-        setSaving(true);
-        try {
-            const response = await apiCalling({
-                method: 'post',
-                route: '/profile/links',
-                data: { id, label: editLabel, url: editUrl }
-            });
-
-            if (response.status) {
-                toast.success('Link updated successfully!');
-                // Update local state
-                setLocalLinks(localLinks.map(link => 
-                    link.id === id ? { ...link, label: editLabel, url: editUrl } : link
-                ));
-                setEditingId(null);
-                // Call onUpdate to refresh parent data if provided
-                if (onUpdate) onUpdate();
-            } else {
-                toast.error(response.message || 'Failed to update link');
-            }
-        } catch (error) {
-            toast.error('Failed to update link');
-        } finally {
-            setSaving(false);
-        }
+        setLocalLinks(localLinks.map(link => 
+            link.id === id ? { ...link, label: editLabel, url: editUrl } : link
+        ));
+        setEditingId(null);
     };
 
-    const handleDeleteLink = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this link?')) return;
-
-        setSaving(true);
-        try {
-            const response = await apiCalling({
-                method: 'delete',
-                route: `/profile/links?id=${id}`
-            });
-
-            if (response.status) {
-                toast.success('Link deleted successfully!');
-                // Update local state
-                setLocalLinks(localLinks.filter(link => link.id !== id));
-                // Call onUpdate to refresh parent data if provided
-                if (onUpdate) onUpdate();
-            } else {
-                toast.error(response.message || 'Failed to delete link');
-            }
-        } catch (error) {
-            toast.error('Failed to delete link');
-        } finally {
-            setSaving(false);
-        }
+    const handleDeleteLink = (id: string) => {
+        // Removed confirm dialog for local delete as per user requirement/UX for deferred save
+        setLocalLinks(localLinks.filter(link => link.id !== id));
     };
 
     const startEdit = (link: LinkData) => {
@@ -184,10 +128,83 @@ export default function LinksDialog({ links, triggerClassName, triggerLabel, onU
         setEditUrl(link.url);
     };
 
-    // Sync localLinks with props when dialog opens or links change
-    React.useEffect(() => {
-        setLocalLinks(links);
-    }, [links, open]);
+    // Check for changes to enable/disable Done button
+    const hasChanges = React.useMemo(() => {
+        if (localLinks.length !== links.length) return true;
+        
+        const originalIds = new Set(links.map(l => l.id));
+        
+        for (const link of localLinks) {
+            if (!originalIds.has(link.id)) return true; // New link
+            
+            const original = links.find(l => l.id === link.id);
+            if (original) {
+                if (original.label !== link.label || original.url !== link.url) return true;
+            }
+        }
+        
+        return false;
+    }, [localLinks, links]);
+
+    const handleSaveChanges = async () => {
+        setSaving(true);
+        try {
+            // 1. Identify Deletions
+            const toDelete = links.filter(l => !localLinks.find(local => local.id === l.id));
+            
+            // 2. Identify Additions
+            const toAdd = localLinks.filter(l => l.id.startsWith('temp-'));
+            
+            // 3. Identify Updates
+            const toUpdate = localLinks.filter(l => {
+                if (l.id.startsWith('temp-')) return false;
+                const original = links.find(orig => orig.id === l.id);
+                return original && (original.label !== l.label || original.url !== l.url);
+            });
+
+            const promises = [];
+
+            // Delete requests
+            toDelete.forEach(link => {
+                promises.push(apiCalling({
+                    method: 'delete',
+                    route: `/profile/links?id=${link.id}`
+                }));
+            });
+
+            // Add requests
+            toAdd.forEach(link => {
+                promises.push(apiCalling({
+                    method: 'post',
+                    route: '/profile/links',
+                    data: { label: link.label, url: link.url, sort_order: link.sort_order }
+                }));
+            });
+
+            // Update requests
+            toUpdate.forEach(link => {
+                 promises.push(apiCalling({
+                    method: 'post',
+                    route: '/profile/links',
+                    data: { id: link.id, label: link.label, url: link.url }
+                }));
+            });
+
+            if (promises.length > 0) {
+                await Promise.all(promises);
+                toast.success('Changes saved successfully');
+            }
+            
+            if (onUpdate) onUpdate();
+            setOpen(false);
+
+        } catch (error) {
+            console.error(error);
+            toast.error('Failed to save changes');
+        } finally {
+            setSaving(false);
+        }
+    }
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -238,7 +255,7 @@ export default function LinksDialog({ links, triggerClassName, triggerLabel, onU
                                             disabled={saving}
                                             className="flex-1"
                                         >
-                                            {saving ? 'Saving...' : 'Save'}
+                                            Save
                                         </Button>
                                         <Button
                                             size="sm"
@@ -330,7 +347,7 @@ export default function LinksDialog({ links, triggerClassName, triggerLabel, onU
                                     disabled={saving}
                                     className="flex-1"
                                 >
-                                    {saving ? 'Adding...' : 'Add Link'}
+                                    Add Link
                                 </Button>
                                 <Button
                                     size="sm"
@@ -361,10 +378,11 @@ export default function LinksDialog({ links, triggerClassName, triggerLabel, onU
                 {/* Done Button */}
                 <div className="mt-4 pt-3 border-t">
                     <Button
-                        onClick={() => setOpen(false)}
-                        className="w-full bg-[#31A7AC] hover:bg-[#27939f] text-white"
+                        onClick={handleSaveChanges}
+                        disabled={!hasChanges || saving}
+                        className="w-full bg-[#31A7AC] hover:bg-[#27939f] text-white disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Done
+                        {saving ? 'Saving...' : 'Done'}
                     </Button>
                 </div>
             </DialogContent>
