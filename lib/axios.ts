@@ -1,18 +1,27 @@
-// "use server";
 import axios, { isAxiosError } from "axios";
-import Cookies from "js-cookie";
+import { getAccessToken } from "./supabase/client";
 
 const axiosInstance = axios.create({
-  baseURL: `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1`,
+  baseURL: `${process.env.NEXT_PUBLIC_BASE_URL}/api`,
   timeout: 10000,
   headers: { "Content-Type": "application/json" },
 });
 
 // Add interceptors for request and response
 axiosInstance.interceptors.request.use(
-  (config) => {
-    const token = Cookies.get("accessToken") || null;
-    if (token) config.headers.Authorization = `Bearer ${token}`;
+  async (config) => {
+    // Only attempt to get token in browser environment
+    if (typeof window !== 'undefined') {
+      try {
+        const token = await getAccessToken();
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+      } catch (error) {
+        console.warn("Failed to get access token:", error);
+        // Continue with request even if token retrieval fails
+      }
+    }
     return config;
   },
   (error) => Promise.reject(error)
@@ -22,14 +31,33 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     // Handle errors globally
-    if (error.response) {
-      console.error(
-        "API Error:",
-        error.response.data.message || error.response.statusText
-      );
+    if (axios.isAxiosError(error)) { 
+      if (error.response) {
+        // Try to get a helpful message from various places
+        const rawErrorMessage = error.response.data?.error || 
+                                error.response.data?.message || 
+                                error.response.statusText;
+                                
+        // 👇️ The actual fix: Provide a reliable message fallback
+        const finalMessage = rawErrorMessage || `Unknown API Error (Status ${error.response.status})`;
+
+        console.error("API Error:", {
+          status: error.response.status,
+          message: finalMessage,
+          url: error.config?.url
+        });
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.error("Network Error - No response received:", error.message);
+      } else {
+        // Something happened in setting up the request
+        console.error("Request Error (Config/Setup):", error.message);
+      }
     } else {
-      console.error("Network Error:", error.message);
+      // Non-Axios error (e.g., from the interceptor itself)
+      console.error("Interceptor/Unknown Error:", error);
     }
+    
     return Promise.reject(error);
   }
 );
