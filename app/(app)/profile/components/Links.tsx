@@ -211,7 +211,7 @@ export default function LinksDialog({ links, triggerClassName, triggerLabel, onU
                 </DialogHeader>
 
                 <div className="mt-3 space-y-3">
-                    {links.map((link, idx) => {
+                    {localLinks.map((link, idx) => {
                         const href = link.url ?? ""
                         const isMail = href.startsWith("mailto:")
                         const isEditing = editingId === link.id;
