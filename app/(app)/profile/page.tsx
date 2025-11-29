@@ -51,6 +51,28 @@ import { toast } from "sonner";
 
 type SectionType = "about" | "skills" | "credits" | "recommendations"
 
+// Extended profile type to include additional fields not in the base ProfileData
+interface ExtendedProfileData extends ProfileData {
+  persionalDetails?: {
+    availability?: string;
+  };
+  language?: Array<{ code: string; name: string; proficiency?: string }>;
+  countryCode?: string;
+  phoneNumber?: string;
+  AvailableCountriesForTravel?: string[];
+  skills?: Array<{
+    id: string;
+    department: string;
+    role: string;
+    description: string;
+    experience?: {
+      value: string;
+      title: string;
+      description: string;
+    };
+  }>;
+}
+
 export default function Profile() {
   // ALL HOOKS MUST BE CALLED AT THE TOP BEFORE ANY CONDITIONAL RETURNS
   const [activeTab, setActiveTab] = useState<"profile" | "slate">("profile")
@@ -198,15 +220,15 @@ export default function Profile() {
                     <VisaSection visaType={''} visaIssueBy={''} visaExpData={''} />
                   </div>
                   <div className="flex-none ">
-                    <WorkStatusSection statusProp={profile.persionalDetails.availability} />
+                    <WorkStatusSection statusProp={(profile as ExtendedProfileData)?.persionalDetails?.availability} />
                   </div>
                   <div className="flex-none ">
-                    <AddLanguageSection languages={profile.language} />
+                    <AddLanguageSection languages={(profile as ExtendedProfileData)?.language || []} />
                   </div>
                   <div className="flex-none ">
                     <WhatupNumbers
-                      countryCode={profile.countryCode}
-                      phoneNumber={profile.phoneNumber}
+                      countryCode={(profile as ExtendedProfileData)?.countryCode}
+                      phoneNumber={(profile as ExtendedProfileData)?.phoneNumber}
                     />
                   </div>
 
@@ -214,7 +236,7 @@ export default function Profile() {
                     <RoleDialog />
                   </div>
                   <div className="flex-none ">
-                    <AvalableCountryForTravel availableCountries={profile.AvailableCountriesForTravel} />
+                    <AvalableCountryForTravel availableCountries={(profile as ExtendedProfileData)?.AvailableCountriesForTravel || []} />
                   </div>
                 </div>
                 {showLeftArrow && (
@@ -385,7 +407,8 @@ function AboutSection({ bio }: { bio: string }) {
 
 function SkillsSectionWrapper({ profile }: { profile: ProfileData | null }) {
   // If profile doesn't have skills or skills is empty, show a placeholder
-  if (!profile || !(profile as any).skills || (profile as any).skills.length === 0) {
+  const extendedProfile = profile as ExtendedProfileData;
+  if (!profile || !extendedProfile.skills || extendedProfile.skills.length === 0) {
     return (
       <div className="w-full rounded-[20px] bg-[#FAFAFA] px-6 py-7 shadow-[0_1px_10px_rgba(0,0,0,0.1)] sm:px-10 sm:py-9">
         <div className="mb-5 flex items-center justify-between">
