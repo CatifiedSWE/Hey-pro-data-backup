@@ -16,7 +16,7 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-  type DragEndEvent,
+  DragEndEvent,
 } from "@dnd-kit/core"
 import {
   arrayMove,
@@ -28,7 +28,6 @@ import {
 import { CSS } from "@dnd-kit/utilities"
 import { HighlightCard } from "@/app/(app)/profile/components/Highlights"
 import HighlightsText from "@/app/(app)/profile/components/highlights-text"
-type SectionType = "about" | "skills" | "credits" | "recommendations"
 import React, { useState, useRef, useEffect } from "react";
 import AboutSectionComponent from "./components/About";
 import VisaSection from "./components/visa";
@@ -47,17 +46,30 @@ import { highlightsData } from "@/data/profile";
 import SlateView from "./components/slate";
 import AddNewSkill from "./components/add-new-skill";
 import { RoleDialog } from "./components/role";
-import { useProfile } from "@/hooks/useProfile";
+import { useProfile, ProfileData } from "@/hooks/useProfile";
 import { toast } from "sonner";
 
+type SectionType = "about" | "skills" | "credits" | "recommendations"
+
 export default function Profile() {
+  // ALL HOOKS MUST BE CALLED AT THE TOP BEFORE ANY CONDITIONAL RETURNS
   const [activeTab, setActiveTab] = useState<"profile" | "slate">("profile")
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
+  const [sectionOrder, setSectionOrder] = useState<SectionType[]>(["about", "skills", "credits", "recommendations"])
+  const [isReorderDialogOpen, setIsReorderDialogOpen] = useState(false)
   
   // Use the profile hook for real data
   const { profile, links, recommendations, loading, error, uploadPhoto, refetch } = useProfile();
+
+  // Drag and drop sensors - MUST be called before any conditional returns
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  )
 
   const handleScroll = () => {
     if (scrollContainerRef.current) {
@@ -73,7 +85,6 @@ export default function Profile() {
     }
   };
 
-
   useEffect(() => {
     handleScroll();
     const container = scrollContainerRef.current;
@@ -81,9 +92,8 @@ export default function Profile() {
     return () => container?.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Non-hook data and functions
   const highlights = highlightsData
-  const [sectionOrder, setSectionOrder] = useState<SectionType[]>(["about", "skills", "credits", "recommendations"])
-  const [isReorderDialogOpen, setIsReorderDialogOpen] = useState(false)
 
   const handlePhotoUpload = async (file: File, type: 'profile' | 'banner') => {
     const result = await uploadPhoto(file, type);
@@ -92,7 +102,7 @@ export default function Profile() {
     }
   };
 
-  // Show loading state
+  // Show loading state - AFTER all hooks are called
   if (loading) {
     return (
       <section className="relative mx-auto flex w-full max-w-[1180px] flex-col items-center gap-8 px-3 xs:px-4 sm:px-6 lg:flex-row lg:items-start lg:justify-center lg:gap-12 pt-6 pb-20">
@@ -109,7 +119,7 @@ export default function Profile() {
     );
   }
 
-  // Show error state
+  // Show error state - AFTER all hooks are called
   if (error) {
     return (
       <section className="relative mx-auto flex w-full max-w-[1180px] flex-col items-center gap-8 px-3 xs:px-4 sm:px-6 lg:flex-row lg:items-start lg:justify-center lg:gap-12 pt-6 pb-20">
@@ -125,13 +135,6 @@ export default function Profile() {
     );
   }
 
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    }),
-  )
-
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event
 
@@ -146,7 +149,7 @@ export default function Profile() {
 
   const sectionComponents = {
     about: <AboutSection key="about" bio={profile?.bio || ''} />,
-    skills: <SkillsSection key="skills" />,
+    skills: <SkillsSectionWrapper key="skills" profile={profile} />,
     credits: <CreditsSection key="credits" />,
     recommendations: <RecommendationsComponent key="recommendations" recommendations={recommendations} onUpdate={refetch} />,
   }
@@ -364,7 +367,7 @@ function SortableItem({ id }: { id: SectionType }) {
   )
 }
 
-function AboutSection({ Profile: profile }: { Profile: { about: string } }) {
+function AboutSection({ bio }: { bio: string }) {
   return (
     <div className="w-full rounded-[20px] bg-[#FAFAFA] px-6 py-7 shadow-[0_1px_10px_rgba(0,0,0,0.1)] sm:px-10 sm:py-9">
       <div className="mb-6 flex items-center justify-between">
@@ -374,10 +377,37 @@ function AboutSection({ Profile: profile }: { Profile: { about: string } }) {
         </Button>
       </div>
       <div className="space-y-4 text-sm leading-[21px] text-[#181818] sm:text-base">
-        {profile.about}
+        {bio}
       </div>
     </div>
   )
+}
+
+function SkillsSectionWrapper({ profile }: { profile: ProfileData | null }) {
+  // If profile doesn't have skills or skills is empty, show a placeholder
+  if (!profile || !(profile as any).skills || (profile as any).skills.length === 0) {
+    return (
+      <div className="w-full rounded-[20px] bg-[#FAFAFA] px-6 py-7 shadow-[0_1px_10px_rgba(0,0,0,0.1)] sm:px-10 sm:py-9">
+        <div className="mb-5 flex items-center justify-between">
+          <h2 className="text-[22px] font-semibold leading-[33px] text-[#000]">Skills</h2>
+          <div className="flex gap-1.5">
+            <AddNewSkill
+              trigger={
+                <Button size="icon" variant="default" className="rounded-full border border-[#31A7AC]/30 bg-[#FA6E80] text-[#ffffff]">
+                  <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
+                </Button>
+              }
+            />
+          </div>
+        </div>
+        <div className="text-center py-8 text-gray-500">
+          <p>No skills added yet. Click the + button to add your first skill.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return <SkillsSection Profile={profile} />;
 }
 
 function SkillsSection({ Profile: profile }: { Profile: { skills: { id: string, department: string, role: string, description: string, experience?: { value: string; title: string; description: string; } }[] } }) {
