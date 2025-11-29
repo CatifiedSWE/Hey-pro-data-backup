@@ -102,7 +102,7 @@ export async function GET(
       name: displayName,
       displayName: displayName,
       avatar: profile.profile_photo_url,
-      banner: profile.banner_photo_url,
+      banner: profile.banner_url,
       bio: profile.bio,
       country: profile.country,
       city: profile.city,
