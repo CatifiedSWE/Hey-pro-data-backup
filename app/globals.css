@@ -161,3 +161,11 @@
 .gradient-border {
   @apply p-[1.5px] rounded-full bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC];
 }
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
