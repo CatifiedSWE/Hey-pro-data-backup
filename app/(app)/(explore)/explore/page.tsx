@@ -25,7 +25,7 @@ async function getExploreData(searchParams: { [key: string]: string | string[] |
         first_name,
         surname,
         profile_photo_url,
-        banner_photo_url,
+        banner_url,
         bio,
         country,
         city,
