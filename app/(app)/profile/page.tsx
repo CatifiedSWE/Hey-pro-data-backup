@@ -73,6 +73,8 @@ interface ExtendedProfileData extends ProfileData {
   }>;
 }
 
+import ProfileSkeleton from "./components/ProfileSkeleton";
+
 export default function Profile() {
   // ALL HOOKS MUST BE CALLED AT THE TOP BEFORE ANY CONDITIONAL RETURNS
   const [activeTab, setActiveTab] = useState<"profile" | "slate">("profile")
@@ -127,19 +129,7 @@ export default function Profile() {
 
   // Show loading state - AFTER all hooks are called
   if (loading) {
-    return (
-      <section className="relative mx-auto flex w-full max-w-[1180px] flex-col items-center gap-8 px-3 xs:px-4 sm:px-6 lg:flex-row lg:items-start lg:justify-center lg:gap-12 pt-6 pb-20">
-        <div className="flex w-full max-w-[600px] flex-col space-y-4">
-          <div className="animate-pulse">
-            <div className="h-[150px] bg-gray-200 rounded-[20px]"></div>
-            <div className="mt-4 space-y-2">
-              <div className="h-8 bg-gray-200 rounded w-1/3"></div>
-              <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-            </div>
-          </div>
-        </div>
-      </section>
-    );
+    return <ProfileSkeleton />;
   }
 
   // Show error state - AFTER all hooks are called
