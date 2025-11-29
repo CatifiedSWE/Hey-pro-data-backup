@@ -319,6 +319,8 @@ export const useProfile = () => {
     addRole,
     deleteRole,
     uploadPhoto,
-    refetch: fetchProfile
+    refetch: fetchProfile,
+    fetchLinks,
+    fetchRecommendations
   };
 };
