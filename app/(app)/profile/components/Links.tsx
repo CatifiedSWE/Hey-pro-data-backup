@@ -164,7 +164,10 @@ export default function LinksDialog({ links, triggerClassName, triggerLabel, onU
 
             if (response.status) {
                 toast.success('Link deleted successfully!');
-                window.location.reload();
+                // Update local state
+                setLocalLinks(localLinks.filter(link => link.id !== id));
+                // Call onUpdate to refresh parent data if provided
+                if (onUpdate) onUpdate();
             } else {
                 toast.error(response.message || 'Failed to delete link');
             }
