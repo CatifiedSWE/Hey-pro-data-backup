@@ -1,13 +1,15 @@
 "use client";
 import { ChevronDown, ChevronUp, Filter, Search, MapPin } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useCallback } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button";
+
 const toSlug = (s: string) =>
     s
         .toLowerCase()
@@ -19,7 +21,9 @@ type FilterValue = { label: string; href: string };
 type FilterOption = { label: string; value: FilterValue[] };
 
 const makeValues = (arr: string[]): FilterValue[] =>
-    arr.map(label => ({ label, href: `/explore/${toSlug(label)}` }));
+    arr.map(label => ({ label, href: `/explore?role=${encodeURIComponent(label)}` })); 
+    // Changed href to query param to use the main dynamic page instead of static [slug] page
+    // or keeps it consistent with Supabase fetching
 
 const filterOptions: FilterOption[] = [
     {
@@ -190,39 +194,125 @@ const experienceOptions = [
 
 const initialFilterState = {
     keyword: "",
-    availability: "available",
+    availability: "",
     productionType: "",
-    location: "UAE, Dubai",
+    location: "",
     experience: "",
-    minRate: 900,
-    maxRate: 3000,
+    minRate: 0,
+    maxRate: 5000,
 };
 
 export default function AppLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+    
     const [isFilterOpen, setIsFilterOpen] = React.useState(false);
     const [filterForm, setFilterForm] = React.useState<typeof initialFilterState>(initialFilterState);
+    const [searchTerm, setSearchTerm] = React.useState("");
+    const [activeFilterCount, setActiveFilterCount] = React.useState(0);
+
+    // Initialize form from URL params
+    useEffect(() => {
+        const keyword = searchParams.get('keyword') || "";
+        const availability = searchParams.get('availability') || "";
+        const productionType = searchParams.get('productionType') || "";
+        const location = searchParams.get('location') || "";
+        const experience = searchParams.get('experience') || "";
+        const minRate = parseInt(searchParams.get('minRate') || "0");
+        const maxRate = parseInt(searchParams.get('maxRate') || "5000");
+
+        setFilterForm({
+            keyword,
+            availability,
+            productionType,
+            location,
+            experience,
+            minRate,
+            maxRate
+        });
+        setSearchTerm(keyword);
+
+        // Calculate active filters count
+        let count = 0;
+        if (availability) count++;
+        if (productionType) count++;
+        if (location) count++;
+        if (experience) count++;
+        if (minRate > 0) count++;
+        if (maxRate < 5000) count++;
+        setActiveFilterCount(count);
+
+    }, [searchParams]);
+
+    // Update URL with current filters
+    const updateUrl = useCallback((newFilters: typeof initialFilterState) => {
+        const params = new URLSearchParams(searchParams.toString());
+        
+        if (newFilters.keyword) params.set('keyword', newFilters.keyword);
+        else params.delete('keyword');
+
+        if (newFilters.availability) params.set('availability', newFilters.availability);
+        else params.delete('availability');
+
+        if (newFilters.productionType) params.set('productionType', newFilters.productionType);
+        else params.delete('productionType');
+
+        if (newFilters.location) params.set('location', newFilters.location);
+        else params.delete('location');
+
+        if (newFilters.experience) params.set('experience', newFilters.experience);
+        else params.delete('experience');
+
+        if (newFilters.minRate > 0) params.set('minRate', newFilters.minRate.toString());
+        else params.delete('minRate');
+
+        if (newFilters.maxRate < 5000) params.set('maxRate', newFilters.maxRate.toString());
+        else params.delete('maxRate');
+
+        // Reset page to 1 when filtering
+        params.set('page', '1');
+
+        router.push(`${pathname}?${params.toString()}`);
+    }, [pathname, router, searchParams]);
+
+    // Handle search input debounce
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (searchTerm !== filterForm.keyword) {
+                const newFilters = { ...filterForm, keyword: searchTerm };
+                // Only update if it changed (avoid infinite loop)
+                setFilterForm(newFilters);
+                updateUrl(newFilters);
+            }
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [searchTerm, filterForm, updateUrl]);
 
     const handleFilterChange = (field: keyof typeof initialFilterState, value: string | number) => {
-        setFilterForm((prev) => ({ ...prev, [field]: value }));
+        const newFilters = { ...filterForm, [field]: value };
+        setFilterForm(newFilters);
+        updateUrl(newFilters);
     };
 
     const handleFilterSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        console.log("Applied filters:", filterForm);
+        setIsFilterOpen(false);
     };
+
     return (
         <>
-            <div className="max-w-7xl">
+            <div className="max-w-7xl mx-auto">
                 <span className="hidden p-2 md:inline-block bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC] bg-clip-text text-transparent text-3xl font-semibold">Crew Directory</span>
                 <div className="sticky top-0 z-20 flex w-full flex-row gap-3 bg-white/90 p-4 backdrop-blur sm:flex-row sm:items-center">
 
                     <DropdownMenu open={isFilterOpen} onOpenChange={setIsFilterOpen}>
                         <DropdownMenuTrigger asChild>
                             <Button
-                                className={`flex h-12 w-auto items-center justify-center rounded-full border px-4 py-2 text-sm font-medium transition-all whitespace-nowrap ${isFilterOpen ? 'bg-[#FA6E80] text-white border-[#FA6E80] sm:w-[281px] ' : 'bg-transparent text-[#FA6E80] border-[#FA6E80]'}`}
+                                className={`flex h-12 w-auto items-center justify-center rounded-full border px-4 py-2 text-sm font-medium transition-all whitespace-nowrap ${isFilterOpen || activeFilterCount > 0 ? 'bg-[#FA6E80] text-white border-[#FA6E80] sm:w-[281px] ' : 'bg-transparent text-[#FA6E80] border-[#FA6E80]'}`}
                             >
                                 <span className="flex items-center space-x-2">
-                                    <span>Filter (<span>{"3"}</span>)</span>
+                                    <span>Filter {activeFilterCount > 0 && `(${activeFilterCount})`}</span>
                                     <Filter className="h-5 w-5" />
                                 </span>
                             </Button>
@@ -230,8 +320,16 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                         <DropdownMenuContent className="w-[273px] border-none" align="start">
                             <form onSubmit={handleFilterSubmit} className=" space-y-2 rounded-[10px] bg-[#F8F8F8] p-4 text-[#017A7C]">
                                 <div className="space-y-1 rounded-[5.71px]  border border-[#017A7C]/30 px-4 py-2 justify-center items-center flex ">
-                                    <label className="text-sm font-[400]">Availability</label>
-
+                                    <label className="text-sm font-[400] w-full">Availability</label>
+                                    <select 
+                                        value={filterForm.availability} 
+                                        onChange={(e) => handleFilterChange("availability", e.target.value)}
+                                        className="bg-transparent outline-none text-sm text-right"
+                                    >
+                                        <option value="">Any</option>
+                                        <option value="available">Available</option>
+                                        <option value="unavailable">Unavailable</option>
+                                    </select>
                                 </div>
 
                                 <div className="space-y-1">
@@ -249,12 +347,13 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                                 </div>
 
                                 <div className="space-y-2">
-                                    <div className="flex items-center gap-2 rounded-xl border border-[#017A7C]/30 px-4 py-2">
+                                    <div className="flex items-center gap-2 rounded-xl border border-[#017A7C]/30 px-4 py-2 bg-white">
                                         <MapPin className="h-4 w-4 text-[#017A7C]" />
                                         <input
                                             value={filterForm.location}
                                             onChange={(e) => handleFilterChange("location", e.target.value)}
                                             className="w-full border-none text-sm outline-none"
+                                            placeholder="Location"
                                         />
                                     </div>
                                 </div>
@@ -264,7 +363,7 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                                         <label className="text-sm font-[400]">Experience</label>
                                         <ChevronDown className="h-4 w-4 text-[#017A7C]" />
                                     </div>
-                                    <div className="space-y-3 rounded-xl border border-[#017A7C]/20 px-4 py-3">
+                                    <div className="space-y-3 rounded-xl border border-[#017A7C]/20 px-4 py-3 bg-white">
                                         {experienceOptions.map((exp) => (
                                             <button
                                                 key={exp.title}
@@ -285,7 +384,7 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                                         <span className="text-[#FA6E80]">{filterForm.minRate}</span>
                                         <span className="text-[#31A7AC]">{filterForm.maxRate}</span>
                                     </div>
-                                    <div className="relative pt-2">
+                                    <div className="relative pt-2 h-6">
                                         <input
                                             type="range"
                                             min={0}
@@ -297,7 +396,7 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                                                     handleFilterChange("minRate", value);
                                                 }
                                             }}
-                                            className="absolute w-full h-2 bg-transparent appearance-none pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#FA6E80] [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-[#FA6E80] [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:cursor-pointer"
+                                            className="absolute w-full h-2 bg-transparent appearance-none pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#FA6E80] [&::-webkit-slider-thumb]:cursor-pointer"
                                             style={{ zIndex: 3 }}
                                         />
                                         <input
@@ -311,10 +410,10 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                                                     handleFilterChange("maxRate", value);
                                                 }
                                             }}
-                                            className="absolute w-full h-2 bg-transparent appearance-none pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#31A7AC] [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-[#31A7AC] [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:cursor-pointer"
+                                            className="absolute w-full h-2 bg-transparent appearance-none pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#31A7AC] [&::-webkit-slider-thumb]:cursor-pointer"
                                             style={{ zIndex: 4 }}
                                         />
-                                        <div className="relative w-full h-2 bg-gray-200 rounded-full">
+                                        <div className="absolute w-full h-2 bg-gray-200 rounded-full top-1">
                                             <div
                                                 className="absolute h-2 bg-gradient-to-r from-[#FA6E80] to-[#31A7AC] rounded-full"
                                                 style={{
@@ -325,8 +424,6 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                                         </div>
                                     </div>
                                 </div>
-
-
                             </form>
                         </DropdownMenuContent>
                     </DropdownMenu>
@@ -334,8 +431,9 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                         <input
                             type="text"
                             placeholder="Search by name, role, or department..."
-                            className="border-none w-[calc(100%-3rem)] text-sm outline-none focus:ring-0"
-                            onChange={(e) => console.log(e.target.value)}
+                            className="border-none w-[calc(100%-3rem)] text-sm outline-none focus:ring-0 ml-2"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
                         />
                         <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#FA6E80]">
                             <Search className="h-5 w-5 text-white" />
@@ -344,7 +442,7 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
 
                 </div>
                 <div className="flex w-full flex-col gap-6 lg:flex-row">
-                    <div className={`${isFilterOpen ? 'sm:flex hidden' : 'hidden lg:flex'} w-full flex-col gap-4 rounded-2xl bg-white/50 p-4 lg:max-w-[280px] lg:overflow-y-auto`}>
+                    <div className={`${isFilterOpen ? 'sm:flex hidden' : 'hidden lg:flex'} w-full flex-col gap-4 rounded-2xl bg-white/50 p-4 lg:max-w-[280px] lg:overflow-y-auto h-[calc(100vh-200px)]`}>
 
                         {filterOptions.map(opt => (
                             <details key={opt.label} className="group  rounded-[10px]  border-[1px] border-[#989898]/10 rotate-[5px]  bg-whit">
@@ -371,7 +469,7 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                         ))
                         }
                     </div>
-                    <div className="w-full flex-1 overflow-x-hidden  p-2 sm:p-4 lg:min-h-[600px]">{children}</div>
+                    <div className="w-full flex-1 overflow-x-hidden p-2 sm:p-4 min-h-[600px]">{children}</div>
                 </div>
 
             </div>
