@@ -221,7 +221,7 @@ export default function ShortProfile({ profile, links, roles = [], onPhotoUpload
                 </div>
             </div>
 
-            <div className="absolute inset-x-0 top-[160px] max-w-[400px] left-[200px] hidden justify-center font-[400] text-[11px] sm:flex ">
+            <div className="absolute inset-x-0 top-[160px] max-w-[400px] left-[200px] hidden justify-center items-center font-[400] text-[11px] sm:flex ">
                 <div className="flex items-center gap-2  px-4 py-2 text-[#393939] ">
                     <MapPin className="h-3.5 w-3.5 text-[#393939]" />
                     <span className="whitespace-nowrap">{locationDescriptor}</span>
