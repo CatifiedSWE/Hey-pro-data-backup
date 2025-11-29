@@ -361,14 +361,14 @@ console.log(process.env.NEXT_PUBLIC_SUPABASE_URL);
 **Solution:** Restart Next.js dev server
 ```bash
 # Stop server (Ctrl+C)
-yarn dev
+npm run dev
 ```
 
 ### Issue 2: Environment variables not loading
 **Solution:** Verify `.env.local` exists and restart server
 ```bash
-cat .env.local  # Verify file exists
-yarn dev        # Restart server
+cat .env.local      # Verify file exists
+npm run dev         # Restart server
 ```
 
 ### Issue 3: AuthProvider causing hydration errors
