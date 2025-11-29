@@ -17,7 +17,7 @@
 
 **Command to verify:**
 ```bash
-cd /app && yarn list --pattern @supabase/supabase-js
+cd /app && npm list @supabase/supabase-js
 ```
 
 ---
