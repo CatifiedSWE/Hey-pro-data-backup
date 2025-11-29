@@ -121,11 +121,16 @@ export async function GET(request: NextRequest) {
           }
         }
 
+        // Build display name with priority: alias_first_name + alias_surname (1st), first_name + surname (2nd)
+        const aliasName = `${profile.alias_first_name || ''} ${profile.alias_surname || ''}`.trim();
+        const realName = `${profile.first_name || ''} ${profile.surname || ''}`.trim();
+        const displayName = aliasName || realName || 'Anonymous';
+        
         return {
           id: profile.id,
           userId: profile.user_id,
-          name: profile.name,
-          displayName: `${profile.alias_first_name || ''} ${profile.alias_surname || ''}`.trim() || profile.name,
+          name: displayName,
+          displayName: displayName,
           avatar: profile.profile_photo_url,
           banner: profile.banner_photo_url,
           bio: profile.bio,
