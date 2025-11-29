@@ -44,10 +44,19 @@ export interface RecommendationData {
   created_at?: string;
 }
 
+export interface RoleData {
+  id: string;
+  user_id: string;
+  role_name: string;
+  sort_order: number;
+  created_at?: string;
+}
+
 export const useProfile = () => {
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [links, setLinks] = useState<LinkData[]>([]);
   const [recommendations, setRecommendations] = useState<RecommendationData[]>([]);
+  const [roles, setRoles] = useState<RoleData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -106,6 +115,24 @@ export const useProfile = () => {
       }
     } catch (err) {
       console.error('Error fetching recommendations:', err);
+    }
+  }, []);
+
+  // Fetch roles
+  const fetchRoles = useCallback(async () => {
+    try {
+      const response = await apiCalling({
+        method: 'get',
+        route: '/profile/roles'
+      });
+
+      if (response.status && response.data?.data) {
+        setRoles(response.data.data);
+      } else {
+        setRoles([]);
+      }
+    } catch (err) {
+      console.error('Error fetching roles:', err);
     }
   }, []);
 
@@ -192,6 +219,47 @@ export const useProfile = () => {
     }
   }, [fetchLinks]);
 
+  // Add role
+  const addRole = useCallback(async (role_name: string, sort_order = 0) => {
+    try {
+      const response = await apiCalling({
+        method: 'post',
+        route: '/profile/roles',
+        data: { role_name, sort_order }
+      });
+
+      if (response.status) {
+        await fetchRoles();
+        return { success: true, message: 'Role added successfully' };
+      } else {
+        return { success: false, message: response.message || 'Failed to add role' };
+      }
+    } catch (err) {
+      console.error('Error adding role:', err);
+      return { success: false, message: 'Failed to add role' };
+    }
+  }, [fetchRoles]);
+
+  // Delete role
+  const deleteRole = useCallback(async (id: string) => {
+    try {
+      const response = await apiCalling({
+        method: 'delete',
+        route: `/profile/roles?id=${id}`
+      });
+
+      if (response.status) {
+        await fetchRoles();
+        return { success: true, message: 'Role deleted successfully' };
+      } else {
+        return { success: false, message: response.message || 'Failed to delete role' };
+      }
+    } catch (err) {
+      console.error('Error deleting role:', err);
+      return { success: false, message: 'Failed to delete role' };
+    }
+  }, [fetchRoles]);
+
   // Upload profile photo or banner
   const uploadPhoto = useCallback(async (file: File, type: 'profile' | 'banner') => {
     try {
@@ -234,18 +302,22 @@ export const useProfile = () => {
     fetchProfile();
     fetchLinks();
     fetchRecommendations();
-  }, [fetchProfile, fetchLinks, fetchRecommendations]);
+    fetchRoles();
+  }, [fetchProfile, fetchLinks, fetchRecommendations, fetchRoles]);
 
   return {
     profile,
     links,
     recommendations,
+    roles,
     loading,
     error,
     updateProfile,
     addLink,
     updateLink,
     deleteLink,
+    addRole,
+    deleteRole,
     uploadPhoto,
     refetch: fetchProfile
   };
