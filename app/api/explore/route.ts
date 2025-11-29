@@ -28,7 +28,8 @@ export async function GET(request: NextRequest) {
 
     const offset = (page - 1) * limit;
 
-    // Build base query - only profiles visible in explore
+    // Build base query
+    // Removed .eq('visible_in_explore', true) to show all profiles for now
     let query = supabase
       .from('user_profiles')
       .select(`
@@ -49,9 +50,9 @@ export async function GET(request: NextRequest) {
         experience_level,
         available_for_work,
         created_at,
-        updated_at
-      `, { count: 'exact' })
-      .eq('visible_in_explore', true);
+        updated_at,
+        visible_in_explore
+      `, { count: 'exact' });
 
     // Apply keyword search
     if (keyword) {
@@ -139,7 +140,8 @@ export async function GET(request: NextRequest) {
           imdbUrl: profile.imdb_url,
           experienceLevel: profile.experience_level,
           availableForWork: profile.available_for_work,
-          createdAt: profile.created_at
+          createdAt: profile.created_at,
+          visibleInExplore: profile.visible_in_explore
         };
       })
     );

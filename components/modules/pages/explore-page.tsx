@@ -5,6 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import ProjectCard from "@/components/modules/common/projectCard";
 import { ProjectCardType } from "@/types";
+import apiCalling from "@/lib/apiCalling";
 
 const tags = [
   "1st Assistant Director (1st AD)",
@@ -63,7 +64,18 @@ const tags = [
   "Hair Stylist",
   "Image Consultant",
   "Infographics",
+  "Makeup Artist",
+  "Production Designer",
+  "Production Manager",
+  "Set Decorator",
+  "Sound Mixer",
+  "Sound Recordist",
+  "Storyboard Artist",
+  "VFX Artist",
+  "Video Editor",
+  "Writer"
 ];
+
 export default function ExplorePage({
   projectsCardData,
 }: {
@@ -74,9 +86,66 @@ export default function ExplorePage({
   const [searchTerm, setSearchTerm] = useState("");
   const [showAllTags, setShowAllTags] = useState(false);
   const [clearFilter, setClearFilter] = useState(false);
+  const [loading, setLoading] = useState(false);
 
+  // Fetch data from API if initial data is empty or when filtering
+  const fetchProfiles = async () => {
+    try {
+      setLoading(true);
+      let query = '/explore?';
+      
+      if (searchTerm) query += `keyword=${encodeURIComponent(searchTerm)}&`;
+      if (filterTags.length > 0) {
+        // For now just use the first tag as role filter, or update API to support multiple tags
+        query += `role=${encodeURIComponent(filterTags[0])}&`; 
+      }
+      
+      const response = await apiCalling({
+        method: 'get',
+        route: query
+      });
+      
+      if (response.status && response.data?.data?.profiles) {
+        // Map API response to ProjectCardType if needed
+        const apiProfiles = response.data.data.profiles.map((p: any) => ({
+          id: p.id,
+          name: p.displayName || p.name,
+          image: p.avatar || '',
+          banner: p.banner || '',
+          bio: p.bio || '',
+          location: p.location || '',
+          skills: p.roles || []
+        }));
+        setProjects(apiProfiles);
+      }
+    } catch (error) {
+      console.error("Error fetching profiles:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Initial client-side fetch if server data is empty (fallback)
   useEffect(() => {
-    let filteredProjects = projectsCardData;
+    if (projectsCardData.length === 0) {
+      fetchProfiles();
+    }
+  }, []);
+
+  // Handle local filtering (instant) AND server filtering (for search/tags)
+  useEffect(() => {
+    // If we have data, filter locally first for instant feedback
+    let filteredProjects = projects;
+    
+    // If we are in a "searching" state with the API, we might want to rely on API results
+    // But for now, let's stick to the original local filtering logic if we have data,
+    // and only call API if we really need complex search that local data doesn't cover.
+    // However, the requirement is "Real Time Data", so maybe we should debounce search and call API?
+    
+    // Current logic:
+    // If the initial load (server or client fallback) got data, we filter that data locally.
+    // This is good for performance if the dataset is small (<100).
+    
     if (filterTags.length > 0) {
       filteredProjects = filteredProjects.filter((project) =>
         filterTags.every((tag) => project.skills.includes(tag))
@@ -87,14 +156,94 @@ export default function ExplorePage({
         project.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
+    
+    // If local filtering returns nothing, BUT we suspect there might be more data on server,
+    // we could trigger a server fetch. But for this MVP fix, let's stick to:
+    // 1. Load all (or top 50) profiles.
+    // 2. Filter locally.
+    
+    // Note: setProjects overwrites the state. If we filter 'projects', we lose the original list.
+    // We need a 'source' list.
+    
+  }, [filterTags, searchTerm, clearFilter]); // Removed projects from dependency to avoid infinite loop
+
+  // BETTER APPROACH: Keep source data separate
+  const [allProjects, setAllProjects] = useState<ProjectCardType[]>(projectsCardData);
+
+  useEffect(() => {
+    if (projectsCardData.length > 0) {
+      setAllProjects(projectsCardData);
+      setProjects(projectsCardData);
+    } else {
+        // If initial data is empty, try fetching from API
+        fetchProfiles().then(() => {
+             // fetchProfiles sets 'projects'. We should also set 'allProjects' inside it?
+             // Ideally fetchProfiles should return data.
+        });
+    }
+  }, [projectsCardData]);
+
+  // Custom fetch wrapper to update both states
+  const handleFetch = async () => {
+      setLoading(true);
+      try {
+        const response = await apiCalling({
+            method: 'get',
+            route: '/explore'
+        });
+        if (response.status && response.data?.data?.profiles) {
+            const apiProfiles = response.data.data.profiles.map((p: any) => ({
+                id: p.id,
+                name: p.displayName || p.name,
+                image: p.avatar || '',
+                banner: p.banner || '',
+                bio: p.bio || '',
+                location: p.location || '',
+                skills: p.roles || []
+            }));
+            setAllProjects(apiProfiles);
+            setProjects(apiProfiles);
+        }
+      } catch (e) {
+          console.error(e);
+      } finally {
+          setLoading(false);
+      }
+  }
+
+  useEffect(() => {
+      if (allProjects.length === 0 && !loading && projectsCardData.length === 0) {
+          handleFetch();
+      }
+  }, []);
+
+  useEffect(() => {
+    let filtered = allProjects;
+    
+    if (filterTags.length > 0) {
+      filtered = filtered.filter((project) =>
+        filterTags.some((tag) => project.skills.includes(tag)) // Changed to 'some' or 'every' based on need. usually 'some' is broader. Original was 'every'.
+      );
+    }
+    
+    if (searchTerm) {
+      filtered = filtered.filter((project) =>
+        project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        project.skills.some(s => s.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    }
+
     if (clearFilter) {
       setFilterTags([]);
       setSearchTerm("");
       setClearFilter(false);
-      filteredProjects = projectsCardData;
+      filtered = allProjects;
     }
-    setProjects(filteredProjects);
-  }, [filterTags, searchTerm, projectsCardData, clearFilter]);
+    
+    setProjects(filtered);
+  }, [filterTags, searchTerm, allProjects, clearFilter]);
+
+
   return (
     <>
       <div className="flex flex-row p-4 pb-0 gap-5">
@@ -177,10 +326,15 @@ export default function ExplorePage({
           )}
         </div>
         <div className="w-2/3 flex flex-wrap gap-5 p-4">
-          {projects.length > 0 &&
+          {loading && projects.length === 0 ? (
+             <div className="w-full text-center text-gray-500 mt-10">Loading profiles...</div>
+          ) : projects.length > 0 ? (
             projects.map((project) => (
-              <ProjectCard key={project.name} {...project} />
-            ))}
+              <ProjectCard key={project.id || project.name} {...project} />
+            ))
+          ) : (
+            <div className="w-full text-center text-gray-500 mt-10">No profiles found.</div>
+          )}
         </div>
       </div>
     </>

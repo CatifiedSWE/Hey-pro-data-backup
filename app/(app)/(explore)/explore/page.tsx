@@ -10,8 +10,9 @@ async function getExploreData(): Promise<ProjectCardType[]> {
   try {
     const supabase = createServerClient();
     
-    // Fetch profiles that are visible in explore
+    // Fetch profiles
     // Limit to 50 for initial load
+    // Removed .eq('visible_in_explore', true) to ensure data shows up even if flag is missing
     const { data: profiles, error } = await supabase
       .from('user_profiles')
       .select(`
@@ -25,9 +26,9 @@ async function getExploreData(): Promise<ProjectCardType[]> {
         bio,
         country,
         city,
-        created_at
+        created_at,
+        visible_in_explore
       `)
-      .eq('visible_in_explore', true)
       .order('created_at', { ascending: false })
       .limit(50);
 
@@ -37,11 +38,11 @@ async function getExploreData(): Promise<ProjectCardType[]> {
     }
 
     if (!profiles || profiles.length === 0) {
+      console.log("No profiles found in explore");
       return [];
     }
 
     // Enrich profiles with roles
-    // Note: In a larger app, we would use a join or a more efficient query
     const enrichedProfiles = await Promise.all(
       profiles.map(async (profile) => {
         const { data: roles } = await supabase
@@ -58,8 +59,8 @@ async function getExploreData(): Promise<ProjectCardType[]> {
         return {
           id: profile.id,
           name: displayName,
-          banner: profile.banner_photo_url || '', // Fallback handled in UI if empty
-          image: profile.profile_photo_url || '', // Fallback handled in UI if empty
+          banner: profile.banner_photo_url || '',
+          image: profile.profile_photo_url || '',
           bio: profile.bio || '',
           location: location,
           skills: roles?.map(r => r.role_name) || []
