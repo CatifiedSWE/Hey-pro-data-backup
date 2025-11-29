@@ -39,7 +39,7 @@ Phase 1 establishes the foundation for migrating from the custom authentication 
 
 **Installation command:**
 ```bash
-yarn add @supabase/supabase-js
+npm install @supabase/supabase-js
 ```
 
 ---
