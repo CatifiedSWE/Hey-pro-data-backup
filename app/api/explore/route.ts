@@ -132,7 +132,7 @@ export async function GET(request: NextRequest) {
           name: displayName,
           displayName: displayName,
           avatar: profile.profile_photo_url,
-          banner: profile.banner_photo_url,
+          banner: profile.banner_url,
           bio: profile.bio,
           location: profile.city && profile.country 
             ? `${profile.city}, ${profile.country}` 
