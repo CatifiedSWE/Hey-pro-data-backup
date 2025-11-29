@@ -184,6 +184,11 @@ export default function LinksDialog({ links, triggerClassName, triggerLabel, onU
         setEditUrl(link.url);
     };
 
+    // Sync localLinks with props when dialog opens or links change
+    React.useEffect(() => {
+        setLocalLinks(links);
+    }, [links, open]);
+
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
