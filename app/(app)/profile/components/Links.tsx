@@ -357,6 +357,16 @@ export default function LinksDialog({ links, triggerClassName, triggerLabel, onU
                         </Button>
                     )}
                 </div>
+
+                {/* Done Button */}
+                <div className="mt-4 pt-3 border-t">
+                    <Button
+                        onClick={() => setOpen(false)}
+                        className="w-full bg-[#31A7AC] hover:bg-[#27939f] text-white"
+                    >
+                        Done
+                    </Button>
+                </div>
             </DialogContent>
         </Dialog>
     )
