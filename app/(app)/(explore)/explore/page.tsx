@@ -4,16 +4,18 @@ import { ProjectCardType } from "@/types";
 
 /**
  * Fetch explore data directly from Supabase
- * This mimics the logic in /api/explore but optimized for initial page load
+ * Filtered by search params
  */
-async function getExploreData(): Promise<ProjectCardType[]> {
+async function getExploreData(searchParams: { [key: string]: string | string[] | undefined }): Promise<ProjectCardType[]> {
   try {
     const supabase = createServerClient();
     
-    // Fetch profiles
-    // Limit to 50 for initial load
-    // Removed .eq('visible_in_explore', true) to ensure data shows up even if flag is missing
-    const { data: profiles, error } = await supabase
+    const keyword = searchParams?.keyword as string;
+    const role = searchParams?.role as string;
+    const category = searchParams?.category as string;
+    // Add other filters as needed
+    
+    let query = supabase
       .from('user_profiles')
       .select(`
         id,
@@ -26,11 +28,20 @@ async function getExploreData(): Promise<ProjectCardType[]> {
         bio,
         country,
         city,
-        created_at,
-        visible_in_explore
+        created_at
       `)
       .order('created_at', { ascending: false })
       .limit(50);
+
+    // Apply keyword search
+    if (keyword) {
+      query = query.or(`name.ilike.%${keyword}%,bio.ilike.%${keyword}%`);
+    }
+    
+    // Apply location search if passed in keyword (simple heuristic) or specific param
+    // For now just basic keyword search
+
+    const { data: profiles, error } = await query;
 
     if (error) {
       console.error("Error fetching explore profiles:", error);
@@ -38,7 +49,6 @@ async function getExploreData(): Promise<ProjectCardType[]> {
     }
 
     if (!profiles || profiles.length === 0) {
-      console.log("No profiles found in explore");
       return [];
     }
 
@@ -51,6 +61,15 @@ async function getExploreData(): Promise<ProjectCardType[]> {
           .eq('user_id', profile.user_id)
           .order('sort_order', { ascending: true });
           
+        // Filter by role if specified
+        if (role || category) {
+             const roleNames = roles?.map(r => r.role_name.toLowerCase()) || [];
+             const searchRole = (role || category).toLowerCase();
+             if (!roleNames.some(r => r.includes(searchRole))) {
+                 return null;
+             }
+        }
+
         const displayName = `${profile.alias_first_name || ''} ${profile.alias_surname || ''}`.trim() || profile.name || 'Anonymous';
         const location = profile.city && profile.country 
           ? `${profile.city}, ${profile.country}` 
@@ -68,15 +87,20 @@ async function getExploreData(): Promise<ProjectCardType[]> {
       })
     );
     
-    return enrichedProfiles;
+    return enrichedProfiles.filter(p => p !== null) as ProjectCardType[];
   } catch (error) {
     console.error("Unexpected error in getExploreData:", error);
     return [];
   }
 }
 
-export default async function Page() {
-  const profiles = await getExploreData();
+interface PageProps {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}
+
+export default async function Page({ searchParams }: PageProps) {
+  const resolvedSearchParams = await searchParams;
+  const profiles = await getExploreData(resolvedSearchParams);
   
   return (
     <div className="w-full">
