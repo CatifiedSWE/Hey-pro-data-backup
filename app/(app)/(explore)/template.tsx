@@ -35,8 +35,7 @@ const filterOptions: FilterOption[] = [
             "Assistant Director | TV",
             "1st Assistant Director (1st AD)",
             "2nd Assistant Director (2nd AD)",
-            "3rd Assistant Director (3rd AD)",
-            "Assistant Director"
+            "3rd Assistant Director (3rd AD)"
         ])
     },
     {
@@ -445,7 +444,7 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                     <div className={`${isFilterOpen ? 'sm:flex hidden' : 'hidden lg:flex'} w-full flex-col gap-4 rounded-2xl bg-white/50 p-4 lg:max-w-[280px] lg:overflow-y-auto h-[calc(100vh-200px)]`}>
 
                         {filterOptions.map(opt => (
-                            <details key={opt.label} className="group  rounded-[10px]  border-[1px] border-[#989898]/10 rotate-[5px]  bg-whit">
+                            <details key={opt.label} className="group  rounded-[10px]  border-[1px] border-[#989898]/10 rotate-[5px]  bg-white">
                                 <summary className="cursor-pointer select-none flex items-center justify-between px-3 py-2 text-sm font-[400px]">
                                     <span>{opt.label}</span>
                                     <span>
