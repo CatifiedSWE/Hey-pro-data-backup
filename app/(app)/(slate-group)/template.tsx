@@ -114,16 +114,6 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
 
     return (
         <div className="min-h-screen bg-gray-50/50">
-            <style jsx global>{`
-                .no-scrollbar::-webkit-scrollbar {
-                    display: none;
-                }
-                .no-scrollbar {
-                    -ms-overflow-style: none;
-                    scrollbar-width: none;
-                }
-            `}</style>
-
             {/* Header Section */}
             <div className="max-w-[959px] mx-auto px-4 sm:px-0 mt-[104px] mb-6">
                 <div className="flex items-center gap-[20px]">
