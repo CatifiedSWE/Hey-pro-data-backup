@@ -93,10 +93,10 @@ If using Google OAuth:
 
 ```bash
 # Install dependencies
-yarn install
+npm install
 
 # Run development server
-yarn dev
+npm run dev
 ```
 
 ## Testing the Fix
@@ -190,8 +190,8 @@ If you continue to experience issues:
 - [ ] Environment variables configured in `.env.local`
 - [ ] Supabase database table created
 - [ ] RLS policies enabled
-- [ ] Dependencies installed (`yarn install`)
-- [ ] Dev server running (`yarn dev`)
+- [ ] Dependencies installed (`npm install`)
+- [ ] Dev server running (`npm run dev`)
 - [ ] Can access login page at http://localhost:3000/login
 - [ ] Can sign up successfully
 - [ ] Can complete profile form

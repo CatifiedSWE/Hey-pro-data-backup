@@ -63,7 +63,7 @@
 
 ### Development Tools
 - **Linting**: ESLint 9 with Next.js config
-- **Package Manager**: Yarn (lockfile present)
+- **Package Manager**: npm
 - **Build Tool**: Next.js with Turbopack
 
 ---
@@ -139,7 +139,7 @@ HeyProData/
 
 ### Root Level Files
 | File | Purpose |
-|------|---------|
+|------|---------|  
 | `middleware.ts` | Route protection, authentication checks, session management |
 | `next.config.ts` | Next.js configuration (Turbopack, images, etc.) |
 | `tailwind.config.js` | Tailwind CSS theme and plugin configuration |
@@ -608,7 +608,7 @@ Supabase Storage:
 
 ### Prerequisites
 - Node.js 18+ (for Next.js 15)
-- Yarn package manager
+- npm package manager
 - Supabase account and project
 
 ### Environment Variables
@@ -634,7 +634,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 2. **Install dependencies**
    ```bash
-   yarn install
+   npm install
    ```
 
 3. **Set up environment variables**
@@ -652,7 +652,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 5. **Start development server**
    ```bash
-   yarn dev
+   npm run dev
    ```
 
 6. **Access the application**
@@ -669,14 +669,14 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 ```bash
 # Development
-yarn dev              # Start development server with Turbopack
+npm run dev          # Start development server with Turbopack
 
 # Production
-yarn build            # Build for production with Turbopack
-yarn start            # Start production server
+npm run build        # Build for production with Turbopack
+npm start            # Start production server
 
 # Code Quality
-yarn lint             # Run ESLint
+npm run lint         # Run ESLint
 ```
 
 ### Development Workflow
