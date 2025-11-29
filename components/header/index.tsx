@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import {
   Search,
   X,
@@ -28,6 +29,9 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
 import Logo from "../logo"
+import { useAuth } from "@/contexts/AuthContext"
+import { useProfile } from "@/hooks/useProfile"
+
 const notifications = [
   {
     id: 1,
@@ -101,8 +105,31 @@ export default function Header() {
   const [notificationOpen, setNotificationOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [chatOpen, setChatOpen] = useState(false)
+  
+  const { user, signOut } = useAuth()
+  const { profile } = useProfile()
+  const router = useRouter()
 
   const unreadCount = notifications.filter((n) => !n.read).length
+
+  const handleSignOut = async () => {
+    await signOut()
+    router.push('/login')
+  }
+
+  // Determine display values
+  const displayName = profile?.first_name && profile?.surname
+    ? `${profile.first_name} ${profile.surname}`
+    : user?.user_metadata?.full_name || 'User'
+
+  const avatarUrl = profile?.profile_photo_url || user?.user_metadata?.avatar_url || '/image (2).png'
+
+  const initials = displayName
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
 
   return (
     <>
@@ -291,8 +318,8 @@ export default function Header() {
                   className="cursor-pointer"
                 >
                   <Avatar className="h-[50px] w-[50px] rounded-full border-[#000000] border-[2px]">
-                    <AvatarImage src="/image (2).png" alt="User" />
-                    <AvatarFallback className="bg-primary text-primary-foreground">JD</AvatarFallback>
+                    <AvatarImage src={avatarUrl} alt={displayName} />
+                    <AvatarFallback className="bg-primary text-primary-foreground">{initials}</AvatarFallback>
                   </Avatar>
                 </div>
 
@@ -316,12 +343,12 @@ export default function Header() {
                       <div className="flex flex-col items-center  ">
                         <div className="relative -mt-3 ">
                           <Avatar className="h-20 w-20">
-                            <AvatarImage src="/image (2).png" alt="User" />
-                            <AvatarFallback className="bg-primary text-primary-foreground text-2xl">JD</AvatarFallback>
+                            <AvatarImage src={avatarUrl} alt={displayName} />
+                            <AvatarFallback className="bg-primary text-primary-foreground text-2xl">{initials}</AvatarFallback>
                           </Avatar>
                           <span className="absolute bottom-1 right-10 block h-[10px] w-[10px] border-[1px] rounded-full bg-[#34A353] ring-2 ring-background" />
                         </div>
-                        <p className="font-[500] text-lg">John Doe</p>
+                        <p className="font-[500] text-lg text-center truncate w-full px-2">{displayName}</p>
                       </div>
                       <div className="-space-y-5">
                         <Button variant="ghost" className="w-full justify-start gap-3 h-12 text-base" asChild>
@@ -359,6 +386,7 @@ export default function Header() {
                           className="w-full justify-start gap-3 h-12 text-base"
                           onClick={() => {
                             setUserMenuOpen(false)
+                            handleSignOut()
                           }}
                         >
                           <span className="font-[400]">
