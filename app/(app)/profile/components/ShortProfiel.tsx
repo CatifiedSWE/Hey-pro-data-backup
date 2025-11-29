@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useRef, useState } from "react"
@@ -42,17 +41,25 @@ export default function ShortProfile({ profile, links, roles = [], onPhotoUpload
     const locationDescriptor = [nationality, profile?.city?.trim()].filter(Boolean).join(" • ");
     
     const primaryLink = links[0]?.url ?? "";
+    
     const linkSummary = (() => {
         if (!primaryLink) return "No links added"
+        
+        const icon = <LinkIcon className="h-5 w-5" color="#FA6E80" />
+        let host = primaryLink
         try {
-            const host = new URL(primaryLink).hostname.replace(/^www\./, "")
-            const extra = links.length - 1
-            const icon = <LinkIcon className="h-5 w-5" color="#FA6E80" />
-            return extra > 0 ? <>{icon} {host} & {extra} other link{extra > 1 ? "s" : ""}</> : host
-        } catch {
-            const extra = links.length - 1
-            return extra > 0 ? `${primaryLink} & ${extra} other link${extra > 1 ? "s" : ""}` : primaryLink
-        }
+            host = new URL(primaryLink).hostname.replace(/^www\./, "")
+        } catch {}
+        
+        const extra = links.length - 1
+        
+        return (
+            <>
+                {icon} 
+                {host} 
+                {extra > 0 && ` & ${extra} other link${extra > 1 ? "s" : ""}`}
+            </>
+        )
     })()
 
     const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -280,7 +287,7 @@ export default function ShortProfile({ profile, links, roles = [], onPhotoUpload
 
                 <LinksDialog
                     links={links}
-                    triggerClassName="h-auto justify-start p-0 -ml-4 text-[12px] font-medium text-[#31A7AC] hover:bg-transparent"
+                    triggerClassName="h-auto justify-start p-0 text-[12px] font-medium text-[#31A7AC] hover:bg-transparent"
                     triggerLabel={linkSummary}
                 />
             </div>
