@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
         first_name,
         surname,
         profile_photo_url,
-        banner_photo_url,
+        banner_url,
         bio,
         country,
         city,
