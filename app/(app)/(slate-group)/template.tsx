@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
+import React from "react";
 import { BookmarkIcon, HelpCircle, SettingsIcon, UserRound } from "lucide-react";
 
 export default function AppLayout({ children }: Readonly<{ children: React.ReactNode }>) {
