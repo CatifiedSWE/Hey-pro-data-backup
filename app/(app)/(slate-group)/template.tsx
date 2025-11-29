@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
-import { BookmarkIcon, HelpCircle, SettingsIcon, UserRound } from "lucide-react";
+import { BookmarkIcon, HelpCircle, SettingsIcon, UserRound, Search } from "lucide-react";
 
 export default function AppLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     interface SimilarAccount {
@@ -31,184 +31,246 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
     const similarAccounts: SimilarAccount[] = [
         {
             id: 1,
-            name: "John Doe",
+            name: "David Garcia",
             image: "/image (1).png",
-            role: "Cinematographer",
-            totlerole: "15 Roles",
-            proifleurl: "/profile/johndoe"
+            role: "Producer",
+            totlerole: "2 roles",
+            proifleurl: "/profile/david"
         },
         {
             id: 2,
-            name: "Jane Smith",
+            name: "Ava Jackson",
             image: "/image (2).png",
-            role: "Cinematographer",
-            totlerole: "15 Roles",
-            proifleurl: "/profile/janesmith"
+            role: "Producer",
+            totlerole: "2 roles",
+            proifleurl: "/profile/ava"
         },
         {
             id: 3,
-            name: "Alice Johnson",
+            name: "Olivia Martin",
             image: "/image (3).png",
-            role: "Cinematographer",
-            totlerole: "15 Roles",
-            proifleurl: "/profile/alicejohnson"
+            role: "Producer",
+            totlerole: "2 roles",
+            proifleurl: "/profile/olivia"
         },
         {
             id: 4,
-            name: "Bob Brown",
+            name: "Ella Lewis",
             image: "/image (4).png",
-            role: "Cinematographer",
-            totlerole: "15 Roles",
-            proifleurl: "/profile/bobbrown"
+            role: "Producer",
+            totlerole: "2 roles",
+            proifleurl: "/profile/ella"
         },
         {
             id: 5,
-            name: "Eva Wilson",
+            name: "Michael Jones",
             image: "/image (5).png",
-            role: "Cinematographer",
-            totlerole: "15 Roles",
-            proifleurl: "/profile/evawilson"
-        },
-        {
-            id: 6,
-            name: "Michael Lee",
-            image: "/image (6).png",
-            role: "Cinematographer",
-            totlerole: "15 Roles",
-            proifleurl: "/profile/michaellee"
+            role: "Producer",
+            totlerole: "2 roles",
+            proifleurl: "/profile/michael"
         }
     ];
+
     const profile: Profile = {
         name: "John Doe",
-        bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+        bio: "Award-winning cinematographer with 10+ years in narrative film and commercial work. Visual storytelling and collaborative filmmaking.",
         backgroundImage: "/bg.jpg",
         avatarImage: "/image (1).png",
         referencesavatar: ["/image (1).png", "/image (2).png", "/image (3).png"],
-        totalref: 3000,
+        totalref: 240,
         profileurl: "/profile/johndoe",
         urls: [
             {
                 id: '1',
                 name: "Profile",
-                icon: <UserRound />,
+                icon: <UserRound className="w-5 h-5" />,
                 link: "/profile/johndoe"
             },
             {
                 id: '2',
                 name: "Saved",
-                icon: <BookmarkIcon />,
+                icon: <BookmarkIcon className="w-5 h-5" />,
                 link: "/profile/johndoe/saved"
             },
             {
                 id: '3',
                 name: "Help",
-                icon: <HelpCircle />,
+                icon: <HelpCircle className="w-5 h-5" />,
                 link: "/profile/johndoe/help"
             },
             {
                 id: '4',
-                name: "setting",
-                icon: <SettingsIcon />,
+                name: "Settings",
+                icon: <SettingsIcon className="w-5 h-5" />,
                 link: "/profile/johndoe/settings"
             }
         ],
     };
 
     return (
-        <div className="mt-22 px-2 sm:px-4">
-            <div className="max-w-[962px] mx-auto flex flex-row justify-between items-center mt-[50px] gap-2 w-full">
-                <span className="font-bold bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC] bg-clip-text text-transparent">SLATE</span>
-                <span className="h-[1px] w-full bg-gradient-to-r from-[#31A7AC] via-[#6A89BE] to-[#FA6E80]" />
-            </div>
-            <div className="flex flex-col md:flex-row justify-center mx-auto max-w-[962px] w-full gap-3.5">
-                {/* Sidebar Profile */}
-                <div className="w-full md:w-80 md:h-screen mt-3 md:block flex-shrink-0 order-2 md:order-1 mb-4 md:mb-0 hidden ">
-                    <div>
-                        <div>
-                            <Image src={profile.backgroundImage} alt={profile.name} width={284} height={72} className="w-full h-[72px] object-cover rounded-t-[13px]" />
+        <div className="min-h-screen bg-gray-50/50">
+            {/* Header Section */}
+            <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-gray-100">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex items-center justify-between h-16">
+                        <div className="flex items-center gap-4">
+                            <span className="text-xl font-bold bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC] bg-clip-text text-transparent">
+                                SLATE
+                            </span>
+                            <div className="hidden md:block h-6 w-[1px] bg-gray-200"></div>
+                            <span className="hidden md:block text-sm text-gray-500">Your professional feed</span>
                         </div>
-                        <div>
-                            <Image src={profile.avatarImage} alt={profile.name} width={96} height={96} className="w-17 h-17 rounded-full border-4 border-white -mt-12 object-cover" />
-                        </div>
-                        <div>
-                            <h2 className="text-lg">{profile.name}</h2>
-                            <p className="text-[12px] text-gray-600 mt-1">{profile.bio}</p>
-                            <div className="flex items-center mt-3 w-full max-w-[160px]">
-                                {profile.referencesavatar.map((avatar, index) => (
-                                    <Image
-                                        key={index}
-                                        src={avatar}
-                                        alt={`Reference ${index + 1}`}
-                                        width={10}
-                                        height={10}
-                                        className={`w-[24px] h-[24px] rounded-full border-2 border-white ${index !== 0 ? '-ml-3' : ''} object-cover`}
-                                    />
-                                ))}
-                                <span className="text-sm text-[#FA6E80] ml-2">+{profile.totalref} Referrals</span>
+                        <div className="flex-1 max-w-md mx-4 hidden md:block">
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                <input 
+                                    type="text" 
+                                    placeholder="Search posts..." 
+                                    className="w-full pl-10 pr-4 py-2 bg-gray-100 border-none rounded-full text-sm focus:ring-2 focus:ring-[#FA6E80]/20 outline-none transition-all"
+                                />
                             </div>
-                            <div>
-                                <div className="flex flex-col space-y-2 mt-2">
-                                    {profile.urls.map((url) => (
-                                        <div key={url.id} className="h-10 w-full rounded-[12.5px] bg-[#F8F8F8] px-2 py-2 mx-auto text-black">
-                                            <Link href={url.link} className="text-sm flex flex-row items-center gap-2">
-                                                {url.icon} {url.name}
-                                            </Link>
+                        </div>
+                    </div>
+                </div>
+                <div className="h-[1px] w-full bg-gradient-to-r from-[#31A7AC] via-[#6A89BE] to-[#FA6E80] opacity-30" />
+            </div>
+
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8">
+                    
+                    {/* Left Sidebar - Profile */}
+                    <div className="hidden md:block md:col-span-4 lg:col-span-3">
+                        <div className="sticky top-24 space-y-6">
+                            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                                {/* Cover Image */}
+                                <div className="h-24 w-full relative bg-gray-100">
+                                    <Image 
+                                        src={profile.backgroundImage} 
+                                        alt="Cover" 
+                                        fill
+                                        className="object-cover"
+                                    />
+                                </div>
+                                
+                                {/* Profile Info */}
+                                <div className="px-5 pb-5">
+                                    <div className="relative -mt-10 mb-3">
+                                        <div className="h-20 w-20 rounded-full border-4 border-white overflow-hidden relative bg-white shadow-sm">
+                                            <Image 
+                                                src={profile.avatarImage} 
+                                                alt={profile.name} 
+                                                fill
+                                                className="object-cover"
+                                            />
                                         </div>
-                                    ))}
-                                    <div>
-                                        <div className="p-[2px] rounded-[12.5px] bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC]">
-                                            <Button
-                                                className="w-full bg-white hover:bg-white rounded-[10px] text-black"
-                                                style={{
-                                                    borderRadius: "10px",
-                                                }}
+                                    </div>
+                                    
+                                    <h2 className="text-lg font-bold text-gray-900">{profile.name}</h2>
+                                    <p className="text-xs text-gray-500 mt-1 leading-relaxed line-clamp-3">
+                                        {profile.bio}
+                                    </p>
+
+                                    {/* Referrals */}
+                                    <div className="flex items-center mt-4 bg-gray-50 p-2 rounded-lg">
+                                        <div className="flex -space-x-2 mr-3">
+                                            {profile.referencesavatar.map((avatar, index) => (
+                                                <div key={index} className="relative h-6 w-6 rounded-full border-2 border-white overflow-hidden">
+                                                    <Image
+                                                        src={avatar}
+                                                        alt={`Ref ${index}`}
+                                                        fill
+                                                        className="object-cover"
+                                                    />
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <span className="text-xs font-semibold text-[#FA6E80]">
+                                            +{profile.totalref} Referrals
+                                        </span>
+                                    </div>
+
+                                    {/* Navigation Links */}
+                                    <div className="mt-6 space-y-1">
+                                        {profile.urls.map((url) => (
+                                            <Link 
+                                                key={url.id} 
+                                                href={url.link}
+                                                className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-colors"
                                             >
-                                                <span className="block bg-clip-text text-transparent bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC]">
-                                                    Send Invite
-                                                </span>
-                                            </Button>
-                                        </div>
+                                                {url.icon}
+                                                {url.name}
+                                            </Link>
+                                        ))}
+                                    </div>
+
+                                    {/* Invite Button */}
+                                    <div className="mt-6">
+                                        <Button className="w-full bg-white hover:bg-gray-50 text-gray-900 border border-gray-200 shadow-sm rounded-xl h-10 font-medium transition-all hover:shadow-md group">
+                                            <span className="bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC] bg-clip-text text-transparent group-hover:opacity-80">
+                                                Send Invite
+                                            </span>
+                                        </Button>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                {/* Main Content */}
-                <div className="w-full md:flex-1 h-auto md:h-screen overflow-x-auto order-1 md:order-2 mb-4 md:mb-0">
-                    {children}
-                </div>
-                {/* Similar Accounts Sidebar */}
-                <div className="w-full max-w-72 flex-col md:block flex-shrink-0 order-3 hidden">
-                    <div>
-                        <h1 className="mt-3 font-bold bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC] bg-clip-text text-transparent">
-                            View Profiles
-                        </h1>
-                        {similarAccounts.map((account) => (
-                            <div key={account.id} className="mb-1 p-1 flex flex-col gap-[9px]">
-                                <Link href={account.proifleurl} className="flex items-center space-x-2">
-                                    <Image
-                                        src={account.image}
-                                        alt={account.name}
-                                        width={80}
-                                        height={80}
-                                        className="w-10 h-10 rounded-full object-cover"
-                                    />
-                                    <div>
-                                        <p className="font-semibold">{account.name}</p>
-                                        <div className="flex flex-row gap-1 justify-center items-center">
-                                            <span className="text-sm text-gray-600">{account.role}</span>
-                                            <span>+</span>
-                                            <span className="text-sm text-gray-500">{account.totlerole}</span>
-                                        </div>
-                                    </div>
-                                </Link>
-                            </div>
-                        ))}
-                        <Link href="#" className="text-[10px] text-black">View crew directory</Link>
-                    </div>
-                </div>
 
+                    {/* Main Content - Feed */}
+                    <div className="col-span-1 md:col-span-8 lg:col-span-6">
+                        <div className="max-w-xl mx-auto">
+                            {children}
+                        </div>
+                    </div>
+
+                    {/* Right Sidebar - Suggestions */}
+                    <div className="hidden lg:block lg:col-span-3">
+                        <div className="sticky top-24">
+                            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="font-bold text-gray-900">View Profiles</h3>
+                                    <Link href="/explore" className="text-xs font-medium text-[#FA6E80] hover:underline">
+                                        View all
+                                    </Link>
+                                </div>
+                                
+                                <div className="space-y-4">
+                                    {similarAccounts.map((account) => (
+                                        <Link 
+                                            key={account.id} 
+                                            href={account.proifleurl}
+                                            className="flex items-center gap-3 group hover:bg-gray-50 p-2 -mx-2 rounded-lg transition-colors"
+                                        >
+                                            <div className="relative h-10 w-10 flex-shrink-0">
+                                                <Image
+                                                    src={account.image}
+                                                    alt={account.name}
+                                                    fill
+                                                    className="rounded-full object-cover"
+                                                />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-semibold text-gray-900 truncate group-hover:text-[#6A89BE] transition-colors">
+                                                    {account.name}
+                                                </p>
+                                                <p className="text-xs text-gray-500 truncate">
+                                                    {account.role} • {account.totlerole}
+                                                </p>
+                                            </div>
+                                        </Link>
+                                    ))}
+                                </div>
+                                
+                                <div className="mt-4 pt-4 border-t border-gray-100">
+                                    <Link href="/explore" className="text-xs text-gray-400 hover:text-gray-600 block text-center">
+                                        View crew directory
+                                    </Link>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
             </div>
         </div>
     );

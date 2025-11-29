@@ -1,10 +1,11 @@
 "use client";
 import { Separator } from "@/components/ui/separator";
-import { Ellipsis, Heart, MessageCircle, Send } from "lucide-react";
+import { Ellipsis, Heart, MessageCircle, Send, Share2 } from "lucide-react";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function SlatePage() {
     const router = useRouter();
@@ -12,50 +13,39 @@ export default function SlatePage() {
 
     useEffect(() => {
         const checkAuth = async () => {
-            console.log('[Slate] Checking authentication...');
             const { data: { session } } = await supabase.auth.getSession();
             
             if (!session) {
-                console.log('[Slate] No session found, redirecting to login');
                 router.push('/login');
                 return;
             }
             
-            console.log('[Slate] Session found, checking profile with retry mechanism...');
             const token = session.access_token;
             
             // Retry mechanism for profile check (handles race conditions)
             const checkProfileWithRetry = async (retries = 3, delay = 1000): Promise<boolean> => {
                 for (let attempt = 1; attempt <= retries; attempt++) {
                     try {
-                        console.log(`[Slate] Profile check attempt ${attempt}/${retries}`);
-                        
                         const response = await fetch('/api/profile', {
                             headers: { 'Authorization': `Bearer ${token}` },
                             cache: 'no-store' // Prevent caching
                         });
                         
                         const data = await response.json();
-                        console.log(`[Slate] Profile check result (attempt ${attempt}):`, data);
                         
                         if (data.success && data.data) {
-                            console.log('[Slate] Profile found!');
                             return true;
                         }
                         
-                        // Profile not found, wait before retry (except on last attempt)
                         if (attempt < retries) {
-                            console.log(`[Slate] Profile not found, waiting ${delay}ms before retry...`);
                             await new Promise(resolve => setTimeout(resolve, delay));
                         }
                     } catch (error) {
-                        console.error(`[Slate] Profile check error (attempt ${attempt}):`, error);
                         if (attempt < retries) {
                             await new Promise(resolve => setTimeout(resolve, delay));
                         }
                     }
                 }
-                
                 return false;
             };
             
@@ -63,21 +53,19 @@ export default function SlatePage() {
                 const profileExists = await checkProfileWithRetry();
                 
                 if (!profileExists) {
-                    console.log('[Slate] No profile found after retries, redirecting to form');
                     router.push('/form');
                     return;
                 }
                 
-                console.log('[Slate] All checks passed, showing page');
                 setLoading(false);
             } catch (error) {
-                console.error('[Slate] Fatal profile check error:', error);
                 router.push('/login');
             }
         };
         
         checkAuth();
     }, [router]);
+
     interface Slate {
         id: string,
         profileAvtar: string,
@@ -88,93 +76,106 @@ export default function SlatePage() {
         noComment: number,
         description: string
         slateSrc?: string
-
     }
+
     const slate: Slate[] = [
         {
             id: "1",
             profileAvtar: "/Image (1).png",
-            profileName: "Jone Dev",
+            profileName: "John Doe",
             role: "Cinematographer",
             totlerole: "15 Roles",
             noLike: 10000,
             noComment: 1000,
             slateSrc: "/slate.png",
-            description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+            description: "Award-winning cinematographer with 10+ years in narrative film and commercial work. Visual storytelling and collaborative filmmaking."
         },
         {
             id: "2",
             profileAvtar: "/Image (2).png",
-            profileName: "Jone Dev",
-            role: "Cinematographer",
-            totlerole: "15 Roles",
+            profileName: "Sophia Hernandez",
+            role: "Producer",
+            totlerole: "2 Roles",
             noLike: 10000,
             noComment: 1000,
             slateSrc: "/slate.png",
-            description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+            description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
         },
         {
             id: "3",
             profileAvtar: "/Image (3).png",
-            profileName: "Jone Dev",
-            role: "Cinematographer",
-            totlerole: "15 Roles",
+            profileName: "James Rodriguez",
+            role: "Music Director",
+            totlerole: "4 Roles",
             noLike: 10000,
             noComment: 1000,
             slateSrc: "/slate.png",
-            description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+            description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
         },
         {
             id: "4",
             profileAvtar: "/slate.png",
-            profileName: "Jone Dev",
-            role: "Cinematographer",
-            totlerole: "15 Roles",
+            profileName: "Mia Taylor",
+            role: "Producer",
+            totlerole: "2 Roles",
             noLike: 10000,
             noComment: 1000,
             slateSrc: "/slate.png",
-            description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+            description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
         }
-
     ]
     
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="text-center space-y-4">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FA6E80] mx-auto"></div>
-                    <p className="text-gray-900 text-lg">Loading slate...</p>
-                </div>
+            <div className="space-y-6 mt-4">
+                {[1, 2, 3].map((i) => (
+                    <SlateSkeleton key={i} />
+                ))}
             </div>
         );
     }
     
     return (
-        <div className="mt-3">
-            <div>
-                {
-                    slate.map((item) => (
-                        <div key={item.id} className="mb-4">
-                            <SlateCard
-                                profileAvtar={item.profileAvtar}
-                                profileName={item.profileName}
-                                role={item.role}
-                                totlerole={item.totlerole}
-                                noLike={item.noLike}
-                                noComment={item.noComment}
-                                description={item.description}
-                                slateSrc={item.slateSrc}
-                            />
-                        </div>
-                    ))
-                }
+        <div className="flex flex-col gap-6 mt-4 pb-20">
+            {slate.map((item) => (
+                <SlateCard
+                    key={item.id}
+                    {...item}
+                />
+            ))}
+        </div>
+    );
+}
+
+function SlateSkeleton() {
+    return (
+        <div className="w-full bg-white rounded-xl p-4 space-y-4 border border-gray-100 shadow-sm">
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <Skeleton className="h-12 w-12 rounded-full" />
+                    <div className="space-y-2">
+                        <Skeleton className="h-4 w-32" />
+                        <Skeleton className="h-3 w-24" />
+                    </div>
+                </div>
+                <Skeleton className="h-8 w-8 rounded-full" />
+            </div>
+            <Skeleton className="h-[300px] w-full rounded-lg" />
+            <div className="flex gap-4">
+                <Skeleton className="h-6 w-6" />
+                <Skeleton className="h-6 w-6" />
+                <Skeleton className="h-6 w-6" />
+            </div>
+            <div className="space-y-2">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-2/3" />
             </div>
         </div>
     );
 }
 
-
-function SlateCard({ profileAvtar,
+function SlateCard({ 
+    profileAvtar,
     profileName,
     role,
     totlerole,
@@ -191,69 +192,74 @@ function SlateCard({ profileAvtar,
     slateSrc?: string
 }) {
     return (
-        <div className=" max-w-[377px] border-gray-300 rounded-lg p-4 bg-white">
+        <div className="w-full bg-white rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-200">
+            {/* Header */}
             <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center mb-4">
-                    <Image
-                        src={profileAvtar}
-                        alt={profileName}
-                        height={100}
-                        width={100}
-                        className="w-11 h-11 rounded-full mr-4 object-cover"
-                    />
+                <div className="flex items-center gap-3">
+                    <div className="relative h-12 w-12">
+                        <Image
+                            src={profileAvtar}
+                            alt={profileName}
+                            fill
+                            className="rounded-full object-cover border border-gray-100"
+                        />
+                    </div>
                     <div>
-                        <h2 className="text-lg font-semibold">{profileName}</h2>
-                        <p className="text-sm text-gray-600">{role} + {totlerole}</p>
+                        <h2 className="text-base font-bold text-gray-900">{profileName}</h2>
+                        <p className="text-xs text-gray-500 font-medium">{role} • {totlerole}</p>
                     </div>
                 </div>
-                <div>
-                    {<Ellipsis className="h-6 w-6" />}
-                </div>
+                <button className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-50">
+                    <Ellipsis className="h-6 w-6" />
+                </button>
             </div>
-            <div>
-                {slateSrc && (
+
+            {/* Content Image */}
+            {slateSrc && (
+                <div className="relative w-full aspect-square sm:aspect-[4/3] mb-4 overflow-hidden rounded-lg bg-gray-50">
                     <Image
                         src={slateSrc}
-                        alt={profileName}
-                        height={377}
-                        width={377}
-                        className="w-[377px] h-[377px] object-cover rounded-lg mb-4"
+                        alt="Post content"
+                        fill
+                        className="object-cover hover:scale-105 transition-transform duration-500"
                     />
-                )}
-            </div>
-            <div className=" flex flex-row gap-3.5 justify-start">
-                <span><Heart className="h-6 w-6" /></span>
-                <span><MessageCircle className="h-6 w-6" /></span>
-                <span><Send className="h-6 w-6" /></span>
-            </div>
-            <DescriptionWithShowMore description={description} />
-            <Separator className="" />
+                </div>
+            )}
 
+            {/* Actions */}
+            <div className="flex items-center gap-4 mb-3">
+                <button className="text-gray-700 hover:text-[#FA6E80] transition-colors">
+                    <Heart className="h-6 w-6" />
+                </button>
+                <button className="text-gray-700 hover:text-[#6A89BE] transition-colors">
+                    <MessageCircle className="h-6 w-6" />
+                </button>
+                <button className="text-gray-700 hover:text-[#31A7AC] transition-colors">
+                    <Send className="h-6 w-6" />
+                </button>
+            </div>
+
+            {/* Description */}
+            <DescriptionWithShowMore description={description} />
         </div>
     );
 }
 
 function DescriptionWithShowMore({ description }: { description: string }) {
     const [isExpanded, setIsExpanded] = React.useState(false);
-
-    const toggleExpand = () => {
-        setIsExpanded(!isExpanded);
-    };
-
-    const shouldTruncate = description.length > 150;
-    const displayedDescription = isExpanded || !shouldTruncate
-        ? description
-        : description.slice(0, 200) + '...';
+    const shouldTruncate = description.length > 100;
 
     return (
-        <div className="mb-4">
-            <p className="text-gray-700 mb-1 text-[12px]">{displayedDescription}</p>
+        <div className="text-sm text-gray-700 leading-relaxed">
+            <span className={!isExpanded && shouldTruncate ? "line-clamp-2" : ""}>
+                {description}
+            </span>
             {shouldTruncate && (
                 <button
-                    onClick={toggleExpand}
-                    className="text-[12px]"
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    className="text-gray-400 hover:text-gray-600 text-xs font-medium mt-1 ml-1"
                 >
-                    {isExpanded ? 'Show Less' : 'Show More'}
+                    {isExpanded ? 'see less' : 'see more'}
                 </button>
             )}
         </div>
