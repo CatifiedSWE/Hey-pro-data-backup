@@ -9,7 +9,7 @@ export interface ProfileData {
   alias_first_name?: string;
   alias_surname?: string;
   profile_photo_url?: string;
-  banner_photo_url?: string;
+  banner_url?: string; // Changed from banner_photo_url
   bio?: string;
   country?: string;
   city?: string;

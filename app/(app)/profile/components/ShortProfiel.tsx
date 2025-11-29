@@ -149,9 +149,9 @@ export default function ShortProfile({ profile, links, onPhotoUpload }: ShortPro
                 onMouseLeave={() => setCoverImageHovered(false)}
             >
                 <div className="relative sm:h-[150px] h-[88px] w-full overflow-hidden rounded-[20px]">
-                    {profile?.banner_photo_url ? (
+                    {profile?.banner_url ? (
                         <Image
-                            src={profile.banner_photo_url}
+                            src={profile.banner_url}
                             alt="Cover image"
                             fill
                             sizes="600px"
