@@ -91,15 +91,24 @@ export default function LinksDialog({ links, triggerClassName, triggerLabel, onU
             const response = await apiCalling({
                 method: 'post',
                 route: '/profile/links',
-                data: { label: newLabel, url: newUrl, sort_order: links.length }
+                data: { label: newLabel, url: newUrl, sort_order: localLinks.length }
             });
 
             if (response.status) {
                 toast.success('Link added successfully!');
+                // Update local state with the new link
+                const newLink: LinkData = {
+                    id: response.data?.id || String(Date.now()),
+                    label: newLabel,
+                    url: newUrl,
+                    sort_order: localLinks.length
+                };
+                setLocalLinks([...localLinks, newLink]);
                 setNewLabel('');
                 setNewUrl('');
                 setIsAddingNew(false);
-                window.location.reload();
+                // Call onUpdate to refresh parent data if provided
+                if (onUpdate) onUpdate();
             } else {
                 toast.error(response.message || 'Failed to add link');
             }
