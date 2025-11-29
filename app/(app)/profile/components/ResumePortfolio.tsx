@@ -1,6 +1,7 @@
 "use client"
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { getAccessToken } from "@/lib/supabase/client";
 import {
     Dialog,
     DialogContent,
@@ -74,6 +75,14 @@ export default function ResumePortfolio({
             const formData = new FormData();
             formData.append('file', file);
 
+            // Get the access token from Supabase session
+            const token = await getAccessToken();
+            
+            if (!token) {
+                toast.error('Not authenticated. Please log in again.');
+                return;
+            }
+
             // Simulate progress
             const progressInterval = setInterval(() => {
                 setUploadProgress((prev) => {
@@ -89,7 +98,7 @@ export default function ResumePortfolio({
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'Authorization': `Bearer ${document.cookie.split('accessToken=')[1]?.split(';')[0] || ''}`
+                    'Authorization': `Bearer ${token}`
                 }
             });
 

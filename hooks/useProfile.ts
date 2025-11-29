@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import apiCalling from '@/lib/apiCalling';
+import { getAccessToken } from '@/lib/supabase/client';
 
 export interface ProfileData {
   user_id: string;
@@ -198,11 +199,18 @@ export const useProfile = () => {
       formData.append('file', file);
       formData.append('type', type);
 
+      // Get the access token from Supabase session
+      const token = await getAccessToken();
+      
+      if (!token) {
+        return { success: false, message: 'Not authenticated. Please log in again.' };
+      }
+
       const response = await fetch('/api/upload/profile-photo', {
         method: 'POST',
         body: formData,
         headers: {
-          'Authorization': `Bearer ${document.cookie.split('accessToken=')[1]?.split(';')[0] || ''}`
+          'Authorization': `Bearer ${token}`
         }
       });
 

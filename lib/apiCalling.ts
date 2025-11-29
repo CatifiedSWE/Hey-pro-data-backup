@@ -1,7 +1,7 @@
 import axios, { isAxiosError } from "./axios";
 
 interface ApiCallingProps {
-  method: "get" | "post" | "put" | "delete";
+  method: "get" | "post" | "put" | "patch" | "delete";
   route: string;
   data?: unknown;
 }
