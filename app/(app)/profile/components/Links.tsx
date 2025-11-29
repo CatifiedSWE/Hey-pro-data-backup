@@ -19,6 +19,7 @@ interface LinksDialogProps {
     links: LinkData[]
     triggerClassName?: string
     triggerLabel?: ReactNode
+    onUpdate?: () => void
 }
 
 export default function LinksDialog({ links, triggerClassName, triggerLabel }: LinksDialogProps) {
