@@ -113,7 +113,17 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
 
     return (
         <div className="min-h-screen bg-gray-50/50">
-            {/* Header Section - Aligned side by side with specific dimensions */}
+            <style jsx global>{`
+                .no-scrollbar::-webkit-scrollbar {
+                    display: none;
+                }
+                .no-scrollbar {
+                    -ms-overflow-style: none;
+                    scrollbar-width: none;
+                }
+            `}</style>
+
+            {/* Header Section */}
             <div className="max-w-[959px] mx-auto px-4 sm:px-0 mt-[104px] mb-6">
                 <div className="flex items-center gap-[20px]">
                     <span 
@@ -134,10 +144,11 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                     
                     {/* Left Sidebar - Profile - STICKY */}
                     <div className="hidden md:block md:col-span-4 lg:col-span-3 sticky top-4 h-[calc(100vh-2rem)] overflow-y-auto no-scrollbar">
-                        <div className="space-y-6 pb-4">
-                            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div className="space-y-4">
+                            {/* Profile Card */}
+                            <div className="bg-white rounded-[20px] shadow-sm border border-gray-100 overflow-hidden">
                                 {/* Cover Image */}
-                                <div className="h-24 w-full relative bg-gray-100">
+                                <div className="h-20 w-full relative bg-gray-100">
                                     <Image 
                                         src={profile.backgroundImage} 
                                         alt="Cover" 
@@ -147,9 +158,9 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                                 </div>
                                 
                                 {/* Profile Info */}
-                                <div className="px-5 pb-5">
-                                    <div className="relative -mt-10 mb-3">
-                                        <div className="h-20 w-20 rounded-full border-4 border-white overflow-hidden relative bg-white shadow-sm">
+                                <div className="px-4 pb-5">
+                                    <div className="relative -mt-10 mb-3 flex justify-start">
+                                        <div className="h-[72px] w-[72px] rounded-full border-4 border-white overflow-hidden relative bg-white shadow-sm">
                                             <Image 
                                                 src={profile.avatarImage} 
                                                 alt={profile.name} 
@@ -160,15 +171,15 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                                     </div>
                                     
                                     <h2 className="text-lg font-bold text-gray-900">{profile.name}</h2>
-                                    <p className="text-xs text-gray-500 mt-1 leading-relaxed line-clamp-3">
+                                    <p className="text-[11px] text-gray-500 mt-1 leading-relaxed">
                                         {profile.bio}
                                     </p>
 
                                     {/* Referrals */}
-                                    <div className="flex items-center mt-4 bg-gray-50 p-2 rounded-lg">
-                                        <div className="flex -space-x-2 mr-3">
+                                    <div className="flex items-center mt-3 bg-[#F2F2F2] p-1.5 rounded-full w-fit pr-4">
+                                        <div className="flex -space-x-2 mr-2">
                                             {profile.referencesavatar.map((avatar, index) => (
-                                                <div key={index} className="relative h-6 w-6 rounded-full border-2 border-white overflow-hidden">
+                                                <div key={index} className="relative h-5 w-5 rounded-full border border-white overflow-hidden">
                                                     <Image
                                                         src={avatar}
                                                         alt={`Ref ${index}`}
@@ -178,37 +189,37 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                                                 </div>
                                             ))}
                                         </div>
-                                        <span className="text-xs font-semibold text-[#FA6E80]">
+                                        <span className="text-[10px] font-semibold text-[#FA6E80]">
                                             +{profile.totalref} Referrals
                                         </span>
                                     </div>
-
-                                    {/* Navigation Links */}
-                                    <div className="mt-6 space-y-1">
-                                        {profile.urls.map((url) => (
-                                            <Link 
-                                                key={url.id} 
-                                                href={url.link}
-                                                className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-colors"
-                                            >
-                                                {url.icon}
-                                                {url.name}
-                                            </Link>
-                                        ))}
-                                    </div>
-
-                                    {/* Invite Button */}
-                                    <div className="mt-6">
-                                        <Button className="w-full bg-white hover:bg-gray-50 text-gray-900 border border-gray-200 shadow-sm rounded-xl h-10 font-medium transition-all hover:shadow-md group">
-                                            <span 
-                                                className="bg-clip-text text-transparent group-hover:opacity-80"
-                                                style={{ ...gradientStyle, WebkitBackgroundClip: "text" }}
-                                            >
-                                                Send Invite
-                                            </span>
-                                        </Button>
-                                    </div>
                                 </div>
+                            </div>
+
+                            {/* Navigation Links */}
+                            <div className="bg-white rounded-[20px] shadow-sm border border-gray-100 overflow-hidden p-2 space-y-1">
+                                {profile.urls.map((url) => (
+                                    <Link 
+                                        key={url.id} 
+                                        href={url.link}
+                                        className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-xl transition-colors"
+                                    >
+                                        {url.icon}
+                                        {url.name}
+                                    </Link>
+                                ))}
+                            </div>
+
+                            {/* Invite Button */}
+                            <div className="bg-white rounded-[20px] shadow-sm border border-gray-100 overflow-hidden p-2">
+                                <Button className="w-full bg-white hover:bg-gray-50 text-gray-900 border border-gray-200 shadow-sm rounded-xl h-10 font-medium transition-all hover:shadow-md group">
+                                    <span 
+                                        className="bg-clip-text text-transparent group-hover:opacity-80 font-bold"
+                                        style={{ ...gradientStyle, WebkitBackgroundClip: "text" }}
+                                    >
+                                        Send Invite
+                                    </span>
+                                </Button>
                             </div>
                         </div>
                     </div>
@@ -222,49 +233,55 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
 
                     {/* Right Sidebar - Suggestions - STICKY */}
                     <div className="hidden lg:block lg:col-span-3 sticky top-4 h-[calc(100vh-2rem)] overflow-y-auto no-scrollbar">
-                        <div className="pb-4">
-                            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-                                <div className="flex items-center justify-between mb-4">
-                                    <h3 
-                                        className="font-bold bg-clip-text text-transparent"
-                                        style={{ ...gradientStyle, WebkitBackgroundClip: "text" }}
+                        <div className="bg-white rounded-[20px] shadow-sm border border-gray-100 p-5">
+                            <div className="flex items-center justify-between mb-6">
+                                <h3 
+                                    className="text-lg font-normal bg-clip-text text-transparent"
+                                    style={{ ...gradientStyle, WebkitBackgroundClip: "text" }}
+                                >
+                                    View Profiles
+                                </h3>
+                                <button className="text-gray-400 hover:text-gray-600">
+                                    <span className="sr-only">Options</span>
+                                    <svg width="16" height="4" viewBox="0 0 16 4" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <circle cx="2" cy="2" r="2" fill="currentColor"/>
+                                        <circle cx="8" cy="2" r="2" fill="currentColor"/>
+                                        <circle cx="14" cy="2" r="2" fill="currentColor"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            
+                            <div className="space-y-5">
+                                {similarAccounts.map((account) => (
+                                    <Link 
+                                        key={account.id} 
+                                        href={account.proifleurl}
+                                        className="flex items-center gap-3 group"
                                     >
-                                        View Profiles
-                                    </h3>
-                                </div>
-                                
-                                <div className="space-y-4">
-                                    {similarAccounts.map((account) => (
-                                        <Link 
-                                            key={account.id} 
-                                            href={account.proifleurl}
-                                            className="flex items-center gap-3 group hover:bg-gray-50 p-2 -mx-2 rounded-lg transition-colors"
-                                        >
-                                            <div className="relative h-10 w-10 flex-shrink-0">
-                                                <Image
-                                                    src={account.image}
-                                                    alt={account.name}
-                                                    fill
-                                                    className="rounded-full object-cover"
-                                                />
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-sm font-semibold text-gray-900 truncate group-hover:text-[#6A89BE] transition-colors">
-                                                    {account.name}
-                                                </p>
-                                                <p className="text-xs text-gray-500 truncate">
-                                                    {account.role} • {account.totlerole}
-                                                </p>
-                                            </div>
-                                        </Link>
-                                    ))}
-                                </div>
-                                
-                                <div className="mt-4 pt-4 border-t border-gray-100">
-                                    <Link href="/explore" className="text-xs text-gray-400 hover:text-gray-600 block text-center">
-                                        View crew directory
+                                        <div className="relative h-10 w-10 flex-shrink-0">
+                                            <Image
+                                                src={account.image}
+                                                alt={account.name}
+                                                fill
+                                                className="rounded-full object-cover"
+                                            />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-bold text-gray-900 truncate">
+                                                {account.name}
+                                            </p>
+                                            <p className="text-xs text-gray-500 truncate">
+                                                {account.role} + {account.totlerole}
+                                            </p>
+                                        </div>
                                     </Link>
-                                </div>
+                                ))}
+                            </div>
+                            
+                            <div className="mt-6">
+                                <Link href="/explore" className="text-[10px] text-gray-400 hover:text-gray-600 block">
+                                    View crew directory
+                                </Link>
                             </div>
                         </div>
                     </div>
