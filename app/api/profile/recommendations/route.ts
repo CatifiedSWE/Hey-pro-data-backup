@@ -22,33 +22,57 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Fetch recommendations with profile photos from user_profiles
-    const { data: recommendations, error } = await supabase
+    // Fetch recommendations - first get the list
+    const { data: recommendationsList, error: recsError } = await supabase
       .from('user_recommendations')
-      .select(`
-        id,
-        recommended_user_id,
-        created_at,
-        user_profiles!user_recommendations_recommended_user_id_fkey(
-          user_id,
-          first_name,
-          surname,
-          profile_photo_url
-        )
-      `)
+      .select('id, recommended_user_id, created_at')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('Recommendations fetch error:', error);
+    if (recsError) {
+      console.error('Recommendations fetch error:', recsError);
       return NextResponse.json(
-        errorResponse('Failed to fetch recommendations', error.message),
+        errorResponse('Failed to fetch recommendations', recsError.message),
         { status: 500 }
       );
     }
 
+    if (!recommendationsList || recommendationsList.length === 0) {
+      return NextResponse.json(
+        successResponse([], 'No recommendations found'),
+        { status: 200 }
+      );
+    }
+
+    // Then fetch the profile details for recommended users
+    const recommendedUserIds = recommendationsList.map(rec => rec.recommended_user_id);
+    
+    const { data: profiles, error: profilesError } = await supabase
+      .from('user_profiles')
+      .select('user_id, first_name, surname, profile_photo_url')
+      .in('user_id', recommendedUserIds);
+
+    if (profilesError) {
+      console.error('Profiles fetch error:', profilesError);
+      return NextResponse.json(
+        errorResponse('Failed to fetch profile details', profilesError.message),
+        { status: 500 }
+      );
+    }
+
+    // Combine the data
+    const recommendations = recommendationsList.map(rec => {
+      const profile = profiles?.find(p => p.user_id === rec.recommended_user_id);
+      return {
+        id: rec.id,
+        recommended_user_id: rec.recommended_user_id,
+        created_at: rec.created_at,
+        user_profiles: profile || null
+      };
+    });
+
     return NextResponse.json(
-      successResponse(recommendations || [], 'Recommendations retrieved successfully'),
+      successResponse(recommendations, 'Recommendations retrieved successfully'),
       { status: 200 }
     );
   } catch (error: any) {
@@ -188,3 +212,4 @@ export async function DELETE(request: NextRequest) {
     );
   }
 }
+
