@@ -184,7 +184,7 @@ export default function LinksDialog({ links, triggerClassName, triggerLabel, onU
             // Update requests
             toUpdate.forEach(link => {
                  promises.push(apiCalling({
-                    method: 'post',
+                    method: 'patch',
                     route: '/profile/links',
                     data: { id: link.id, label: link.label, url: link.url }
                 }));
