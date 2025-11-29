@@ -1,10 +1,12 @@
 import Image from "next/image"
 import Link from "next/link"
 import { Calendar, Edit, Plus } from "lucide-react"
+import { useState, useEffect } from "react"
 
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { ProfileDataTypes } from "@/types"
+import apiCalling from "@/lib/apiCalling"
 
 import CreditsEditor from "./CreditsEditor"
 
@@ -114,8 +116,73 @@ function CreditCard({ credit }: { credit: CreditType }) {
     )
 }
 
-export default function CreditsSection({ Profile }: { Profile: ProfileDataTypes }) {
-    const credits = Profile.credits ?? []
+export default function CreditsSection() {
+    const [credits, setCredits] = useState<CreditType[]>([])
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
+
+    // Fetch credits data
+    useEffect(() => {
+        const fetchCredits = async () => {
+            try {
+                setLoading(true)
+                const response = await apiCalling({
+                    method: 'get',
+                    route: '/profile/credits'
+                })
+
+                if (response.status && response.data?.data) {
+                    // Map the API response to match the expected CreditType format
+                    const mappedCredits = response.data.data.map((credit: Record<string, unknown>) => ({
+                        id: credit.id,
+                        creditTitle: credit.credit_title || '',
+                        startDate: credit.start_date || '',
+                        endDate: credit.end_date || '',
+                        description: credit.description || '',
+                        imgUrl: credit.image_url || '',
+                        productionType: credit.production_type || '',
+                        role: credit.role || '',
+                        projectTitle: credit.project_title || '',
+                        brandClient: credit.brand_client || '',
+                        localCompany: credit.local_company || '',
+                        internationalCompany: credit.international_company || '',
+                        country: credit.country || '',
+                        releaseYear: credit.release_year || '',
+                        isUnreleased: credit.is_unreleased || false,
+                        headlineStats: credit.headline_stats || '',
+                        awardsSummary: credit.awards_summary || '',
+                        awards: credit.awards || []
+                    }))
+                    setCredits(mappedCredits)
+                } else {
+                    setCredits([])
+                }
+            } catch (err) {
+                console.error('Error fetching credits:', err)
+                setError('Failed to load credits')
+                setCredits([])
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        fetchCredits()
+    }, [])
+
+    // Show loading state
+    if (loading) {
+        return (
+            <section className="isolate w-full max-w-[600px] rounded-[20px] bg-[#FAFAFA] p-[29px] shadow-[0px_1px_10px_rgba(0,0,0,0.1)]">
+                <div className="animate-pulse">
+                    <div className="h-8 bg-gray-200 rounded w-1/3 mb-6"></div>
+                    <div className="space-y-4">
+                        <div className="h-32 bg-gray-200 rounded"></div>
+                        <div className="h-32 bg-gray-200 rounded"></div>
+                    </div>
+                </div>
+            </section>
+        )
+    }
 
     return (
         <section className="isolate w-full max-w-[600px] rounded-[20px] bg-[#FAFAFA] p-[29px] shadow-[0px_1px_10px_rgba(0,0,0,0.1)]">
@@ -138,24 +205,37 @@ export default function CreditsSection({ Profile }: { Profile: ProfileDataTypes 
                 />
             </header>
 
-            <div className="flex flex-col gap-8">
-                {credits.map((credit) => (
-                    <>
-                        <CreditCard key={credit.id} credit={credit} />
-                        <div
-                            className="h-0 w-full rounded-full"
-                            style={{
-                                border: '1px solid transparent',
-                                backgroundImage: 'linear-gradient(white, white), linear-gradient(90deg, #FA6E80 0%, #6A89BE 33%, #85AAB7 66%, #31A7AC 100%)',
-                                backgroundOrigin: 'border-box',
-                                backgroundClip: 'padding-box, border-box'
-                            }}
-                            aria-hidden
-                        />
-                    </>
+            {error && (
+                <div className="text-center py-8 text-red-500">
+                    <p>{error}</p>
+                </div>
+            )}
 
-                ))}
-            </div>
+            {!error && credits.length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                    <p>No credits added yet. Click the + button to add your first credit.</p>
+                </div>
+            )}
+
+            {!error && credits.length > 0 && (
+                <div className="flex flex-col gap-8">
+                    {credits.map((credit) => (
+                        <>
+                            <CreditCard key={credit.id} credit={credit} />
+                            <div
+                                className="h-0 w-full rounded-full"
+                                style={{
+                                    border: '1px solid transparent',
+                                    backgroundImage: 'linear-gradient(white, white), linear-gradient(90deg, #FA6E80 0%, #6A89BE 33%, #85AAB7 66%, #31A7AC 100%)',
+                                    backgroundOrigin: 'border-box',
+                                    backgroundClip: 'padding-box, border-box'
+                                }}
+                                aria-hidden
+                            />
+                        </>
+                    ))}
+                </div>
+            )}
 
             <div className="mt-8 flex flex-col items-start justify-between">
                 <div className="flex flex-col sm:flex-row gap-5">
