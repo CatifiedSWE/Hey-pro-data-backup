@@ -85,7 +85,7 @@ export default function Profile() {
   const [isReorderDialogOpen, setIsReorderDialogOpen] = useState(false)
   
   // Use the profile hook for real data
-  const { profile, links, recommendations, loading, error, uploadPhoto, refetch } = useProfile();
+  const { profile, links, recommendations, roles, loading, error, uploadPhoto, refetch } = useProfile();
 
   // Drag and drop sensors - MUST be called before any conditional returns
   const sensors = useSensors(
@@ -170,7 +170,7 @@ export default function Profile() {
   return (
     <section className="relative mx-auto flex w-full max-w-[1180px] flex-col items-center gap-8 px-3 xs:px-4 sm:px-6 lg:flex-row lg:items-start lg:justify-center lg:gap-12 pt-6 pb-20">
       <main className="flex w-full max-w-[600px] flex-col space-y-4">
-        <ShortProfile profile={profile} links={links} onPhotoUpload={handlePhotoUpload} />
+        <ShortProfile profile={profile} links={links} roles={roles} onPhotoUpload={handlePhotoUpload} />
         <div className="w-full bg-slate-200 h-px sm:h-[1px] mb-5" />
 
         <div className="space-y-2 mx-auto w-full">
