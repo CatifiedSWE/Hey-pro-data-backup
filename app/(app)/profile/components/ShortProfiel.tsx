@@ -210,7 +210,7 @@ export default function ShortProfile({ profile, links, roles = [], onPhotoUpload
                 >
                     <ProfileProgress 
                         value={profile?.profile_completion_percentage || 0} 
-                        imageUrl={profile?.profile_photo_url || '/image (2).png'} 
+                        imageUrl={profile?.profile_photo_url || user?.user_metadata?.avatar_url || '/image (2).png'} 
                         className="rounded-full" 
                     />
                     <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
