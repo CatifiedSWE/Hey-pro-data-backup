@@ -35,9 +35,10 @@ export async function GET(request: NextRequest) {
       .select(`
         id,
         user_id,
-        name,
         alias_first_name,
         alias_surname,
+        first_name,
+        surname,
         profile_photo_url,
         banner_photo_url,
         bio,
@@ -56,7 +57,7 @@ export async function GET(request: NextRequest) {
 
     // Apply keyword search
     if (keyword) {
-      query = query.or(`name.ilike.%${keyword}%,bio.ilike.%${keyword}%`);
+      query = query.or(`alias_first_name.ilike.%${keyword}%,alias_surname.ilike.%${keyword}%,first_name.ilike.%${keyword}%,surname.ilike.%${keyword}%,bio.ilike.%${keyword}%`);
     }
 
     // Apply location filter
