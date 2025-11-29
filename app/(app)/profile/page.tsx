@@ -122,6 +122,7 @@ export default function Profile() {
     if (!result.success) {
       toast.error(result.message || 'Failed to upload photo');
     }
+    return result;
   };
 
   // Show loading state - AFTER all hooks are called
@@ -465,5 +466,3 @@ function SkillsSection({ Profile: profile }: { Profile: { skills: { id: string, 
     </div>
   )
 }
-
-
