@@ -22,7 +22,7 @@ interface LinksDialogProps {
     onUpdate?: () => void
 }
 
-export default function LinksDialog({ links, triggerClassName, triggerLabel }: LinksDialogProps) {
+export default function LinksDialog({ links, triggerClassName, triggerLabel, onUpdate }: LinksDialogProps) {
 
     const [open, setOpen] = React.useState(false)
     const [copiedIndex, setCopiedIndex] = React.useState<number | null>(null)
@@ -33,6 +33,7 @@ export default function LinksDialog({ links, triggerClassName, triggerLabel }: L
     const [editLabel, setEditLabel] = React.useState('')
     const [editUrl, setEditUrl] = React.useState('')
     const [saving, setSaving] = React.useState(false)
+    const [localLinks, setLocalLinks] = React.useState<LinkData[]>(links)
     const timersRef = React.useRef<Record<number, number | null>>({})
     const urlIcons = {
         "linkedin": <Linkedin className="h-5 w-5" />,
