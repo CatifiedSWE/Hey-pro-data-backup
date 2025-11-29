@@ -22,8 +22,6 @@ type FilterOption = { label: string; value: FilterValue[] };
 
 const makeValues = (arr: string[]): FilterValue[] =>
     arr.map(label => ({ label, href: `/explore?role=${encodeURIComponent(label)}` })); 
-    // Changed href to query param to use the main dynamic page instead of static [slug] page
-    // or keeps it consistent with Supabase fetching
 
 const filterOptions: FilterOption[] = [
     {
@@ -280,7 +278,6 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
         const timer = setTimeout(() => {
             if (searchTerm !== filterForm.keyword) {
                 const newFilters = { ...filterForm, keyword: searchTerm };
-                // Only update if it changed (avoid infinite loop)
                 setFilterForm(newFilters);
                 updateUrl(newFilters);
             }
@@ -298,6 +295,14 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
         event.preventDefault();
         setIsFilterOpen(false);
     };
+
+    const handleSearchSubmit = () => {
+        if (searchTerm !== filterForm.keyword) {
+             const newFilters = { ...filterForm, keyword: searchTerm };
+             setFilterForm(newFilters);
+             updateUrl(newFilters);
+        }
+    }
 
     return (
         <>
@@ -433,10 +438,18 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                             className="border-none w-[calc(100%-3rem)] text-sm outline-none focus:ring-0 ml-2"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    handleSearchSubmit();
+                                }
+                            }}
                         />
-                        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#FA6E80]">
+                        <button 
+                            onClick={handleSearchSubmit}
+                            className="flex h-9 w-9 items-center justify-center rounded-full bg-[#FA6E80] cursor-pointer hover:bg-[#fa5a6e] transition-colors"
+                        >
                             <Search className="h-5 w-5 text-white" />
-                        </span>
+                        </button>
                     </div>
 
                 </div>
