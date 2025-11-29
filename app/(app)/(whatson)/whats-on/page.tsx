@@ -103,13 +103,13 @@ export default function WhatsOnHeader() {
     };
     return (
         <>
-            <div className=" h-screen w-full overflow-x-hidden sm:mb-5 mb-20">
-                <div className="flex flex-col sm:flex-row gap-2 sm:gap-0 sm:items-center sm:justify-between justify-start">
-                    <span className="bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC] bg-clip-text text-transparent text-3xl font-semibold">{"What's On"}</span>
+            <div className=" w-full overflow-x-hidden overflow-hidden">
+                <div className="flex flex-row mx-auto px-1 gap-2 sm:gap-0 sm:items-center sm:justify-between justify-center">
+                    <span className="bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC] bg-clip-text text-transparent text-[26px] font-semibold">{"What's On"}</span>
                     <Link href="/whats-on/manage-whats-on" className="ml-2 text-white bg-[#31A7AC] border rounded-[10px] sm:w-auto w-[192px] px-4 py-2 "> <span className="text-[16px] font-[400]">Manage What’s On</span></Link>
                 </div>
 
-                <div className="flex flex-row mx-auto  justify-center w-[354px] items-center gap-0.5 space-x-4 mt-4 sm:w-full">
+                <div className="flex flex-row mx-auto  justify-center w-full items-center gap-0.5 space-x-4 mt-4 sm:w-full">
                     <div
                         className={`sm:flex items-center hidden justify-center space-x-2 h-[48px] w-[111px] border rounded-full px-4 py-2 cursor-pointer transition-all ${isFilterOpen ? 'w-[300px] bg-[#FA6E80]' : 'w-[150px] bg-[#f7f7f700] border-[#FA6E80] '}`}
                         onClick={() => setIsFilterOpen(!isFilterOpen)}
@@ -117,7 +117,7 @@ export default function WhatsOnHeader() {
                         <button className={`text-sm font-medium ${isFilterOpen ? 'text-white' : 'text-[#FA6E80]'}`}>Filter (<span>{"3"}</span>)</button>
                         <Filter className={`h-5 w-5 ${isFilterOpen ? 'text-white' : 'text-[#FA6E80]'}`} />
                     </div>
-                    <div className="flex flex-row border rounded-full px-1 py-2 justify-between items-center h-[48px] w-[230px] sm:w-[960px]">
+                    <div className="flex flex-row border rounded-full px-1 py-2 justify-between items-center h-[48px] w-[240px] sm:w-[960px]">
                         <input
                             placeholder="Search by name, role, or department..."
                             className=" px-2 border-none outline-none focus:ring-0 text-sm bg-transparent"
@@ -143,9 +143,9 @@ export default function WhatsOnHeader() {
 
 
                 </div>
-                <div className=" flex flex-col md:flex-row gap-6">
+                <div className=" flex flex-row mx-auto justify-center ">
                     {isFilterOpen && (
-                        <div className="hidden h-screen w-full max-w-[280px] overflow-y-auto p-4 space-y-2 sm:block">
+                        <div className="hidden w-full max-w-[280px] overflow-y-auto p-4 space-y-2 sm:block">
                             <form onSubmit={handleFilterSubmit} className="space-y-5 rounded-[10px] border bg-white p-4 text-[#017A7C] shadow-sm">
                                 <div className="space-y-2">
                                     <div className="flex gap-3">

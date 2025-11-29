@@ -428,7 +428,7 @@ export function EditWhatsOnForm({ event }: EditWhatsOnFormProps) {
                                         </div>
 
                                         <div className="mt-3 flex gap-4 w-full ">
-                                            <div ref={listRef} className="flex-1 max-h-[188px] space-y-3 overflow-y-auto pr-2">
+                                            <div ref={listRef} className="flex-1 max-h-[188px] space-y-3 overflow-y-auto no-scrollbar pr-2">
                                                 {schedule.length === 0 ? (
                                                     <p className="text-sm text-gray-500">No schedule added yet. Select dates on the calendar to begin.</p>
                                                 ) : (

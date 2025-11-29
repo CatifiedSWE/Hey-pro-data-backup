@@ -12,9 +12,9 @@ import { whatsOnEvents } from "@/data/whatsOnEvents";
 
 export default function EventListingPage({ isFilterOpen }: { isFilterOpen?: boolean }) {
     return (
-        <div className={`min-h-screen  flex justify-center items-center py-1 ${poppins.variable} font-poppins`}>
-            <div className="w-full max-w-[360px] md:max-w-[960px] px-2 md:px-0">
-                <div className={`grid ${isFilterOpen ? "sm:grid-cols-3 grid-cols-2" : "grid-cols-2 md:grid-cols-3 lg:grid-cols-4"} auto-rows-fr gap-[7.46px] md:gap-[10px]`}>
+        <div className={`flex justify-center items-center py-1 ${poppins.variable} font-poppins`}>
+            <div className="w-full mx-autopx-2 md:px-0">
+                <div className={`grid ${isFilterOpen ? "sm:grid-cols-3 grid-cols-2 -mt-15" : "grid-cols-2 md:grid-cols-3 lg:grid-cols-4"} auto-rows-fr gap-[7.46px] md:gap-[10px]`}>
                     {whatsOnEvents.map((event, index) => (
                         <EventCard key={index} event={event} />
                     ))}

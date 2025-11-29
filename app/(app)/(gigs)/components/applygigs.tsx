@@ -2,8 +2,18 @@
 import { useEffect, useMemo, useState } from "react"
 import Image from "next/image"
 import { addDays, endOfMonth, endOfWeek, format, getDate, isSameMonth, startOfMonth, startOfWeek } from "date-fns"
-import { Calendar, CircleAlert, Mail, MapPin, } from "lucide-react"
-
+import { Calendar, CircleAlert, Mail, MapPin, X, } from "lucide-react"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
@@ -31,6 +41,7 @@ const STATUS_OPTIONS: { label: DayStatus; color: string }[] = [
     { label: "N/A", color: "bg-[#6B7280]" },
     { label: "P1", color: "bg-[#FFB347]" },
     { label: "P2", color: "bg-[#8BCBFF]" },
+    { label: "A", color: "bg-[#31A7AC]" },
 ]
 
 const STATUS_COLOR_MAP: Record<DayStatus, string> = {
@@ -58,18 +69,26 @@ const buildMonthMatrix = (year: number, month: number) => {
     }
     return rows
 }
-
+import { Loader2 } from "lucide-react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
 export default function ApplyGigs({ gig }: ApplyGigsProps) {
+    const router = useRouter()
     const [selectedStatuses, setSelectedStatuses] = useState<Record<string, DayStatus>>({})
     const [selectAllChecked, setSelectAllChecked] = useState(false)
     const [selectedCreditIds, setSelectedCreditIds] = useState<string[]>([])
+    const [applicationFormSubmitted, setApplicationFormSubmitted] = useState(false)
+    const [isSubmitting, setIsSubmitting] = useState(false)
+    const [showSuccessDialog, setShowSuccessDialog] = useState(false)
     const buildDefaultFormState = (): ApplicantFormState => ({
         savedRate: gig.budgetLabel ?? "",
         customRate: "",
     })
-    const [formValues, setFormValues] = useState<ApplicantFormState>(() => buildDefaultFormState())
+    // Hardcoded rate value for demo, but allow selection from profile credits
+    const [formValues, setFormValues] = useState<ApplicantFormState>({ savedRate: "", customRate: "" })
 
     const availableCredits = useMemo(() => profileData.credits ?? [], [profileData.credits])
+    const availableRates = useMemo(() => profileData.rate ?? [], [profileData.rate])
 
     const highlightedDateMeta = useMemo(() => {
         return gig.calendarMonths.flatMap((month) =>
@@ -135,6 +154,21 @@ export default function ApplyGigs({ gig }: ApplyGigsProps) {
         return availableCredits.filter((credit) => selectedCreditIds.includes(credit.id))
     }, [availableCredits, selectedCreditIds])
 
+    // Remove selected credit
+    const handleRemoveCredit = (creditId: string) => {
+        setSelectedCreditIds((prev) => prev.filter((id) => id !== creditId))
+    }
+
+    // Remove selected rate
+    const handleRemoveRate = () => {
+        setFormValues((prev) => ({ ...prev, savedRate: "" }))
+    }
+
+    // Choose rate from profile credits
+    const handleSelectRateFromCredit = (rate: string) => {
+        setFormValues((prev) => ({ ...prev, savedRate: rate }))
+    }
+
     const handleSelectAllChange = (checked: boolean | "indeterminate") => {
         const isChecked = checked === true
         setSelectAllChecked(isChecked)
@@ -151,9 +185,19 @@ export default function ApplyGigs({ gig }: ApplyGigsProps) {
     }
 
     const handleSubmit = () => {
+        setIsSubmitting(true)
         const entries = highlightedDateMeta
             .filter(({ key }) => selectedStatuses[key])
             .map(({ key, label }) => ({ date: label, status: selectedStatuses[key] as DayStatus }))
+
+        // some deled code
+        const formValues = buildDefaultFormState()
+        setTimeout(() => {
+            setApplicationFormSubmitted(true)
+        }, 1000)
+        setIsSubmitting(false)
+
+
 
         const payload = {
             gigId: gig.id,
@@ -169,6 +213,11 @@ export default function ApplyGigs({ gig }: ApplyGigsProps) {
         }
 
         console.log("Gig application submission", payload)
+        setTimeout(() => {
+            setIsSubmitting(false)
+            setApplicationFormSubmitted(true)
+            setShowSuccessDialog(true)
+        }, 1200)
     }
 
     return (
@@ -240,13 +289,13 @@ export default function ApplyGigs({ gig }: ApplyGigsProps) {
                                     const highlighted = new Set(month.highlightedDays)
 
                                     return (
-                                        <div key={`${gig.id}-${month.month}-${month.year}`} className="min-w-[250px]  p-4">
-                                            <div className="mb-1 flex items-center justify-between text-[18px] font-[400] text-[#FF4B82] p-2 bg-[#F8F8F8] rounded-[6px]">
+                                        <div key={`${gig.id}-${month.month}-${month.year}`} className="min-w-[276px] bg-[#FFFFFF]  p-4">
+                                            <div className="mb-1 flex items-center justify-between text-[18px] font-[400] text-[#FF4B82] p-2 rounded-[6px]">
                                                 <span>{format(monthDate, "MMM, yyyy")}</span>
                                                 <Calendar className="h-4 w-4" />
                                             </div>
-                                            <div className=" bg-[#F8F8F8] pt-2">
-                                                <div className="grid grid-cols-7 gap-[6px] text-[11px] font-[400] text-[#FF4B82] rounded-[6px]  bg-[#F8F8F8]">
+                                            <div className="  pt-2 ">
+                                                <div className="grid grid-cols-7 gap-[6px] text-[11px] font-[400] text-[#FF4B82] rounded-[6px]">
                                                     {WEEKDAY_LABELS.map((label) => (
                                                         <span key={`${gig.id}-${month.month}-${label}`} className="text-center">
                                                             {label}
@@ -267,9 +316,9 @@ export default function ApplyGigs({ gig }: ApplyGigsProps) {
                                                                 const selectedStatus = selectedStatuses[dateKey]
                                                                 const highlightBgClass = isHighlighted
                                                                     ? [
-                                                                        "absolute inset-y-0",
+                                                                        "absolute inset-y-0 flex justify-center items-center mx-auto text-center w-auto",
                                                                         selectedStatus ? STATUS_COLOR_MAP[selectedStatus] : "bg-[#22A5A8]",
-                                                                        prevHighlighted ? "-left-1" : "left-0 rounded-l-full",
+                                                                        prevHighlighted ? "-left-0" : "left-0 rounded-l-full",
                                                                         nextHighlighted ? "-right-1" : "right-0 rounded-r-full",
                                                                     ].join(" ")
                                                                     : ""
@@ -295,7 +344,7 @@ export default function ApplyGigs({ gig }: ApplyGigsProps) {
                                                                         <span className={highlightBgClass} />
                                                                         <DropdownMenu>
                                                                             <DropdownMenuTrigger asChild>
-                                                                                <button type="button" className="relative z-10 text-sm font-[400] text-white">
+                                                                                <button type="button" className="relative z-10 text-[16.87px] font-[400] text-white">
                                                                                     {dayNumber}
                                                                                 </button>
                                                                             </DropdownMenuTrigger>
@@ -304,7 +353,7 @@ export default function ApplyGigs({ gig }: ApplyGigsProps) {
                                                                                     {STATUS_OPTIONS.map((option, index) => (
                                                                                         <div key={option.label}>
                                                                                             <DropdownMenuItem
-                                                                                                className={`${STATUS_COLOR_MAP[option.label]} text-white`}
+                                                                                                className={`${STATUS_COLOR_MAP[option.label]} text-white text-center`}
                                                                                                 onSelect={() => handleStatusChange(dateKey, option.label)}
                                                                                             >
                                                                                                 {option.label}
@@ -346,7 +395,7 @@ export default function ApplyGigs({ gig }: ApplyGigsProps) {
                         </section>
                     </section>
 
-                    <section className="mt-8 space-y-6 rounded-[32px] bg-white p-6 shadow-[0_20px_50px_rgba(36,35,37,0.08)]">
+                    <section className="mt-8 space-y-6 rounded-[32px] max-w-[360px] p-6 ">
                         <div className="space-y-2">
                             <Label className="text-[14px] uppercase tracking-wide text-slate-500">Select your credits</Label>
                             <DropdownMenu>
@@ -364,7 +413,7 @@ export default function ApplyGigs({ gig }: ApplyGigsProps) {
                                         <span className="text-[14px] text-slate-400">View all</span>
                                     </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent className="w-[360px] max-h-72 overflow-y-auto rounded-2xl border border-slate-100 bg-white p-0" align="start">
+                                <DropdownMenuContent className=" max-h-72 overflow-y-auto rounded-2xl border border-slate-100 bg-white p-0" align="start">
                                     <DropdownMenuGroup>
                                         {availableCredits.map((credit) => {
                                             return (
@@ -395,23 +444,64 @@ export default function ApplyGigs({ gig }: ApplyGigsProps) {
                                     {selectedCreditDetails.map((credit) => (
                                         <span
                                             key={credit.id}
-                                            className="rounded-full bg-slate-100 px-3 py-1 text-[14px] font-medium text-slate-600"
+                                            className="rounded-full bg-[#31A7AC] px-3 py-1 text-[14px] font-medium text-white flex items-center gap-2 shadow"
                                         >
                                             {credit.creditTitle}
+                                            <button type="button" className="ml-1 text-white hover:text-[#FF4B82]" onClick={() => handleRemoveCredit(credit.id)}>
+                                                &times;
+                                            </button>
                                         </span>
                                     ))}
                                 </div>
                             )}
                         </div>
-                        <div className="grid gap-4 max-w-[530px] md:items-center">
-                            <div className="space-y-2">
+                        <div className="grid gap-4 md:items-center">
+                            <div className="space-y-2 flex flex-col ">
                                 <Label htmlFor="profile-rate" className="text-[14px] uppercase tracking-wide text-slate-500">Select rate from profile</Label>
-                                <Input
-                                    id="profile-rate"
-                                    value={formValues.savedRate}
-                                    onChange={(event) => updateFormValue("savedRate", event.target.value)}
-                                    placeholder="Use saved rate"
-                                />
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            className="h-12 justify-between rounded-2xl border-slate-200 text-sm font-medium text-slate-700"
+                                        >
+                                            <span>
+                                                {formValues.savedRate
+                                                    ? `Rate selected: ADE ${formValues.savedRate}`
+                                                    : "Choose rate from profile credits"}
+                                            </span>
+                                            <span className="text-[14px] text-slate-400">View all</span>
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent className="w-[360px] max-h-72 overflow-y-auto rounded-2xl border border-slate-100 bg-white p-0" align="start">
+                                        <DropdownMenuGroup>
+                                            {availableRates.map((rate) => (
+                                                <DropdownMenuItem
+                                                    key={rate.id}
+                                                    className="flex items-start gap-3 px-4 py-3 cursor-pointer"
+                                                    onSelect={(event) => {
+                                                        event.preventDefault()
+                                                        handleSelectRateFromCredit(rate.value ?? "")
+                                                    }}
+                                                >
+                                                    <div>
+                                                        <p className="text-sm font-[600] text-[#444444]">{rate.label}</p>
+                                                        <p className="text-[12px] font-normal text-[#444444]">Rate: ADE {rate.value ?? "N/A"}</p>
+                                                    </div>
+                                                </DropdownMenuItem>
+                                            ))}
+                                        </DropdownMenuGroup>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                                {formValues.savedRate && (
+                                    <span className="inline-flex items-center gap-2  h-[30px] rounded-full bg-[#31A7AC] px-4 py-2 text-[15px] font-semibold text-white shadow">
+                                        Rate: ADE {formValues.savedRate}
+                                        <button type="button" className="ml-1 text-white hover:text-[#FF4B82]" onClick={handleRemoveRate}>
+                                            &times;
+                                        </button>
+                                    </span>
+                                )}
+
                             </div>
                             <div className="flex flex-row justify-center items-center gap-4">
                                 <span className="h-px w-full bg-[#646464] border " />
@@ -420,6 +510,14 @@ export default function ApplyGigs({ gig }: ApplyGigsProps) {
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="custom-rate" className="text-[14px] uppercase tracking-wide text-slate-500">Enter rate</Label>
+                                {formValues.customRate && (
+                                    <span className="inline-flex items-center gap-2 rounded-full bg-[#31A7AC] px-4 py-2 text-[15px] font-semibold text-white shadow">
+                                        Custom Rate: ADE {formValues.customRate}
+                                        <button type="button" className="ml-1 text-white hover:text-[#FF4B82]" onClick={() => updateFormValue("customRate", "")}>
+                                            &times;
+                                        </button>
+                                    </span>
+                                )}
                                 <Input
                                     id="custom-rate"
                                     value={formValues.customRate}
@@ -428,13 +526,31 @@ export default function ApplyGigs({ gig }: ApplyGigsProps) {
                                 />
                             </div>
                         </div>
-                        <div className="flex justify-end">
-                            <Button type="button" onClick={handleSubmit} className="inline-flex items-center gap-2 h-[68px] w-[274px] rounded-[10px] bg-[#FA6E80] px-6 py-4 text-[18px] font-[400] text-white">
-                                <Mail className="h-5 w-5" /> Submit Application
-                            </Button>
-                        </div>
+
                     </section>
+                    <div className="flex justify-end">
+                        <Button
+                            type="button"
+                            onClick={handleSubmit}
+                            className="inline-flex items-center gap-2 h-[68px] w-[274px] rounded-[10px] bg-[#FA6E80] px-6 py-4 text-[18px] font-[400] text-white"
+                            disabled={isSubmitting}
+                        >
+                            {isSubmitting ? (
+                                <>
+                                    <Loader2 className="animate-spin h-5 w-5" />
+                                    Submitting...
+                                </>
+                            ) : (
+                                <>
+                                    <Mail className="h-5 w-5" /> Submit Application
+                                </>
+                            )}
+                        </Button>
+                    </div>
                 </div>
+                {showSuccessDialog && (
+                    <SumbmitApplicationSuccess open={showSuccessDialog} setOpen={setShowSuccessDialog} />
+                )}
             </SheetContent>
         </Sheet>
     )
@@ -444,3 +560,41 @@ export default function ApplyGigs({ gig }: ApplyGigsProps) {
 
 
 
+function SumbmitApplicationSuccess({ open, setOpen }: { open: boolean, setOpen: (v: boolean) => void }) {
+    const router = useRouter()
+    const handelRedirect = () => {
+        router.push('/gigs')
+    }
+    return (
+        <AlertDialog open={open} onOpenChange={setOpen}>
+            <AlertDialogContent>
+                <div className="bg-white flex flex-row  items-center justify-center gap-1.5">
+                    <Image
+                        src="/assets/icons/su.png"
+                        alt="Success Illustration"
+                        width={60}
+                        height={60}
+                        className="mx-auto mt-6"
+                    />
+                    <div className=" flex flex-col justify-start items-start">
+                        <h2 className="mt-4 text-[18px] font-[400] text-gray-800">Your Project as Successful Published</h2>
+                        <p className="text-[12px] font-[400]">You can check, Edit, Short list in your <Link href="/gigs" className="text-[#31A7AC]">jon pages.</Link></p>
+                    </div>
+                </div>
+                <AlertDialogFooter>
+                    <AlertDialogAction
+                        onClick={() => {
+                            setOpen(false)
+                            handelRedirect()
+                        }
+                        }
+                        className="bg-transparent border-none text-black absolute top-0 right-1.5"
+                    >
+                        <X className="h-4 w-4" />
+                    </AlertDialogAction>
+
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+    )
+}

@@ -1,17 +1,13 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import Link from "next/link"
 import {
   Search,
   X,
   Bell,
-  User,
-  Settings,
-  LogOut,
   Briefcase,
   MessageCircleMore,
-  Save,
   Compass,
   Calendar,
   NewspaperIcon,
@@ -32,9 +28,6 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
 import Logo from "../logo"
-import { useAuth } from "@/contexts/AuthContext"
-import { useProfile } from "@/hooks/useProfile"
-
 const notifications = [
   {
     id: 1,
@@ -74,24 +67,24 @@ const notifications = [
 ]
 const components: { title: string; href: string; category: string }[] = [
   // Pre Production
-  { title: "screenwriter", href: "/explore/screenwriter", category: "Pre Production" },
-  { title: "casting", href: "/explore/casting", category: "Pre Production" },
-  { title: "location manager", href: "/explore/location manager", category: "Pre Production" },
-  { title: "director", href: "/explore/director", category: "Pre Production" },
-  { title: "camera operator", href: "/explore/camera-operator", category: "Pre Production" },
-  { title: "cinematographer", href: "/explore/cinematographer", category: "Pre Production" },
+  { title: "Casting", href: "/explore/casting", category: "Pre Production" },
+  { title: "Camera Operator", href: "/explore/camera-operator", category: "Pre Production" },
+  { title: "Cinematographer", href: "/explore/cinematographer", category: "Pre Production" },
+  { title: "Director", href: "/explore/director", category: "Pre Production" },
+  { title: "Location Manager", href: "/explore/location manager", category: "Pre Production" },
+  { title: "Screenwriter", href: "/explore/screenwriter", category: "Pre Production" },
 
   // Post Production
-  { title: "editor", href: "/explore/editor", category: "Post Production" },
-  { title: "sound technician", href: "/explore/sound-technician", category: "Post Production" },
-  { title: "animator", href: "/explore/animator", category: "Post Production" },
+  { title: "Animator", href: "/explore/animator", category: "Post Production" },
+  { title: "Editor", href: "/explore/editor", category: "Post Production" },
+  { title: "Sound Technician", href: "/explore/sound-technician", category: "Post Production" },
   { title: "VFX / SFX", href: "/explore/vfx-sfx", category: "Post Production" },
 
 
   // Craft Services
-  { title: "makeup artist", href: "/explore/makeup-artist", category: "Craft Services" },
-  { title: "hairstylist", href: "/explore/hairstylist", category: "Craft Services" },
-  { title: "set designer", href: "/explore/set-designer", category: "Craft Services" },
+  { title: "Hairstylist", href: "/explore/hairstylist", category: "Craft Services" },
+  { title: "Makeup Artist", href: "/explore/makeup-artist", category: "Craft Services" },
+  { title: "Set Designer", href: "/explore/set-designer", category: "Craft Services" },
 
 ]
 
@@ -108,62 +101,8 @@ export default function Header() {
   const [notificationOpen, setNotificationOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [chatOpen, setChatOpen] = useState(false)
-  
-  const { signOut } = useAuth()
-  const { profile } = useProfile()
-  const [avatarUrl, setAvatarUrl] = useState<string>("/image (2).png")
-  const [initials, setInitials] = useState<string>("JD")
-  const [fullName, setFullName] = useState<string>("John Doe")
 
   const unreadCount = notifications.filter((n) => !n.read).length
-
-  // Load cached profile data on mount
-  useEffect(() => {
-    const cachedPhoto = localStorage.getItem('profile_photo_url')
-    const cachedName = localStorage.getItem('profile_name')
-    
-    if (cachedPhoto) setAvatarUrl(cachedPhoto)
-    if (cachedName) {
-      setFullName(cachedName)
-      const nameParts = cachedName.split(' ')
-      if (nameParts.length >= 2) {
-        setInitials(`${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase())
-      } else if (nameParts.length === 1) {
-        setInitials(nameParts[0].substring(0, 2).toUpperCase())
-      }
-    }
-  }, [])
-
-  // Update state and cache when profile data is available
-  useEffect(() => {
-    if (profile) {
-      if (profile.profile_photo_url) {
-        setAvatarUrl(profile.profile_photo_url)
-        localStorage.setItem('profile_photo_url', profile.profile_photo_url)
-      }
-      
-      const first = profile.first_name || ""
-      const last = profile.surname || ""
-      const name = `${first} ${last}`.trim() || "User"
-      
-      setFullName(name)
-      localStorage.setItem('profile_name', name)
-      
-      if (first && last) {
-        setInitials(`${first[0]}${last[0]}`.toUpperCase())
-      } else if (first) {
-        setInitials(first.substring(0, 2).toUpperCase())
-      }
-    }
-  }, [profile])
-
-  const handleSignOut = async () => {
-    setUserMenuOpen(false)
-    // Clear profile cache on sign out
-    localStorage.removeItem('profile_photo_url')
-    localStorage.removeItem('profile_name')
-    await signOut()
-  }
 
   return (
     <>
@@ -231,7 +170,7 @@ export default function Header() {
                         )}
                       </ul>
                       <div className=" text-sm flex flex-row justify-center items-center mx-auto gap-3.5">
-                        <p>Discover on more field, jobs, events, etc,. </p> <Link href={"#"} className="text-[#31A7AC] font-semibold"> Discover</Link>
+                        <p>Discover on more field, jobs, events, etc,. </p> <Link href={"#"} className="text-[#31A7AC] font-[400]"> See More</Link>
                       </div>
                     </NavigationMenuContent>
                   </NavigationMenuItem>
@@ -270,43 +209,17 @@ export default function Header() {
                 className="relative"
                 onMouseLeave={() => setChatOpen(false)}
               >
-                <div
-                  onMouseEnter={() => setChatOpen(true)}
-                  onClick={() => setChatOpen((prev) => !prev)}
+                <Link href="/inbox"
+
                   className="relative cursor-pointer"
                 >
                   <MessageCircleMore className="h-9 w-9" />
-                  <Badge className="absolute -top-2 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-accent text-accent-foreground">
-                    3
-                  </Badge>
-                </div>
+                  <Badge className="absolute top-6 right-1 h-3 w-3 rounded-full p-0 flex items-center justify-center text-xs bg-[#FA596E] text-white">
 
-                {chatOpen && (
-                  <>
-                    <div
-                      className="fixed inset-0 z-40"
-                      onClick={() => setChatOpen(false)}
-                    />
-                    <div className="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto bg-background border border-border rounded-lg shadow-lg z-50">
-                      <div className="p-4">
-                        <div className="flex justify-between items-center mb-2">
-                          <h3 className="text-lg font-semibold">Messages</h3>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => setChatOpen(false)}
-                            aria-label="Close messages"
-                          >
-                            <X className="h-5 w-5" />
-                          </Button>
-                        </div>
-                        <Separator className="mb-2" />
-                        <p className="text-sm text-muted-foreground">No new messages</p>
-                        {/* Placeholder for chat items */}
-                      </div>
-                    </div>
-                  </>
-                )}
+                  </Badge>
+                </Link>
+
+
               </div>
 
               <div
@@ -321,7 +234,7 @@ export default function Header() {
                 >
                   <Bell className="h-9 w-9" />
                   {unreadCount > 0 && (
-                    <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-accent text-accent-foreground">
+                    <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-[#FA596E] text-white">
                       {unreadCount}
                     </Badge>
                   )}
@@ -378,8 +291,8 @@ export default function Header() {
                   className="cursor-pointer"
                 >
                   <Avatar className="h-[50px] w-[50px] rounded-full border-[#000000] border-[2px]">
-                    <AvatarImage src={avatarUrl} alt="User" />
-                    <AvatarFallback className="bg-primary text-primary-foreground">{initials}</AvatarFallback>
+                    <AvatarImage src="/image (2).png" alt="User" />
+                    <AvatarFallback className="bg-primary text-primary-foreground">JD</AvatarFallback>
                   </Avatar>
                 </div>
 
@@ -403,12 +316,12 @@ export default function Header() {
                       <div className="flex flex-col items-center  ">
                         <div className="relative -mt-3 ">
                           <Avatar className="h-20 w-20">
-                            <AvatarImage src={avatarUrl} alt="User" />
-                            <AvatarFallback className="bg-primary text-primary-foreground text-2xl">{initials}</AvatarFallback>
+                            <AvatarImage src="/image (2).png" alt="User" />
+                            <AvatarFallback className="bg-primary text-primary-foreground text-2xl">JD</AvatarFallback>
                           </Avatar>
                           <span className="absolute bottom-1 right-10 block h-[10px] w-[10px] border-[1px] rounded-full bg-[#34A353] ring-2 ring-background" />
                         </div>
-                        <p className="font-[500] text-lg text-center truncate w-full">{fullName}</p>
+                        <p className="font-[500] text-lg">John Doe</p>
                       </div>
                       <div className="-space-y-5">
                         <Button variant="ghost" className="w-full justify-start gap-3 h-12 text-base" asChild>
@@ -444,7 +357,9 @@ export default function Header() {
                         <Button
                           variant="ghost"
                           className="w-full justify-start gap-3 h-12 text-base"
-                          onClick={handleSignOut}
+                          onClick={() => {
+                            setUserMenuOpen(false)
+                          }}
                         >
                           <span className="font-[400]">
                             Sign Out
@@ -476,7 +391,7 @@ export default function Header() {
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="flex items-center justify-around px-6 py-3">
           <Link
-            href="/"
+            href="/explore"
             className="flex flex-col items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
             onClick={() => {
               setChatOpen(false)
@@ -486,17 +401,7 @@ export default function Header() {
           >
             <Compass className="h-6 w-6" />
           </Link>
-          <Link
-            href="/explore"
-            className="flex flex-col items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
-            onClick={() => {
-              setChatOpen(false)
-              setNotificationOpen(false)
-              setUserMenuOpen(false)
-            }}
-          >
-            <Search className="h-6 w-6" />
-          </Link>
+
           <Link
             href="/gigs"
             className="flex flex-col items-center gap-1 text-xs text-muted-foreground hover:text-foreground"

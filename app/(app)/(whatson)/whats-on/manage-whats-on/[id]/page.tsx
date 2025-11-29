@@ -1,9 +1,9 @@
+
 import Link from "next/link";
 import { notFound } from "next/navigation";
-
+import React from "react";
 import { EditWhatsOnForm } from "../../../components/EditWhatsOnForm";
 import { getWhatsOnEventById } from "@/data/whatsOnEvents";
-import * as React from 'react'
 import { Button } from "@/components/ui/button";
 import DataTable from "../../../components/data-table";
 type ManageWhatsOnEditPageProps = {
@@ -19,11 +19,14 @@ const rsvpEntries = Array.from({ length: 6 }).map((_, index) => ({
 }));
 
 export default async function ManageWhatsOnEditPage({ params }: ManageWhatsOnEditPageProps) {
+
     const { id } = await params;
     const event = getWhatsOnEventById(id);
+
     if (!event) {
         notFound();
     }
+
 
     return (
         <div className="space-y-8">

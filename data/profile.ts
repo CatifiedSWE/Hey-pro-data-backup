@@ -199,6 +199,17 @@ export const profileData = {
                 "Limited series chronicling polar navigation crews mapping melting ice lanes with lidar-equipped drones. Currently in post with hybrid animation overlays.",
         },
     ],
+    rate: [
+        { id: "rate-1", label: "$200 per day", value: "200" },
+        { id: "rate-2", label: "$300 per day", value: "300" },
+        { id: "rate-3", label: "$400 per day", value: "400" },
+        { id: "rate-4", label: "$500 per day", value: "500" },
+        { id: "rate-5", label: "$600 per day", value: "600" },
+        { id: "rate-6", label: "$700 per day", value: "700" },
+        { id: "rate-7", label: "$800 per day", value: "800" },
+        { id: "rate-8", label: "$900 per day", value: "900" },
+        { id: "rate-9", label: "$1000 per day", value: "1000" },
+    ],
     recomendPeoples: [
         {
             imgUrl: "/image (2).png",

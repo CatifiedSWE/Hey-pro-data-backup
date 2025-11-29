@@ -1,7 +1,9 @@
-
+"use client"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Download, MessageCircle } from "lucide-react";
+import { set } from "date-fns";
+import { DollarSign, Download, MessageCircle, MessageCircleMore } from "lucide-react";
 import Image from "next/image";
+import React from "react";
 export default function DataTable({ rsvpEntries }: {
     rsvpEntries: Array<{
         id: string;
@@ -11,7 +13,18 @@ export default function DataTable({ rsvpEntries }: {
         chatEnabled: boolean;
         paid: boolean;
     }>
+
 }) {
+    // Allow toggling paid status per user row
+    const [entries, setEntries] = React.useState(rsvpEntries);
+
+    const handleTogglePaid = (id: string) => {
+        setEntries((prev) =>
+            prev.map((entry) =>
+                entry.id === id ? { ...entry, paid: !entry.paid } : entry
+            )
+        );
+    }
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between px-5">
@@ -33,7 +46,7 @@ export default function DataTable({ rsvpEntries }: {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {rsvpEntries.map((entry) => (
+                        {entries.map((entry) => (
                             <TableRow key={entry.id}>
                                 <TableCell className="flex items-center gap-3">
                                     <Image src="/assets/whatson/host-avatar.svg" alt={entry.name} width={32} height={32} className="rounded-full" />
@@ -41,16 +54,31 @@ export default function DataTable({ rsvpEntries }: {
                                 </TableCell>
                                 <TableCell>{entry.ticketNo}</TableCell>
                                 <TableCell>{entry.reference}</TableCell>
-                                <TableCell>
-                                    <span className="inline-flex items-center gap-1 text-gray-600">
-                                        <MessageCircle className="h-4 w-4" />
-                                        {entry.chatEnabled ? "Open" : "-"}
+                                <TableCell className="text-center justify-center">
+                                    <span className="inline-flex justify-center mx-auto text-center items-center gap-1 text-gray-600">
+                                        <MessageCircleMore className="h-5 w-5" />
                                     </span>
                                 </TableCell>
-                                <TableCell>
-                                    <span className={`inline-flex items-center gap-1 ${entry.paid ? "text-green-600" : "text-[#FF4B82]"}`}>
-                                        <span className="text-xs font-semibold">{entry.paid ? "Paid" : "Unpaid"}</span>
-                                    </span>
+                                <TableCell className="cursor-pointer text-center justify-center" onClick={() => handleTogglePaid(entry.id)}>
+                                    {entry.paid ? (
+                                        <span className="inline-flex items-center gap-1">
+                                            <span className="text-xs flex justify-center items-center text-[12px] font-normal gap-x-2">
+                                                <span className="bg-[#FCAF45] rounded-full p-1">
+                                                    <DollarSign className="h-[11px] w-[11px] text-white" />
+                                                </span>
+                                                Paid
+                                            </span>
+                                        </span>
+                                    ) : (
+                                        <span className="inline-flex items-center gap-1">
+                                            <span className="text-xs flex justify-center items-center text-[12px] font-normal gap-x-2">
+                                                <span className="bg-grey rounded-full p-1">
+                                                    <DollarSign className="h-[11px] w-[11px] text-white" />
+                                                </span>
+                                                Unpaid
+                                            </span>
+                                        </span>
+                                    )}
                                 </TableCell>
                             </TableRow>
                         ))}

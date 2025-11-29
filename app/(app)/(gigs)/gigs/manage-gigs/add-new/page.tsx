@@ -51,13 +51,7 @@ const buildDateKey = (year: number, monthIndex: number, day: number) => new Date
 
 const defaultSelectedDates = [
     buildDateKey(2025, 8, 1),
-    buildDateKey(2025, 8, 2),
-    buildDateKey(2025, 8, 4),
-    buildDateKey(2025, 8, 13),
-    buildDateKey(2025, 8, 14),
-    buildDateKey(2025, 8, 15),
-    buildDateKey(2025, 8, 16),
-    buildDateKey(2025, 8, 17),
+
 ]
 
 const capitalizeLabel = (value: string) => {
@@ -140,7 +134,37 @@ export default function AddGigPage() {
     const [referencePreview, setReferencePreview] = useState<string | null>(null)
     const fileInputRef = useRef<HTMLInputElement | null>(null)
     const previewUrlRef = useRef<string | null>(null)
+    const [oscarAiSuggestion, setOscarAiSuggestion] = useState(false)
 
+    // Sample data for Oscar AI
+    const fillSampleGigData = () => {
+        setCrewCount(5)
+        setFormValues({
+            role: "cinematographer",
+            type: "contract",
+            department: "Camera",
+            location: "Dubai, UAE",
+            company: "Oscar Films",
+            description: "Looking for a skilled cinematographer for a 2-week commercial shoot. Experience with RED cameras preferred.",
+            referenceUrl: "https://oscarfilms.com/sample-reel",
+            qualifyingCriteria: "5+ years experience, portfolio required",
+            gigRate: "12000",
+            expiryDate: format(new Date(2025, 8, 10), "dd MMM, yyyy"),
+        })
+        setSelectedDates([
+            buildDateKey(2025, 8, 3),
+            buildDateKey(2025, 8, 4),
+            buildDateKey(2025, 8, 5),
+            buildDateKey(2025, 8, 6),
+            buildDateKey(2025, 8, 7),
+        ])
+        setIsTbc(true)
+        setRequestQuote(false)
+        setExpiryDate(new Date(2025, 8, 10))
+        setReferenceFile(null)
+        setReferencePreview(null)
+        if (fileInputRef.current) fileInputRef.current.value = ""
+    }
     const calendarDays = useMemo(() => {
         const start = startOfWeek(startOfMonth(currentMonth), { weekStartsOn: 1 })
         const end = endOfWeek(endOfMonth(currentMonth), { weekStartsOn: 1 })
@@ -278,10 +302,10 @@ export default function AddGigPage() {
             }
         }
     }, [])
-
     return (
         <div className="flex justify-center  px-4 py-8 bg-[#F8F8F8]">
-            <div className="grid w-full max-w-[1100px] gap-8 lg:grid-cols-[1.2fr_0.8fr]">
+            <div className={`grid w-full  max-w-[1100px] gap-8 lg:grid-cols-[1.2fr_0.8fr] ${oscarAiSuggestion ? 'grid' : 'hidden'}  `}>
+                {/** create gig form  */}
                 <form
                     onSubmit={handleSubmit}
                     className="w-full mb-10"
@@ -351,19 +375,19 @@ export default function AddGigPage() {
                             placeholder="Select GIG department"
                             value={formValues.department}
                             onChange={(event) => handleFieldChange("department", event.target.value)}
-                            className="h-12 rounded-2xl border-[#E4E7EC] bg-[#ffffff] text-[#515151]"
+                            className="h-[54px] rounded-2xl border-[#E4E7EC] bg-[#ffffff] text-[#515151]"
                         />
                         <Input
                             placeholder="Enter GIG location(s)"
                             value={formValues.location}
                             onChange={(event) => handleFieldChange("location", event.target.value)}
-                            className="h-12 rounded-2xl border-[#646464] bg-[#ffffff] text-[#515151]"
+                            className="h-[54px] rounded-2xl border-[#646464] bg-[#ffffff] text-[#515151]"
                         />
                         <Input
                             placeholder="Enter production company name (optional)"
                             value={formValues.company}
                             onChange={(event) => handleFieldChange("company", event.target.value)}
-                            className="h-12 rounded-2xl border-[#646464] bg-[#ffffff] text-[#515151]"
+                            className="h-[54px] rounded-2xl border-[#646464] bg-[#ffffff] text-[#515151]"
                         />
 
                         <div className="space-y-2">
@@ -401,7 +425,7 @@ export default function AddGigPage() {
                                         <span key={day}>{day}</span>
                                     ))}
                                 </div>
-                                <ScrollArea className="mx-auto sm:mx-0 max-h-[260px] w-full max-w-[425px] rounded-b-[10px] bg-[#ffffff]">
+                                <ScrollArea className="mx-auto sm:mx-0 max-h-[333px] w-full max-w-[425px] rounded-b-[10px] bg-[#ffffff]">
                                     <div className="grid grid-cols-7 gap-x-0 gap-y-2">
                                         {calendarDays.map((day, index) => {
                                             const dayNumber = day.getDate()
@@ -443,7 +467,7 @@ export default function AddGigPage() {
                                                     disabled={!isCurrentMonthDay}
                                                     onClick={() => toggleDate(day)}
                                                     className={cn(
-                                                        "flex h-12 w-full items-center justify-center text-[26px] font-[400] transition",
+                                                        "flex h-[54px] w-full items-center justify-center text-[26px] font-[400] transition",
                                                         shapeClass,
                                                         !isCurrentMonthDay && "text-[#D7E3E5]",
                                                         isCurrentMonthDay && !isSelected && "text-[#199490]",
@@ -476,7 +500,7 @@ export default function AddGigPage() {
                                     placeholder="Enter URL"
                                     value={formValues.referenceUrl}
                                     onChange={(event) => handleFieldChange("referenceUrl", event.target.value)}
-                                    className="h-12 rounded-2xl border-[#646464] bg-[#ffffff] text-[#515151]"
+                                    className="h-[54px] rounded-2xl border-[#646464] bg-[#ffffff] text-[#515151]"
                                 />
                                 <div className="space-y-3">
                                     <input
@@ -488,7 +512,7 @@ export default function AddGigPage() {
                                     <Button
                                         type="button"
                                         variant="outline"
-                                        className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border-[#E4E7EC] text-[#1D1D1F]"
+                                        className="flex h-[54px] w-full items-center justify-center gap-2 rounded-2xl border-[#E4E7EC] text-[#1D1D1F]"
                                         onClick={() => fileInputRef.current?.click()}
                                     >
                                         <UploadCloud className="h-4 w-4" />
@@ -541,7 +565,7 @@ export default function AddGigPage() {
                                         value={formValues.gigRate}
                                         onChange={(event) => handleFieldChange("gigRate", event.target.value)}
                                         disabled={requestQuote}
-                                        className="h-12 border-0 bg-transparent focus-visible:ring-0"
+                                        className="h-[54px] border-0 bg-transparent focus-visible:ring-0"
                                     />
                                 </div>
                                 <div className="flex items-center gap-2 ml-0 sm:ml-[18px]">
@@ -723,6 +747,255 @@ export default function AddGigPage() {
                                 <div className="h-2 w-32 rounded-full bg-[#F0F0F0]" />
                             </div>
                         )}
+                    </div>
+                </aside>
+            </div>
+            {/** create gig form with ai */}
+            <div className={`grid w-full  max-w-[1200px] gap-8 lg:grid-cols-[1.2fr_0.8fr] ${oscarAiSuggestion ? 'hidden' : 'grid'}  `}>
+                <form
+                    onSubmit={handleSubmit}
+                    className="w-full mb-10"
+                >
+                    <div className="flex items-start justify-between">
+                        <div className="">
+                            <div className="text-[20px] font-[400] text-[#1D1D1F] flex flex-row gap-1 justify-center items-center"><span><Image src="/assets/icons/zap.png" alt="Zap Icon" width={30} height={30} /></span><span> Create a Quick GIG</span></div>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={resetForm}
+                            className="text-2xl leading-none text-[#CECFD2] transition hover:text-[#7B7B7B]"
+                            aria-label="Close"
+                        >
+                            ×
+                        </button>
+                    </div>
+
+                    <section className="mt-8 space-y-6">
+
+
+
+
+
+
+                        <div className="space-y-2">
+                            <Textarea
+                                placeholder="I am looking for..."
+                                value={formValues.description}
+                                onChange={(event) => handleFieldChange("description", event.target.value)}
+                                className="min-h-[120px] rounded-2xl border-[#646464] bg-[#ffffff] text-[#515151]"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                                <Label className="text-sm font-medium text-[#1D1D1F]">Choose date(s)</Label>
+                            </div>
+                            <div className="rounded-[24px] p-4">
+
+                                <div className="mx-auto sm:mx-0 mb-5 flex w-full max-w-[425px] flex-row items-center justify-between gap-2 rounded-[10px] p-[10px] text-[#1D1D1F] bg-[#ffffff] min-h-[56px]">
+                                    <span className="text-[24px] font-[400] text-[#FA596E]">{format(currentMonth, "MMM, yyyy")}</span>
+                                    <div className="flex gap-2">
+                                        <Button type="button" variant="ghost" size="icon" className="h-10 rounded-full" onClick={() => setCurrentMonth((prev) => addMonths(prev, -1))}>
+                                            -
+                                        </Button>
+                                        <Button type="button" variant="ghost" size="icon" className="h-10 rounded-full" onClick={() => setCurrentMonth((prev) => addMonths(prev, 1))}>
+                                            +
+                                        </Button>
+                                    </div>
+                                    <CalendarIcon className="h-5 w-5 text-[#FF5470]" />
+                                </div>
+
+
+                                <div className="mx-auto sm:mx-0 grid w-full max-w-[425px] grid-cols-7 items-center gap-2 rounded-t-[10px] bg-[#ffffff] text-center text-[25px] font-[400] text-[#FF8FA5] min-h-[60px]">
+                                    {["M", "T", "W", "T", "F", "S", "S"].map((day) => (
+                                        <span key={day}>{day}</span>
+                                    ))}
+                                </div>
+                                <ScrollArea className="mx-auto sm:mx-0 max-h-[333px] w-full max-w-[425px] rounded-b-[10px] bg-[#ffffff]">
+                                    <div className="grid grid-cols-7 gap-x-0 gap-y-2">
+                                        {calendarDays.map((day, index) => {
+                                            const dayNumber = day.getDate()
+                                            const isCurrentMonthDay = isSameMonth(day, currentMonth)
+                                            const dayKey = getDateKey(day)
+                                            const isSelected = isCurrentMonthDay && selectedDates.includes(dayKey)
+                                            const columnIndex = index % 7
+                                            const atRowStart = columnIndex === 0
+                                            const atRowEnd = columnIndex === 6
+                                            const prevCell = columnIndex > 0 ? calendarDays[index - 1] : null
+                                            const nextCell = columnIndex < 6 ? calendarDays[index + 1] : null
+                                            const isPrevSelected = Boolean(
+                                                prevCell &&
+                                                isSameMonth(prevCell, currentMonth) &&
+                                                selectedDates.includes(getDateKey(prevCell))
+                                            )
+                                            const isNextSelected = Boolean(
+                                                nextCell &&
+                                                isSameMonth(nextCell, currentMonth) &&
+                                                selectedDates.includes(getDateKey(nextCell))
+                                            )
+
+                                            const shapeClass = cn(
+                                                "rounded-full",
+                                                isSelected && isPrevSelected && isNextSelected && "rounded-none",
+                                                isSelected && isPrevSelected && !isNextSelected &&
+                                                (atRowEnd ? "rounded-none" : "rounded-r-full rounded-l-none"),
+                                                isSelected && !isPrevSelected && isNextSelected && (atRowStart ? "rounded-none" : "rounded-l-full rounded-r-none"),
+                                                isSelected && !isPrevSelected && !isNextSelected && [
+                                                    atRowStart ? "rounded-l-none" : "rounded-l-full",
+                                                    atRowEnd ? "rounded-r-none" : "rounded-r-full",
+                                                ]
+                                            )
+
+                                            return (
+                                                <button
+                                                    key={day.toISOString()}
+                                                    type="button"
+                                                    disabled={!isCurrentMonthDay}
+                                                    onClick={() => toggleDate(day)}
+                                                    className={cn(
+                                                        "flex h-[54px] w-full items-center justify-center text-[26px] font-[400] transition",
+                                                        shapeClass,
+                                                        !isCurrentMonthDay && "text-[#D7E3E5]",
+                                                        isCurrentMonthDay && !isSelected && "text-[#199490]",
+                                                        isSelected && "bg-[#1FB3B0] text-white",
+                                                        !isCurrentMonthDay && "cursor-default"
+                                                    )}
+                                                >
+                                                    {dayNumber}
+                                                </button>
+                                            )
+                                        })}
+                                    </div>
+                                </ScrollArea>
+                            </div>
+
+                            <div className="ml-0 flex items-center gap-3 sm:ml-10">
+                                <Checkbox id="tbc" checked={isTbc} onCheckedChange={() => setIsTbc((prev) => !prev)} className="h-[27px] w-[27px]" />
+                                <Label htmlFor="tbc" className="text-[18px] font-[400] text-[#1D1D1F]">
+                                    TBC
+                                </Label>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div className="mt-8 flex flex-col gap-3 border-t-[2px] border-[#F0F0F0] pt-6 md:flex-row md:items-center md:justify-between">
+                        <button
+                            type="button"
+                            className="flex items-center gap-2 text-sm font-[400] "
+                        >
+                            Discard
+                        </button>
+                        <div className="flex flex-1 justify-end gap-3">
+                            <Button type="button" variant="outline" className="rounded-[10px] border-[#2AA9A7] text-[#2AA9A7] h-[47px] w-[102px]">
+                                Publish
+                            </Button>
+                            <Button type="submit" className="rounded-[10px] bg-[#2AA9A7] px-6 text-white h-[47px] w-[102px]">
+                                Save to draft
+                            </Button>
+                        </div>
+                    </div>
+                </form>
+
+                <aside className="rounded-[32px]">
+                    <h2 className="text-lg font-[400] text-[#1D1D1F]">Preview</h2>
+                    <div className="mt-4 rounded-[28px]">
+                        {hasActivePreview ? (
+                            <div className="bg-white shadow p-4 rounded-[17px] mb-4">
+                                <div className="flex items-center gap-3">
+                                    <Image
+                                        src={previewAvatarSrc}
+                                        alt="Project owner avatar"
+                                        width={24}
+                                        height={24}
+                                        className="rounded-full object-cover"
+                                        unoptimized={Boolean(referencePreview)}
+                                    />
+                                    <div>
+                                        <p className="text-sm font-[400] text-[#1D1D1F]">Michael Molar</p>
+                                        <p className="text-xs text-[#8F8F8F]">Project owner</p>
+                                    </div>
+                                </div>
+                                <p className="mt-3 text-sm text-[#6F6F6F]">
+                                    {formValues.description || "Description of the GIG will be here ..."}
+                                </p>
+                                <div className="my-4 h-px w-full  border-dotted border-[#E0E0E0]" />
+
+                                <div className="space-y-4 text-sm text-[#1D1D1F]">
+                                    <div className="flex gap-3">
+                                        <CalendarIcon className="mt-1 h-4 w-4 text-[#6F6F6F]" />
+                                        <div className="space-y-1">
+                                            <p className="text-xs font-[400] uppercase tracking-wide text-[#8F8F8F]">Selected dates</p>
+                                            {monthDateSummaries.length ? (
+                                                <div className="space-y-1">
+                                                    {monthDateSummaries.map((entry) => (
+                                                        <p key={`${entry.label}-${entry.ranges}`} className="text-sm text-[#4F4F4F]">
+                                                            <span className="font-[400] text-[#1D1D1F]">{entry.label}</span>
+                                                            <span className="px-2 text-[#A3A3A3]">|</span>
+                                                            {entry.ranges}
+                                                        </p>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <p className="text-[#6F6F6F]">No dates selected yet</p>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <p className="text-base font-[400]">
+                                        {requestQuote ? "Requesting quote" : `AED ${formValues.gigRate || "0"}`}
+                                    </p>
+                                    <p className="text-sm font-[400] text-[#1D1D1F]">
+                                        Qualifying criteria:
+                                        <span className="pl-1 font-normal text-[#6F6F6F]">
+                                            {formValues.qualifyingCriteria || "This is where the qualifying criteria value comes"}
+                                        </span>
+                                    </p>
+                                    {referenceLabel && (
+                                        <div className="flex items-center gap-2 text-sm text-[#1D1D1F]">
+                                            <FileText className="h-4 w-4" />
+                                            <span>Reference included{referenceFile ? ` (${referenceFile.name})` : ""}</span>
+                                        </div>
+                                    )}
+                                </div>
+                                <p className="mt-4 text-xs text-[#8F8F8F]">Posted on {format(new Date(), "d MMM, yyyy")}</p>
+                                <p className="mt-1 text-xs font-[400] text-[#FF5470]">
+                                    Apply before {formValues.expiryDate || formattedMonthLabel}
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="space-y-4 animate-pulse">
+                                <div className="flex items-center gap-3">
+                                    <div className="h-11 w-11 rounded-full bg-[#F0F0F0]" />
+                                    <div className="space-y-2">
+                                        <div className="h-3 w-24 rounded-full bg-[#F0F0F0]" />
+                                        <div className="h-2 w-16 rounded-full bg-[#F0F0F0]" />
+                                    </div>
+                                </div>
+                                <div className="h-4 w-56 rounded-full bg-[#F0F0F0]" />
+                                <div className="h-3 w-40 rounded-full bg-[#F0F0F0]" />
+                                <div className="h-16 rounded-2xl bg-[#F0F0F0]" />
+                                <div className="space-y-2">
+                                    <div className="h-3 w-48 rounded-full bg-[#F0F0F0]" />
+                                    <div className="h-3 w-36 rounded-full bg-[#F0F0F0]" />
+                                    <div className="h-3 w-28 rounded-full bg-[#F0F0F0]" />
+                                </div>
+                                <div className="h-2 w-32 rounded-full bg-[#F0F0F0]" />
+                            </div>
+                        )}
+                        <div className="h-[126px] border border-[#FA596E] rounded-[10px] flex flex-col px-3 font-[600] text-[15px] justify-center max-w-[441px]">
+                            <span>Your GIG could look even better with AI!</span>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                className="flex h-[54px]  items-center justify-center gap-2  border-[#FA596E] text-[14px] font-[600] text-[#FA596E] w-[158px] rounded-[10px] mt-4"
+                                onClick={() => {
+                                    setOscarAiSuggestion(true)
+                                    fillSampleGigData()
+                                }}
+                            >
+                                <Image src="/assets/icons/ai-gig.png" alt="Sparkles Icon" width={31} height={31} />
+                                Try Oscar AI
+                            </Button>
+                        </div>
                     </div>
                 </aside>
             </div>

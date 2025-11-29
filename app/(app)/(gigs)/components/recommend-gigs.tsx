@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 import {
     Dialog,
     DialogClose,
@@ -18,7 +19,7 @@ import { MapPin, Search } from "lucide-react"
 import Image from "next/image"
 import { Checkbox } from "@/components/ui/checkbox"
 
-export function SendRecommendationDialog() {
+export function SendRecommendationDialog({ className }: { className?: string }) {
     const [searchTerm, setSearchTerm] = useState("")
     const [selectedUsers, setSelectedUsers] = useState<RecommendationUser[]>([])
 
@@ -53,7 +54,7 @@ export function SendRecommendationDialog() {
         <Dialog>
             <div>
                 <DialogTrigger asChild>
-                    <Button type="button" className="inline-flex  items-center h-[34px] gap-2 rounded-[14px] bg-[#FA6E80] px-6 py-3 text-sm font-medium text-white shadow-md">
+                    <Button type="button" className={cn("inline-flex  items-center h-[44px] gap-2 rounded-[14px] px-6 py-3 text-sm font-medium text-white shadow-md", className)}>
                         Invite crew for this Gig
                     </Button>
                 </DialogTrigger>

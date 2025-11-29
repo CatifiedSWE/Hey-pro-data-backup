@@ -38,7 +38,7 @@ export default function ManageGigsPage() {
             ...prev,
             [rowKey]: {
                 ...prev[rowKey],
-                [action]: true,
+                [action]: !prev[rowKey]?.[action],
             },
         }));
     };

@@ -1,249 +1,177 @@
 "use client";
-import { ChevronDown, ChevronUp, Filter, Search, MapPin } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Button } from "@/components/ui/button";
-const toSlug = (s: string) =>
-    s
-        .toLowerCase()
-        .replace(/[\|\(\)]/g, "") // remove | and parentheses
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-+|-+$/g, "");
+    Tabs,
+    TabsContent,
+    TabsList,
+    TabsTrigger,
+} from "@/components/ui/tabs"
+import Image from "next/image";
 
-type FilterValue = { label: string; href: string };
-type FilterOption = { label: string; value: FilterValue[] };
-
-const makeValues = (arr: string[]): FilterValue[] =>
-    arr.map(label => ({ label, href: `/explore/${toSlug(label)}` }));
-
-const filterOptions: FilterOption[] = [
-    {
-        label: "Director",
-        value: makeValues([
-            "Director",
-            "Director | Commercial",
-            "Assistant Director",
-            "Assistant Director | TV",
-            "1st Assistant Director (1st AD)",
-            "2nd Assistant Director (2nd AD)",
-            "3rd Assistant Director (3rd AD)",
-            "Assistant Director"
-        ])
-    },
-    {
-        label: "Cinematographer",
-        value: makeValues([
-            "Cinematographer",
-            "Director of Photography (DP)",
-            "Camera Operator",
-            "1st AC (Focus Puller)",
-            "2nd AC (Clapper Loader)",
-            "Digital Imaging Technician (DIT)",
-            "Steadicam Operator",
-            "Gimbal Operator",
-            "Drone Operator",
-            "Camera Trainee"
-        ])
-    },
-    {
-        label: "Editor",
-        value: makeValues([
-            "Editor",
-            "Assistant Editor",
-            "Colorist",
-            "VFX Artist",
-            "Motion Graphics Designer",
-            "Sound Editor",
-            "Sound Designer",
-            "Foley Artist",
-            "Re-Recording Mixer"
-        ])
-    },
-    {
-        label: "Producer",
-        value: makeValues([
-            "Producer",
-            "Executive Producer",
-            "Line Producer",
-            "Production Manager",
-            "Production Coordinator",
-            "Production Assistant"
-        ])
-    },
-    {
-        label: "Writer",
-        value: makeValues(["Writer", "Screenwriter", "Script Supervisor", "Story Editor"])
-    },
-    {
-        label: "Production Designer",
-        value: makeValues([
-            "Production Designer",
-            "Art Director",
-            "Set Designer",
-            "Set Decorator",
-            "Props Master",
-            "Costume Designer",
-            "Makeup Artist",
-            "Hair Stylist"
-        ])
-    },
-    {
-        label: "Sound Designer",
-        value: makeValues([
-            "Sound Designer",
-            "Sound Mixer",
-            "Boom Operator",
-            "Location Sound Recordist"
-        ])
-    },
-    {
-        label: "Camera Operator",
-        value: makeValues([
-            "Camera Operator",
-            "Steadicam Operator",
-            "Gimbal Operator",
-            "Drone Operator"
-        ])
-    },
-    {
-        label: "Gaffer",
-        value: makeValues([
-            "Gaffer",
-            "Key Gaffer",
-            "Best Boy Gaffer",
-            "Gimbal Gaffer",
-            "Drone Gaffer",
-            "3rd AC (Grip)",
-            "2nd AC (Grip)",
-            "1st AC (Grip)"
-        ])
-    },
-    {
-        label: "Location Scout",
-        value: makeValues([
-            "Location Scout",
-            "Location Assistant",
-            "Location Assistant (LA)",
-            "Location Assistant (LA) | Commercial",
-            "Location Assistant (LA) | TV"
-        ])
-    },
-    {
-        label: "VFX Artist",
-        value: makeValues([
-            "VFX Artist",
-            "VFX Supervisor",
-            "VFX Assistant",
-            "VFX Assistant (VA)",
-            "VFX Assistant (VA) | Commercial",
-            "VFX Assistant (VA) | TV"
-        ])
-    },
-    {
-        label: "Colorist",
-        value: makeValues([
-            "Colorist",
-            "Color Timer",
-            "Colorist (Color Grading)",
-            "Colorist (Color Correction)"
-        ])
-    },
-    {
-        label: "Sound Engineer",
-        value: makeValues([
-            "Sound Engineer",
-            "Sound Technician",
-            "Sound Engineer | Commercial",
-            "Sound Engineer | TV"
-        ])
-    },
-    {
-        label: "Makeup Artist",
-        value: makeValues([
-            "Makeup Artist",
-            "Makeup Artist | Commercial",
-            "Makeup Artist | TV"
-        ])
-    },
-    {
-        label: "Other",
-        value: makeValues([
-            "Other",
-            "Other | Commercial",
-            "Other | TV",
-            "Other | Commercial | TV"
-        ])
-    }
-];
-
-const experienceOptions = [
-    { title: "Intern", description: "helped on set, shadowed role" },
-    { title: "Learning | Assisted", description: "assisted the role under supervision" },
-    { title: "Competent | Independent", description: "can handle role solo" },
-    { title: "Expert | Lead", description: "leads team, multiple projects" },
-];
-
-const initialFilterState = {
-    keyword: "",
-    availability: "available",
-    productionType: "",
-    location: "UAE, Dubai",
-    experience: "",
-    minRate: 900,
-    maxRate: 3000,
-};
+import { chatData, Groups } from '@/data/chatMessage';
 
 export default function AppLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-    const [isFilterOpen, setIsFilterOpen] = React.useState(false);
-    const [filterForm, setFilterForm] = React.useState<typeof initialFilterState>(initialFilterState);
 
-    const handleFilterChange = (field: keyof typeof initialFilterState, value: string | number) => {
-        setFilterForm((prev) => ({ ...prev, [field]: value }));
-    };
 
-    const handleFilterSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        console.log("Applied filters:", filterForm);
-    };
     return (
         <>
-            <div className="max-w-[960px]">
+            <div className="max-w-7xl mx-auto overflow-hidden flex flex-col gap-6 ">
                 <span className="hidden p-2 md:inline-block bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC] bg-clip-text text-transparent text-3xl font-semibold">Message</span>
 
-                <div className="flex w-full flex-col gap-6 lg:flex-row">
-                    <div className={`${isFilterOpen ? 'sm:flex hidden' : 'hidden lg:flex'} w-full flex-col gap-4 rounded-2xl bg-white/50 p-4 lg:max-w-[280px] lg:overflow-y-auto`}>
-
-                        {filterOptions.map(opt => (
-                            <details key={opt.label} className="group  rounded-[10px]  border-[1px] border-[#989898]/10 rotate-[5px]  bg-whit">
-                                <summary className="cursor-pointer select-none flex items-center justify-between px-3 py-2 text-sm font-[400px]">
-                                    <span>{opt.label}</span>
-                                    <span>
-                                        <span className="group-open:hidden"><ChevronUp className="h-4 w-4 text-[#FA6E80]" /></span>
-                                        <span className="hidden group-open:inline"><ChevronDown className="h-4 w-4 text-[#FA6E80]" /></span>
-                                    </span>
-                                </summary>
-                                <ul className="px-3 pb-2 space-y-1 bg-[#FAFAFA]">
-                                    {opt.value.map(v => (
-                                        <li key={v.label}>
-                                            <Link
-                                                href={v.href}
-                                                className="text-xs text-[#444444] hover:text-[#FA6E80] cursor-pointer block py-1"
-                                            >
-                                                {v.label}
-                                            </Link>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </details>
-                        ))
-                        }
+                <div className="flex flex-row justify-center items-center mx-auto">
+                    <div className={`flex flex-col gap-4 overflow-hidden bg-white/50 p-4`}>
+                        {/*  */}
+                        <div
+                            className="flex flex-col gap-6 border w-[265px] h-[546px] rounded-[25px] p-[1px] "
+                            style={{
+                                background: "linear-gradient(90deg, #FA6E80 0%, #6A89BE 41.52%, #85AAB7 62.27%, #31A7AC 103.79%)",
+                                borderRadius: "px",
+                                paddingTop: "0px",
+                                paddingBottom: "0px",
+                                WebkitMaskComposite: "xor",
+                                maskComposite: "exclude",
+                            }}
+                        >
+                            <div className="flex flex-col h-full w-full bg-white rounded-[24px]">
+                                <Tabs defaultValue="chat" className=" ">
+                                    <TabsList className="flex flex-row sm:w-[245px] gap-2 mx-auto mt-4">
+                                        <TabsTrigger
+                                            value="chat"
+                                            className="flex-1 flex justify-center items-center px-[25px] py-[10px] h-[47px] rounded-[20px] border-none cursor-pointer bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC]"
+                                        >
+                                            <span className="font-medium text-[18px] leading-[27px] text-white">
+                                                Chats
+                                            </span>
+                                        </TabsTrigger>
+                                        <TabsTrigger
+                                            value="groups"
+                                            className="flex-1 flex justify-center items-center px-[25px] py-[10px] h-[47px] rounded-[20px] cursor-pointer border-none relative bg-white"
+                                        >
+                                            <span className="font-medium text-[18px] leading-[27px] text-black z-10">
+                                                Groups
+                                            </span>
+                                            <span
+                                                className="absolute inset-0 rounded-[20px] pointer-events-none"
+                                                style={{
+                                                    padding: "1px",
+                                                    background: "linear-gradient(90deg, #FA6E80 0%, #6A89BE 41.52%, #85AAB7 62.27%, #31A7AC 103.79%)",
+                                                    WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+                                                    WebkitMaskComposite: "xor",
+                                                    maskComposite: "exclude",
+                                                }}
+                                            />
+                                        </TabsTrigger>
+                                    </TabsList>
+                                    <TabsContent value="chat">
+                                        <div className="flex flex-col items-start gap-[5px] w-full overflow-y-auto h-[460px] rounded-[20px] no-scrollbar">
+                                            {chatData.map((chat, index) => (
+                                                <React.Fragment key={index}>
+                                                    <Link href={`/inbox/c/${chat.messageId}`} className="flex flex-row items-center p-[10px] gap-[19px] w-full h-[61px] rounded-[10px] hover:bg-white transition-colors cursor-pointer">
+                                                        <Image
+                                                            src={chat.image}
+                                                            alt={chat.name}
+                                                            className="w-[40px] h-[41px] rounded-full object-cover bg-[#D9D9D9]"
+                                                            width={40}
+                                                            height={40}
+                                                        />
+                                                        <div className="flex flex-row items-center gap-[7px] flex-1">
+                                                            <div className="flex flex-col justify-center items-start gap-[1px] w-[145px]">
+                                                                <span className="w-full font-medium text-[16px] leading-[24px] text-black truncate">
+                                                                    {chat.name}
+                                                                </span>
+                                                                <span className="w-full font-medium text-[10px] leading-[15px] text-[#444444] truncate">
+                                                                    {chat.message}
+                                                                </span>
+                                                            </div>
+                                                            {chat.badge && (
+                                                                <div className="w-[20px] h-[20px] bg-[#31A7AC] border-2 border-white rounded-full flex items-center justify-center">
+                                                                    <span className="font-medium text-[10px] leading-[15px] text-white">
+                                                                        {chat.badge}
+                                                                    </span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </Link>
+                                                    {index < chatData.length - 1 && (
+                                                        <div className="w-full h-[1px] border-t border-[#CDCDCD]" />
+                                                    )}
+                                                </React.Fragment>
+                                            ))}
+                                        </div>
+                                    </TabsContent>
+                                    <TabsContent value="groups">
+                                        <div className="flex flex-col items-start gap-[5px] w-full h-[460px] rounded-[20px] overflow-y-auto no-scrollbar">
+                                            {Groups.map((chat, index) => (
+                                                <React.Fragment key={index}>
+                                                    <Link href={`/inbox/g/${chat.messageId}`} className="flex flex-row items-center p-[10px] gap-[19px] w-full h-[66px] rounded-[10px] hover:bg-white transition-colors cursor-pointer">
+                                                        {Array.isArray(chat.image) ? (
+                                                            <div className="flex -space-x-4">
+                                                                {chat.image.slice(0, 2).map((imgSrc, imgIdx) => (
+                                                                    <Image
+                                                                        key={imgIdx}
+                                                                        src={imgSrc}
+                                                                        alt={chat.name}
+                                                                        className="w-[35px] h-[35px] rounded-full object-cover bg-[#D9D9D9] border-2 border-white"
+                                                                        width={35}
+                                                                        height={35}
+                                                                    />
+                                                                ))}
+                                                            </div>
+                                                        ) : (
+                                                            <Image
+                                                                src={chat.image}
+                                                                alt={chat.name}
+                                                                className="w-[40px] h-[41px] rounded-full object-cover bg-[#D9D9D9]"
+                                                                width={40}
+                                                                height={40}
+                                                            />
+                                                        )}
+                                                        <div className="flex flex-row items-center gap-[7px] flex-1">
+                                                            <div className="flex flex-col justify-center items-start gap-[1px] w-[145px]">
+                                                                <span className="w-full font-medium text-[16px] leading-[24px] text-black truncate">
+                                                                    {chat.name}
+                                                                </span>
+                                                                <span className="w-full font-medium text-[10px] leading-[15px] text-[#444444] truncate">
+                                                                    {chat.message}
+                                                                </span>
+                                                            </div>
+                                                            {chat.badge && (
+                                                                <div className="w-[20px] h-[20px] bg-[#31A7AC] border-2 border-white rounded-full flex items-center justify-center">
+                                                                    <span className="font-medium text-[10px] leading-[15px] text-white">
+                                                                        {chat.badge}
+                                                                    </span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </Link>
+                                                    {index < Groups.length - 1 && (
+                                                        <div className="w-full h-[1px] border-t border-[#CDCDCD]" />
+                                                    )}
+                                                </React.Fragment>
+                                            ))}
+                                        </div>
+                                    </TabsContent>
+                                </Tabs>
+                            </div>
+                        </div>
                     </div>
-                    <div className="w-full flex-1 overflow-x-hidden  p-2 sm:p-4 lg:min-h-[600px]">{children}</div>
+                    <div
+                        className="h-[546px] w-[689px] p-[2px] overflow-hidden rounded-[25px]"
+                        style={{
+                            background: "linear-gradient(90deg, #FA6E80 0%, #6A89BE 41.52%, #85AAB7 62.27%, #31A7AC 103.79%)",
+                            paddingTop: "0px",
+                            paddingBottom: "0px",
+                            WebkitMaskComposite: "xor",
+                            maskComposite: "exclude",
+                            paddingLeft: "1px",
+                            paddingRight: "1px",
+                        }}
+                    >
+                        <div className="h-full w-full bg-[#F8F8F8] rounded-[25px]  overflow-hidden">
+                            {children}
+                        </div>
+                    </div>
                 </div>
 
             </div>

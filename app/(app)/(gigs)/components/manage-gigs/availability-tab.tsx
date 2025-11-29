@@ -74,7 +74,7 @@ export function AvailabilityTab({ selectedGigIds }: AvailabilityTabProps) {
                 const monthBadges = Array.from(new Set(timeline.map((entry) => entry.monthLabel)));
                 return (
                     <section key={gig.id} className="space-y-4 bg-transparent">
-                        <header className="space-y-3 overflow-x-auto ">
+                        <header className="space-y-3 overflow-x-auto no-scrollbar">
                             <p className="text-lg font-semibold text-gray-900">{gig.title}</p>
                             <div className="flex flex-row gap-2">
                             </div>
@@ -94,7 +94,7 @@ export function AvailabilityTab({ selectedGigIds }: AvailabilityTabProps) {
                                 Showing availability for every requested day; days without data default to N/A.
                             </p>
                         </header>
-                        <div className="overflow-x-auto">
+                        <div className="overflow-x-auto no-scrollbar">
                             <table className="min-w-full border-separate border-spacing-x-[2px] border-spacing-y-[10px] text-sm">
                                 <thead>
                                     <tr className="bg-gray-50 text-gray-600">
