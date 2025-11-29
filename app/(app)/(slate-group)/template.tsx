@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
@@ -144,7 +145,9 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                                         src={profile.backgroundImage} 
                                         alt="Cover" 
                                         fill
+                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 25vw"
                                         className="object-cover"
+                                        priority
                                     />
                                 </div>
                                 
@@ -156,6 +159,7 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                                                 src={profile.avatarImage} 
                                                 alt={profile.name} 
                                                 fill
+                                                sizes="72px"
                                                 className="object-cover"
                                             />
                                         </div>
@@ -175,6 +179,7 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                                                         src={avatar}
                                                         alt={`Ref ${index}`}
                                                         fill
+                                                        sizes="20px"
                                                         className="object-cover"
                                                     />
                                                 </div>
@@ -254,6 +259,7 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                                                 src={account.image}
                                                 alt={account.name}
                                                 fill
+                                                sizes="40px"
                                                 className="rounded-full object-cover"
                                             />
                                         </div>

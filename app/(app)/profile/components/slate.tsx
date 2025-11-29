@@ -19,7 +19,7 @@ export default function SlateView() {
     const slate: Slate[] = [
         {
             id: "1",
-            profileAvtar: "/Image (1).png",
+            profileAvtar: "/image (1).png",
             profileName: "Jone Dev",
             role: "Cinematographer",
             totlerole: "15 Roles",
@@ -30,7 +30,7 @@ export default function SlateView() {
         },
         {
             id: "2",
-            profileAvtar: "/Image (2).png",
+            profileAvtar: "/image (2).png",
             profileName: "Jone Dev",
             role: "Cinematographer",
             totlerole: "15 Roles",
@@ -41,7 +41,7 @@ export default function SlateView() {
         },
         {
             id: "3",
-            profileAvtar: "/Image (3).png",
+            profileAvtar: "/image (3).png",
             profileName: "Jone Dev",
             role: "Cinematographer",
             totlerole: "15 Roles",
@@ -103,13 +103,16 @@ function SlateCard({ profileAvtar,
         <div className=" w-[600px] rounded-3xl  bg-white p-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
                 <div className="flex items-center">
-                    <Image
+                    <div className="relative w-11 h-11 mr-4">
+                         <Image
                         src={profileAvtar}
                         alt={profileName}
-                        height={200}
-                        width={200}
-                        className="w-11 h-11 rounded-full mr-4 object-cover"
+                        fill
+                        sizes="44px"
+                        className="rounded-full object-cover"
                     />
+                    </div>
+                   
                     <div>
                         <h2 className="text-lg font-semibold">{profileName}</h2>
                         <p className="text-sm text-gray-600">{role} + {totlerole}</p>
@@ -120,13 +123,13 @@ function SlateCard({ profileAvtar,
                 </div>
             </div>
             {slateSrc && (
-                <div className="mb-5 overflow-hidden rounded-3xl">
+                <div className="mb-5 overflow-hidden rounded-3xl relative w-full h-[400px]">
                     <Image
                         src={slateSrc}
                         alt={profileName}
-                        width={800}
-                        height={600}
-                        className="h-auto w-full max-h-[560px] object-cover"
+                        fill
+                        sizes="(max-width: 768px) 100vw, 600px"
+                        className="object-cover"
                     />
                 </div>
             )}

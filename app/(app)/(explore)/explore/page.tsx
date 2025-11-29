@@ -36,7 +36,11 @@ async function getExploreData(searchParams: { [key: string]: string | string[] |
 
     // Apply keyword search
     if (keyword) {
-      query = query.or(`alias_first_name.ilike.%${keyword}%,alias_surname.ilike.%${keyword}%,first_name.ilike.%${keyword}%,surname.ilike.%${keyword}%,bio.ilike.%${keyword}%`);
+        // Sanitized keyword for search
+      const sanitizedKeyword = keyword.replace(/[^a-zA-Z0-9 ]/g, "");
+      if (sanitizedKeyword) {
+           query = query.or(`alias_first_name.ilike.%${sanitizedKeyword}%,alias_surname.ilike.%${sanitizedKeyword}%,first_name.ilike.%${sanitizedKeyword}%,surname.ilike.%${sanitizedKeyword}%,bio.ilike.%${sanitizedKeyword}%`);
+      }
     }
     
     // Apply location search if passed in keyword (simple heuristic) or specific param
@@ -45,7 +49,7 @@ async function getExploreData(searchParams: { [key: string]: string | string[] |
     const { data: profiles, error } = await query;
 
     if (error) {
-      console.error("Error fetching explore profiles:", error);
+      console.error("Error fetching explore profiles:", JSON.stringify(error, null, 2));
       return [];
     }
 
@@ -56,39 +60,44 @@ async function getExploreData(searchParams: { [key: string]: string | string[] |
     // Enrich profiles with roles
     const enrichedProfiles = await Promise.all(
       profiles.map(async (profile) => {
-        const { data: roles } = await supabase
-          .from('user_roles')
-          .select('role_name')
-          .eq('user_id', profile.user_id)
-          .order('sort_order', { ascending: true });
-          
-        // Filter by role if specified
-        if (role || category) {
-             const roleNames = roles?.map(r => r.role_name.toLowerCase()) || [];
-             const searchRole = (role || category).toLowerCase();
-             if (!roleNames.some(r => r.includes(searchRole))) {
-                 return null;
-             }
+        try {
+            const { data: roles } = await supabase
+            .from('user_roles')
+            .select('role_name')
+            .eq('user_id', profile.user_id)
+            .order('sort_order', { ascending: true });
+            
+            // Filter by role if specified
+            if (role || category) {
+                const roleNames = roles?.map(r => r.role_name.toLowerCase()) || [];
+                const searchRole = (role || category).toLowerCase();
+                if (!roleNames.some(r => r.includes(searchRole))) {
+                    return null;
+                }
+            }
+
+            // Build display name with priority: alias_first_name + alias_surname (1st), first_name + surname (2nd)
+            const aliasName = `${profile.alias_first_name || ''} ${profile.alias_surname || ''}`.trim();
+            const realName = `${profile.first_name || ''} ${profile.surname || ''}`.trim();
+            const displayName = aliasName || realName || 'Anonymous';
+            
+            const location = profile.city && profile.country 
+            ? `${profile.city}, ${profile.country}` 
+            : profile.country || 'Not specified';
+
+            return {
+            id: profile.id,
+            name: displayName,
+            banner: profile.banner_photo_url || '',
+            image: profile.profile_photo_url || '',
+            bio: profile.bio || '',
+            location: location,
+            skills: roles?.map(r => r.role_name) || []
+            };
+        } catch (innerError) {
+            console.error(`Error processing profile ${profile.id}:`, innerError);
+            return null;
         }
-
-        // Build display name with priority: alias_first_name + alias_surname (1st), first_name + surname (2nd)
-        const aliasName = `${profile.alias_first_name || ''} ${profile.alias_surname || ''}`.trim();
-        const realName = `${profile.first_name || ''} ${profile.surname || ''}`.trim();
-        const displayName = aliasName || realName || 'Anonymous';
-        
-        const location = profile.city && profile.country 
-          ? `${profile.city}, ${profile.country}` 
-          : profile.country || 'Not specified';
-
-        return {
-          id: profile.id,
-          name: displayName,
-          banner: profile.banner_photo_url || '',
-          image: profile.profile_photo_url || '',
-          bio: profile.bio || '',
-          location: location,
-          skills: roles?.map(r => r.role_name) || []
-        };
       })
     );
     
