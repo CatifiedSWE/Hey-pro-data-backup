@@ -19,7 +19,7 @@ import { CalendarDialog } from "./calendar"
 interface ShortProfileProps {
   profile: ProfileData | null;
   links: LinkData[];
-  onPhotoUpload: (file: File, type: 'profile' | 'banner') => Promise<void>;
+  onPhotoUpload: (file: File, type: 'profile' | 'banner') => Promise<{ success: boolean; message?: string; url?: string }>;
 }
 
 export default function ShortProfile({ profile, links, onPhotoUpload }: ShortProfileProps) {
@@ -72,8 +72,12 @@ export default function ShortProfile({ profile, links, onPhotoUpload }: ShortPro
 
         setUploadingBanner(true);
         try {
-            await onPhotoUpload(file, 'banner');
-            toast.success('Banner updated successfully!');
+            const result = await onPhotoUpload(file, 'banner');
+            if (result.success) {
+                toast.success('Banner updated successfully!');
+            } else {
+                toast.error(result.message || 'Failed to upload banner');
+            }
         } catch (error) {
             toast.error('Failed to upload banner');
         } finally {
@@ -102,8 +106,12 @@ export default function ShortProfile({ profile, links, onPhotoUpload }: ShortPro
 
         setUploadingProfile(true);
         try {
-            await onPhotoUpload(file, 'profile');
-            toast.success('Profile photo updated successfully!');
+            const result = await onPhotoUpload(file, 'profile');
+            if (result.success) {
+                toast.success('Profile photo updated successfully!');
+            } else {
+                toast.error(result.message || 'Failed to upload profile photo');
+            }
         } catch (error) {
             toast.error('Failed to upload profile photo');
         } finally {

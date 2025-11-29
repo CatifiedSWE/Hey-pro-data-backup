@@ -47,7 +47,7 @@ export default function AboutSectionComponent({ icon, title, about: initialAbout
         try {
             // Save to API
             const response = await apiCalling({
-                method: 'post',
+                method: 'patch',
                 route: '/profile',
                 data: { bio: about }
             });

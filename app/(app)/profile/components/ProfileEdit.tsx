@@ -29,7 +29,7 @@ export default function ProfileEditor({ profile, trigger }: EditProfileInfoProps
         setSaving(true);
         try {
             const response = await apiCalling({
-                method: 'post',
+                method: 'patch',
                 route: '/profile',
                 data: {
                     first_name: firstName,
