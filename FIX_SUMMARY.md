@@ -83,3 +83,27 @@ All queries now:
 - ✅ Implements proper name priority fallback as specified
 - ✅ Maintains backward compatibility with existing display name logic
 - ✅ Improves search functionality to cover all name fields
+
+## Project Configuration
+- ✅ Removed `yarn.lock` - project now uses **npm** as package manager
+- ✅ `package-lock.json` is the active lockfile
+- ✅ All npm commands work: `npm install`, `npm run dev`, `npm run build`, `npm start`
+
+## Running the Project
+This is a Next.js application. Use these npm commands:
+```bash
+# Install dependencies
+npm install
+
+# Development mode (with hot reload)
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm start
+
+# Run linter
+npm run lint
+```
