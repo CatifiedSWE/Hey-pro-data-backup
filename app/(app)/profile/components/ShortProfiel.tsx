@@ -20,9 +20,10 @@ interface ShortProfileProps {
   links: LinkData[];
   roles?: RoleData[];
   onPhotoUpload: (file: File, type: 'profile' | 'banner') => Promise<{ success: boolean; message?: string; url?: string }>;
+  onLinksUpdate?: () => void;
 }
 
-export default function ShortProfile({ profile, links, roles = [], onPhotoUpload }: ShortProfileProps) {
+export default function ShortProfile({ profile, links, roles = [], onPhotoUpload, onLinksUpdate }: ShortProfileProps) {
     const [coverImageHovered, setCoverImageHovered] = useState(false)
     const [uploadingBanner, setUploadingBanner] = useState(false)
     const [uploadingProfile, setUploadingProfile] = useState(false)
