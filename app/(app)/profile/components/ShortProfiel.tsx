@@ -31,6 +31,9 @@ export default function ShortProfile({ profile, links, roles = [], onPhotoUpload
     const filterScrollRef = useRef<HTMLDivElement>(null)
     const bannerInputRef = useRef<HTMLInputElement>(null)
     const profileInputRef = useRef<HTMLInputElement>(null)
+    
+    // Get user from AuthContext for Google profile picture fallback
+    const { user } = useAuth();
 
     // Get display name - use alias if available, otherwise use regular name
     const displayName = profile?.alias_first_name && profile?.alias_surname
