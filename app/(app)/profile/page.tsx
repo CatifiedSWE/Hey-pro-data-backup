@@ -85,7 +85,7 @@ export default function Profile() {
   const [isReorderDialogOpen, setIsReorderDialogOpen] = useState(false)
   
   // Use the profile hook for real data
-  const { profile, links, recommendations, roles, loading, error, uploadPhoto, refetch, addRole, deleteRole } = useProfile();
+  const { profile, links, recommendations, roles, loading, error, uploadPhoto, refetch, fetchLinks, fetchRecommendations, addRole, deleteRole } = useProfile();
 
   // Drag and drop sensors - MUST be called before any conditional returns
   const sensors = useSensors(
