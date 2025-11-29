@@ -1,16 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase, setStoragePreference } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 
 /**
- * Login page - As per AUTH_FLOW_TYPESCRIPT_GUIDE.md
- * Handles email/password and OAuth authentication
+ * Login Form Component containing the logic using useSearchParams
  */
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [formData, setFormData] = useState({
@@ -259,5 +258,20 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+/**
+ * Main Page Component
+ */
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="animate-pulse text-gray-500">Loading login...</div>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }
