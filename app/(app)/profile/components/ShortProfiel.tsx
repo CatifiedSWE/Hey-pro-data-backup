@@ -221,7 +221,7 @@ export default function ShortProfile({ profile, links, roles = [], onPhotoUpload
                 </div>
             </div>
 
-            <div className="absolute right-4 top-[98px]  sm:top-[200px] flex items-center gap-3">
+            <div className="absolute right-4 top-[98px] sm:top-[160px] flex items-center gap-3">
                 <ProfileEditor
                     profile={profile}
                     trigger={
