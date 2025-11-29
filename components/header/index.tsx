@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import {
   Search,
@@ -32,6 +32,9 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
 import Logo from "../logo"
+import { useAuth } from "@/contexts/AuthContext"
+import { useProfile } from "@/hooks/useProfile"
+
 const notifications = [
   {
     id: 1,
@@ -105,8 +108,62 @@ export default function Header() {
   const [notificationOpen, setNotificationOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [chatOpen, setChatOpen] = useState(false)
+  
+  const { signOut } = useAuth()
+  const { profile } = useProfile()
+  const [avatarUrl, setAvatarUrl] = useState<string>("/image (2).png")
+  const [initials, setInitials] = useState<string>("JD")
+  const [fullName, setFullName] = useState<string>("John Doe")
 
   const unreadCount = notifications.filter((n) => !n.read).length
+
+  // Load cached profile data on mount
+  useEffect(() => {
+    const cachedPhoto = localStorage.getItem('profile_photo_url')
+    const cachedName = localStorage.getItem('profile_name')
+    
+    if (cachedPhoto) setAvatarUrl(cachedPhoto)
+    if (cachedName) {
+      setFullName(cachedName)
+      const nameParts = cachedName.split(' ')
+      if (nameParts.length >= 2) {
+        setInitials(`${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase())
+      } else if (nameParts.length === 1) {
+        setInitials(nameParts[0].substring(0, 2).toUpperCase())
+      }
+    }
+  }, [])
+
+  // Update state and cache when profile data is available
+  useEffect(() => {
+    if (profile) {
+      if (profile.profile_photo_url) {
+        setAvatarUrl(profile.profile_photo_url)
+        localStorage.setItem('profile_photo_url', profile.profile_photo_url)
+      }
+      
+      const first = profile.first_name || ""
+      const last = profile.surname || ""
+      const name = `${first} ${last}`.trim() || "User"
+      
+      setFullName(name)
+      localStorage.setItem('profile_name', name)
+      
+      if (first && last) {
+        setInitials(`${first[0]}${last[0]}`.toUpperCase())
+      } else if (first) {
+        setInitials(first.substring(0, 2).toUpperCase())
+      }
+    }
+  }, [profile])
+
+  const handleSignOut = async () => {
+    setUserMenuOpen(false)
+    // Clear profile cache on sign out
+    localStorage.removeItem('profile_photo_url')
+    localStorage.removeItem('profile_name')
+    await signOut()
+  }
 
   return (
     <>
@@ -321,8 +378,8 @@ export default function Header() {
                   className="cursor-pointer"
                 >
                   <Avatar className="h-[50px] w-[50px] rounded-full border-[#000000] border-[2px]">
-                    <AvatarImage src="/image (2).png" alt="User" />
-                    <AvatarFallback className="bg-primary text-primary-foreground">JD</AvatarFallback>
+                    <AvatarImage src={avatarUrl} alt="User" />
+                    <AvatarFallback className="bg-primary text-primary-foreground">{initials}</AvatarFallback>
                   </Avatar>
                 </div>
 
@@ -346,12 +403,12 @@ export default function Header() {
                       <div className="flex flex-col items-center  ">
                         <div className="relative -mt-3 ">
                           <Avatar className="h-20 w-20">
-                            <AvatarImage src="/image (2).png" alt="User" />
-                            <AvatarFallback className="bg-primary text-primary-foreground text-2xl">JD</AvatarFallback>
+                            <AvatarImage src={avatarUrl} alt="User" />
+                            <AvatarFallback className="bg-primary text-primary-foreground text-2xl">{initials}</AvatarFallback>
                           </Avatar>
                           <span className="absolute bottom-1 right-10 block h-[10px] w-[10px] border-[1px] rounded-full bg-[#34A353] ring-2 ring-background" />
                         </div>
-                        <p className="font-[500] text-lg">John Doe</p>
+                        <p className="font-[500] text-lg text-center truncate w-full">{fullName}</p>
                       </div>
                       <div className="-space-y-5">
                         <Button variant="ghost" className="w-full justify-start gap-3 h-12 text-base" asChild>
@@ -387,9 +444,7 @@ export default function Header() {
                         <Button
                           variant="ghost"
                           className="w-full justify-start gap-3 h-12 text-base"
-                          onClick={() => {
-                            setUserMenuOpen(false)
-                          }}
+                          onClick={handleSignOut}
                         >
                           <span className="font-[400]">
                             Sign Out
