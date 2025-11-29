@@ -13,117 +13,125 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { profileData } from "@/data/profile"
-import { Plus } from "lucide-react"
+import { Plus, X } from "lucide-react"
+import { useProfile } from "@/hooks/useProfile"
+import { toast } from "sonner"
 
 export function RoleDialog() {
-    const [roles, setRoles] = useState<string[]>(profileData.roles ?? [])
-    const [draftRoles, setDraftRoles] = useState<string[]>(roles)
+    const { roles, addRole, deleteRole } = useProfile()
     const [newRole, setNewRole] = useState("")
     const [open, setOpen] = useState(false)
+    const [isSubmitting, setIsSubmitting] = useState(false)
 
     const handleOpenChange = (nextOpen: boolean) => {
         setOpen(nextOpen)
         if (nextOpen) {
-            setDraftRoles(roles)
             setNewRole("")
         }
     }
 
-    const handleAddRole = () => {
+    const handleAddRole = async () => {
         const value = newRole.trim()
         if (!value) {
             return
         }
-        if (draftRoles.includes(value)) {
+        
+        // Check if role already exists (case insensitive)
+        if (roles.some(r => r.role_name.toLowerCase() === value.toLowerCase())) {
+            toast.error("Role already exists")
             setNewRole("")
             return
         }
-        setDraftRoles((prev) => [...prev, value])
-        setNewRole("")
+
+        setIsSubmitting(true)
+        const result = await addRole(value, roles.length)
+        setIsSubmitting(false)
+
+        if (result.success) {
+            toast.success("Role added successfully")
+            setNewRole("")
+        } else {
+            toast.error(result.message)
+        }
     }
 
-    const handleRemoveRole = (role: string) => {
-        setDraftRoles((prev) => prev.filter((entry) => entry !== role))
-    }
-
-    const handleSaveRoles = () => {
-        setRoles(draftRoles)
-        profileData.roles = draftRoles
-        console.log("Updated roles", draftRoles)
-        setOpen(false)
+    const handleRemoveRole = async (id: string) => {
+        const result = await deleteRole(id)
+        if (result.success) {
+            toast.success("Role removed successfully")
+        } else {
+            toast.error(result.message)
+        }
     }
 
     return (
-        <>
-            <Dialog open={open} onOpenChange={handleOpenChange}>
-                <DialogTrigger asChild>
-                    <div
-
-                        className="flex flex-row gap-5 h-[44px] w-auto text-base font-[400] rounded-[15px]  bg-transparent border px-9 justify-start items-center cursor-pointer hover:bg-muted/50 border-[#444444] "
-                    >
-                        Role
-                    </div>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[420px] rounded-[24px]">
-                    <DialogHeader>
-                        <DialogTitle className="flex items-start mt-10">Roles</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4 -mt-15">
-                        <p className="text-sm font[400] text-slate-500">Let people know what all language you speak.</p>
-                        <div className="flex justify-center items-center gap-2 w-full border border-[#31A7AC] h-[41px] rounded-[15px]">
-                            <Input
-                                value={newRole}
-                                onChange={(event) => setNewRole(event.target.value)}
-                                placeholder="e.g. Cinematographer"
-                                onKeyDown={(event) => {
-                                    if (event.key === "Enter") {
-                                        event.preventDefault()
-                                        handleAddRole()
-                                    }
-                                }}
-                                className=" border-none focus:ring-0"
-                            />
-                            <Button type="button" className="bg-transparent" onClick={handleAddRole}>
-                                <Plus className="h-7 w-7 text-[#31A7AC]" />
-                            </Button>
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                            {draftRoles.length === 0 && (
-                                <p className="text-xs text-slate-400">No roles yet.</p>
-                            )}
-                            {draftRoles.map((role) => (
-                                <span
-                                    key={role}
-                                    className="inline-flex items-center gap-2 rounded-[15px] border border-[#31A7AC] h-[41px] px-3 py-1 text-sm text-slate-700"
-                                >
-                                    {role}
-                                    <button
-                                        type="button"
-                                        className="text-xs text-slate-400 hover:text-slate-600"
-                                        onClick={() => handleRemoveRole(role)}
-                                        aria-label={`Remove ${role}`}
-                                    >
-                                        ✕
-                                    </button>
-                                </span>
-                            ))}
-                        </div>
-                    </div>
-                    <DialogFooter className=" flex flex-row justify-start items-start">
-                        <DialogClose asChild>
-                            <Button type="button" className="h-[44px] w-[128px] rounded-[15px] border-[#31A7AC]" variant="outline">
-                                <span className="text-[#31A7AC]">Cancel</span>
-                            </Button>
-                        </DialogClose>
-                        <Button type="button" className="h-[44px] rounded[15px] bg-[#31A7AC]" onClick={handleSaveRoles}>
-                            Save roles
+        <Dialog open={open} onOpenChange={handleOpenChange}>
+            <DialogTrigger asChild>
+                <div
+                    className="flex flex-row gap-5 h-[44px] w-auto text-base font-[400] rounded-[15px] bg-transparent border px-9 justify-start items-center cursor-pointer hover:bg-muted/50 border-[#444444]"
+                >
+                    Role
+                </div>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[420px] rounded-[24px]">
+                <DialogHeader>
+                    <DialogTitle className="flex items-start mt-10">Roles</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 -mt-15">
+                    <p className="text-sm font[400] text-slate-500">Add your professional roles (e.g. Director, Photographer).</p>
+                    <div className="flex justify-center items-center gap-2 w-full border border-[#31A7AC] h-[41px] rounded-[15px]">
+                        <Input
+                            value={newRole}
+                            onChange={(event) => setNewRole(event.target.value)}
+                            placeholder="e.g. Cinematographer"
+                            onKeyDown={(event) => {
+                                if (event.key === "Enter") {
+                                    event.preventDefault()
+                                    handleAddRole()
+                                }
+                            }}
+                            className="border-none focus:ring-0 focus-visible:ring-0"
+                            disabled={isSubmitting}
+                        />
+                        <Button 
+                            type="button" 
+                            className="bg-transparent hover:bg-transparent" 
+                            onClick={handleAddRole}
+                            disabled={isSubmitting}
+                        >
+                            <Plus className="h-7 w-7 text-[#31A7AC]" />
                         </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-        </>
-
-
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                        {roles.length === 0 && (
+                            <p className="text-xs text-slate-400">No roles yet.</p>
+                        )}
+                        {roles.map((role) => (
+                            <span
+                                key={role.id}
+                                className="inline-flex items-center gap-2 rounded-[15px] bg-[#FA6E80] px-3 py-1 text-sm text-white"
+                            >
+                                {role.role_name}
+                                <button
+                                    type="button"
+                                    className="text-white/80 hover:text-white"
+                                    onClick={() => handleRemoveRole(role.id)}
+                                    aria-label={`Remove ${role.role_name}`}
+                                >
+                                    <X className="h-3 w-3" />
+                                </button>
+                            </span>
+                        ))}
+                    </div>
+                </div>
+                <DialogFooter className="flex flex-row justify-start items-start">
+                    <DialogClose asChild>
+                        <Button type="button" className="h-[44px] w-[128px] rounded-[15px] border-[#31A7AC] text-[#31A7AC] hover:text-[#31A7AC]" variant="outline">
+                            Close
+                        </Button>
+                    </DialogClose>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     )
 }
