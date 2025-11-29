@@ -71,7 +71,11 @@ async function getExploreData(searchParams: { [key: string]: string | string[] |
              }
         }
 
-        const displayName = `${profile.alias_first_name || ''} ${profile.alias_surname || ''}`.trim() || profile.name || 'Anonymous';
+        // Build display name with priority: alias_first_name + alias_surname (1st), first_name + surname (2nd)
+        const aliasName = `${profile.alias_first_name || ''} ${profile.alias_surname || ''}`.trim();
+        const realName = `${profile.first_name || ''} ${profile.surname || ''}`.trim();
+        const displayName = aliasName || realName || 'Anonymous';
+        
         const location = profile.city && profile.country 
           ? `${profile.city}, ${profile.country}` 
           : profile.country || 'Not specified';
