@@ -221,20 +221,7 @@ export default function ShortProfile({ profile, links, roles = [], onPhotoUpload
                 </div>
             </div>
 
-            <div className="absolute right-4 top-[98px] sm:top-[160px] flex items-center gap-3">
-                <ProfileEditor
-                    profile={profile}
-                    trigger={
-                        <Button
-                            className="h-[28px] w-[28px] mt-2 rounded-full bg-[#31A7AC] text-white shadow-[0_4px_16px_rgba(49,167,172,0.35)] hover:bg-[#27939f]"
-                            aria-label="Edit profile"
-                        >
-                            <Edit2 className="h-5 w-5" />
-                        </Button>
-                    }
-                />
-            </div>
-            <div className="absolute inset-x-0 top-[160px] max-w-[367.8px] left-[200px] hidden justify-center font-[400] text-[11px] sm:flex ">
+            <div className="absolute inset-x-0 top-[160px] max-w-[400px] left-[200px] hidden justify-center font-[400] text-[11px] sm:flex ">
                 <div className="flex items-center gap-2  px-4 py-2 text-[#393939] ">
                     <MapPin className="h-3.5 w-3.5 text-[#393939]" />
                     <span className="whitespace-nowrap">{locationDescriptor}</span>
@@ -250,6 +237,17 @@ export default function ShortProfile({ profile, links, roles = [], onPhotoUpload
                             <CalendarIcon className="h-4 w-4" />
                             View Calendar
                         </>
+                    }
+                />
+                <ProfileEditor
+                    profile={profile}
+                    trigger={
+                        <Button
+                            className="h-[28px] w-[28px] ml-2 rounded-full bg-[#31A7AC] text-white shadow-[0_4px_16px_rgba(49,167,172,0.35)] hover:bg-[#27939f]"
+                            aria-label="Edit profile"
+                        >
+                            <Edit2 className="h-5 w-5" />
+                        </Button>
                     }
                 />
             </div>
