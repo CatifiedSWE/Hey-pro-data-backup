@@ -7,10 +7,21 @@ export default function ProjectCard(props: ProjectCardType) {
   const hasSkills = props.skills && props.skills.length > 0;
 
   return (
-    <div className="w-[197px] h-[218px] bg-[#FAFAFA] shadow-md hover:shadow-lg transition-all duration-300 flex flex-col border border-[#31A7AC] overflow-hidden" style={{ borderRadius: '8.5px' }}>
-      {/* Profile Picture - Centered at top */}
-      <div className="flex justify-center items-center pt-4 pb-2">
-        <div className="relative h-[52px] w-[52px] rounded-full overflow-hidden bg-gray-200 shadow-md flex-shrink-0">
+    <div className="w-[197px] h-[218px] bg-[#FAFAFA] shadow-md hover:shadow-lg transition-all duration-300 flex flex-col overflow-hidden" style={{ borderRadius: '8.5px' }}>
+      {/* Banner Image at top */}
+      <div className="relative h-[70px] w-full flex-shrink-0">
+        <Image
+          src={props.banner || "/bg.jpg"}
+          alt={`Banner image for ${props.name}`}
+          fill
+          sizes="197px"
+          className="object-cover"
+        />
+      </div>
+
+      {/* Profile Picture - Centered, overlapping banner */}
+      <div className="flex justify-center items-center -mt-[26px] relative z-10">
+        <div className="relative h-[52px] w-[52px] rounded-full overflow-hidden bg-gray-200 shadow-md flex-shrink-0 border-2 border-white">
           <Image
             src={props.image || "/image (1).png"}
             alt={props.name}
@@ -22,7 +33,7 @@ export default function ProjectCard(props: ProjectCardType) {
       </div>
 
       {/* Content Area */}
-      <div className="px-3 pb-3 flex flex-col flex-1">
+      <div className="px-3 pt-1 pb-3 flex flex-col flex-1">
         {/* Name - Centered, bold */}
         <h1 className="text-[13px] font-bold text-gray-900 leading-tight mb-1 text-center">
           {props.name}
