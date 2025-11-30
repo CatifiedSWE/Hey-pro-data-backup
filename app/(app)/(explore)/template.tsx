@@ -315,9 +315,9 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                             <Button
                                 className={`flex h-12 w-auto items-center justify-center rounded-full border px-4 py-2 text-sm font-medium transition-all whitespace-nowrap ${isFilterOpen || activeFilterCount > 0 ? 'bg-[#FA6E80] text-white border-[#FA6E80] sm:w-[281px] ' : 'bg-transparent text-[#FA6E80] border-[#FA6E80]'}`}
                             >
-                                <span className="flex items-center space-x-2">
+                                <span className="flex items-center justify-center space-x-2">
                                     <span>Filter {activeFilterCount > 0 && `(${activeFilterCount})`}</span>
-                                    <Filter className="h-5 w-5" />
+                                    <Filter className="h-4 w-4" />
                                 </span>
                             </Button>
                         </DropdownMenuTrigger>
