@@ -7,72 +7,74 @@ export default function ProjectCard(props: ProjectCardType) {
   const hasSkills = props.skills && props.skills.length > 0;
 
   return (
-    <div className="w-full max-w-[320px] h-[340px] bg-[#FAFAFA] shadow-lg rounded-2xl mx-auto hover:shadow-xl transition-shadow flex flex-col">
-      {/* Header Image - Fixed Height */}
-      <div className="relative h-[140px] w-full flex-shrink-0">
+    <div className="w-full max-w-[340px] h-[440px] bg-white shadow-lg rounded-3xl mx-auto hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden border border-gray-100 group">
+      {/* Header Image */}
+      <div className="relative h-[150px] w-full flex-shrink-0">
         <Image
           src={props.banner || "/bg.jpg"}
           alt={`Banner image for ${props.name}`}
           fill
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          className="rounded-t-2xl object-cover"
+          className="object-cover group-hover:scale-105 transition-transform duration-500"
         />
       </div>
 
-      {/* Profile Picture - Overlapping */}
-      <div className="flex justify-center items-start -mt-[40px] mx-auto relative z-10">
-        <div className="relative h-[80px] w-[80px] rounded-full border-4 border-white overflow-hidden bg-white shadow-md flex-shrink-0">
+      {/* Profile Picture */}
+      <div className="flex justify-center items-start -mt-[55px] relative z-10">
+        <div className="relative h-[110px] w-[110px] rounded-full border-[5px] border-white overflow-hidden bg-white shadow-md flex-shrink-0">
           <Image
             src={props.image || "/image (1).png"}
             alt={props.name}
             fill
-            sizes="80px"
+            sizes="110px"
             className="object-cover"
           />
         </div>
       </div>
 
-      {/* Content Area - Fixed spacing */}
-      <div className="px-4 pb-3 pt-2 flex flex-col flex-1">
-        {/* Name - Always same position */}
-        <div className="flex flex-col items-center mb-1">
-          <h1 className="text-base font-semibold text-center leading-tight">{props.name}</h1>
+      {/* Content Area */}
+      <div className="px-6 pt-4 pb-8 flex flex-col flex-1 items-center">
+        {/* Name */}
+        <h1 className="text-2xl font-bold text-center text-gray-900 mb-2 leading-tight tracking-tight">
+            {props.name}
+        </h1>
+
+        {/* Location */}
+        <div className="flex items-center justify-center gap-1.5 text-gray-500 mb-5">
+          <MapPin strokeWidth={2} className="w-4 h-4 flex-shrink-0" />
+          <p className="text-sm font-medium">{props.location}</p>
         </div>
 
-        {/* Location - Always same position */}
-        <div className="flex justify-center items-center gap-1 text-gray-500 mb-2">
-          <MapPin strokeWidth={1.5} className="w-3.5 h-3.5 flex-shrink-0" />
-          <p className="text-xs text-center">{props.location}</p>
-        </div>
-
-        {/* Bio Section - Fixed height */}
-        <div className="w-full h-[40px] mb-2 flex items-start justify-center">
-          <p className="w-full text-gray-600 text-center text-xs line-clamp-2">
-            {hasBio ? props.bio : "No bio"}
+        {/* Bio */}
+        <div className="w-full mb-6 flex items-start justify-center min-h-[44px]">
+          <p className="text-center text-gray-600 text-sm line-clamp-2 leading-relaxed w-full">
+            {hasBio ? props.bio : "No bio available"}
           </p>
         </div>
 
-        {/* Skills Section - Fixed height */}
-        <div className="w-full h-[50px] flex flex-wrap gap-1 justify-center content-start">
-          {hasSkills ? (
-            <>
-              {props.skills.slice(0, 3).map((skill) => (
-                <span
-                  key={skill}
-                  className="text-light-green text-[10px] font-medium px-2.5 py-0.5 border border-light-green rounded-full whitespace-nowrap h-fit"
-                >
-                  {skill}
-                </span>
-              ))}
-              {props.skills.length > 3 && (
-                <span className="text-gray-400 text-[10px] font-medium px-2.5 py-0.5 whitespace-nowrap h-fit">
-                  +{props.skills.length - 3}
-                </span>
-              )}
-            </>
-          ) : (
-            <span className="text-gray-400 text-xs">No role</span>
-          )}
+        {/* Skills/Roles */}
+        <div className="w-full mt-auto">
+            <div className="flex flex-wrap gap-2 justify-center items-center">
+            {hasSkills ? (
+                <>
+                {props.skills.slice(0, 3).map((skill) => (
+                    <span
+                    key={skill}
+                    className="text-light-green border border-light-green text-xs font-semibold px-4 py-1.5 rounded-full whitespace-nowrap bg-white hover:bg-light-green/5 transition-colors"
+                    >
+                    {skill}
+                    </span>
+                ))}
+                {props.skills.length > 3 && (
+                    <span className="text-gray-400 text-xs font-medium ml-1">
+                    +{props.skills.length - 3}
+                    </span>
+                )}
+                </>
+            ) : (
+                <span className="text-gray-400 text-sm italic">No roles specified</span>
+            )}
+            </div>
         </div>
       </div>
     </div>
