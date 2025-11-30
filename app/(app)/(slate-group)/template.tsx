@@ -50,94 +50,55 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                 console.log('Starting to fetch profiles...');
                 console.log('Current user ID:', user?.id);
                 
-                // Get current user ID to exclude from results
-                const currentUserId = user?.id;
+                // Get auth session for API call
+                const { data: { session } } = await supabase.auth.getSession();
+                const token = session?.access_token;
                 
-                // Build query for user profiles
-                let query = supabase
-                    .from('user_profiles')
-                    .select(`
-                        id,
-                        user_id,
-                        alias_first_name,
-                        alias_surname,
-                        first_name,
-                        surname,
-                        profile_photo_url,
-                        banner_url,
-                        bio,
-                        country,
-                        city,
-                        created_at
-                    `)
-                    .order('created_at', { ascending: false })
-                    .limit(6);
-
-                // Exclude current user from results
-                if (currentUserId) {
-                    query = query.neq('user_id', currentUserId);
+                // Call API endpoint to fetch recommendations
+                const headers: HeadersInit = {
+                    'Content-Type': 'application/json'
+                };
+                
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
                 }
+                
+                const response = await fetch('/api/slate/recommendations?limit=6', {
+                    method: 'GET',
+                    headers,
+                    cache: 'no-store'
+                });
 
-                const { data: profiles, error } = await query;
-
-                if (error) {
-                    console.error('Error fetching profiles:', error);
+                if (!response.ok) {
+                    console.error('Failed to fetch recommendations:', response.statusText);
                     setSimilarAccounts([]);
                     setLoadingSimilar(false);
                     return;
                 }
 
-                if (!profiles || profiles.length === 0) {
+                const result = await response.json();
+
+                if (!result.success || !result.data?.profiles) {
                     console.log('No profiles found');
                     setSimilarAccounts([]);
                     setLoadingSimilar(false);
                     return;
                 }
 
-                console.log('Fetched profiles:', profiles.length);
+                console.log('Fetched profiles:', result.data.profiles.length);
 
-                // Enrich profiles with roles
-                const enrichedProfiles = await Promise.all(
-                    profiles.map(async (profile) => {
-                        try {
-                            // Fetch user roles
-                            const { data: roles } = await supabase
-                                .from('user_roles')
-                                .select('role_name')
-                                .eq('user_id', profile.user_id)
-                                .order('sort_order', { ascending: true });
-                            
-                            const roleCount = roles?.length || 0;
-                            const primaryRole = roles && roles.length > 0 ? roles[0].role_name : 'Crew Member';
+                // Transform API response to match SimilarAccount interface
+                const transformedUsers = result.data.profiles.map((profile: any) => ({
+                    id: profile.id,
+                    name: profile.name,
+                    image: profile.image || '/image (1).png',
+                    role: profile.role,
+                    totlerole: profile.totalRoles,
+                    proifleurl: profile.profileUrl
+                }));
 
-                            // Build display name with priority: alias_first_name + alias_surname (1st), first_name + surname (2nd)
-                            const aliasName = `${profile.alias_first_name || ''} ${profile.alias_surname || ''}`.trim();
-                            const realName = `${profile.first_name || ''} ${profile.surname || ''}`.trim();
-                            const displayName = aliasName || realName || 'Anonymous';
-
-                            // Priority: profile_photo_url > default
-                            // Note: Google OAuth avatar fallback would require server-side API call
-                            const profileImage = profile.profile_photo_url || '/image (1).png';
-
-                            return {
-                                id: profile.user_id,
-                                name: displayName,
-                                image: profileImage,
-                                role: primaryRole,
-                                totlerole: `${roleCount} Role${roleCount !== 1 ? 's' : ''}`,
-                                proifleurl: `/explore/${profile.user_id}`
-                            };
-                        } catch (innerError) {
-                            console.error(`Error processing profile ${profile.id}:`, innerError);
-                            return null;
-                        }
-                    })
-                );
-                
-                // Filter out null profiles and update state
-                const validProfiles = enrichedProfiles.filter(p => p !== null) as SimilarAccount[];
-                console.log('Final users count:', validProfiles.length);
-                setSimilarAccounts(validProfiles);
+                console.log('Final users count:', transformedUsers.length);
+                setSimilarAccounts(transformedUsers);
 
             } catch (error) {
                 console.error('Error in fetchSimilarUsers:', error);
