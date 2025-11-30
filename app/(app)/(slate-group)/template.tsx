@@ -96,23 +96,7 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
 
                 console.log('Fetched profiles:', profiles.length);
 
-                // Fetch Google OAuth avatars for all users at once (batch query)
-                const { data: authData } = await supabase.auth.admin.listUsers();
-                
-                // Create a map of user_id to Google avatar
-                const googleAvatarMap = new Map<string, string>();
-                if (authData?.users) {
-                    authData.users.forEach(authUser => {
-                        if (authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture) {
-                            googleAvatarMap.set(
-                                authUser.id, 
-                                authUser.user_metadata.avatar_url || authUser.user_metadata.picture
-                            );
-                        }
-                    });
-                }
-
-                // Enrich profiles with roles and Google avatars
+                // Enrich profiles with roles
                 const enrichedProfiles = await Promise.all(
                     profiles.map(async (profile) => {
                         try {
