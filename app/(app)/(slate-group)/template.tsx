@@ -50,58 +50,83 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                 console.log('Starting to fetch profiles...');
                 console.log('Current user ID:', user?.id);
                 
-                // Use the API endpoint to bypass RLS issues
-                const response = await fetch('/api/explore?limit=6&sortBy=created_at&sortOrder=desc');
+                // Fetch directly from Supabase to match explore page behavior
+                const { data: profiles, error } = await supabase
+                    .from('user_profiles')
+                    .select(`
+                        id,
+                        user_id,
+                        alias_first_name,
+                        alias_surname,
+                        first_name,
+                        surname,
+                        profile_photo_url,
+                        banner_url,
+                        bio,
+                        country,
+                        city
+                    `)
+                    .order('created_at', { ascending: false })
+                    .limit(20); // Fetch more to account for filtering
                 
-                if (!response.ok) {
-                    console.error('API error:', response.status, response.statusText);
+                if (error) {
+                    console.error('Supabase error:', error);
                     setLoadingSimilar(false);
                     return;
                 }
                 
-                const result = await response.json();
+                console.log('Fetched profiles from Supabase:', profiles?.length || 0);
                 
-                if (!result.success) {
-                    console.error('API returned error:', result.error);
-                    setLoadingSimilar(false);
-                    return;
-                }
-                
-                const profiles = result.data?.profiles || [];
-                console.log('Fetched profiles from API:', profiles.length);
-                
-                if (profiles.length === 0) {
+                if (!profiles || profiles.length === 0) {
                     console.log('No profiles found in database');
                     setSimilarAccounts([]);
                     setLoadingSimilar(false);
                     return;
                 }
                 
-                // Filter out current user and limit to 6
-                const filteredProfiles = profiles
-                    .filter((profile: any) => profile.userId !== user?.id)
+                // Enrich profiles with roles
+                const enrichedProfiles = await Promise.all(
+                    profiles.map(async (profile) => {
+                        try {
+                            const { data: roles } = await supabase
+                                .from('user_roles')
+                                .select('role_name')
+                                .eq('user_id', profile.user_id)
+                                .order('sort_order', { ascending: true });
+                            
+                            // Build display name
+                            const aliasName = `${profile.alias_first_name || ''} ${profile.alias_surname || ''}`.trim();
+                            const realName = `${profile.first_name || ''} ${profile.surname || ''}`.trim();
+                            const displayName = aliasName || realName || 'Anonymous';
+                            
+                            const userRoles = roles?.map(r => r.role_name) || [];
+                            const mainRole = userRoles.length > 0 ? userRoles[0] : 'Crew Member';
+                            const roleCount = userRoles.length;
+                            
+                            return {
+                                id: profile.user_id,
+                                name: displayName,
+                                image: profile.profile_photo_url || "/image (1).png",
+                                role: mainRole,
+                                totlerole: `${roleCount} ${roleCount === 1 ? 'Role' : 'Roles'}`,
+                                proifleurl: `/explore/${profile.user_id}`
+                            };
+                        } catch (innerError) {
+                            console.error(`Error processing profile ${profile.id}:`, innerError);
+                            return null;
+                        }
+                    })
+                );
+                
+                // Filter out nulls and current user, limit to 6
+                const filteredUsers = enrichedProfiles
+                    .filter((profile): profile is SimilarAccount => 
+                        profile !== null && profile.id !== user?.id
+                    )
                     .slice(0, 6);
                 
-                console.log('Filtered profiles:', filteredProfiles.length);
-                
-                // Map profiles to SimilarAccount format (roles already included from API)
-                const mappedUsers: SimilarAccount[] = filteredProfiles.map((profile: any) => {
-                    const userRoles = profile.roles || [];
-                    const mainRole = userRoles.length > 0 ? userRoles[0] : 'Crew Member';
-                    const roleCount = userRoles.length;
-
-                    return {
-                        id: profile.userId,
-                        name: profile.name || profile.displayName || 'Anonymous',
-                        image: profile.avatar || "/image (1).png",
-                        role: mainRole,
-                        totlerole: `${roleCount} ${roleCount === 1 ? 'Role' : 'Roles'}`,
-                        proifleurl: `/explore/${profile.userId}` 
-                    };
-                });
-                
-                console.log('Mapped users:', mappedUsers.length);
-                setSimilarAccounts(mappedUsers);
+                console.log('Final filtered users:', filteredUsers.length);
+                setSimilarAccounts(filteredUsers);
 
             } catch (error) {
                 console.error('Error in fetchSimilarUsers:', error);
