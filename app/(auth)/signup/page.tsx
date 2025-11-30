@@ -352,9 +352,9 @@ export default function SignUpPage() {
 
       {/* Right Side - Gradient Background 
           Responsive: Hidden on mobile, visible from lg.
-          Layout: Uses inline styles for robust aspect ratio + height constraints.
+          Layout: Centered horizontally and vertically.
       */}
-      <div className="hidden lg:flex lg:w-1/2 items-center justify-start p-8 h-screen sticky top-0 order-1 lg:order-2">
+      <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-4 h-screen sticky top-0 order-1 lg:order-2">
         <div
           className="rounded-[68px] shadow-2xl"
           style={{

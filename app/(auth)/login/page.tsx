@@ -168,9 +168,9 @@ function LoginForm() {
     <div className="min-h-screen flex overflow-hidden bg-white">
       {/* Left side - Gradient Background 
           Responsive: Hidden on mobile, visible from lg.
-          Layout: Uses inline styles for robust aspect ratio + height constraints.
+          Layout: Centered horizontally and vertically.
       */}
-      <div className="hidden lg:flex lg:w-1/2 items-center justify-end p-4 xl:p-8 h-screen sticky top-0">
+      <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-4 h-screen sticky top-0">
         <div
           className="rounded-[68px] shadow-2xl"
           style={{
