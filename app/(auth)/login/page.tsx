@@ -167,12 +167,12 @@ function LoginForm() {
   return (
     <div className="min-h-screen flex overflow-hidden bg-white">
       {/* Left side - Gradient Background 
-          Responsive: Hidden on mobile/small tablets, visible from lg (1024px) and up.
-          Updated to fixed vertical rectangle ratio as requested: 450x721
+          Responsive: Hidden on mobile, visible from lg.
+          Layout: Uses max-h-[90vh] to respect screen height, preserving aspect ratio.
       */}
-      <div className="hidden lg:flex lg:w-1/2 items-center justify-end p-8 h-screen sticky top-0">
+      <div className="hidden lg:flex lg:w-1/2 items-center justify-end p-4 xl:p-8 h-screen sticky top-0">
         <div
-          className="w-full max-w-[450px] aspect-[450/721] rounded-[68px] shadow-2xl"
+          className="w-auto h-auto max-w-[450px] max-h-[90vh] aspect-[450/721] rounded-[68px] shadow-2xl"
           style={{
             background:
               "conic-gradient(from 180deg at 50% 50%, #FA6E80 0deg, #6A89BE 144deg, #85AAB7 216deg, #31A7AC 360deg)",
@@ -180,10 +180,7 @@ function LoginForm() {
         ></div>
       </div>
 
-      {/* Right side - Login Form 
-          Responsive: Full width on mobile/tablet, half width on desktop.
-          Centered vertically and horizontally.
-      */}
+      {/* Right side - Login Form */}
       <div className="w-full lg:w-1/2 flex flex-col items-center justify-center min-h-screen px-4 sm:px-8 md:px-12 py-8">
         <div className="w-full max-w-md sm:max-w-lg">
           {/* Logo */}

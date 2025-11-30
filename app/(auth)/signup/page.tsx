@@ -217,10 +217,7 @@ export default function SignUpPage() {
 
   return (
     <div className="min-h-screen flex overflow-hidden bg-white">
-      {/* Left Side - Signup Form 
-          Responsive: Full width on mobile/tablet, half width on desktop.
-          Centered vertically and horizontally.
-      */}
+      {/* Left Side - Signup Form */}
       <div className="w-full lg:w-1/2 flex flex-col items-center justify-center min-h-screen px-4 sm:px-8 md:px-12 py-8 order-2 lg:order-1">
         <div className="w-full max-w-md sm:max-w-lg">
           <div className="mb-8 text-center lg:text-left">
@@ -354,12 +351,12 @@ export default function SignUpPage() {
       </div>
 
       {/* Right Side - Gradient Background 
-          Responsive: Hidden on mobile/small tablets, visible from lg (1024px) and up.
-          Updated to fixed vertical rectangle ratio as requested: 450x721
+          Responsive: Hidden on mobile, visible from lg.
+          Layout: Uses max-h-[90vh] to respect screen height, preserving aspect ratio.
       */}
       <div className="hidden lg:flex lg:w-1/2 items-center justify-start p-8 h-screen sticky top-0 order-1 lg:order-2">
         <div
-          className="w-full max-w-[450px] aspect-[450/721] rounded-[68px] shadow-2xl"
+          className="w-auto h-auto max-w-[450px] max-h-[90vh] aspect-[450/721] rounded-[68px] shadow-2xl"
           style={{
             background:
               "conic-gradient(from 0deg at 50% 50%, #FA6E80 0deg, #6A89BE 144deg, #85AAB7 216deg, #31A7AC 360deg)",
