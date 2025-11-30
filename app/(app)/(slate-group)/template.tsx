@@ -79,44 +79,26 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                 
                 // Filter out current user and limit to 6
                 const filteredProfiles = profiles
-                    .filter((profile: any) => profile.user_id !== user?.id)
+                    .filter((profile: any) => profile.userId !== user?.id)
                     .slice(0, 6);
                 
                 console.log('Filtered profiles:', filteredProfiles.length);
                 
-                // Fetch roles for each profile
-                const mappedUsersPromises = filteredProfiles.map(async (profile: any) => {
-                    try {
-                        const { data: roles } = await supabase
-                            .from('user_roles')
-                            .select('role_name')
-                            .eq('user_id', profile.user_id)
-                            .order('sort_order', { ascending: true });
-                        
-                        // Name logic
-                        const aliasName = `${profile.alias_first_name || ''} ${profile.alias_surname || ''}`.trim();
-                        const realName = `${profile.first_name || ''} ${profile.surname || ''}`.trim();
-                        const displayName = aliasName || realName || 'Anonymous';
+                // Map profiles to SimilarAccount format (roles already included from API)
+                const mappedUsers: SimilarAccount[] = filteredProfiles.map((profile: any) => {
+                    const userRoles = profile.roles || [];
+                    const mainRole = userRoles.length > 0 ? userRoles[0] : 'Crew Member';
+                    const roleCount = userRoles.length;
 
-                        const userRoles = roles || [];
-                        const mainRole = userRoles.length > 0 ? userRoles[0].role_name : 'Crew Member';
-                        const roleCount = userRoles.length;
-
-                        return {
-                            id: profile.user_id,
-                            name: displayName,
-                            image: profile.profile_photo_url || "/image (1).png",
-                            role: mainRole,
-                            totlerole: `${roleCount} Roles`,
-                            proifleurl: `/explore/${profile.user_id}` 
-                        };
-                    } catch (innerError) {
-                        console.error('Error processing profile:', innerError);
-                        return null;
-                    }
+                    return {
+                        id: profile.userId,
+                        name: profile.name || profile.displayName || 'Anonymous',
+                        image: profile.avatar || "/image (1).png",
+                        role: mainRole,
+                        totlerole: `${roleCount} ${roleCount === 1 ? 'Role' : 'Roles'}`,
+                        proifleurl: `/explore/${profile.userId}` 
+                    };
                 });
-
-                const mappedUsers = (await Promise.all(mappedUsersPromises)).filter(u => u !== null) as SimilarAccount[];
                 
                 console.log('Mapped users:', mappedUsers.length);
                 setSimilarAccounts(mappedUsers);
