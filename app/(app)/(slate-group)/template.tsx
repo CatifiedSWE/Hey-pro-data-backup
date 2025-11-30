@@ -125,6 +125,8 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                 });
 
                 const mappedUsers = (await Promise.all(mappedUsersPromises)).filter(u => u !== null) as SimilarAccount[];
+                
+                console.log('Mapped users:', mappedUsers.length);
                 setSimilarAccounts(mappedUsers);
 
             } catch (err) {
