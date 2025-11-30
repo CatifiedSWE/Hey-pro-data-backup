@@ -64,13 +64,15 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                         profile_photo_url,
                         created_at
                     `)
-                    .order('created_at', { ascending: false })
-                    .limit(6);
+                    .order('created_at', { ascending: false });
                 
                 // Exclude current user if logged in
                 if (user?.id) {
                     query = query.neq('user_id', user.id);
                 }
+                
+                // Apply limit after filter
+                query = query.limit(6);
 
                 const { data: profiles, error: profileError } = await query;
 
