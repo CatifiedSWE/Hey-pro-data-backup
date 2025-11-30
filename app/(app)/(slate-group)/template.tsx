@@ -50,19 +50,21 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
             try {
                 setLoadingSimilar(true);
                 
-                // 1. Fetch profiles
+                // 1. Fetch profiles from user_profiles (limit 6)
+                // Using created_at desc to show recent users
                 let query = supabase
                     .from('user_profiles')
                     .select(`
+                        id,
                         user_id,
                         alias_first_name,
                         alias_surname,
                         first_name,
                         surname,
                         profile_photo_url,
-                        updated_at
+                        created_at
                     `)
-                    .order('updated_at', { ascending: false })
+                    .order('created_at', { ascending: false })
                     .limit(6);
                 
                 // Exclude current user if logged in
@@ -84,43 +86,41 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                     return;
                 }
 
-                // 2. Fetch roles for these users manually
-                const userIds = profiles.map((p: any) => p.user_id);
-                
-                let roles: any[] = [];
-                if (userIds.length > 0) {
-                    const { data: rolesData, error: rolesError } = await supabase
-                        .from('user_roles')
-                        .select('user_id, role_name')
-                        .in('user_id', userIds);
-                    
-                    if (rolesError) {
-                        console.error('Error fetching roles:', rolesError);
-                    } else {
-                        roles = rolesData || [];
+                // 2. Fetch roles for each profile individually to match ExplorePage logic
+                const mappedUsersPromises = profiles.map(async (profile: any) => {
+                    try {
+                        const { data: roles } = await supabase
+                            .from('user_roles')
+                            .select('role_name')
+                            .eq('user_id', profile.user_id)
+                            .order('sort_order', { ascending: true });
+                        
+                        // Name logic matching ExplorePage
+                        const aliasName = `${profile.alias_first_name || ''} ${profile.alias_surname || ''}`.trim();
+                        const realName = `${profile.first_name || ''} ${profile.surname || ''}`.trim();
+                        const displayName = aliasName || realName || 'Anonymous';
+
+                        const userRoles = roles || [];
+                        const mainRole = userRoles.length > 0 ? userRoles[0].role_name : 'Crew Member';
+                        const roleCount = userRoles.length;
+
+                        return {
+                            id: profile.user_id,
+                            name: displayName,
+                            image: profile.profile_photo_url || "/image (1).png",
+                            role: mainRole,
+                            totlerole: `${roleCount} Roles`,
+                            // Note: Ideally this should link to the public profile page
+                            // Explore page uses /explore/ but here we stick to what fits the app structure
+                            proifleurl: `/profile` 
+                        };
+                    } catch (innerError) {
+                        console.error('Error processing profile:', innerError);
+                        return null;
                     }
-                }
-
-                // 3. Map data
-                const mappedUsers: SimilarAccount[] = profiles.map((user: any) => {
-                    const name = user.alias_first_name 
-                        ? `${user.alias_first_name} ${user.alias_surname || ''}`
-                        : `${user.first_name || ''} ${user.surname || ''}`;
-                    
-                    // Find roles for this user
-                    const userRoles = roles.filter((r: any) => r.user_id === user.user_id);
-                    const mainRole = userRoles.length > 0 ? userRoles[0].role_name : 'Crew Member';
-                    const roleCount = userRoles.length;
-
-                    return {
-                        id: user.user_id,
-                        name: name.trim() || 'User',
-                        image: user.profile_photo_url || "/image (1).png",
-                        role: mainRole,
-                        totlerole: `${roleCount} Roles`,
-                        proifleurl: `/profile` // Placeholder as per current routing
-                    };
                 });
+
+                const mappedUsers = (await Promise.all(mappedUsersPromises)).filter(u => u !== null) as SimilarAccount[];
                 setSimilarAccounts(mappedUsers);
 
             } catch (err) {
@@ -131,7 +131,7 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
         };
 
         fetchSimilarUsers();
-    }, [user, authLoading]); // Re-run when auth state changes
+    }, [user, authLoading]);
 
     // Construct profile object from real user data
     const profile: Profile = {
