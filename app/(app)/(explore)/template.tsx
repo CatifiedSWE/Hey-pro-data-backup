@@ -431,7 +431,7 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                             </form>
                         </DropdownMenuContent>
                     </DropdownMenu>
-                    <div className="flex h-12 flex-row w-full items-center justify-between rounded-full border px-2 py-2">
+                    <div className="flex h-12 flex-row w-full items-center justify-between rounded-full border px-3 py-2">
                         <input
                             type="text"
                             placeholder="Search by name, role, or department..."
@@ -446,9 +446,9 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                         />
                         <button 
                             onClick={handleSearchSubmit}
-                            className="flex h-9 w-9 items-center justify-center rounded-full bg-[#FA6E80] cursor-pointer hover:bg-[#fa5a6e] transition-colors"
+                            className="flex h-9 w-9 items-center justify-center rounded-full bg-[#FA6E80] cursor-pointer hover:bg-[#fa5a6e] transition-colors flex-shrink-0"
                         >
-                            <Search className="h-5 w-5 text-white" />
+                            <Search className="h-4 w-4 text-white" />
                         </button>
                     </div>
 
