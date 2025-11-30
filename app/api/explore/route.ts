@@ -111,7 +111,23 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Enrich profiles with roles
+    // Fetch Google OAuth avatars for all users at once (batch query)
+    const { data: authUsers } = await supabase.auth.admin.listUsers();
+    
+    // Create a map of user_id to Google avatar
+    const googleAvatarMap = new Map<string, string>();
+    if (authUsers?.users) {
+      authUsers.users.forEach(authUser => {
+        if (authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture) {
+          googleAvatarMap.set(
+            authUser.id, 
+            authUser.user_metadata.avatar_url || authUser.user_metadata.picture
+          );
+        }
+      });
+    }
+
+    // Enrich profiles with roles and Google avatars
     const enrichedProfiles = await Promise.all(
       (profiles || []).map(async (profile) => {
         // Fetch user roles
@@ -135,12 +151,15 @@ export async function GET(request: NextRequest) {
         const realName = `${profile.first_name || ''} ${profile.surname || ''}`.trim();
         const displayName = aliasName || realName || 'Anonymous';
         
+        // Priority: profile_photo_url > Google metadata avatar > null
+        const profileAvatar = profile.profile_photo_url || googleAvatarMap.get(profile.user_id) || null;
+        
         return {
           id: profile.id,
           userId: profile.user_id,
           name: displayName,
           displayName: displayName,
-          avatar: profile.profile_photo_url,
+          avatar: profileAvatar,
           banner: profile.banner_url,
           bio: profile.bio,
           location: profile.city && profile.country 
