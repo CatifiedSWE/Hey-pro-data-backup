@@ -19,7 +19,7 @@ export default function ExplorePage({
         - Gap 10px
         - Mobile: 2 columns (responsive)
       */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-[10px] p-4 md:p-0 max-w-[615px] w-full justify-items-center auto-rows-max">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-[10px] p-2 md:p-0 max-w-[615px] w-full justify-items-stretch auto-rows-max">
         {projectsCardData.length > 0 ? (
           projectsCardData.map((project) => (
             <ProjectCard key={project.id || project.name} {...project} />

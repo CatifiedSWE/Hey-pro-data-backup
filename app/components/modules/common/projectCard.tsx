@@ -8,7 +8,7 @@ export default function ProjectCard(props: ProjectCardType) {
 
   return (
     <div 
-      className="w-full h-[218px] bg-white shadow-sm hover:shadow-md transition-all duration-300 flex flex-col overflow-hidden border border-gray-100" 
+      className="w-full h-[218px] bg-white shadow-sm hover:shadow-md transition-all duration-300 flex flex-col overflow-hidden border border-gray-100 min-w-0" 
       style={{ borderRadius: '8.5px' }}
       data-testid="profile-card"
     >
@@ -37,19 +37,16 @@ export default function ProjectCard(props: ProjectCardType) {
       </div>
 
       {/* Content Area */}
-      <div className="px-2 pt-1 pb-2 flex flex-col flex-1 min-w-0">
+      <div className="px-1.5 pt-1 pb-2 flex flex-col flex-1 min-w-0">
         {/* Name - Centered, bold */}
-        <h1 className="text-[14px] font-bold text-gray-900 leading-tight mb-0.5 text-center truncate w-full">
+        <h1 className="text-[13px] font-bold text-gray-900 leading-tight mb-0.5 text-center truncate w-full px-1">
           {props.name}
         </h1>
 
         {/* Location - Centered */}
-        <div className="flex items-center justify-center gap-1 text-gray-500 mb-1.5">
-          {/* <MapPin strokeWidth={1.5} className="w-3 h-3 flex-shrink-0" /> */}
-           {/* Using a smaller location text or icon if needed, keeping it minimal as per Frame 311 vibe */}
-           {/* Frame 311 analysis mentioned Location Icon. Keeping it. */}
-           <MapPin className="w-3 h-3" />
-          <p className="text-[10px] truncate max-w-[120px]">{props.location}</p>
+        <div className="flex items-center justify-center gap-0.5 text-gray-500 mb-1.5 w-full">
+           <MapPin className="w-3 h-3 flex-shrink-0" />
+          <p className="text-[10px] truncate max-w-full px-1">{props.location}</p>
         </div>
 
         {/* Bio - Left-aligned, limited height */}
@@ -60,7 +57,7 @@ export default function ProjectCard(props: ProjectCardType) {
         </div>
 
         {/* Skills/Roles - Centered/Wrapped */}
-        <div className="w-full mt-2 px-1">
+        <div className="w-full mt-1.5 px-0.5">
           <div className="flex flex-wrap gap-1 justify-center">
             {hasSkills ? (
               props.skills.slice(0, 2).map((skill) => (
