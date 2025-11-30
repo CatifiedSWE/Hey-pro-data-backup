@@ -11,6 +11,10 @@ export async function GET(request: NextRequest) {
     const supabase = createServerClient();
     const { searchParams } = new URL(request.url);
     
+    // Get current logged-in user to exclude from results
+    const { data: { user: currentUser } } = await supabase.auth.getUser();
+    const currentUserId = currentUser?.id;
+    
     // Parse query parameters
     const keyword = searchParams.get('keyword');
     const role = searchParams.get('role');
@@ -54,6 +58,11 @@ export async function GET(request: NextRequest) {
         updated_at,
         visible_in_explore
       `, { count: 'exact' });
+
+    // Exclude current user from explore results
+    if (currentUserId) {
+      query = query.neq('user_id', currentUserId);
+    }
 
     // Apply keyword search
     if (keyword) {
