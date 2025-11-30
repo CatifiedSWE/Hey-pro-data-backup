@@ -49,39 +49,33 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                 console.log('Starting to fetch profiles...');
                 console.log('Current user ID:', user?.id);
                 
-                // Use the API endpoint instead of direct Supabase client
-                // This matches exactly how explore page works (using server-side client)
-                const response = await fetch('/api/explore?limit=6&page=1');
+                // Fetch from the data file that explore uses - this is a client-side approach
+                // Import dynamically to match explore page pattern
+                const { default: profilesData } = await import('@/data/recommendUsers');
                 
-                if (!response.ok) {
-                    console.error('API error:', response.statusText);
-                    setLoadingSimilar(false);
-                    return;
-                }
+                console.log('Loaded profiles from data file:', profilesData?.length || 0);
                 
-                const result = await response.json();
-                
-                if (!result.success || !result.data?.profiles) {
-                    console.log('No profiles in API response');
+                if (!profilesData || profilesData.length === 0) {
+                    console.log('No profiles in data file');
                     setSimilarAccounts([]);
                     setLoadingSimilar(false);
                     return;
                 }
                 
-                console.log('Fetched profiles from API:', result.data.profiles.length);
+                // Filter out current user and limit to 6
+                const filteredProfiles = profilesData
+                    .filter((profile: any) => profile.id !== user?.id)
+                    .slice(0, 6);
                 
-                // Transform API response to match our SimilarAccount interface
-                const transformedUsers = result.data.profiles
-                    .filter((profile: any) => profile.userId !== user?.id) // Exclude current user
-                    .slice(0, 6) // Limit to 6
-                    .map((profile: any) => ({
-                        id: profile.userId,
-                        name: profile.displayName || profile.name,
-                        image: profile.avatar || "/image (1).png",
-                        role: profile.roles && profile.roles.length > 0 ? profile.roles[0] : 'Crew Member',
-                        totlerole: `${profile.roles?.length || 0} ${profile.roles?.length === 1 ? 'Role' : 'Roles'}`,
-                        proifleurl: `/explore/${profile.userId}`
-                    }));
+                // Transform to match our interface
+                const transformedUsers = filteredProfiles.map((profile: any) => ({
+                    id: profile.id,
+                    name: profile.name,
+                    image: profile.image || "/image (1).png",
+                    role: profile.role || 'Crew Member',
+                    totlerole: profile.totlerole || '1 Role',
+                    proifleurl: profile.proifleurl || `/explore/${profile.id}`
+                }));
                 
                 console.log('Final users count:', transformedUsers.length);
                 console.log('Users to display:', transformedUsers);
