@@ -115,8 +115,9 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                             const realName = `${profile.first_name || ''} ${profile.surname || ''}`.trim();
                             const displayName = aliasName || realName || 'Anonymous';
 
-                            // Priority: profile_photo_url > Google metadata avatar > default
-                            const profileImage = profile.profile_photo_url || googleAvatarMap.get(profile.user_id) || '/image (1).png';
+                            // Priority: profile_photo_url > default
+                            // Note: Google OAuth avatar fallback would require server-side API call
+                            const profileImage = profile.profile_photo_url || '/image (1).png';
 
                             return {
                                 id: profile.user_id,
