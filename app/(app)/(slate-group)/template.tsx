@@ -43,12 +43,12 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
     const [loadingSimilar, setLoadingSimilar] = useState(true);
 
     useEffect(() => {
-        // Wait for auth to load before fetching to ensure we can exclude current user
-        if (authLoading) return;
-
         const fetchSimilarUsers = async () => {
             try {
                 setLoadingSimilar(true);
+                
+                console.log('Starting to fetch profiles...');
+                console.log('Current user ID:', user?.id);
                 
                 // 1. Fetch profiles from user_profiles (limit 6)
                 // Using created_at desc to show recent users
@@ -78,14 +78,16 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
 
                 if (profileError) {
                     console.error('Error fetching profiles:', profileError);
+                    console.error('Error details:', JSON.stringify(profileError, null, 2));
                     setLoadingSimilar(false);
                     return;
                 }
 
                 console.log('Fetched profiles:', profiles?.length || 0);
+                console.log('Profile data:', profiles);
 
                 if (!profiles || profiles.length === 0) {
-                    console.log('No profiles found');
+                    console.log('No profiles found in database');
                     setSimilarAccounts([]);
                     setLoadingSimilar(false);
                     return;
