@@ -355,10 +355,11 @@ export default function SignUpPage() {
 
       {/* Right Side - Gradient Background 
           Responsive: Hidden on mobile/small tablets, visible from lg (1024px) and up.
+          Updated to fixed vertical rectangle ratio as requested: 450x721
       */}
-      <div className="hidden lg:flex lg:w-1/2 items-center justify-start p-4 xl:p-8 h-screen sticky top-0 order-1 lg:order-2">
+      <div className="hidden lg:flex lg:w-1/2 items-center justify-start p-8 h-screen sticky top-0 order-1 lg:order-2">
         <div
-          className="w-full h-full max-w-[600px] rounded-[40px] xl:rounded-[68px]"
+          className="w-full max-w-[450px] aspect-[450/721] rounded-[68px] shadow-2xl"
           style={{
             background:
               "conic-gradient(from 0deg at 50% 50%, #FA6E80 0deg, #6A89BE 144deg, #85AAB7 216deg, #31A7AC 360deg)",

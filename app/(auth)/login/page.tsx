@@ -168,11 +168,11 @@ function LoginForm() {
     <div className="min-h-screen flex overflow-hidden bg-white">
       {/* Left side - Gradient Background 
           Responsive: Hidden on mobile/small tablets, visible from lg (1024px) and up.
-          This prevents cramped layout on medium screens (ipads).
+          Updated to fixed vertical rectangle ratio as requested: 450x721
       */}
-      <div className="hidden lg:flex lg:w-1/2 items-center justify-end p-4 xl:p-8 h-screen sticky top-0">
+      <div className="hidden lg:flex lg:w-1/2 items-center justify-end p-8 h-screen sticky top-0">
         <div
-          className="w-full h-full max-w-[600px] rounded-[40px] xl:rounded-[68px]"
+          className="w-full max-w-[450px] aspect-[450/721] rounded-[68px] shadow-2xl"
           style={{
             background:
               "conic-gradient(from 180deg at 50% 50%, #FA6E80 0deg, #6A89BE 144deg, #85AAB7 216deg, #31A7AC 360deg)",
