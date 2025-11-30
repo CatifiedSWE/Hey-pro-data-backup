@@ -50,7 +50,7 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                 console.log('Starting to fetch profiles...');
                 console.log('Current user ID:', user?.id);
                 
-                // Fetch directly from Supabase to match explore page behavior
+                // Fetch directly from Supabase - EXACT same query as explore page
                 const { data: profiles, error } = await supabase
                     .from('user_profiles')
                     .select(`
@@ -64,7 +64,8 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                         banner_url,
                         bio,
                         country,
-                        city
+                        city,
+                        created_at
                     `)
                     .order('created_at', { ascending: false })
                     .limit(20); // Fetch more to account for filtering
@@ -84,7 +85,7 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                     return;
                 }
                 
-                // Enrich profiles with roles
+                // Enrich profiles with roles - EXACT same logic as explore page
                 const enrichedProfiles = await Promise.all(
                     profiles.map(async (profile) => {
                         try {
@@ -94,7 +95,8 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                                 .eq('user_id', profile.user_id)
                                 .order('sort_order', { ascending: true });
                             
-                            // Build display name
+                            // Build display name with priority: alias_first_name + alias_surname (1st), first_name + surname (2nd)
+                            // This is EXACTLY how explore page does it
                             const aliasName = `${profile.alias_first_name || ''} ${profile.alias_surname || ''}`.trim();
                             const realName = `${profile.first_name || ''} ${profile.surname || ''}`.trim();
                             const displayName = aliasName || realName || 'Anonymous';
@@ -126,6 +128,7 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                     .slice(0, 6);
                 
                 console.log('Final filtered users:', filteredUsers.length);
+                console.log('Users to display:', filteredUsers);
                 setSimilarAccounts(filteredUsers);
 
             } catch (error) {
@@ -135,8 +138,8 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
             }
         };
 
-        // Only fetch when auth has finished loading
-        if (!authLoading) {
+        // Only fetch when auth has finished loading and we have a user
+        if (!authLoading && user) {
             fetchSimilarUsers();
         }
     }, [authLoading, user?.id]);
