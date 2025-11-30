@@ -7,26 +7,26 @@ export default function ProjectCard(props: ProjectCardType) {
   const hasSkills = props.skills && props.skills.length > 0;
 
   return (
-    <div className="w-[320px] h-[420px] bg-white shadow-md rounded-2xl mx-auto hover:shadow-lg transition-all duration-300 flex flex-col overflow-hidden border border-gray-100 group">
+    <div className="w-[280px] h-[368px] bg-white shadow-md rounded-2xl mx-auto hover:shadow-lg transition-all duration-300 flex flex-col overflow-hidden border border-gray-100 group">
       {/* Header Image - 40% of card height */}
-      <div className="relative h-[168px] w-full flex-shrink-0">
+      <div className="relative h-[147px] w-full flex-shrink-0">
         <Image
           src={props.banner || "/bg.jpg"}
           alt={`Banner image for ${props.name}`}
           fill
-          sizes="320px"
+          sizes="280px"
           className="object-cover group-hover:scale-105 transition-transform duration-500"
         />
       </div>
 
       {/* Profile Picture - Overlapping background, positioned left */}
-      <div className="flex justify-start items-start -mt-[50px] relative z-10 px-5">
-        <div className="relative h-[100px] w-[100px] rounded-full border-4 border-white overflow-hidden bg-white shadow-md flex-shrink-0">
+      <div className="flex justify-start items-start -mt-[44px] relative z-10 px-4">
+        <div className="relative h-[88px] w-[88px] rounded-full border-4 border-white overflow-hidden bg-white shadow-md flex-shrink-0">
           <Image
             src={props.image || "/image (1).png"}
             alt={props.name}
             fill
-            sizes="100px"
+            sizes="88px"
             className="object-cover"
           />
         </div>
