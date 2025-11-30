@@ -13,7 +13,7 @@ export default function ExplorePage({
   
   return (
     <div className="w-full">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 p-6 place-items-center">
         {projectsCardData.length > 0 ? (
           projectsCardData.map((project) => (
             <ProjectCard key={project.id || project.name} {...project} />
