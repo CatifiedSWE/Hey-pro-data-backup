@@ -220,7 +220,7 @@ export default function SignUpPage() {
       <div className="w-full flex px-4 sm:px-6 py-6 mx-auto">
         <div className="flex w-full flex-col md:flex-row gap-8 mx-auto justify-center items-center">
           {/* Left Side - Signup Form */}
-          <div className="w-full md:p-32 md:pr-8 flex flex-col justify-center mx-auto">
+          <div className="w-full max-w-md md:max-w-full md:p-32 md:pr-8 flex flex-col justify-center mx-auto">
             <form onSubmit={handleSubmit} className="space-y-2 md:space-y-3">
               <div className="mb-6 md:mb-12 md:text-left text-center">
                 <Image

@@ -178,8 +178,8 @@ function LoginForm() {
       </div>
 
       {/* Right side - Login Form */}
-      <div className="w-full md:w-1/2 flex items-center justify-start px-4 sm:px-6 md:pl-0 py-6 md:py-12">
-        <div className="w-full max-w-md md:max-w-lg md:pl-12 lg:pl-16 xl:pl-20">
+      <div className="w-full md:w-1/2 flex items-center justify-center md:justify-start px-4 sm:px-6 md:pl-0 py-6 md:py-12">
+        <div className="w-full max-w-md mx-auto md:mx-0 md:max-w-lg md:pl-12 lg:pl-16 xl:pl-20">
           {/* Logo */}
           <div className="mb-6 md:text-left text-center">
             <Image
