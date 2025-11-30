@@ -50,51 +50,42 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                 console.log('Starting to fetch profiles...');
                 console.log('Current user ID:', user?.id);
                 
-                // 1. Fetch profiles from user_profiles (limit 6)
-                // Using created_at desc to show recent users
-                let query = supabase
-                    .from('user_profiles')
-                    .select(`
-                        id,
-                        user_id,
-                        alias_first_name,
-                        alias_surname,
-                        first_name,
-                        surname,
-                        profile_photo_url,
-                        created_at
-                    `)
-                    .order('created_at', { ascending: false });
+                // Use the API endpoint to bypass RLS issues
+                const response = await fetch('/api/explore?limit=6&sortBy=created_at&sortOrder=desc');
                 
-                // Exclude current user if logged in
-                if (user?.id) {
-                    query = query.neq('user_id', user.id);
-                }
-                
-                // Apply limit after filter
-                query = query.limit(6);
-
-                const { data: profiles, error: profileError } = await query;
-
-                if (profileError) {
-                    console.error('Error fetching profiles:', profileError);
-                    console.error('Error details:', JSON.stringify(profileError, null, 2));
+                if (!response.ok) {
+                    console.error('API error:', response.status, response.statusText);
                     setLoadingSimilar(false);
                     return;
                 }
-
-                console.log('Fetched profiles:', profiles?.length || 0);
-                console.log('Profile data:', profiles);
-
-                if (!profiles || profiles.length === 0) {
+                
+                const result = await response.json();
+                
+                if (!result.success) {
+                    console.error('API returned error:', result.error);
+                    setLoadingSimilar(false);
+                    return;
+                }
+                
+                const profiles = result.data?.profiles || [];
+                console.log('Fetched profiles from API:', profiles.length);
+                
+                if (profiles.length === 0) {
                     console.log('No profiles found in database');
                     setSimilarAccounts([]);
                     setLoadingSimilar(false);
                     return;
                 }
-
-                // 2. Fetch roles for each profile individually to match ExplorePage logic
-                const mappedUsersPromises = profiles.map(async (profile: any) => {
+                
+                // Filter out current user and limit to 6
+                const filteredProfiles = profiles
+                    .filter((profile: any) => profile.user_id !== user?.id)
+                    .slice(0, 6);
+                
+                console.log('Filtered profiles:', filteredProfiles.length);
+                
+                // Fetch roles for each profile
+                const mappedUsersPromises = filteredProfiles.map(async (profile: any) => {
                     try {
                         const { data: roles } = await supabase
                             .from('user_roles')
@@ -102,7 +93,7 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                             .eq('user_id', profile.user_id)
                             .order('sort_order', { ascending: true });
                         
-                        // Name logic matching ExplorePage
+                        // Name logic
                         const aliasName = `${profile.alias_first_name || ''} ${profile.alias_surname || ''}`.trim();
                         const realName = `${profile.first_name || ''} ${profile.surname || ''}`.trim();
                         const displayName = aliasName || realName || 'Anonymous';
@@ -117,7 +108,6 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                             image: profile.profile_photo_url || "/image (1).png",
                             role: mainRole,
                             totlerole: `${roleCount} Roles`,
-                            // Link to the user's explore profile page
                             proifleurl: `/explore/${profile.user_id}` 
                         };
                     } catch (innerError) {
@@ -131,8 +121,8 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                 console.log('Mapped users:', mappedUsers.length);
                 setSimilarAccounts(mappedUsers);
 
-            } catch (err) {
-                console.error('Exception fetching similar users:', err);
+            } catch (error) {
+                console.error('Error in fetchSimilarUsers:', error);
             } finally {
                 setLoadingSimilar(false);
             }
