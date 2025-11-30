@@ -1,0 +1,85 @@
+import { ProjectCardType } from "@/types";
+import { MapPin } from "lucide-react";
+import Image from "next/image";
+
+export default function ProjectCard(props: ProjectCardType) {
+  const hasBio = props.bio && props.bio.trim().length > 0;
+  const hasSkills = props.skills && props.skills.length > 0;
+
+  return (
+    <div 
+      className="w-full h-[218px] bg-white shadow-sm hover:shadow-md transition-all duration-300 flex flex-col overflow-hidden border border-gray-100" 
+      style={{ borderRadius: '8.5px' }}
+      data-testid="profile-card"
+    >
+      {/* Banner Image at top */}
+      <div className="relative h-[70px] w-full flex-shrink-0 bg-gray-100">
+        <Image
+          src={props.banner || "/bg.jpg"}
+          alt={`Banner image for ${props.name}`}
+          fill
+          sizes="(max-width: 768px) 50vw, 197px"
+          className="object-cover"
+        />
+      </div>
+
+      {/* Profile Picture - Centered, overlapping banner */}
+      <div className="flex justify-center items-center -mt-[26px] relative z-10">
+        <div className="relative h-[52px] w-[52px] rounded-full overflow-hidden bg-white shadow-sm flex-shrink-0 border-[2px] border-white">
+          <Image
+            src={props.image || "/image (1).png"}
+            alt={props.name}
+            fill
+            sizes="52px"
+            className="object-cover"
+          />
+        </div>
+      </div>
+
+      {/* Content Area */}
+      <div className="px-2 pt-1 pb-2 flex flex-col flex-1 min-w-0">
+        {/* Name - Centered, bold */}
+        <h1 className="text-[14px] font-bold text-gray-900 leading-tight mb-0.5 text-center truncate w-full">
+          {props.name}
+        </h1>
+
+        {/* Location - Centered */}
+        <div className="flex items-center justify-center gap-1 text-gray-500 mb-1.5">
+          {/* <MapPin strokeWidth={1.5} className="w-3 h-3 flex-shrink-0" /> */}
+           {/* Using a smaller location text or icon if needed, keeping it minimal as per Frame 311 vibe */}
+           {/* Frame 311 analysis mentioned Location Icon. Keeping it. */}
+           <MapPin className="w-3 h-3" />
+          <p className="text-[10px] truncate max-w-[120px]">{props.location}</p>
+        </div>
+
+        {/* Bio - Left-aligned, limited height */}
+        <div className="w-full mb-auto px-1">
+          <p className="text-center text-gray-600 text-[10px] leading-snug line-clamp-2">
+            {hasBio ? props.bio : "No bio available"}
+          </p>
+        </div>
+
+        {/* Skills/Roles - Centered/Wrapped */}
+        <div className="w-full mt-2 px-1">
+          <div className="flex flex-wrap gap-1 justify-center">
+            {hasSkills ? (
+              props.skills.slice(0, 2).map((skill) => (
+                <span
+                  key={skill}
+                  className="text-[#31A7AC] bg-[#F0FDFA] border border-[#31A7AC]/30 text-[9px] font-medium px-1.5 py-0.5 rounded-[4px] whitespace-nowrap truncate max-w-full"
+                >
+                  {skill}
+                </span>
+              ))
+            ) : (
+              <span className="text-gray-400 text-[9px] italic">No roles</span>
+            )}
+             {hasSkills && props.skills.length > 2 && (
+                <span className="text-gray-400 text-[9px] py-0.5">+</span>
+             )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
