@@ -112,9 +112,8 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                             image: profile.profile_photo_url || "/image (1).png",
                             role: mainRole,
                             totlerole: `${roleCount} Roles`,
-                            // Note: Ideally this should link to the public profile page
-                            // Explore page uses /explore/ but here we stick to what fits the app structure
-                            proifleurl: `/profile` 
+                            // Link to the user's explore profile page
+                            proifleurl: `/explore/${profile.user_id}` 
                         };
                     } catch (innerError) {
                         console.error('Error processing profile:', innerError);
