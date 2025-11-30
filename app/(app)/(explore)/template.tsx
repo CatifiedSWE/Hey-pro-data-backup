@@ -308,6 +308,14 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
         }
     }
 
+    const handleClearRoleFilter = () => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.delete('role');
+        params.set('page', '1');
+        setActiveRole("");
+        router.push(`${pathname}?${params.toString()}`);
+    }
+
     return (
         <>
             <div className="max-w-7xl mx-auto">
