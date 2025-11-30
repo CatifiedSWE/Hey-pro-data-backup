@@ -1,5 +1,5 @@
 "use client";
-import { ChevronDown, ChevronUp, Filter, Search, MapPin } from "lucide-react";
+import { ChevronDown, ChevronUp, Filter, Search, MapPin, X } from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useCallback } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
