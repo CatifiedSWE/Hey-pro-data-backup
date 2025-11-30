@@ -45,45 +45,72 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
     useEffect(() => {
         const fetchSimilarUsers = async () => {
             try {
-                const { data, error } = await supabase
+                // 1. Fetch profiles without joining roles initially to avoid relation errors
+                // Also removed 'id' from select as user_id is the PK
+                const { data: profiles, error: profileError } = await supabase
                     .from('user_profiles')
                     .select(`
-                        id,
                         user_id,
                         alias_first_name,
                         alias_surname,
                         first_name,
                         surname,
-                        profile_photo_url,
-                        user_roles (
-                            role_name
-                        )
+                        profile_photo_url
                     `)
                     .limit(6);
 
-                if (error) {
-                    console.error('Error fetching similar users:', error);
-                } else if (data) {
-                    const mappedUsers: SimilarAccount[] = data.map((user: any) => {
-                        const name = user.alias_first_name 
-                            ? `${user.alias_first_name} ${user.alias_surname || ''}`
-                            : `${user.first_name || ''} ${user.surname || ''}`;
-                        
-                        const roles = user.user_roles || [];
-                        const mainRole = roles.length > 0 ? roles[0].role_name : 'Crew Member';
-                        const roleCount = roles.length;
-
-                        return {
-                            id: user.id || user.user_id,
-                            name: name.trim() || 'User',
-                            image: user.profile_photo_url || "/image (1).png",
-                            role: mainRole,
-                            totlerole: `${roleCount} Roles`,
-                            proifleurl: `/profile` // Or specific profile link if available
-                        };
-                    });
-                    setSimilarAccounts(mappedUsers);
+                if (profileError) {
+                    console.error('Error fetching profiles:', profileError);
+                    setLoadingSimilar(false);
+                    return;
                 }
+
+                if (!profiles || profiles.length === 0) {
+                    setSimilarAccounts([]);
+                    setLoadingSimilar(false);
+                    return;
+                }
+
+                // 2. Fetch roles for these users manually
+                const userIds = profiles.map((p: any) => p.user_id);
+                
+                // Note: In case user_roles table is empty or query fails, we continue gracefully
+                let roles: any[] = [];
+                if (userIds.length > 0) {
+                    const { data: rolesData, error: rolesError } = await supabase
+                        .from('user_roles')
+                        .select('user_id, role_name')
+                        .in('user_id', userIds);
+                    
+                    if (rolesError) {
+                        console.error('Error fetching roles:', rolesError);
+                    } else {
+                        roles = rolesData || [];
+                    }
+                }
+
+                // 3. Map data
+                const mappedUsers: SimilarAccount[] = profiles.map((user: any) => {
+                    const name = user.alias_first_name 
+                        ? `${user.alias_first_name} ${user.alias_surname || ''}`
+                        : `${user.first_name || ''} ${user.surname || ''}`;
+                    
+                    // Find roles for this user
+                    const userRoles = roles.filter((r: any) => r.user_id === user.user_id);
+                    const mainRole = userRoles.length > 0 ? userRoles[0].role_name : 'Crew Member';
+                    const roleCount = userRoles.length;
+
+                    return {
+                        id: user.user_id,
+                        name: name.trim() || 'User',
+                        image: user.profile_photo_url || "/image (1).png",
+                        role: mainRole,
+                        totlerole: `${roleCount} Roles`,
+                        proifleurl: `/profile` // Placeholder as per current routing
+                    };
+                });
+                setSimilarAccounts(mappedUsers);
+
             } catch (err) {
                 console.error('Exception fetching similar users:', err);
             } finally {
