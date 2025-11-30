@@ -50,101 +50,43 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                 console.log('Starting to fetch profiles...');
                 console.log('Current user ID:', user?.id);
                 
-                // First, try fetching WITHOUT excluding current user to see if we get any data
-                const { data: allProfiles, error: testError } = await supabase
-                    .from('user_profiles')
-                    .select('id, user_id, alias_first_name, alias_surname, first_name, surname')
-                    .limit(10);
+                // Use the API endpoint instead of direct Supabase client
+                // This matches exactly how explore page works (using server-side client)
+                const response = await fetch('/api/explore?limit=6&page=1');
                 
-                console.log('TEST QUERY - All profiles count:', allProfiles?.length || 0);
-                console.log('TEST QUERY - Error:', testError);
-                console.log('TEST QUERY - Sample data:', allProfiles?.slice(0, 2));
-                
-                // Build query to exclude current user and limit to 6
-                let query = supabase
-                    .from('user_profiles')
-                    .select(`
-                        id,
-                        user_id,
-                        alias_first_name,
-                        alias_surname,
-                        first_name,
-                        surname,
-                        profile_photo_url,
-                        banner_url,
-                        bio,
-                        country,
-                        city,
-                        created_at
-                    `)
-                    .order('created_at', { ascending: false })
-                    .limit(6);
-                
-                // Exclude current user if logged in
-                if (user?.id) {
-                    console.log('Excluding user ID:', user.id);
-                    query = query.neq('user_id', user.id);
-                }
-                
-                const { data: profiles, error } = await query;
-                console.log('MAIN QUERY - Error:', error);
-                console.log('MAIN QUERY - Profiles:', profiles);
-                
-                if (error) {
-                    console.error('Supabase error:', error);
+                if (!response.ok) {
+                    console.error('API error:', response.statusText);
                     setLoadingSimilar(false);
                     return;
                 }
                 
-                console.log('Fetched profiles from Supabase:', profiles?.length || 0);
+                const result = await response.json();
                 
-                if (!profiles || profiles.length === 0) {
-                    console.log('No profiles found in database');
+                if (!result.success || !result.data?.profiles) {
+                    console.log('No profiles in API response');
                     setSimilarAccounts([]);
                     setLoadingSimilar(false);
                     return;
                 }
                 
-                // Enrich profiles with roles - EXACT same logic as explore page
-                const enrichedProfiles = await Promise.all(
-                    profiles.map(async (profile) => {
-                        try {
-                            const { data: roles } = await supabase
-                                .from('user_roles')
-                                .select('role_name')
-                                .eq('user_id', profile.user_id)
-                                .order('sort_order', { ascending: true });
-                            
-                            // Build display name with priority: alias_first_name + alias_surname (1st), first_name + surname (2nd)
-                            const aliasName = `${profile.alias_first_name || ''} ${profile.alias_surname || ''}`.trim();
-                            const realName = `${profile.first_name || ''} ${profile.surname || ''}`.trim();
-                            const displayName = aliasName || realName || 'Anonymous';
-                            
-                            const userRoles = roles?.map(r => r.role_name) || [];
-                            const mainRole = userRoles.length > 0 ? userRoles[0] : 'Crew Member';
-                            const roleCount = userRoles.length;
-                            
-                            return {
-                                id: profile.user_id,
-                                name: displayName,
-                                image: profile.profile_photo_url || "/image (1).png",
-                                role: mainRole,
-                                totlerole: `${roleCount} ${roleCount === 1 ? 'Role' : 'Roles'}`,
-                                proifleurl: `/explore/${profile.user_id}`
-                            };
-                        } catch (innerError) {
-                            console.error(`Error processing profile ${profile.id}:`, innerError);
-                            return null;
-                        }
-                    })
-                );
+                console.log('Fetched profiles from API:', result.data.profiles.length);
                 
-                // Filter out only nulls (keep all users, already limited to 6 by query)
-                const validUsers = enrichedProfiles.filter((profile): profile is SimilarAccount => profile !== null);
+                // Transform API response to match our SimilarAccount interface
+                const transformedUsers = result.data.profiles
+                    .filter((profile: any) => profile.userId !== user?.id) // Exclude current user
+                    .slice(0, 6) // Limit to 6
+                    .map((profile: any) => ({
+                        id: profile.userId,
+                        name: profile.displayName || profile.name,
+                        image: profile.avatar || "/image (1).png",
+                        role: profile.roles && profile.roles.length > 0 ? profile.roles[0] : 'Crew Member',
+                        totlerole: `${profile.roles?.length || 0} ${profile.roles?.length === 1 ? 'Role' : 'Roles'}`,
+                        proifleurl: `/explore/${profile.userId}`
+                    }));
                 
-                console.log('Final users count:', validUsers.length);
-                console.log('Users to display:', validUsers);
-                setSimilarAccounts(validUsers);
+                console.log('Final users count:', transformedUsers.length);
+                console.log('Users to display:', transformedUsers);
+                setSimilarAccounts(transformedUsers);
 
             } catch (error) {
                 console.error('Error in fetchSimilarUsers:', error);
