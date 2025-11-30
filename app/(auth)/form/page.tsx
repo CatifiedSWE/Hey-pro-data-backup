@@ -206,7 +206,7 @@ export default function FormPage() {
         {/* Logo */}
         <div className="flex justify-center mb-8">
           <Image 
-            src="/logo/logo.svg" 
+            src="/logo/LogoIcon.svg"
             alt="HPD Logo" 
             width={80} 
             height={55}
