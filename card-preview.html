@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Card Preview</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: #f3f4f6;
+            padding: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto">
+        <h1 class="text-2xl font-bold mb-8 text-center">Profile Cards - Fixed Design</h1>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 place-items-center">
+            
+            <!-- Card 1 - Michael Molar -->
+            <div class="w-[320px] h-[380px] bg-white shadow-md rounded-2xl hover:shadow-lg transition-all duration-300 flex flex-col overflow-hidden border border-gray-100 group">
+                <!-- Header Image - 40-45% of card height -->
+                <div class="relative h-[170px] w-full flex-shrink-0 overflow-hidden">
+                    <img 
+                        src="https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=400" 
+                        alt="Banner" 
+                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                </div>
+
+                <!-- Profile Picture - Overlapping background -->
+                <div class="flex justify-start items-start -mt-[55px] relative z-10 px-5">
+                    <div class="relative h-[110px] w-[110px] rounded-full border-4 border-white overflow-hidden bg-white shadow-md flex-shrink-0">
+                        <img 
+                            src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200" 
+                            alt="Michael Molar" 
+                            class="w-full h-full object-cover"
+                        />
+                    </div>
+                </div>
+
+                <!-- Content Area - Left-aligned layout -->
+                <div class="px-5 pt-4 pb-5 flex flex-col flex-1">
+                    <!-- Name - Left aligned, bold -->
+                    <h1 class="text-[20px] font-bold text-gray-900 leading-tight mb-2">
+                        Michael Molar
+                    </h1>
+
+                    <!-- Location - Left aligned -->
+                    <div class="flex items-center gap-1.5 text-gray-600 mb-4">
+                        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        <p class="text-[15px]">UAE, Dhabi</p>
+                    </div>
+
+                    <!-- Bio - Left-aligned, grows to fill space -->
+                    <div class="w-full mb-4 flex-1">
+                        <p class="text-left text-gray-600 text-[14px] leading-relaxed line-clamp-3">
+                            Behind-the-scenes documentary capturing the energy and creativity of Dubai Fashion Week 2024. We need a skilled team to docu...
+                        </p>
+                    </div>
+
+                    <!-- Skills/Roles - Left-aligned, wrapping layout -->
+                    <div class="w-full">
+                        <div class="flex flex-wrap gap-2 items-center">
+                            <span class="text-[#31A7AC] bg-white border-2 border-[#31A7AC] text-[14px] font-medium px-4 py-2 rounded-xl whitespace-nowrap">
+                                Producer
+                            </span>
+                            <span class="text-[#31A7AC] bg-white border-2 border-[#31A7AC] text-[14px] font-medium px-4 py-2 rounded-xl whitespace-nowrap">
+                                Producer | Creative
+                            </span>
+                            <span class="text-[#31A7AC] bg-white border-2 border-[#31A7AC] text-[14px] font-medium px-4 py-2 rounded-xl whitespace-nowrap">
+                                Production Manager
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2 - Ajith Kumar -->
+            <div class="w-[320px] h-[380px] bg-white shadow-md rounded-2xl hover:shadow-lg transition-all duration-300 flex flex-col overflow-hidden border border-gray-100 group">
+                <!-- Header Image -->
+                <div class="relative h-[170px] w-full flex-shrink-0 overflow-hidden">
+                    <img 
+                        src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400" 
+                        alt="Banner" 
+                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                </div>
+
+                <!-- Profile Picture -->
+                <div class="flex justify-start items-start -mt-[55px] relative z-10 px-5">
+                    <div class="relative h-[110px] w-[110px] rounded-full border-4 border-white overflow-hidden bg-white shadow-md flex-shrink-0">
+                        <img 
+                            src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200" 
+                            alt="Ajith Kumar" 
+                            class="w-full h-full object-cover"
+                        />
+                    </div>
+                </div>
+
+                <!-- Content Area -->
+                <div class="px-5 pt-4 pb-5 flex flex-col flex-1">
+                    <h1 class="text-[20px] font-bold text-gray-900 leading-tight mb-2">
+                        Ajith Kumar
+                    </h1>
+
+                    <div class="flex items-center gap-1.5 text-gray-600 mb-4">
+                        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        <p class="text-[15px]">Florida, India</p>
+                    </div>
+
+                    <div class="w-full mb-4 flex-1">
+                        <p class="text-left text-gray-600 text-[14px] leading-relaxed line-clamp-3">
+                            Award-winning cinematographer with 10+ years in narrative film and...
+                        </p>
+                    </div>
+
+                    <div class="w-full">
+                        <div class="flex flex-wrap gap-2 items-center">
+                            <span class="text-[#31A7AC] bg-white border-2 border-[#31A7AC] text-[14px] font-medium px-4 py-2 rounded-xl whitespace-nowrap">
+                                Director
+                            </span>
+                            <span class="text-[#31A7AC] bg-white border-2 border-[#31A7AC] text-[14px] font-medium px-4 py-2 rounded-xl whitespace-nowrap">
+                                Stunt master
+                            </span>
+                            <span class="text-[#31A7AC] bg-white border-2 border-[#31A7AC] text-[14px] font-medium px-4 py-2 rounded-xl whitespace-nowrap">
+                                DOP
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3 - Naveen SM (no bio) -->
+            <div class="w-[320px] h-[380px] bg-white shadow-md rounded-2xl hover:shadow-lg transition-all duration-300 flex flex-col overflow-hidden border border-gray-100 group">
+                <!-- Header Image -->
+                <div class="relative h-[170px] w-full flex-shrink-0 overflow-hidden">
+                    <img 
+                        src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400" 
+                        alt="Banner" 
+                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                </div>
+
+                <!-- Profile Picture -->
+                <div class="flex justify-start items-start -mt-[55px] relative z-10 px-5">
+                    <div class="relative h-[110px] w-[110px] rounded-full border-4 border-white overflow-hidden bg-white shadow-md flex-shrink-0">
+                        <img 
+                            src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200" 
+                            alt="Naveen SM" 
+                            class="w-full h-full object-cover"
+                        />
+                    </div>
+                </div>
+
+                <!-- Content Area -->
+                <div class="px-5 pt-4 pb-5 flex flex-col flex-1">
+                    <h1 class="text-[20px] font-bold text-gray-900 leading-tight mb-2">
+                        Naveen SM
+                    </h1>
+
+                    <div class="flex items-center gap-1.5 text-gray-600 mb-4">
+                        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        <p class="text-[15px]">chennai, India</p>
+                    </div>
+
+                    <div class="w-full mb-4 flex-1">
+                        <p class="text-left text-gray-600 text-[14px] leading-relaxed">
+                            No bio available
+                        </p>
+                    </div>
+
+                    <div class="w-full">
+                        <div class="flex flex-wrap gap-2 items-center">
+                            <span class="text-gray-400 text-[14px] italic">No roles</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>
