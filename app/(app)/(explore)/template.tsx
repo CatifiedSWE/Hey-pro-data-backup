@@ -468,29 +468,70 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                 <div className="flex w-full flex-col gap-6 lg:flex-row">
                     <div className={`${isFilterOpen ? 'sm:flex hidden' : 'hidden lg:flex'} w-full flex-col gap-4 rounded-2xl bg-white/50 p-4 lg:max-w-[280px] lg:overflow-y-auto h-[calc(100vh-200px)]`}>
 
-                        {filterOptions.map(opt => (
-                            <details key={opt.label} className="group  rounded-[10px]  border-[1px] border-[#989898]/10 rotate-[5px]  bg-white">
-                                <summary className="cursor-pointer select-none flex items-center justify-between px-3 py-2 text-sm font-[400px]">
-                                    <span>{opt.label}</span>
-                                    <span>
-                                        <span className="group-open:hidden"><ChevronUp className="h-4 w-4 text-[#FA6E80]" /></span>
-                                        <span className="hidden group-open:inline"><ChevronDown className="h-4 w-4 text-[#FA6E80]" /></span>
-                                    </span>
-                                </summary>
-                                <ul className="px-3 pb-2 space-y-1 bg-[#FAFAFA]">
-                                    {opt.value.map(v => (
-                                        <li key={v.label}>
-                                            <Link
-                                                href={v.href}
-                                                className="text-xs text-[#444444] hover:text-[#FA6E80] cursor-pointer block py-1"
-                                            >
-                                                {v.label}
-                                            </Link>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </details>
-                        ))
+                        {filterOptions.map(opt => {
+                            // Check if any role in this category is active
+                            const hasActiveRole = opt.value.some(v => v.label === activeRole);
+                            
+                            return (
+                                <details key={opt.label} className="group  rounded-[10px]  border-[1px] border-[#989898]/10 rotate-[5px]  bg-white" open={hasActiveRole}>
+                                    <summary className={`cursor-pointer select-none flex items-center justify-between px-3 py-2 text-sm font-[400px] ${hasActiveRole ? 'bg-[#FA6E80] text-white rounded-t-[10px]' : ''}`}>
+                                        <span>{opt.label}</span>
+                                        <span className="flex items-center gap-2">
+                                            {hasActiveRole && (
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        handleClearRoleFilter();
+                                                    }}
+                                                    className="hover:bg-white/20 rounded-full p-0.5 transition-colors"
+                                                    title="Clear filter"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                                    </svg>
+                                                </button>
+                                            )}
+                                            <span className="group-open:hidden"><ChevronUp className="h-4 w-4 text-[#FA6E80]" /></span>
+                                            <span className="hidden group-open:inline"><ChevronDown className={`h-4 w-4 ${hasActiveRole ? 'text-white' : 'text-[#FA6E80]'}`} /></span>
+                                        </span>
+                                    </summary>
+                                    <ul className="px-3 pb-2 space-y-1 bg-[#FAFAFA]">
+                                        {opt.value.map(v => (
+                                            <li key={v.label}>
+                                                <Link
+                                                    href={v.href}
+                                                    className={`text-xs cursor-pointer block py-1 flex items-center justify-between group/item ${
+                                                        activeRole === v.label 
+                                                            ? 'text-[#FA6E80] font-semibold' 
+                                                            : 'text-[#444444] hover:text-[#FA6E80]'
+                                                    }`}
+                                                >
+                                                    <span>{v.label}</span>
+                                                    {activeRole === v.label && (
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                e.stopPropagation();
+                                                                handleClearRoleFilter();
+                                                            }}
+                                                            className="hover:bg-[#FA6E80]/10 rounded-full p-0.5 transition-colors"
+                                                            title="Clear filter"
+                                                        >
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                                                            </svg>
+                                                        </button>
+                                                    )}
+                                                </Link>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </details>
+                            );
+                        })
                         }
                     </div>
                     <div className="w-full flex-1 overflow-x-hidden p-2 sm:p-4 min-h-[600px]">{children}</div>
