@@ -1,17 +1,21 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { supabase, setStoragePreference } from '@/lib/supabase/client';
 import { toast } from 'sonner';
+import { Eye, EyeOff } from 'lucide-react';
+import { supabase, setStoragePreference } from '@/lib/supabase/client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
+import { cn } from '@/lib/utils';
 
-/**
- * Login Form Component containing the logic using useSearchParams
- */
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -19,6 +23,7 @@ function LoginForm() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   // On page load: Check if already logged in
   useEffect(() => {
@@ -63,6 +68,18 @@ function LoginForm() {
     e.preventDefault();
     setLoading(true);
     setError('');
+
+    // Validation
+    if (!formData.email.trim()) {
+      setError('Please enter your email');
+      setLoading(false);
+      return;
+    }
+    if (!formData.password) {
+      setError('Please enter your password');
+      setLoading(false);
+      return;
+    }
 
     try {
       // Step 1: Set storage preference BEFORE login
@@ -120,11 +137,7 @@ function LoginForm() {
   };
 
   // OAuth login
-  const handleOAuthLogin = async (provider: 'google' | 'apple') => {
-    if (provider === 'apple') {
-      return; // Apple login not implemented
-    }
-
+  const handleGoogleAuth = async () => {
     setLoading(true);
     setError('');
 
@@ -134,7 +147,7 @@ function LoginForm() {
       
       // Initiate OAuth flow
       const { error } = await supabase.auth.signInWithOAuth({
-        provider,
+        provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/callback`
         }
@@ -152,22 +165,37 @@ function LoginForm() {
   };
 
   return (
-    <div className="flex min-h-screen bg-white">
-      {/* LEFT GRADIENT PART */}
-      <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-8">
-        <div className="w-full h-full rounded-3xl" style={{background: 'conic-gradient(from 180deg at 50% 50%, #FA6E80 0deg, #6A89BE 144deg, #85AAB7 216deg, #31A7AC 360deg)'}}></div>
+    <div className="min-h-screen flex overflow-hidden bg-white">
+      {/* Left side - Gradient Background */}
+      <div className="hidden md:flex md:w-1/2 items-center justify-end pl-2 pr-0 py-2">
+        <div
+          className="w-full h-full max-w-[450px] max-h-[721px] rounded-[68px]"
+          style={{
+            background:
+              "conic-gradient(from 180deg at 50% 50%, #FA6E80 0deg, #6A89BE 144deg, #85AAB7 216deg, #31A7AC 360deg)",
+          }}
+        ></div>
       </div>
 
-      {/* RIGHT LOGIN PART */}
-      <div className="flex-1 flex items-center justify-center bg-white px-8">
-        <div className="w-full max-w-md">
-          <div className="mb-8">
-            <img src="/logo/logo.svg" alt="Logo" width="60" className="mb-8" />
+      {/* Right side - Login Form */}
+      <div className="w-full md:w-1/2 flex items-center justify-start px-4 sm:px-6 md:pl-0 py-6 md:py-12">
+        <div className="w-full max-w-md md:max-w-lg md:pl-12 lg:pl-16 xl:pl-20">
+          {/* Logo */}
+          <div className="mb-6 md:text-left text-center">
+            <Image
+              src="/logo/LogoIcon.svg"
+              alt="HeyProData"
+              width={200}
+              height={60}
+              className="h-14 md:h-12 mb-4 md:mb-8 w-auto mx-auto md:mx-0 "
+            />
+            <p className="text-2xl md:text-3xl font-light text-gray-900">
+              Login to
+              <span className="font-semibold text-pink"> Hey</span>
+              <span className="font-semibold text-black">Pro</span>
+              <span className="font-semibold text-light-green">Data</span>
+            </p>
           </div>
-
-          <h2 className="text-3xl font-medium mb-8">
-            Login to <span className="text-gray-900">HeyPro</span><span className="text-[#00bcd4]">Data</span>
-          </h2>
 
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
@@ -175,85 +203,129 @@ function LoginForm() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <input
+          {/* Login Form */}
+          <form onSubmit={handleSubmit} className="space-y-2 md:space-y-3">
+            {/* Email Field */}
+            <div>
+              <Input
                 type="email"
                 placeholder="Email"
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
+                onChange={(e) => {
+                  setFormData({ ...formData, email: e.target.value });
+                  if (error) setError('');
+                }}
+                className="h-11 md:h-12 text-sm md:text-base border-gray-300 rounded-xl focus:border-pink focus:ring-pink transition-all duration-300"
                 required
                 disabled={loading}
               />
             </div>
 
-            <div className="mb-4">
-              <input
-                type="password"
+            {/* Password Field */}
+            <div className="relative">
+              <Input
+                type={showPassword ? "text" : "password"}
                 placeholder="Password"
                 value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
+                onChange={(e) => {
+                  setFormData({ ...formData, password: e.target.value });
+                  if (error) setError('');
+                }}
+                className="h-11 md:h-12 text-sm md:text-base border-gray-300 rounded-xl focus:border-[#FA6E80] focus:ring-[#FA6E80] pr-10"
                 required
                 disabled={loading}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 top-1 pr-3 flex items-center text-gray-600"
+              >
+                {showPassword ? (
+                  <EyeOff className="h-5 w-5" />
+                ) : (
+                  <Eye className="h-5 w-5" />
+                )}
+              </button>
             </div>
 
-            <div className="flex items-center justify-between mb-6 text-sm">
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
+            {/* Remember Password Checkbox */}
+            <div className="flex items-center flex-row justify-between mb-4">
+              <span className="flex items-center space-x-2 md:space-x-3">
+                <Checkbox
+                  id="remember"
                   checked={formData.keepLoggedIn}
-                  onChange={(e) => setFormData({ ...formData, keepLoggedIn: e.target.checked })}
-                  className="mr-2"
-                  disabled={loading}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, keepLoggedIn: checked as boolean })
+                  }
+                  className="border-gray-400 data-[state=checked]:bg-pink data-[state=checked]:border-pink"
                 />
-                Keep me logged in
-              </label>
-              <Link href="/forget-password" className="text-[#00bcd4] hover:underline">
-                Forgot password?
+                <label
+                  htmlFor="remember"
+                  className="text-xs md:text-sm text-gray-600 cursor-pointer select-none"
+                >
+                  Keep me logged in
+                </label>
+              </span>
+
+              <Link
+                href="/forget-password"
+                className="text-xs md:text-sm text-light-green font-medium hover:underline transition-all duration-200"
+              >
+                Forgot Password?
               </Link>
             </div>
 
-            <button
+            {/* Login Button */}
+            <Button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#ff6b9d] hover:bg-[#ff5a8f] text-white py-3 rounded-lg font-medium mb-6 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className={cn(
+                "w-full h-[40px] md:h-[50px] bg-pink hover:bg-[#f95569] text-white text-sm md:text-lg font-medium rounded-[15px] transition-all duration-300 ease-out transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl cursor-pointer",
+                loading && "opacity-70 cursor-progress"
+              )}
             >
-              {loading ? 'Logging in...' : 'Login'}
-            </button>
+              {loading ? "Logging in..." : "Login"}
+            </Button>
           </form>
 
-          <div className="relative mb-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white text-gray-500">or</span>
-            </div>
+          {/* Divider */}
+          <div className="flex items-center my-5 md:my-8">
+            <div className="flex-1 border-t border-gray-300"></div>
+            <span className="px-3 md:px-4 text-gray-500 text-xs md:text-sm">
+              or
+            </span>
+            <div className="flex-1 border-t border-gray-300"></div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <button 
-              onClick={() => handleOAuthLogin('google')}
+          {/* Social Login Buttons */}
+          <div className="flex flex-row w-full gap-3 md:gap-4 justify-center">
+            <Button
+              type="button"
+              onClick={handleGoogleAuth}
               disabled={loading}
-              className="flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full h-[45px] md:h-[40px] bg-white border border-gray-300 rounded-[12px] md:rounded-[15px] hover:bg-gray-50 hover:border-gray-400 transition-all duration-300 transform hover:scale-105 shadow-sm hover:shadow-md flex items-center justify-center p-3 md:p-6"
             >
-              <img src="/assets/google-icon.png" width="20" alt="Google" />
-              Google
-            </button>
-            <button 
-              disabled
-              className="flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-lg opacity-50 cursor-not-allowed"
-            >
-              <img src="/assets/apple-icon.png" width="20" alt="Apple" />
-              Apple
-            </button>
+              <Image
+                src="/assets/icons/google.svg"
+                alt="Google Logo"
+                width={24}
+                height={24}
+                className="h-6 w-6"
+              />
+            </Button>
           </div>
 
-          <div className="text-center text-sm">
-            Don&apos;t have an account? <Link href="/signup" className="text-[#0066ff] hover:underline">Sign up</Link>
+          {/* Sign up Link */}
+          <div className="text-center mt-5 md:mt-8">
+            <span className="text-gray-600 text-xs md:text-base">
+              Don&apos;t have an account?{" "}
+            </span>
+            <Link
+              href="/signup"
+              className="text-[#4A90E2] font-medium hover:underline transition-all duration-200 text-xs md:text-base bg-transparent shadow-none hover:shadow-none"
+            >
+              Sign up
+            </Link>
           </div>
         </div>
       </div>
@@ -261,9 +333,6 @@ function LoginForm() {
   );
 }
 
-/**
- * Main Page Component
- */
 export default function LoginPage() {
   return (
     <Suspense fallback={
