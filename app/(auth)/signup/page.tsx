@@ -352,12 +352,15 @@ export default function SignUpPage() {
 
       {/* Right Side - Gradient Background 
           Responsive: Hidden on mobile, visible from lg.
-          Layout: Uses max-h-[90vh] to respect screen height, preserving aspect ratio.
+          Layout: Uses inline styles for robust aspect ratio + height constraints.
       */}
       <div className="hidden lg:flex lg:w-1/2 items-center justify-start p-8 h-screen sticky top-0 order-1 lg:order-2">
         <div
-          className="w-auto h-auto max-w-[450px] max-h-[90vh] aspect-[450/721] rounded-[68px] shadow-2xl"
+          className="rounded-[68px] shadow-2xl"
           style={{
+            height: '85vh',
+            maxHeight: '721px',
+            aspectRatio: '450/721',
             background:
               "conic-gradient(from 0deg at 50% 50%, #FA6E80 0deg, #6A89BE 144deg, #85AAB7 216deg, #31A7AC 360deg)",
           }}
