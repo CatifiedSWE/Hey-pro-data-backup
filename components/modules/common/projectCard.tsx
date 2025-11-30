@@ -4,8 +4,8 @@ import Image from "next/image";
 
 export default function ProjectCard(props: ProjectCardType) {
   return (
-    <div className="w-full max-w-[320px] h-[26rem] bg-[#FAFAFA] shadow-lg rounded-2xl mx-auto hover:shadow-xl transition-shadow">
-      <div className="relative h-[12.5rem] w-full">
+    <div className="w-full max-w-[320px] bg-[#FAFAFA] shadow-lg rounded-2xl mx-auto hover:shadow-xl transition-shadow flex flex-col">
+      <div className="relative h-[200px] w-full flex-shrink-0">
         <Image
           src={props.banner || "/bg.jpg"}
           alt={`Banner image for ${props.name}`}
@@ -14,8 +14,8 @@ export default function ProjectCard(props: ProjectCardType) {
           className="rounded-t-2xl object-cover"
         />
       </div>
-      <div className="flex justify-center items-center -mt-12 mx-auto relative z-10">
-        <div className="relative h-[96px] w-[96px] rounded-full border-4 border-white overflow-hidden bg-white shadow-md">
+      <div className="flex justify-center items-start -mt-[48px] mx-auto relative z-10 mb-3">
+        <div className="relative h-[96px] w-[96px] rounded-full border-4 border-white overflow-hidden bg-white shadow-md flex-shrink-0">
             <Image
             src={props.image || "/image (1).png"}
             alt={props.name}
@@ -25,30 +25,30 @@ export default function ProjectCard(props: ProjectCardType) {
             />
         </div>
       </div>
-      <div className="px-4 pt-2">
-        <div className="flex flex-col justify-center items-center space-y-1">
-          <h1 className="text-lg font-semibold text-center">{props.name}</h1>
+      <div className="px-4 pb-4 flex flex-col flex-1">
+        <div className="flex flex-col items-center">
+          <h1 className="text-lg font-semibold text-center leading-tight">{props.name}</h1>
         </div>
-        <div className="flex justify-center items-center space-x-1 text-gray-500 mt-1">
+        <div className="flex justify-center items-center gap-1 text-gray-500 mt-2">
           <MapPin strokeWidth={1.5} className="w-4 h-4 flex-shrink-0" />
-          <p className="text-sm">{props.location}</p>
+          <p className="text-sm text-center">{props.location}</p>
         </div>
 
-        <p className="block w-full text-gray-600 mt-3 mb-2 text-center px-1 text-sm line-clamp-2">
-          {props.bio}
+        <p className="w-full text-gray-600 text-center text-sm line-clamp-2 mt-3 min-h-[2.5rem]">
+          {props.bio || "\u00A0"}
         </p>
 
-        <div className="w-full flex flex-wrap gap-1.5 justify-center mt-3 h-[4.5rem] overflow-hidden">
+        <div className="w-full flex flex-wrap gap-1.5 justify-center mt-4">
           {props.skills.slice(0, 3).map((skill) => (
             <span
               key={skill}
-              className="text-light-green text-xs font-medium px-3 py-1 border border-light-green rounded-full"
+              className="text-light-green text-xs font-medium px-3 py-1 border border-light-green rounded-full whitespace-nowrap"
             >
               {skill}
             </span>
           ))}
           {props.skills.length > 3 && (
-             <span className="text-gray-400 text-xs font-medium px-3 py-1">
+             <span className="text-gray-400 text-xs font-medium px-3 py-1 whitespace-nowrap">
                 +{props.skills.length - 3}
              </span>
           )}
