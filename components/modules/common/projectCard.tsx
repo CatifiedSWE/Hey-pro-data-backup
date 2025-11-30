@@ -7,7 +7,7 @@ export default function ProjectCard(props: ProjectCardType) {
   const hasSkills = props.skills && props.skills.length > 0;
 
   return (
-    <div className="w-full min-h-[240px] bg-[#FAFAFA] shadow-md hover:shadow-lg transition-all duration-300 flex flex-col overflow-hidden rounded-[8.5px]">
+    <div className="w-full h-full min-h-[240px] bg-[#FAFAFA] shadow-md hover:shadow-lg transition-all duration-300 flex flex-col overflow-hidden rounded-[8.5px]">
       {/* Banner Image at top */}
       <div className="relative h-[80px] w-full flex-shrink-0">
         <Image
