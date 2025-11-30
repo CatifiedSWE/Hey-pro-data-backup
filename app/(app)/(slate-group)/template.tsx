@@ -5,10 +5,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { BookmarkIcon, HelpCircle, SettingsIcon, UserRound } from "lucide-react";
 import { useProfile } from "@/hooks/useProfile";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function AppLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     // Fetch real profile data
     const { profile: userProfile, loading, error } = useProfile();
+    const { user } = useAuth();
     interface SimilarAccount {
         id: number;
         name: string;
