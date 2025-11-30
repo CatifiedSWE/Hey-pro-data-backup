@@ -50,45 +50,119 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                 console.log('Starting to fetch profiles...');
                 console.log('Current user ID:', user?.id);
                 
-                // Fetch from the data file - using static data approach
-                const { default: profilesData } = await import('@/data/recommendUsers');
+                // Get current user ID to exclude from results
+                const currentUserId = user?.id;
                 
-                console.log('Loaded profiles from data file:', profilesData?.length || 0);
-                
-                if (!profilesData || profilesData.length === 0) {
-                    console.log('No profiles in data file');
+                // Build query for user profiles
+                let query = supabase
+                    .from('user_profiles')
+                    .select(`
+                        id,
+                        user_id,
+                        alias_first_name,
+                        alias_surname,
+                        first_name,
+                        surname,
+                        profile_photo_url,
+                        banner_url,
+                        bio,
+                        country,
+                        city,
+                        created_at
+                    `)
+                    .order('created_at', { ascending: false })
+                    .limit(6);
+
+                // Exclude current user from results
+                if (currentUserId) {
+                    query = query.neq('user_id', currentUserId);
+                }
+
+                const { data: profiles, error } = await query;
+
+                if (error) {
+                    console.error('Error fetching profiles:', error);
                     setSimilarAccounts([]);
                     setLoadingSimilar(false);
                     return;
                 }
+
+                if (!profiles || profiles.length === 0) {
+                    console.log('No profiles found');
+                    setSimilarAccounts([]);
+                    setLoadingSimilar(false);
+                    return;
+                }
+
+                console.log('Fetched profiles:', profiles.length);
+
+                // Fetch Google OAuth avatars for all users at once (batch query)
+                const { data: authData } = await supabase.auth.admin.listUsers();
                 
-                // Filter out current user and limit to 6
-                const filteredProfiles = profilesData
-                    .filter((profile: any) => profile.id !== user?.id)
-                    .slice(0, 6);
+                // Create a map of user_id to Google avatar
+                const googleAvatarMap = new Map<string, string>();
+                if (authData?.users) {
+                    authData.users.forEach(authUser => {
+                        if (authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture) {
+                            googleAvatarMap.set(
+                                authUser.id, 
+                                authUser.user_metadata.avatar_url || authUser.user_metadata.picture
+                            );
+                        }
+                    });
+                }
+
+                // Enrich profiles with roles and Google avatars
+                const enrichedProfiles = await Promise.all(
+                    profiles.map(async (profile) => {
+                        try {
+                            // Fetch user roles
+                            const { data: roles } = await supabase
+                                .from('user_roles')
+                                .select('role_name')
+                                .eq('user_id', profile.user_id)
+                                .order('sort_order', { ascending: true });
+                            
+                            const roleCount = roles?.length || 0;
+                            const primaryRole = roles && roles.length > 0 ? roles[0].role_name : 'Crew Member';
+
+                            // Build display name with priority: alias_first_name + alias_surname (1st), first_name + surname (2nd)
+                            const aliasName = `${profile.alias_first_name || ''} ${profile.alias_surname || ''}`.trim();
+                            const realName = `${profile.first_name || ''} ${profile.surname || ''}`.trim();
+                            const displayName = aliasName || realName || 'Anonymous';
+
+                            // Priority: profile_photo_url > Google metadata avatar > default
+                            const profileImage = profile.profile_photo_url || googleAvatarMap.get(profile.user_id) || '/image (1).png';
+
+                            return {
+                                id: profile.user_id,
+                                name: displayName,
+                                image: profileImage,
+                                role: primaryRole,
+                                totlerole: `${roleCount} Role${roleCount !== 1 ? 's' : ''}`,
+                                proifleurl: `/explore/${profile.user_id}`
+                            };
+                        } catch (innerError) {
+                            console.error(`Error processing profile ${profile.id}:`, innerError);
+                            return null;
+                        }
+                    })
+                );
                 
-                // Transform to match our SimilarAccount interface
-                const transformedUsers = filteredProfiles.map((profile: any) => ({
-                    id: profile.id,
-                    name: profile.name,
-                    image: profile.avatar || "/image (1).png",
-                    role: profile.role || 'Crew Member',
-                    totlerole: '1 Role', // Static for now since data doesn't have role count
-                    proifleurl: `/explore/${profile.id}`
-                }));
-                
-                console.log('Final users count:', transformedUsers.length);
-                console.log('Users to display:', transformedUsers);
-                setSimilarAccounts(transformedUsers);
+                // Filter out null profiles and update state
+                const validProfiles = enrichedProfiles.filter(p => p !== null) as SimilarAccount[];
+                console.log('Final users count:', validProfiles.length);
+                setSimilarAccounts(validProfiles);
 
             } catch (error) {
                 console.error('Error in fetchSimilarUsers:', error);
+                setSimilarAccounts([]);
             } finally {
                 setLoadingSimilar(false);
             }
         };
 
-        // Fetch when auth has finished loading (even if no user, will show profiles)
+        // Fetch when auth has finished loading
         if (!authLoading) {
             fetchSimilarUsers();
         }
