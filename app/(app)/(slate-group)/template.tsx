@@ -138,8 +138,11 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
             }
         };
 
-        fetchSimilarUsers();
-    }, [user, authLoading]);
+        // Only fetch when auth has finished loading
+        if (!authLoading) {
+            fetchSimilarUsers();
+        }
+    }, [authLoading, user?.id]);
 
     // Construct profile object from real user data
     const profile: Profile = {
