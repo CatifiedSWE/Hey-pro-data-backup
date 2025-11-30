@@ -49,8 +49,7 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                 console.log('Starting to fetch profiles...');
                 console.log('Current user ID:', user?.id);
                 
-                // Fetch from the data file that explore uses - this is a client-side approach
-                // Import dynamically to match explore page pattern
+                // Fetch from the data file - using static data approach
                 const { default: profilesData } = await import('@/data/recommendUsers');
                 
                 console.log('Loaded profiles from data file:', profilesData?.length || 0);
@@ -67,14 +66,14 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                     .filter((profile: any) => profile.id !== user?.id)
                     .slice(0, 6);
                 
-                // Transform to match our interface
+                // Transform to match our SimilarAccount interface
                 const transformedUsers = filteredProfiles.map((profile: any) => ({
                     id: profile.id,
                     name: profile.name,
-                    image: profile.image || "/image (1).png",
+                    image: profile.avatar || "/image (1).png",
                     role: profile.role || 'Crew Member',
-                    totlerole: profile.totlerole || '1 Role',
-                    proifleurl: profile.proifleurl || `/explore/${profile.id}`
+                    totlerole: '1 Role', // Static for now since data doesn't have role count
+                    proifleurl: `/explore/${profile.id}`
                 }));
                 
                 console.log('Final users count:', transformedUsers.length);
