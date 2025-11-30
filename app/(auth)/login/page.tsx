@@ -166,17 +166,11 @@ function LoginForm() {
 
   return (
     <div className="min-h-screen flex overflow-hidden bg-white">
-      {/* Left side - Gradient Background 
-          Responsive: Hidden on mobile, visible from lg.
-          Layout: Centered horizontally and vertically.
-      */}
-      <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-4 h-screen sticky top-0">
+      {/* Left side - Gradient Background */}
+      <div className="hidden md:flex md:w-1/2 items-center justify-end pl-2 pr-0 py-2">
         <div
-          className="rounded-[68px] shadow-2xl"
+          className="w-full h-full max-w-[450px] max-h-[721px] rounded-[68px]"
           style={{
-            height: '85vh',
-            maxHeight: '721px',
-            aspectRatio: '450/721',
             background:
               "conic-gradient(from 180deg at 50% 50%, #FA6E80 0deg, #6A89BE 144deg, #85AAB7 216deg, #31A7AC 360deg)",
           }}
@@ -184,18 +178,18 @@ function LoginForm() {
       </div>
 
       {/* Right side - Login Form */}
-      <div className="w-full lg:w-1/2 flex flex-col items-center justify-center min-h-screen px-4 sm:px-8 md:px-12 py-8">
-        <div className="w-full max-w-md sm:max-w-lg">
+      <div className="w-full md:w-1/2 flex items-center justify-start px-4 sm:px-6 md:pl-0 py-6 md:py-12">
+        <div className="w-full max-w-md md:max-w-lg md:pl-12 lg:pl-16 xl:pl-20">
           {/* Logo */}
-          <div className="mb-8 text-center lg:text-left">
+          <div className="mb-6 md:text-left text-center">
             <Image
               src="/logo/LogoIcon.svg"
               alt="HeyProData"
               width={200}
               height={60}
-              className="h-12 sm:h-14 mb-6 w-auto mx-auto lg:mx-0"
+              className="h-14 md:h-12 mb-4 md:mb-8 w-auto mx-auto md:mx-0 "
             />
-            <p className="text-2xl sm:text-3xl font-light text-gray-900">
+            <p className="text-2xl md:text-3xl font-light text-gray-900">
               Login to
               <span className="font-semibold text-pink"> Hey</span>
               <span className="font-semibold text-black">Pro</span>
@@ -204,13 +198,13 @@ function LoginForm() {
           </div>
 
           {error && (
-            <div className="mb-6 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm animate-in fade-in slide-in-from-top-2">
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
               {error}
             </div>
           )}
 
           {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-2 md:space-y-3">
             {/* Email Field */}
             <div>
               <Input
@@ -221,7 +215,7 @@ function LoginForm() {
                   setFormData({ ...formData, email: e.target.value });
                   if (error) setError('');
                 }}
-                className="h-12 text-base border-gray-300 rounded-xl focus:border-pink focus:ring-pink transition-all duration-300"
+                className="h-11 md:h-12 text-sm md:text-base border-gray-300 rounded-xl focus:border-pink focus:ring-pink transition-all duration-300"
                 required
                 disabled={loading}
               />
@@ -237,14 +231,14 @@ function LoginForm() {
                   setFormData({ ...formData, password: e.target.value });
                   if (error) setError('');
                 }}
-                className="h-12 text-base border-gray-300 rounded-xl focus:border-[#FA6E80] focus:ring-[#FA6E80] pr-10"
+                className="h-11 md:h-12 text-sm md:text-base border-gray-300 rounded-xl focus:border-[#FA6E80] focus:ring-[#FA6E80] pr-10"
                 required
                 disabled={loading}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 top-0 h-full pr-3 flex items-center text-gray-500 hover:text-gray-700"
+                className="absolute inset-y-0 right-0 top-1 pr-3 flex items-center text-gray-600"
               >
                 {showPassword ? (
                   <EyeOff className="h-5 w-5" />
@@ -255,8 +249,8 @@ function LoginForm() {
             </div>
 
             {/* Remember Password Checkbox */}
-            <div className="flex items-center flex-row justify-between pt-1">
-              <span className="flex items-center space-x-2">
+            <div className="flex items-center flex-row justify-between mb-4">
+              <span className="flex items-center space-x-2 md:space-x-3">
                 <Checkbox
                   id="remember"
                   checked={formData.keepLoggedIn}
@@ -267,7 +261,7 @@ function LoginForm() {
                 />
                 <label
                   htmlFor="remember"
-                  className="text-sm text-gray-600 cursor-pointer select-none"
+                  className="text-xs md:text-sm text-gray-600 cursor-pointer select-none"
                 >
                   Keep me logged in
                 </label>
@@ -275,7 +269,7 @@ function LoginForm() {
 
               <Link
                 href="/forget-password"
-                className="text-sm text-light-green font-medium hover:underline transition-all duration-200"
+                className="text-xs md:text-sm text-light-green font-medium hover:underline transition-all duration-200"
               >
                 Forgot Password?
               </Link>
@@ -286,7 +280,7 @@ function LoginForm() {
               type="submit"
               disabled={loading}
               className={cn(
-                "w-full h-12 bg-pink hover:bg-[#f95569] text-white text-lg font-medium rounded-[15px] transition-all duration-300 ease-out transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl cursor-pointer mt-2",
+                "w-full h-[40px] md:h-[50px] bg-pink hover:bg-[#f95569] text-white text-sm md:text-lg font-medium rounded-[15px] transition-all duration-300 ease-out transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl cursor-pointer",
                 loading && "opacity-70 cursor-progress"
               )}
             >
@@ -295,21 +289,21 @@ function LoginForm() {
           </form>
 
           {/* Divider */}
-          <div className="flex items-center my-8">
+          <div className="flex items-center my-5 md:my-8">
             <div className="flex-1 border-t border-gray-300"></div>
-            <span className="px-4 text-gray-500 text-sm">
+            <span className="px-3 md:px-4 text-gray-500 text-xs md:text-sm">
               or
             </span>
             <div className="flex-1 border-t border-gray-300"></div>
           </div>
 
           {/* Social Login Buttons */}
-          <div className="flex flex-row w-full justify-center">
+          <div className="flex flex-row w-full gap-3 md:gap-4 justify-center">
             <Button
               type="button"
               onClick={handleGoogleAuth}
               disabled={loading}
-              className="w-full h-12 bg-white border border-gray-300 rounded-[15px] hover:bg-gray-50 hover:border-gray-400 transition-all duration-300 transform hover:scale-[1.02] shadow-sm hover:shadow-md flex items-center justify-center"
+              className="w-full h-[45px] md:h-[40px] bg-white border border-gray-300 rounded-[12px] md:rounded-[15px] hover:bg-gray-50 hover:border-gray-400 transition-all duration-300 transform hover:scale-105 shadow-sm hover:shadow-md flex items-center justify-center p-3 md:p-6"
             >
               <Image
                 src="/assets/icons/google.svg"
@@ -318,18 +312,17 @@ function LoginForm() {
                 height={24}
                 className="h-6 w-6"
               />
-              <span className="ml-2 text-gray-700 font-medium">Continue with Google</span>
             </Button>
           </div>
 
           {/* Sign up Link */}
-          <div className="text-center mt-8">
-            <span className="text-gray-600 text-base">
+          <div className="text-center mt-5 md:mt-8">
+            <span className="text-gray-600 text-xs md:text-base">
               Don&apos;t have an account?{" "}
             </span>
             <Link
               href="/signup"
-              className="text-[#4A90E2] font-medium hover:underline transition-all duration-200 text-base"
+              className="text-[#4A90E2] font-medium hover:underline transition-all duration-200 text-xs md:text-base bg-transparent shadow-none hover:shadow-none"
             >
               Sign up
             </Link>

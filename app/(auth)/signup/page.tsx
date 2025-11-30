@@ -30,19 +30,19 @@ const PasswordRule: React.FC<PasswordRuleProps> = ({
 }) => (
   <div className="flex items-center space-x-2">
     <div
-      className={`w-1.5 h-1.5 md:w-2 md:h-2 rounded-full transition-colors duration-300 ${valid
+      className={`w-1.5 h-1.5 md:w-2 md:h-2 rounded-full ${valid
         ? color === "red"
           ? "bg-red-500"
           : "bg-green-500"
-        : "bg-gray-300"
+        : "bg-gray-400"
         }`}
     ></div>
     <span
-      className={`text-xs sm:text-sm transition-colors duration-300 ${valid
+      className={`text-[10px] md:text-sm ${valid
         ? color === "red"
           ? "text-red-500"
           : "text-green-500"
-        : "text-gray-400"
+        : "text-gray-500"
         }`}
     >
       Password must contain <span className="font-medium">{label}</span>
@@ -51,9 +51,9 @@ const PasswordRule: React.FC<PasswordRuleProps> = ({
 );
 
 const Divider: React.FC<{ label: string }> = ({ label }) => (
-  <div className="flex items-center my-8">
+  <div className="flex items-center my-5 md:my-8">
     <div className="flex-1 border-t border-gray-300"></div>
-    <span className="px-4 text-gray-500 text-sm">
+    <span className="px-3 md:px-4 text-gray-500 text-xs md:text-sm">
       {label}
     </span>
     <div className="flex-1 border-t border-gray-300"></div>
@@ -216,155 +216,146 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="min-h-screen flex overflow-hidden bg-white">
-      {/* Left Side - Signup Form */}
-      <div className="w-full lg:w-1/2 flex flex-col items-center justify-center min-h-screen px-4 sm:px-8 md:px-12 py-8 order-2 lg:order-1">
-        <div className="w-full max-w-md sm:max-w-lg">
-          <div className="mb-8 text-center lg:text-left">
-            <Image
-              src="/logo/LogoIcon.svg"
-              alt="HeyProData"
-              width={200}
-              height={60}
-              className="h-12 sm:h-14 mb-6 w-auto mx-auto lg:mx-0"
-            />
-            <p className="text-2xl sm:text-3xl font-light text-gray-900">
-              Sign up to
-              <span className="font-semibold text-pink"> Hey</span>
-              <span className="font-semibold text-black">Pro</span>
-              <span className="font-semibold text-light-green"> Data</span>
-            </p>
-          </div>
-
-          {error && (
-            <div className="mb-6 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm animate-in fade-in slide-in-from-top-2">
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
-            <div className="">
-              <Input
-                type="email"
-                placeholder="Email"
-                value={formData.email}
-                onChange={(e) => {
-                  setFormData({ ...formData, email: e.target.value });
-                  if (error) setError('');
-                }}
-                className="h-12 text-base border-gray-300 rounded-xl focus:border-[#FA6E80] focus:ring-[#FA6E80]"
-                required
-                disabled={loading}
-              />
-            </div>
-
-            <div className="relative">
-              <Input
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                value={formData.password}
-                onChange={handlePasswordChange}
-                className="h-12 text-base border-gray-300 rounded-xl focus:border-[#FA6E80] focus:ring-[#FA6E80] pr-10"
-                required
-                disabled={loading}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 top-0 h-full pr-3 flex items-center text-gray-500 hover:text-gray-700"
-              >
-                {showPassword ? (
-                  <EyeOff className="h-5 w-5" />
-                ) : (
-                  <Eye className="h-5 w-5" />
-                )}
-              </button>
-            </div>
-
-            {formData.password && (
-              <div className="space-y-2 p-3 bg-gray-50 rounded-lg">
-                <PasswordRule
-                  label="at least one uppercase"
-                  valid={passwordValidation.hasUppercase}
+    <div className="flex min-h-screen items-center justify-center overflow-hidden mx-auto max-w-7xl bg-white">
+      <div className="w-full flex px-4 sm:px-6 py-6 mx-auto">
+        <div className="flex w-full flex-col md:flex-row gap-8 mx-auto justify-center items-center">
+          {/* Left Side - Signup Form */}
+          <div className="w-full md:p-32 md:pr-8 flex flex-col justify-center mx-auto">
+            <form onSubmit={handleSubmit} className="space-y-2 md:space-y-3">
+              <div className="mb-6 md:mb-12 md:text-left text-center">
+                <Image
+                  src="/logo/LogoIcon.svg"
+                  alt="HeyProData"
+                  width={200}
+                  height={60}
+                  className="h-14 md:h-12 mb-4 md:mb-8 w-auto mx-auto md:mx-0"
                 />
-                <PasswordRule
-                  label="at least one number"
-                  valid={passwordValidation.hasNumber}
-                />
-                <PasswordRule
-                  label="at least one special character"
-                  valid={passwordValidation.hasSpecialChar}
-                  color="green"
-                />
-                <PasswordRule
-                  label="minimum 8 characters"
-                  valid={formData.password.length >= 8}
+                <p className="text-2xl md:text-3xl font-light text-gray-900">
+                  Sign up to
+                  <span className="font-semibold text-pink"> Hey</span>
+                  <span className="font-semibold text-black">Pro</span>
+                  <span className="font-semibold text-light-green"> Data</span>
+                </p>
+              </div>
+
+              {error && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
+                  {error}
+                </div>
+              )}
+
+              <div className="">
+                <Input
+                  type="email"
+                  placeholder="Email"
+                  value={formData.email}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                    setFormData({ ...formData, email: e.target.value });
+                    if (error) setError('');
+                  }}
+                  className="h-11 md:h-12 text-sm md:text-base border-gray-300 rounded-xl focus:border-[#FA6E80] focus:ring-[#FA6E80]"
+                  required
+                  disabled={loading}
                 />
               </div>
-            )}
 
-            <Button
-              type="submit"
-              disabled={loading || !isPasswordValid()}
-              className={cn(
-                "w-full h-12 bg-[#FA6E80] hover:bg-[#f95569] text-white text-lg font-medium rounded-[15px] transition-all duration-300 ease-out transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl cursor-pointer mt-2",
-                loading && "opacity-70 cursor-progress",
-                !isPasswordValid() && "opacity-50 cursor-not-allowed hover:scale-100 hover:shadow-none"
+              <div className="relative">
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  value={formData.password}
+                  onChange={handlePasswordChange}
+                  className="h-11 md:h-12 text-sm md:text-base border-gray-300 rounded-xl focus:border-[#FA6E80] focus:ring-[#FA6E80] pr-10"
+                  required
+                  disabled={loading}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 top-1 pr-3 flex items-center text-gray-600"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
+
+              {formData.password && (
+                <div className="space-y-1.5 md:space-y-2">
+                  <PasswordRule
+                    label="at least one uppercase"
+                    valid={passwordValidation.hasUppercase}
+                  />
+                  <PasswordRule
+                    label="at least one number"
+                    valid={passwordValidation.hasNumber}
+                  />
+                  <PasswordRule
+                    label="at least one special character"
+                    valid={passwordValidation.hasSpecialChar}
+                    color="green"
+                  />
+                  <PasswordRule
+                    label="minimum 8 characters"
+                    valid={formData.password.length >= 8}
+                  />
+                </div>
               )}
-            >
-              {loading ? "Signing up..." : "Sign up"}
-            </Button>
-          </form>
 
-          <Divider label="or" />
+              <Button
+                type="submit"
+                disabled={loading || !isPasswordValid()}
+                className="w-full h-[40px] md:h-[50px] bg-[#FA6E80] hover:bg-[#f95569] text-white text-sm md:text-lg font-medium rounded-[15px]"
+              >
+                {loading ? "Signing up..." : "Sign up"}
+              </Button>
+            </form>
 
-          <div className="flex flex-row w-full justify-center">
-            <Button
-              type="button"
-              onClick={handleGoogleAuth}
-              disabled={loading}
-              className="w-full h-12 bg-white border border-gray-300 rounded-[15px] hover:bg-gray-50 hover:border-gray-400 transition-all duration-300 transform hover:scale-[1.02] shadow-sm hover:shadow-md flex items-center justify-center"
-            >
-              <Image
-                src="/assets/icons/google.svg"
-                alt="Google Logo"
-                width={24}
-                height={24}
-                className="h-6 w-6"
-              />
-              <span className="ml-2 text-gray-700 font-medium">Continue with Google</span>
-            </Button>
+            <Divider label="or" />
+
+            <div className="flex flex-row w-full gap-3 md:gap-4 justify-center">
+              <Button
+                type="button"
+                onClick={handleGoogleAuth}
+                disabled={loading}
+                className="w-full h-[45px] md:h-[40px] bg-white border border-gray-300 rounded-[12px] md:rounded-[15px] hover:bg-gray-50 hover:border-gray-400 transition-all duration-300 transform hover:scale-105 shadow-sm hover:shadow-md flex items-center justify-center p-3 md:p-6"
+              >
+                <Image
+                  src="/assets/icons/google.svg"
+                  alt="Google Logo"
+                  width={24}
+                  height={24}
+                  className="h-6 w-6"
+                />
+              </Button>
+            </div>
+
+            <div className="text-center mt-5 md:mt-8">
+              <span className="text-gray-600 text-xs md:text-base">
+                Already have an account?{" "}
+              </span>
+              <Link
+                href="/login"
+                className="text-[#4A90E2] font-medium hover:underline text-xs md:text-base"
+              >
+                Login
+              </Link>
+            </div>
           </div>
 
-          <div className="text-center mt-8">
-            <span className="text-gray-600 text-base">
-              Already have an account?{" "}
-            </span>
-            <Link
-              href="/login"
-              className="text-[#4A90E2] font-medium hover:underline transition-all duration-200 text-base"
-            >
-              Login
-            </Link>
+          {/* Right Side - Gradient Background */}
+          <div className="hidden md:flex w-full items-center justify-start py-6 md:py-0">
+            <div
+              className="w-full md:h-[50rem] max-w-[450px] rounded-[40px] md:rounded-[68px]"
+              style={{
+                background:
+                  "conic-gradient(from 0deg at 50% 50%, #FA6E80 0deg, #6A89BE 144deg, #85AAB7 216deg, #31A7AC 360deg)",
+              }}
+            ></div>
           </div>
         </div>
-      </div>
-
-      {/* Right Side - Gradient Background 
-          Responsive: Hidden on mobile, visible from lg.
-          Layout: Centered horizontally and vertically.
-      */}
-      <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-4 h-screen sticky top-0 order-1 lg:order-2">
-        <div
-          className="rounded-[68px] shadow-2xl"
-          style={{
-            height: '85vh',
-            maxHeight: '721px',
-            aspectRatio: '450/721',
-            background:
-              "conic-gradient(from 0deg at 50% 50%, #FA6E80 0deg, #6A89BE 144deg, #85AAB7 216deg, #31A7AC 360deg)",
-          }}
-        ></div>
       </div>
     </div>
   );
