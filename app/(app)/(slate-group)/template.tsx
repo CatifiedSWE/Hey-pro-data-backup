@@ -50,6 +50,16 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                 console.log('Starting to fetch profiles...');
                 console.log('Current user ID:', user?.id);
                 
+                // First, try fetching WITHOUT excluding current user to see if we get any data
+                const { data: allProfiles, error: testError } = await supabase
+                    .from('user_profiles')
+                    .select('id, user_id, alias_first_name, alias_surname, first_name, surname')
+                    .limit(10);
+                
+                console.log('TEST QUERY - All profiles count:', allProfiles?.length || 0);
+                console.log('TEST QUERY - Error:', testError);
+                console.log('TEST QUERY - Sample data:', allProfiles?.slice(0, 2));
+                
                 // Build query to exclude current user and limit to 6
                 let query = supabase
                     .from('user_profiles')
@@ -72,10 +82,13 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                 
                 // Exclude current user if logged in
                 if (user?.id) {
+                    console.log('Excluding user ID:', user.id);
                     query = query.neq('user_id', user.id);
                 }
                 
                 const { data: profiles, error } = await query;
+                console.log('MAIN QUERY - Error:', error);
+                console.log('MAIN QUERY - Profiles:', profiles);
                 
                 if (error) {
                     console.error('Supabase error:', error);
