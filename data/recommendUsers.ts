@@ -78,3 +78,5 @@ export const recommendationUsers: RecommendationUser[] = [
         mutualAvatars: ["/image (4).png", "/image (2).png"],
     },
 ]
+
+export default recommendationUsers;
