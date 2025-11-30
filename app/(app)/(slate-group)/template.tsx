@@ -12,7 +12,7 @@ import { supabase } from "@/lib/supabase/client";
 export default function AppLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     // Fetch real profile data
     const { profile: userProfile, loading: profileLoading, error } = useProfile();
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
 
     interface SimilarAccount {
         id: string | number;
@@ -43,11 +43,15 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
     const [loadingSimilar, setLoadingSimilar] = useState(true);
 
     useEffect(() => {
+        // Wait for auth to load before fetching to ensure we can exclude current user
+        if (authLoading) return;
+
         const fetchSimilarUsers = async () => {
             try {
-                // 1. Fetch profiles without joining roles initially to avoid relation errors
-                // Also removed 'id' from select as user_id is the PK
-                const { data: profiles, error: profileError } = await supabase
+                setLoadingSimilar(true);
+                
+                // 1. Fetch profiles
+                let query = supabase
                     .from('user_profiles')
                     .select(`
                         user_id,
@@ -55,9 +59,18 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                         alias_surname,
                         first_name,
                         surname,
-                        profile_photo_url
+                        profile_photo_url,
+                        updated_at
                     `)
+                    .order('updated_at', { ascending: false })
                     .limit(6);
+                
+                // Exclude current user if logged in
+                if (user?.id) {
+                    query = query.neq('user_id', user.id);
+                }
+
+                const { data: profiles, error: profileError } = await query;
 
                 if (profileError) {
                     console.error('Error fetching profiles:', profileError);
@@ -74,7 +87,6 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                 // 2. Fetch roles for these users manually
                 const userIds = profiles.map((p: any) => p.user_id);
                 
-                // Note: In case user_roles table is empty or query fails, we continue gracefully
                 let roles: any[] = [];
                 if (userIds.length > 0) {
                     const { data: rolesData, error: rolesError } = await supabase
@@ -119,7 +131,7 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
         };
 
         fetchSimilarUsers();
-    }, []);
+    }, [user, authLoading]); // Re-run when auth state changes
 
     // Construct profile object from real user data
     const profile: Profile = {
