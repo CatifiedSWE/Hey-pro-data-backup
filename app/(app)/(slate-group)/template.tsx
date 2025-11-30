@@ -82,7 +82,10 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                     return;
                 }
 
+                console.log('Fetched profiles:', profiles?.length || 0);
+
                 if (!profiles || profiles.length === 0) {
+                    console.log('No profiles found');
                     setSimilarAccounts([]);
                     setLoadingSimilar(false);
                     return;
