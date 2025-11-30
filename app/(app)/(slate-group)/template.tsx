@@ -1,9 +1,14 @@
+"use client"
+
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
 import { BookmarkIcon, HelpCircle, SettingsIcon, UserRound } from "lucide-react";
+import { useProfile } from "@/hooks/useProfile";
 
 export default function AppLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+    // Fetch real profile data
+    const { profile: userProfile, loading, error } = useProfile();
     interface SimilarAccount {
         id: number;
         name: string;
@@ -78,38 +83,41 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
             proifleurl: "/profile/michaellee"
         }
     ];
+    // Construct profile object from real user data
     const profile: Profile = {
-        name: "John Doe",
-        bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-        backgroundImage: "/bg.jpg",
-        avatarImage: "/image (1).png",
+        name: userProfile 
+            ? `${userProfile.first_name || userProfile.alias_first_name || ''} ${userProfile.surname || userProfile.alias_surname || ''}`.trim() || "User"
+            : "Loading...",
+        bio: userProfile?.bio || "No bio available",
+        backgroundImage: userProfile?.banner_url || "/bg.jpg",
+        avatarImage: userProfile?.profile_photo_url || "/image (1).png",
         referencesavatar: ["/image (1).png", "/image (2).png", "/image (3).png"],
         totalref: 3000,
-        profileurl: "/profile/johndoe",
+        profileurl: "/profile",
         urls: [
             {
                 id: '1',
                 name: "Profile",
                 icon: <UserRound />,
-                link: "/profile/johndoe"
+                link: "/profile"
             },
             {
                 id: '2',
                 name: "Saved",
                 icon: <BookmarkIcon />,
-                link: "/profile/johndoe/saved"
+                link: "/slate/saved"
             },
             {
                 id: '3',
                 name: "Help",
                 icon: <HelpCircle />,
-                link: "/profile/johndoe/help"
+                link: "/help"
             },
             {
                 id: '4',
                 name: "setting",
                 icon: <SettingsIcon />,
-                link: "/profile/johndoe/settings"
+                link: "/settings"
             }
         ],
     };
@@ -123,16 +131,31 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
             <div className="flex flex-col md:flex-row justify-center mx-auto max-w-7xl w-full gap-3.5">
                 {/* Sidebar Profile */}
                 <div className="w-full md:w-80 md:h-screen mt-3 md:block flex-shrink-0 order-2 md:order-1 mb-4 md:mb-0 hidden ">
-                    <div>
-                        <div>
-                            <Image src={profile.backgroundImage} alt={profile.name} width={284} height={72} className="w-full h-[72px] object-cover rounded-t-[13px]" />
+                    {loading ? (
+                        <div className="animate-pulse">
+                            <div className="w-full h-[72px] bg-gray-200 rounded-t-[13px]" />
+                            <div className="w-17 h-17 bg-gray-300 rounded-full border-4 border-white -mt-12" />
+                            <div className="mt-4 space-y-2">
+                                <div className="h-5 bg-gray-200 rounded w-3/4" />
+                                <div className="h-4 bg-gray-200 rounded w-full" />
+                                <div className="h-4 bg-gray-200 rounded w-5/6" />
+                            </div>
                         </div>
-                        <div>
-                            <Image src={profile.avatarImage} alt={profile.name} width={96} height={96} className="w-17 h-17 rounded-full border-4 border-white -mt-12 object-cover" />
+                    ) : error ? (
+                        <div className="p-4 bg-red-50 rounded-lg">
+                            <p className="text-sm text-red-600">Failed to load profile</p>
                         </div>
+                    ) : (
                         <div>
-                            <h2 className="text-lg">{profile.name}</h2>
-                            <p className="text-[12px] text-gray-600 mt-1">{profile.bio}</p>
+                            <div>
+                                <Image src={profile.backgroundImage} alt={profile.name} width={284} height={72} className="w-full h-[72px] object-cover rounded-t-[13px]" />
+                            </div>
+                            <div>
+                                <Image src={profile.avatarImage} alt={profile.name} width={96} height={96} className="w-17 h-17 rounded-full border-4 border-white -mt-12 object-cover" />
+                            </div>
+                            <div>
+                                <h2 className="text-lg">{profile.name}</h2>
+                                <p className="text-[12px] text-gray-600 mt-1">{profile.bio}</p>
                             <div className="flex items-center mt-3 w-full max-w-[160px]">
                                 {profile.referencesavatar.map((avatar, index) => (
                                     <Image
@@ -173,6 +196,7 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                             </div>
                         </div>
                     </div>
+                    )}
                 </div>
                 {/* Main Content */}
                 <div
