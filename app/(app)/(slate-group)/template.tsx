@@ -7,7 +7,6 @@ import { BookmarkIcon, HelpCircle, SettingsIcon, UserRound } from "lucide-react"
 import { useProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase/client";
 
 export default function AppLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     // Fetch real profile data
