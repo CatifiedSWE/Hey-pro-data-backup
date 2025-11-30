@@ -50,8 +50,8 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                 console.log('Starting to fetch profiles...');
                 console.log('Current user ID:', user?.id);
                 
-                // Fetch directly from Supabase - EXACT same query as explore page
-                const { data: profiles, error } = await supabase
+                // Build query to exclude current user and limit to 6
+                let query = supabase
                     .from('user_profiles')
                     .select(`
                         id,
@@ -68,7 +68,14 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                         created_at
                     `)
                     .order('created_at', { ascending: false })
-                    .limit(20); // Fetch more to account for filtering
+                    .limit(6);
+                
+                // Exclude current user if logged in
+                if (user?.id) {
+                    query = query.neq('user_id', user.id);
+                }
+                
+                const { data: profiles, error } = await query;
                 
                 if (error) {
                     console.error('Supabase error:', error);
@@ -96,7 +103,6 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                                 .order('sort_order', { ascending: true });
                             
                             // Build display name with priority: alias_first_name + alias_surname (1st), first_name + surname (2nd)
-                            // This is EXACTLY how explore page does it
                             const aliasName = `${profile.alias_first_name || ''} ${profile.alias_surname || ''}`.trim();
                             const realName = `${profile.first_name || ''} ${profile.surname || ''}`.trim();
                             const displayName = aliasName || realName || 'Anonymous';
@@ -120,16 +126,12 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                     })
                 );
                 
-                // Filter out nulls and current user, limit to 6
-                const filteredUsers = enrichedProfiles
-                    .filter((profile): profile is SimilarAccount => 
-                        profile !== null && profile.id !== user?.id
-                    )
-                    .slice(0, 6);
+                // Filter out only nulls (keep all users, already limited to 6 by query)
+                const validUsers = enrichedProfiles.filter((profile): profile is SimilarAccount => profile !== null);
                 
-                console.log('Final filtered users:', filteredUsers.length);
-                console.log('Users to display:', filteredUsers);
-                setSimilarAccounts(filteredUsers);
+                console.log('Final users count:', validUsers.length);
+                console.log('Users to display:', validUsers);
+                setSimilarAccounts(validUsers);
 
             } catch (error) {
                 console.error('Error in fetchSimilarUsers:', error);
@@ -138,8 +140,8 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
             }
         };
 
-        // Only fetch when auth has finished loading and we have a user
-        if (!authLoading && user) {
+        // Fetch when auth has finished loading (even if no user, will show profiles)
+        if (!authLoading) {
             fetchSimilarUsers();
         }
     }, [authLoading, user?.id]);
