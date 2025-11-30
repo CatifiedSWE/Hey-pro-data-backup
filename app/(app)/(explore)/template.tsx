@@ -208,6 +208,7 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
     const [filterForm, setFilterForm] = React.useState<typeof initialFilterState>(initialFilterState);
     const [searchTerm, setSearchTerm] = React.useState("");
     const [activeFilterCount, setActiveFilterCount] = React.useState(0);
+    const [activeRole, setActiveRole] = React.useState<string>("");
 
     // Initialize form from URL params
     useEffect(() => {
@@ -218,6 +219,7 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
         const experience = searchParams.get('experience') || "";
         const minRate = parseInt(searchParams.get('minRate') || "0");
         const maxRate = parseInt(searchParams.get('maxRate') || "5000");
+        const role = searchParams.get('role') || "";
 
         setFilterForm({
             keyword,
@@ -229,6 +231,7 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
             maxRate
         });
         setSearchTerm(keyword);
+        setActiveRole(role);
 
         // Calculate active filters count
         let count = 0;
@@ -238,6 +241,7 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
         if (experience) count++;
         if (minRate > 0) count++;
         if (maxRate < 5000) count++;
+        if (role) count++;
         setActiveFilterCount(count);
 
     }, [searchParams]);
