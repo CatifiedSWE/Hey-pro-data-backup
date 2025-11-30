@@ -487,10 +487,7 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                                                     className="hover:bg-white/20 rounded-full p-0.5 transition-colors"
                                                     title="Clear filter"
                                                 >
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                                                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                                                    </svg>
+                                                    <X className="h-3.5 w-3.5" />
                                                 </button>
                                             )}
                                             <span className="group-open:hidden"><ChevronUp className="h-4 w-4 text-[#FA6E80]" /></span>
@@ -519,10 +516,7 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                                                             className="hover:bg-[#FA6E80]/10 rounded-full p-0.5 transition-colors"
                                                             title="Clear filter"
                                                         >
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                                <line x1="18" y1="6" x2="6" y2="18"></line>
-                                                                <line x1="6" y1="6" x2="18" y2="18"></line>
-                                                            </svg>
+                                                            <X className="h-3 w-3" />
                                                         </button>
                                                     )}
                                                 </Link>
