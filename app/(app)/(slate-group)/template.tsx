@@ -278,7 +278,7 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                                     </div>
                                 ))}
                            </div>
-                        ) : (
+                        ) : similarAccounts.length > 0 ? (
                             similarAccounts.map((account) => (
                                 <div key={account.id} className="mb-1 p-1 flex flex-col gap-[9px]">
                                     <Link href={account.proifleurl} className="flex items-center space-x-2">
@@ -300,6 +300,10 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                                     </Link>
                                 </div>
                             ))
+                        ) : (
+                            <div className="mt-2 text-sm text-gray-500">
+                                <p>No profiles available yet.</p>
+                            </div>
                         )}
                         <Link href="#" className="text-[10px] text-black mt-2 block">View crew directory</Link>
                     </div>
