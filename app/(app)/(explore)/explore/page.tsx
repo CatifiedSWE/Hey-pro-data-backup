@@ -4,11 +4,15 @@ import { ProjectCardType } from "@/types";
 
 /**
  * Fetch explore data directly from Supabase
- * Filtered by search params
+ * Filtered by search params and excludes current user
  */
 async function getExploreData(searchParams: { [key: string]: string | string[] | undefined }): Promise<ProjectCardType[]> {
   try {
     const supabase = createServerClient();
+    
+    // Get current logged-in user to exclude from results
+    const { data: { user: currentUser } } = await supabase.auth.getUser();
+    const currentUserId = currentUser?.id;
     
     const keyword = searchParams?.keyword as string;
     const role = searchParams?.role as string;
@@ -34,6 +38,11 @@ async function getExploreData(searchParams: { [key: string]: string | string[] |
       .order('created_at', { ascending: false })
       .limit(50);
 
+    // Exclude current user from explore results
+    if (currentUserId) {
+      query = query.neq('user_id', currentUserId);
+    }
+
     // Apply keyword search
     if (keyword) {
         // Sanitized keyword for search
@@ -57,7 +66,24 @@ async function getExploreData(searchParams: { [key: string]: string | string[] |
       return [];
     }
 
-    // Enrich profiles with roles
+    // Fetch Google OAuth avatars for all users at once (batch query)
+    const userIds = profiles.map(p => p.user_id);
+    const { data: authUsers } = await supabase.auth.admin.listUsers();
+    
+    // Create a map of user_id to Google avatar
+    const googleAvatarMap = new Map<string, string>();
+    if (authUsers?.users) {
+      authUsers.users.forEach(authUser => {
+        if (authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture) {
+          googleAvatarMap.set(
+            authUser.id, 
+            authUser.user_metadata.avatar_url || authUser.user_metadata.picture
+          );
+        }
+      });
+    }
+
+    // Enrich profiles with roles and Google avatars
     const enrichedProfiles = await Promise.all(
       profiles.map(async (profile) => {
         try {
@@ -85,11 +111,14 @@ async function getExploreData(searchParams: { [key: string]: string | string[] |
             ? `${profile.city}, ${profile.country}` 
             : profile.country || 'Not specified';
 
+            // Priority: profile_photo_url > Google metadata avatar > default (empty string)
+            const profileImage = profile.profile_photo_url || googleAvatarMap.get(profile.user_id) || '';
+
             return {
             id: profile.id,
             name: displayName,
             banner: profile.banner_url || '',
-            image: profile.profile_photo_url || '',
+            image: profileImage,
             bio: profile.bio || '',
             location: location,
             skills: roles?.map(r => r.role_name) || []
