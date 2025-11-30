@@ -1,6 +1,7 @@
 import ExplorePage from "@/components/modules/pages/explore-page";
 import { createServerClient } from "@/lib/supabase/server";
 import { ProjectCardType } from "@/types";
+export const dynamic = "force-dynamic";
 
 /**
  * Fetch explore data directly from Supabase
