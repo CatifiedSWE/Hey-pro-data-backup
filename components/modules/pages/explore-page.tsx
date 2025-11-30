@@ -13,13 +13,13 @@ export default function ExplorePage({
   
   return (
     <div className="w-full">
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 p-4 md:p-6 justify-items-center auto-rows-max">
+      <div className="grid grid-cols-3 gap-6 p-6 justify-items-center auto-rows-max">
         {projectsCardData.length > 0 ? (
           projectsCardData.map((project) => (
             <ProjectCard key={project.id || project.name} {...project} />
           ))
         ) : (
-          <div className="col-span-full text-center text-gray-500 mt-10">
+          <div className="col-span-3 text-center text-gray-500 mt-10">
             <p>No profiles found matching your criteria.</p>
           </div>
         )}
