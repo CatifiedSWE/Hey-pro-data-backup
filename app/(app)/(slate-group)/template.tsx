@@ -6,19 +6,23 @@ import Link from "next/link";
 import { BookmarkIcon, HelpCircle, SettingsIcon, UserRound } from "lucide-react";
 import { useProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/contexts/AuthContext";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase/client";
 
 export default function AppLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     // Fetch real profile data
-    const { profile: userProfile, loading, error } = useProfile();
+    const { profile: userProfile, loading: profileLoading, error } = useProfile();
     const { user } = useAuth();
+
     interface SimilarAccount {
-        id: number;
+        id: string | number;
         name: string;
         image: string;
         role: string;
         totlerole: string;
         proifleurl: string;
     }
+
     interface Profile {
         name: string;
         bio: string;
@@ -35,56 +39,61 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
         }[]
     }
 
-    const similarAccounts: SimilarAccount[] = [
-        {
-            id: 1,
-            name: "John Doe",
-            image: "/image (1).png",
-            role: "Cinematographer",
-            totlerole: "15 Roles",
-            proifleurl: "/profile/johndoe"
-        },
-        {
-            id: 2,
-            name: "Jane Smith",
-            image: "/image (2).png",
-            role: "Cinematographer",
-            totlerole: "15 Roles",
-            proifleurl: "/profile/janesmith"
-        },
-        {
-            id: 3,
-            name: "Alice Johnson",
-            image: "/image (3).png",
-            role: "Cinematographer",
-            totlerole: "15 Roles",
-            proifleurl: "/profile/alicejohnson"
-        },
-        {
-            id: 4,
-            name: "Bob Brown",
-            image: "/image (4).png",
-            role: "Cinematographer",
-            totlerole: "15 Roles",
-            proifleurl: "/profile/bobbrown"
-        },
-        {
-            id: 5,
-            name: "Eva Wilson",
-            image: "/image (5).png",
-            role: "Cinematographer",
-            totlerole: "15 Roles",
-            proifleurl: "/profile/evawilson"
-        },
-        {
-            id: 6,
-            name: "Michael Lee",
-            image: "/image (6).png",
-            role: "Cinematographer",
-            totlerole: "15 Roles",
-            proifleurl: "/profile/michaellee"
-        }
-    ];
+    const [similarAccounts, setSimilarAccounts] = useState<SimilarAccount[]>([]);
+    const [loadingSimilar, setLoadingSimilar] = useState(true);
+
+    useEffect(() => {
+        const fetchSimilarUsers = async () => {
+            try {
+                const { data, error } = await supabase
+                    .from('user_profiles')
+                    .select(`
+                        id,
+                        user_id,
+                        alias_first_name,
+                        alias_surname,
+                        first_name,
+                        surname,
+                        profile_photo_url,
+                        user_roles (
+                            role_name
+                        )
+                    `)
+                    .limit(6);
+
+                if (error) {
+                    console.error('Error fetching similar users:', error);
+                } else if (data) {
+                    const mappedUsers: SimilarAccount[] = data.map((user: any) => {
+                        const name = user.alias_first_name 
+                            ? `${user.alias_first_name} ${user.alias_surname || ''}`
+                            : `${user.first_name || ''} ${user.surname || ''}`;
+                        
+                        const roles = user.user_roles || [];
+                        const mainRole = roles.length > 0 ? roles[0].role_name : 'Crew Member';
+                        const roleCount = roles.length;
+
+                        return {
+                            id: user.id || user.user_id,
+                            name: name.trim() || 'User',
+                            image: user.profile_photo_url || "/image (1).png",
+                            role: mainRole,
+                            totlerole: `${roleCount} Roles`,
+                            proifleurl: `/profile` // Or specific profile link if available
+                        };
+                    });
+                    setSimilarAccounts(mappedUsers);
+                }
+            } catch (err) {
+                console.error('Exception fetching similar users:', err);
+            } finally {
+                setLoadingSimilar(false);
+            }
+        };
+
+        fetchSimilarUsers();
+    }, []);
+
     // Construct profile object from real user data
     const profile: Profile = {
         name: userProfile 
@@ -133,7 +142,7 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
             <div className="flex flex-col md:flex-row justify-center mx-auto max-w-7xl w-full gap-3.5">
                 {/* Sidebar Profile */}
                 <div className="w-full md:w-80 md:h-screen mt-3 md:block flex-shrink-0 order-2 md:order-1 mb-4 md:mb-0 hidden ">
-                    {loading ? (
+                    {profileLoading ? (
                         <div className="animate-pulse">
                             <div className="w-full h-[72px] bg-gray-200 rounded-t-[13px]" />
                             <div className="w-17 h-17 bg-gray-300 rounded-full border-4 border-white -mt-12" />
@@ -212,28 +221,42 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                         <h1 className="mt-3 font-bold bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC] bg-clip-text text-transparent">
                             View Profiles
                         </h1>
-                        {similarAccounts.map((account) => (
-                            <div key={account.id} className="mb-1 p-1 flex flex-col gap-[9px]">
-                                <Link href={account.proifleurl} className="flex items-center space-x-2">
-                                    <Image
-                                        src={account.image}
-                                        alt={account.name}
-                                        width={80}
-                                        height={80}
-                                        className="w-10 h-10 rounded-full object-cover"
-                                    />
-                                    <div>
-                                        <p className="font-semibold">{account.name}</p>
-                                        <div className="flex flex-row gap-1 justify-center items-center">
-                                            <span className="text-sm text-gray-600">{account.role}</span>
-                                            <span>+</span>
-                                            <span className="text-sm text-gray-500">{account.totlerole}</span>
+                        {loadingSimilar ? (
+                           <div className="space-y-4 mt-2">
+                                {[1, 2, 3].map((i) => (
+                                    <div key={i} className="flex items-center space-x-2">
+                                        <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse" />
+                                        <div className="space-y-1">
+                                            <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+                                            <div className="h-3 w-16 bg-gray-200 rounded animate-pulse" />
                                         </div>
                                     </div>
-                                </Link>
-                            </div>
-                        ))}
-                        <Link href="#" className="text-[10px] text-black">View crew directory</Link>
+                                ))}
+                           </div>
+                        ) : (
+                            similarAccounts.map((account) => (
+                                <div key={account.id} className="mb-1 p-1 flex flex-col gap-[9px]">
+                                    <Link href={account.proifleurl} className="flex items-center space-x-2">
+                                        <Image
+                                            src={account.image}
+                                            alt={account.name}
+                                            width={80}
+                                            height={80}
+                                            className="w-10 h-10 rounded-full object-cover"
+                                        />
+                                        <div>
+                                            <p className="font-semibold text-sm">{account.name}</p>
+                                            <div className="flex flex-row gap-1 items-center">
+                                                <span className="text-xs text-gray-600 truncate max-w-[100px]">{account.role}</span>
+                                                <span className="text-xs text-gray-400">•</span>
+                                                <span className="text-xs text-gray-500">{account.totlerole}</span>
+                                            </div>
+                                        </div>
+                                    </Link>
+                                </div>
+                            ))
+                        )}
+                        <Link href="#" className="text-[10px] text-black mt-2 block">View crew directory</Link>
                     </div>
                 </div>
 
