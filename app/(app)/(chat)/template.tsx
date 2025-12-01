@@ -14,9 +14,45 @@ import { format } from 'date-fns';
 
 export default function AppLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     const pathname = usePathname();
+    const [conversations, setConversations] = useState<Conversation[]>([]);
+    const [groups, setGroups] = useState<Group[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     // Logic to determine if a specific chat is open
     const isChatOpen = pathname?.includes('/inbox/c/') || pathname?.includes('/inbox/g/');
+
+    // Fetch conversations and groups
+    const fetchData = async () => {
+        try {
+            setError(null);
+            const [conversationsData, groupsData] = await Promise.all([
+                getConversations(),
+                getGroups(),
+            ]);
+            setConversations(conversationsData);
+            setGroups(groupsData);
+        } catch (err: any) {
+            console.error('Error fetching chat data:', err);
+            setError('Failed to load chats');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Initial fetch
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    // Poll for updates every 5 seconds
+    useEffect(() => {
+        const interval = setInterval(() => {
+            fetchData();
+        }, 5000);
+
+        return () => clearInterval(interval);
+    }, []);
 
     return (
         <div className="w-full h-screen bg-[#F8F8F8] md:bg-white overflow-hidden flex flex-col md:flex-row justify-center items-stretch gap-4 p-0 md:p-6 max-w-[1600px] mx-auto">
