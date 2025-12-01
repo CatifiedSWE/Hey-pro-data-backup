@@ -121,41 +121,61 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                             {/* Chat List Scrollable Area */}
                             <div className="flex-1 overflow-y-auto no-scrollbar px-2 pb-4 sm:mb-0 mb-30">
                                 <TabsContent value="chat" className="mt-0">
-                                    <div className="flex flex-col items-start gap-[5px] w-full">
-                                        {chatData.map((chat, index) => (
-                                            <React.Fragment key={index}>
-                                                <Link href={`/inbox/c/${chat.messageId}`} className="flex flex-row items-center p-[10px] gap-[19px] w-full h-[70px] rounded-[10px] hover:bg-gray-50 transition-colors cursor-pointer">
-                                                    <Image
-                                                        src={chat.image}
-                                                        alt={chat.name}
-                                                        className="w-[48px] h-[48px] rounded-full object-cover bg-[#D9D9D9] shrink-0"
-                                                        width={48}
-                                                        height={48}
-                                                    />
-                                                    <div className="flex flex-row items-center gap-[7px] flex-1 min-w-0">
-                                                        <div className="flex flex-col justify-center items-start gap-[1px] flex-1 min-w-0">
-                                                            <span className="w-full font-medium text-[16px] leading-[24px] text-black truncate">
-                                                                {chat.name}
-                                                            </span>
-                                                            <span className="w-full font-medium text-[12px] leading-[15px] text-[#444444] truncate">
-                                                                {chat.message}
-                                                            </span>
-                                                        </div>
-                                                        {chat.badge && (
-                                                            <div className="w-[20px] h-[20px] bg-[#31A7AC] border-2 border-white rounded-full flex items-center justify-center shrink-0">
-                                                                <span className="font-medium text-[10px] leading-[15px] text-white">
-                                                                    {chat.badge}
+                                    {loading ? (
+                                        <div className="flex items-center justify-center h-40">
+                                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#31A7AC]"></div>
+                                        </div>
+                                    ) : error ? (
+                                        <div className="flex flex-col items-center justify-center h-40 text-gray-500">
+                                            <p className="text-sm">{error}</p>
+                                            <button 
+                                                onClick={fetchData}
+                                                className="mt-2 text-[#31A7AC] text-sm hover:underline"
+                                            >
+                                                Try again
+                                            </button>
+                                        </div>
+                                    ) : conversations.length === 0 ? (
+                                        <div className="flex items-center justify-center h-40 text-gray-500">
+                                            <p className="text-sm">No conversations yet</p>
+                                        </div>
+                                    ) : (
+                                        <div className="flex flex-col items-start gap-[5px] w-full">
+                                            {conversations.map((conv, index) => (
+                                                <React.Fragment key={conv.id}>
+                                                    <Link href={`/inbox/c/${conv.id}`} className="flex flex-row items-center p-[10px] gap-[19px] w-full h-[70px] rounded-[10px] hover:bg-gray-50 transition-colors cursor-pointer">
+                                                        <Image
+                                                            src={conv.user.avatar || '/image (1).png'}
+                                                            alt={conv.user.name}
+                                                            className="w-[48px] h-[48px] rounded-full object-cover bg-[#D9D9D9] shrink-0"
+                                                            width={48}
+                                                            height={48}
+                                                        />
+                                                        <div className="flex flex-row items-center gap-[7px] flex-1 min-w-0">
+                                                            <div className="flex flex-col justify-center items-start gap-[1px] flex-1 min-w-0">
+                                                                <span className="w-full font-medium text-[16px] leading-[24px] text-black truncate">
+                                                                    {conv.user.name}
+                                                                </span>
+                                                                <span className="w-full font-medium text-[12px] leading-[15px] text-[#444444] truncate">
+                                                                    {conv.lastMessage?.content || 'No messages yet'}
                                                                 </span>
                                                             </div>
-                                                        )}
-                                                    </div>
-                                                </Link>
-                                                {index < chatData.length - 1 && (
-                                                    <div className="w-full h-[1px] border-t border-[#CDCDCD]" />
-                                                )}
-                                            </React.Fragment>
-                                        ))}
-                                    </div>
+                                                            {conv.unreadCount > 0 && (
+                                                                <div className="w-[20px] h-[20px] bg-[#31A7AC] border-2 border-white rounded-full flex items-center justify-center shrink-0">
+                                                                    <span className="font-medium text-[10px] leading-[15px] text-white">
+                                                                        {conv.unreadCount > 9 ? '9+' : conv.unreadCount}
+                                                                    </span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </Link>
+                                                    {index < conversations.length - 1 && (
+                                                        <div className="w-full h-[1px] border-t border-[#CDCDCD]" />
+                                                    )}
+                                                </React.Fragment>
+                                            ))}
+                                        </div>
+                                    )}
                                 </TabsContent>
                                 <TabsContent value="groups" className="mt-0">
                                     <div className="flex flex-col items-start gap-[5px] w-full">
