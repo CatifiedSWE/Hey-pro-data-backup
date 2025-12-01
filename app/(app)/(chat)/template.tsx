@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
     Tabs,
     TabsContent,
@@ -8,9 +8,9 @@ import {
     TabsTrigger,
 } from "@/components/ui/tabs"
 import Image from "next/image";
-
-import { chatData, Groups } from '@/data/chatMessage';
 import { usePathname } from "next/navigation";
+import { getConversations, getGroups, type Conversation, type Group } from '@/lib/api/chat';
+import { format } from 'date-fns';
 
 export default function AppLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     const pathname = usePathname();
