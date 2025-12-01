@@ -1,29 +1,40 @@
 "use client"
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { Plus, Speech, Trash2, Edit } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
 import { Separator } from "@/components/ui/separator"
+import { useProfile, type LanguageData } from "@/hooks/useProfile"
 
 interface Language {
+    id?: string;
     name: string;
     canSpeak: boolean;
     canWrite: boolean;
 }
 
-export default function AddLanguageSection({ languages: initialLanguages }: { languages: string[] }) {
+export default function AddLanguageSection({ onUpdate }: { onUpdate?: () => void }) {
+    const { languages: apiLanguages, addLanguage, deleteLanguage, fetchLanguages } = useProfile();
     const [isLanguagesDialogOpen, setIsLanguagesDialogOpen] = useState(false)
-    // Convert initial string array to Language objects
-    const initialLanguageObjects: Language[] = initialLanguages?.map(lang => ({
-        name: lang,
-        canSpeak: true,
-        canWrite: true
-    })) || []
-    const [languages, setLanguages] = useState<Language[]>(initialLanguageObjects)
+    const [languages, setLanguages] = useState<Language[]>([])
     const [tempLanguages, setTempLanguages] = useState<Language[]>([])
     const [newLanguage, setNewLanguage] = useState("")
+    const [saving, setSaving] = useState(false)
+
+    // Load languages from API
+    useEffect(() => {
+        if (apiLanguages) {
+            const languageObjects: Language[] = apiLanguages.map(lang => ({
+                id: lang.id,
+                name: lang.language_name,
+                canSpeak: lang.can_speak ?? true,
+                canWrite: lang.can_write ?? true
+            }));
+            setLanguages(languageObjects);
+        }
+    }, [apiLanguages]);
 
     const handleOpenLanguagesDialog = () => {
         setTempLanguages([...languages])
@@ -60,7 +71,7 @@ export default function AddLanguageSection({ languages: initialLanguages }: { la
         }))
     }
 
-    const handleSaveLanguages = () => {
+    const handleSaveLanguages = async () => {
         const languagesChanged = JSON.stringify(tempLanguages.sort((a, b) => a.name.localeCompare(b.name))) !==
             JSON.stringify(languages.sort((a, b) => a.name.localeCompare(b.name)));
 
@@ -77,13 +88,39 @@ export default function AddLanguageSection({ languages: initialLanguages }: { la
             return;
         }
 
-        console.log("=== Languages Data ===");
-        console.log("Total Languages:", tempLanguages.length);
-        console.log("Languages Details:", JSON.stringify(tempLanguages, null, 2));
+        setSaving(true);
+        try {
+            // Find languages to add (new ones without id)
+            const languagesToAdd = tempLanguages.filter(lang => !lang.id);
+            
+            // Find languages to delete (old ones not in temp)
+            const languagesToDelete = languages.filter(lang => 
+                lang.id && !tempLanguages.find(tl => tl.id === lang.id)
+            );
 
-        setLanguages(tempLanguages)
-        toast.success("Languages updated successfully!");
-        setIsLanguagesDialogOpen(false)
+            // Delete removed languages
+            for (const lang of languagesToDelete) {
+                if (lang.id) {
+                    await deleteLanguage(lang.id);
+                }
+            }
+
+            // Add new languages
+            for (const lang of languagesToAdd) {
+                await addLanguage(lang.name, lang.canSpeak, lang.canWrite);
+            }
+
+            // Refresh the data
+            await fetchLanguages();
+            
+            toast.success("Languages updated successfully!");
+            setIsLanguagesDialogOpen(false);
+            onUpdate?.();
+        } catch (error) {
+            toast.error('Failed to update languages');
+        } finally {
+            setSaving(false);
+        }
     }
 
     return (
@@ -195,8 +232,8 @@ export default function AddLanguageSection({ languages: initialLanguages }: { la
                                 Cancel
                             </Button>
                         </DialogClose>
-                        <Button onClick={handleSaveLanguages} className="bg-[#31A7AC] hover:bg-[#31A7AC] w-[128px] h-[41px] text-[#FFFFFF] rounded-[16px]">
-                            Save
+                        <Button onClick={handleSaveLanguages} disabled={saving} className="bg-[#31A7AC] hover:bg-[#31A7AC] w-[128px] h-[41px] text-[#FFFFFF] rounded-[16px]">
+                            {saving ? 'Saving...' : 'Save'}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

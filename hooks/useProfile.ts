@@ -52,11 +52,74 @@ export interface RoleData {
   created_at?: string;
 }
 
+export interface VisaData {
+  id?: string;
+  user_id?: string;
+  nationality?: string;
+  passport_expiry_date?: string;
+  visa_type?: string;
+  visa_issued_by?: string;
+  visa_expiry_date?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface LanguageData {
+  id: string;
+  user_id: string;
+  language_name: string;
+  proficiency_level?: string;
+  can_speak?: boolean;
+  can_write?: boolean;
+  sort_order?: number;
+  created_at?: string;
+}
+
+export interface TravelCountryData {
+  id: string;
+  user_id: string;
+  country_name: string;
+  sort_order?: number;
+  created_at?: string;
+}
+
+export interface HighlightData {
+  id: string;
+  user_id: string;
+  title: string;
+  description: string;
+  image_url?: string;
+  sort_order?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface SkillData {
+  id: string;
+  user_id: string;
+  skill_name: string;
+  department?: string;
+  role?: string;
+  description?: string;
+  proficiency_level?: string;
+  experience_level?: string;
+  day_rate?: number;
+  day_rate_currency?: string;
+  is_public?: boolean;
+  sort_order?: number;
+  created_at?: string;
+}
+
 export const useProfile = () => {
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [links, setLinks] = useState<LinkData[]>([]);
   const [recommendations, setRecommendations] = useState<RecommendationData[]>([]);
   const [roles, setRoles] = useState<RoleData[]>([]);
+  const [visa, setVisa] = useState<VisaData | null>(null);
+  const [languages, setLanguages] = useState<LanguageData[]>([]);
+  const [travelCountries, setTravelCountries] = useState<TravelCountryData[]>([]);
+  const [highlights, setHighlights] = useState<HighlightData[]>([]);
+  const [skills, setSkills] = useState<SkillData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -260,6 +323,328 @@ export const useProfile = () => {
     }
   }, [fetchRoles]);
 
+  // ========== VISA METHODS ==========
+  // Fetch visa
+  const fetchVisa = useCallback(async () => {
+    try {
+      const response = await apiCalling({
+        method: 'get',
+        route: '/profile/visa'
+      });
+
+      if (response.status && response.data?.data) {
+        setVisa(response.data.data);
+      } else {
+        setVisa(null);
+      }
+    } catch (err) {
+      console.error('Error fetching visa:', err);
+    }
+  }, []);
+
+  // Update visa
+  const updateVisa = useCallback(async (data: Partial<VisaData>) => {
+    try {
+      const response = await apiCalling({
+        method: 'patch',
+        route: '/profile/visa',
+        data
+      });
+
+      if (response.status) {
+        await fetchVisa();
+        return { success: true, message: 'Visa information updated successfully' };
+      } else {
+        return { success: false, message: response.message || 'Failed to update visa information' };
+      }
+    } catch (err) {
+      console.error('Error updating visa:', err);
+      return { success: false, message: 'Failed to update visa information' };
+    }
+  }, [fetchVisa]);
+
+  // ========== LANGUAGE METHODS ==========
+  // Fetch languages
+  const fetchLanguages = useCallback(async () => {
+    try {
+      const response = await apiCalling({
+        method: 'get',
+        route: '/profile/languages'
+      });
+
+      if (response.status && response.data?.data) {
+        setLanguages(response.data.data);
+      } else {
+        setLanguages([]);
+      }
+    } catch (err) {
+      console.error('Error fetching languages:', err);
+    }
+  }, []);
+
+  // Add language
+  const addLanguage = useCallback(async (language_name: string, can_speak = false, can_write = false, proficiency_level?: string, sort_order = 0) => {
+    try {
+      const response = await apiCalling({
+        method: 'post',
+        route: '/profile/languages',
+        data: { language_name, can_speak, can_write, proficiency_level, sort_order }
+      });
+
+      if (response.status) {
+        await fetchLanguages();
+        return { success: true, message: 'Language added successfully' };
+      } else {
+        return { success: false, message: response.message || 'Failed to add language' };
+      }
+    } catch (err) {
+      console.error('Error adding language:', err);
+      return { success: false, message: 'Failed to add language' };
+    }
+  }, [fetchLanguages]);
+
+  // Delete language
+  const deleteLanguage = useCallback(async (id: string) => {
+    try {
+      const response = await apiCalling({
+        method: 'delete',
+        route: `/profile/languages?id=${id}`
+      });
+
+      if (response.status) {
+        await fetchLanguages();
+        return { success: true, message: 'Language deleted successfully' };
+      } else {
+        return { success: false, message: response.message || 'Failed to delete language' };
+      }
+    } catch (err) {
+      console.error('Error deleting language:', err);
+      return { success: false, message: 'Failed to delete language' };
+    }
+  }, [fetchLanguages]);
+
+  // ========== TRAVEL COUNTRY METHODS ==========
+  // Fetch travel countries
+  const fetchTravelCountries = useCallback(async () => {
+    try {
+      const response = await apiCalling({
+        method: 'get',
+        route: '/profile/travel-countries'
+      });
+
+      if (response.status && response.data?.data) {
+        setTravelCountries(response.data.data);
+      } else {
+        setTravelCountries([]);
+      }
+    } catch (err) {
+      console.error('Error fetching travel countries:', err);
+    }
+  }, []);
+
+  // Add travel country
+  const addTravelCountry = useCallback(async (country_name: string, sort_order = 0) => {
+    try {
+      const response = await apiCalling({
+        method: 'post',
+        route: '/profile/travel-countries',
+        data: { country_name, sort_order }
+      });
+
+      if (response.status) {
+        await fetchTravelCountries();
+        return { success: true, message: 'Travel country added successfully' };
+      } else {
+        return { success: false, message: response.message || 'Failed to add travel country' };
+      }
+    } catch (err) {
+      console.error('Error adding travel country:', err);
+      return { success: false, message: 'Failed to add travel country' };
+    }
+  }, [fetchTravelCountries]);
+
+  // Delete travel country
+  const deleteTravelCountry = useCallback(async (id: string) => {
+    try {
+      const response = await apiCalling({
+        method: 'delete',
+        route: `/profile/travel-countries?id=${id}`
+      });
+
+      if (response.status) {
+        await fetchTravelCountries();
+        return { success: true, message: 'Travel country deleted successfully' };
+      } else {
+        return { success: false, message: response.message || 'Failed to delete travel country' };
+      }
+    } catch (err) {
+      console.error('Error deleting travel country:', err);
+      return { success: false, message: 'Failed to delete travel country' };
+    }
+  }, [fetchTravelCountries]);
+
+  // ========== HIGHLIGHT METHODS ==========
+  // Fetch highlights
+  const fetchHighlights = useCallback(async () => {
+    try {
+      const response = await apiCalling({
+        method: 'get',
+        route: '/profile/highlights'
+      });
+
+      if (response.status && response.data?.data) {
+        setHighlights(response.data.data);
+      } else {
+        setHighlights([]);
+      }
+    } catch (err) {
+      console.error('Error fetching highlights:', err);
+    }
+  }, []);
+
+  // Add highlight
+  const addHighlight = useCallback(async (title: string, description: string, image_url?: string, sort_order = 0) => {
+    try {
+      const response = await apiCalling({
+        method: 'post',
+        route: '/profile/highlights',
+        data: { title, description, image_url, sort_order }
+      });
+
+      if (response.status) {
+        await fetchHighlights();
+        return { success: true, message: 'Highlight added successfully' };
+      } else {
+        return { success: false, message: response.message || 'Failed to add highlight' };
+      }
+    } catch (err) {
+      console.error('Error adding highlight:', err);
+      return { success: false, message: 'Failed to add highlight' };
+    }
+  }, [fetchHighlights]);
+
+  // Update highlight
+  const updateHighlight = useCallback(async (id: string, data: Partial<HighlightData>) => {
+    try {
+      const response = await apiCalling({
+        method: 'patch',
+        route: '/profile/highlights',
+        data: { id, ...data }
+      });
+
+      if (response.status) {
+        await fetchHighlights();
+        return { success: true, message: 'Highlight updated successfully' };
+      } else {
+        return { success: false, message: response.message || 'Failed to update highlight' };
+      }
+    } catch (err) {
+      console.error('Error updating highlight:', err);
+      return { success: false, message: 'Failed to update highlight' };
+    }
+  }, [fetchHighlights]);
+
+  // Delete highlight
+  const deleteHighlight = useCallback(async (id: string) => {
+    try {
+      const response = await apiCalling({
+        method: 'delete',
+        route: `/profile/highlights?id=${id}`
+      });
+
+      if (response.status) {
+        await fetchHighlights();
+        return { success: true, message: 'Highlight deleted successfully' };
+      } else {
+        return { success: false, message: response.message || 'Failed to delete highlight' };
+      }
+    } catch (err) {
+      console.error('Error deleting highlight:', err);
+      return { success: false, message: 'Failed to delete highlight' };
+    }
+  }, [fetchHighlights]);
+
+  // ========== SKILL METHODS ==========
+  // Fetch skills
+  const fetchSkills = useCallback(async () => {
+    try {
+      const response = await apiCalling({
+        method: 'get',
+        route: '/skills'
+      });
+
+      if (response.status && response.data?.data) {
+        setSkills(response.data.data);
+      } else {
+        setSkills([]);
+      }
+    } catch (err) {
+      console.error('Error fetching skills:', err);
+    }
+  }, []);
+
+  // Add skill
+  const addSkill = useCallback(async (data: Partial<SkillData>) => {
+    try {
+      const response = await apiCalling({
+        method: 'post',
+        route: '/skills',
+        data
+      });
+
+      if (response.status) {
+        await fetchSkills();
+        return { success: true, message: 'Skill added successfully' };
+      } else {
+        return { success: false, message: response.message || 'Failed to add skill' };
+      }
+    } catch (err) {
+      console.error('Error adding skill:', err);
+      return { success: false, message: 'Failed to add skill' };
+    }
+  }, [fetchSkills]);
+
+  // Update skill
+  const updateSkill = useCallback(async (id: string, data: Partial<SkillData>) => {
+    try {
+      const response = await apiCalling({
+        method: 'patch',
+        route: `/skills/${id}`,
+        data
+      });
+
+      if (response.status) {
+        await fetchSkills();
+        return { success: true, message: 'Skill updated successfully' };
+      } else {
+        return { success: false, message: response.message || 'Failed to update skill' };
+      }
+    } catch (err) {
+      console.error('Error updating skill:', err);
+      return { success: false, message: 'Failed to update skill' };
+    }
+  }, [fetchSkills]);
+
+  // Delete skill
+  const deleteSkill = useCallback(async (id: string) => {
+    try {
+      const response = await apiCalling({
+        method: 'delete',
+        route: `/skills/${id}`
+      });
+
+      if (response.status) {
+        await fetchSkills();
+        return { success: true, message: 'Skill deleted successfully' };
+      } else {
+        return { success: false, message: response.message || 'Failed to delete skill' };
+      }
+    } catch (err) {
+      console.error('Error deleting skill:', err);
+      return { success: false, message: 'Failed to delete skill' };
+    }
+  }, [fetchSkills]);
+
   // Upload profile photo or banner
   const uploadPhoto = useCallback(async (file: File, type: 'profile' | 'banner') => {
     try {
@@ -303,24 +688,71 @@ export const useProfile = () => {
     fetchLinks();
     fetchRecommendations();
     fetchRoles();
-  }, [fetchProfile, fetchLinks, fetchRecommendations, fetchRoles]);
+    fetchVisa();
+    fetchLanguages();
+    fetchTravelCountries();
+    fetchHighlights();
+    fetchSkills();
+  }, [fetchProfile, fetchLinks, fetchRecommendations, fetchRoles, fetchVisa, fetchLanguages, fetchTravelCountries, fetchHighlights, fetchSkills]);
 
   return {
+    // Profile data
     profile,
     links,
     recommendations,
     roles,
+    visa,
+    languages,
+    travelCountries,
+    highlights,
+    skills,
     loading,
     error,
+    
+    // Profile methods
     updateProfile,
+    refetch: fetchProfile,
+    
+    // Link methods
     addLink,
     updateLink,
     deleteLink,
+    fetchLinks,
+    
+    // Recommendation methods
+    fetchRecommendations,
+    
+    // Role methods
     addRole,
     deleteRole,
+    
+    // Visa methods
+    fetchVisa,
+    updateVisa,
+    
+    // Language methods
+    fetchLanguages,
+    addLanguage,
+    deleteLanguage,
+    
+    // Travel country methods
+    fetchTravelCountries,
+    addTravelCountry,
+    deleteTravelCountry,
+    
+    // Highlight methods
+    fetchHighlights,
+    addHighlight,
+    updateHighlight,
+    deleteHighlight,
+    
+    // Skill methods
+    fetchSkills,
+    addSkill,
+    updateSkill,
+    deleteSkill,
+    
+    // Upload methods
     uploadPhoto,
-    refetch: fetchProfile,
-    fetchLinks,
-    fetchRecommendations
   };
 };

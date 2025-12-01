@@ -5,6 +5,8 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import HighlightsText from "./highlights-text";
+import { useProfile, type HighlightData } from "@/hooks/useProfile";
+import { useEffect } from "react";
 
 interface HighlightItem {
     id: string;
@@ -14,7 +16,8 @@ interface HighlightItem {
 }
 
 interface HighlightsProps {
-    highlights: HighlightItem[];
+    // This prop is kept for backward compatibility but we'll use API data
+    highlights?: HighlightItem[];
 }
 
 export function HighlightCard({
@@ -52,8 +55,20 @@ export function HighlightCard({
     );
 }
 
-export default function Highlights({ highlights }: HighlightsProps) {
-    if (!highlights?.length) {
+export default function Highlights({ highlights: propHighlights }: HighlightsProps) {
+    const { highlights: apiHighlights } = useProfile();
+    
+    // Use API highlights if available, otherwise fall back to prop highlights
+    const displayHighlights = apiHighlights.length > 0 
+        ? apiHighlights.map(h => ({
+            id: h.id,
+            title: h.title,
+            description: h.description,
+            images: h.image_url || '/placeholder.png'
+          }))
+        : propHighlights || [];
+
+    if (!displayHighlights?.length) {
         return null;
     }
 
@@ -68,7 +83,7 @@ export default function Highlights({ highlights }: HighlightsProps) {
                         Edit Highlights
                     </Button>
                     <div className="space-y-6">
-                        {highlights.map((highlight) => (
+                        {displayHighlights.map((highlight) => (
                             <HighlightCard key={highlight.id} highlight={highlight} />
                         ))}
                     </div>

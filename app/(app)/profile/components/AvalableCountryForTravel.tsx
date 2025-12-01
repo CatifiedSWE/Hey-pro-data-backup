@@ -9,10 +9,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, X } from "lucide-react";
 import { countries, type Country } from "@/lib/countries";
 import { toast } from "sonner";
+import { useProfile, type TravelCountryData } from "@/hooks/useProfile";
 
 interface AvailableCountryProps {
-    availableCountries?: Country[];
-    markAllInitial?: boolean;
+    onUpdate?: () => void;
 }
 
 const haveSameCountries = (a: Country[], b: Country[]) => {
@@ -21,18 +21,35 @@ const haveSameCountries = (a: Country[], b: Country[]) => {
     return b.every((country) => codes.has(country.code));
 };
 
-export default function AvalableCountryForTravel({ availableCountries: initialCountries = [], markAllInitial = false }: AvailableCountryProps) {
+export default function AvalableCountryForTravel({ onUpdate }: AvailableCountryProps) {
+    const { travelCountries: apiTravelCountries, addTravelCountry, deleteTravelCountry, fetchTravelCountries } = useProfile();
+    
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [visaCountries, setVisaCountries] = useState<Country[]>(initialCountries);
-    const [tempCountries, setTempCountries] = useState<Country[]>(initialCountries);
+    const [visaCountries, setVisaCountries] = useState<Country[]>([]);
+    const [tempCountries, setTempCountries] = useState<Country[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
-    const [markAll, setMarkAll] = useState(markAllInitial);
+    const [markAll, setMarkAll] = useState(false);
+    const [saving, setSaving] = useState(false);
 
+    // Load travel countries from API
     useEffect(() => {
-        setVisaCountries(initialCountries);
-        setTempCountries(initialCountries);
-        setMarkAll(markAllInitial || haveSameCountries(initialCountries, countries));
-    }, [initialCountries, markAllInitial]);
+        if (apiTravelCountries) {
+            const countryObjects: Country[] = apiTravelCountries
+                .map(tc => {
+                    // Try to find the country in our countries list
+                    const country = countries.find(c => 
+                        c.name.toLowerCase() === tc.country_name.toLowerCase() ||
+                        c.code === tc.country_name
+                    );
+                    return country;
+                })
+                .filter((c): c is Country => c !== undefined);
+            
+            setVisaCountries(countryObjects);
+            setTempCountries(countryObjects);
+            setMarkAll(haveSameCountries(countryObjects, countries));
+        }
+    }, [apiTravelCountries]);
 
     const handleOpenDialog = () => {
         const savedMarkAll = haveSameCountries(visaCountries, countries);
@@ -80,7 +97,7 @@ export default function AvalableCountryForTravel({ availableCountries: initialCo
         }
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         const nextCountries = markAll ? countries : tempCountries;
         const nextMarkAll = haveSameCountries(nextCountries, countries);
         const prevMarkAll = haveSameCountries(visaCountries, countries);
@@ -91,14 +108,46 @@ export default function AvalableCountryForTravel({ availableCountries: initialCo
             return;
         }
 
-        console.log("Available to travel submission:", {
-            markAll: nextMarkAll,
-            countries: nextCountries,
-        });
+        setSaving(true);
+        try {
+            // Find countries to add (in next but not in current)
+            const countriesToAdd = nextCountries.filter(nc => 
+                !visaCountries.find(vc => vc.code === nc.code)
+            );
+            
+            // Find countries to delete (in current but not in next)
+            const countriesToDelete = visaCountries.filter(vc => 
+                !nextCountries.find(nc => nc.code === vc.code)
+            );
 
-        setVisaCountries(nextCountries);
-        toast.success("Availability for travel ready to submit!");
-        setIsDialogOpen(false);
+            // Delete removed countries
+            for (const country of countriesToDelete) {
+                const apiCountry = apiTravelCountries?.find(tc => 
+                    tc.country_name.toLowerCase() === country.name.toLowerCase() ||
+                    tc.country_name === country.code
+                );
+                if (apiCountry?.id) {
+                    await deleteTravelCountry(apiCountry.id);
+                }
+            }
+
+            // Add new countries
+            for (const country of countriesToAdd) {
+                await addTravelCountry(country.name);
+            }
+
+            // Refresh the data
+            await fetchTravelCountries();
+            
+            setVisaCountries(nextCountries);
+            toast.success("Travel availability updated successfully!");
+            setIsDialogOpen(false);
+            onUpdate?.();
+        } catch (error) {
+            toast.error('Failed to update travel availability');
+        } finally {
+            setSaving(false);
+        }
     };
 
     const handleCancel = () => {
@@ -232,9 +281,10 @@ export default function AvalableCountryForTravel({ availableCountries: initialCo
                             <Button
                                 type="button"
                                 onClick={handleSave}
+                                disabled={saving}
                                 className="h-11 flex-1 rounded-[16px] bg-[#31A7AC] text-base font-medium text-white hover:bg-[#2b9497]"
                             >
-                                Save
+                                {saving ? 'Saving...' : 'Save'}
                             </Button>
                         </div>
                     </div>

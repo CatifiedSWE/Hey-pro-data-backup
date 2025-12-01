@@ -1,5 +1,5 @@
 "use client"
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +19,7 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover";
 import { toast } from "sonner";
+import { useProfile, type VisaData } from "@/hooks/useProfile";
 
 function formatDate(date: Date | undefined) {
     if (!date) {
@@ -32,63 +33,78 @@ function formatDate(date: Date | undefined) {
 }
 
 interface VisaSectionProps {
-    nationality?: string;
-    passportExpDate?: string;
-    visaType?: string;
-    visaIssueBy?: string;
-    visaExpData?: string;
+    onUpdate?: () => void;
 }
 
-export default function VisaSection({
-    nationality: initialNationality,
-    passportExpDate: initialPassportExpDate,
-    visaType: initialVisaType,
-    visaIssueBy: initialVisaIssueBy,
-    visaExpData: initialVisaExpDateString,
-}: VisaSectionProps) {
+export default function VisaSection({ onUpdate }: VisaSectionProps) {
+    const { visa, updateVisa, fetchVisa } = useProfile();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [saving, setSaving] = useState(false);
 
-    const [nationality, setNationality] = useState(initialNationality || "");
-    const [visaType, setVisaType] = useState(initialVisaType || "");
-    const [issuedBy, setIssuedBy] = useState(initialVisaIssueBy || "");
-    const [passportExpiryDate, setPassportExpiryDate] = useState<Date | undefined>(
-        initialPassportExpDate ? new Date(initialPassportExpDate) : undefined
-    );
-    const [visaExpiryDate, setVisaExpiryDate] = useState<Date | undefined>(
-        initialVisaExpDateString ? new Date(initialVisaExpDateString) : undefined
-    );
+    const [nationality, setNationality] = useState("");
+    const [visaType, setVisaType] = useState("");
+    const [issuedBy, setIssuedBy] = useState("");
+    const [passportExpiryDate, setPassportExpiryDate] = useState<Date | undefined>(undefined);
+    const [visaExpiryDate, setVisaExpiryDate] = useState<Date | undefined>(undefined);
 
-    const [passportMonth, setPassportMonth] = useState<Date | undefined>(passportExpiryDate);
-    const [visaMonth, setVisaMonth] = useState<Date | undefined>(visaExpiryDate);
+    const [passportMonth, setPassportMonth] = useState<Date | undefined>(undefined);
+    const [visaMonth, setVisaMonth] = useState<Date | undefined>(undefined);
     const [passportPopoverOpen, setPassportPopoverOpen] = useState(false);
     const [visaPopoverOpen, setVisaPopoverOpen] = useState(false);
 
-    const nationalityOptions = ["United States", "Canada", "United Kingdom", "Australia", "India", "Germany", "France"];
-    const visaTypes = ["H1B", "L1", "O1", "TN", "E3", "F1", "J1", "B1/B2"];
+    const nationalityOptions = ["United States", "Canada", "United Kingdom", "Australia", "India", "Germany", "France", "United Arab Emirates", "Saudi Arabia", "Egypt"];
+    const visaTypes = ["H1B", "L1", "O1", "TN", "E3", "F1", "J1", "B1/B2", "Work Visa", "Tourist Visa", "Resident Visa"];
+
+    // Load visa data when component mounts or when visa changes
+    useEffect(() => {
+        if (visa) {
+            setNationality(visa.nationality || "");
+            setVisaType(visa.visa_type || "");
+            setIssuedBy(visa.visa_issued_by || "");
+            
+            const passportDate = visa.passport_expiry_date ? new Date(visa.passport_expiry_date) : undefined;
+            const visaDate = visa.visa_expiry_date ? new Date(visa.visa_expiry_date) : undefined;
+            
+            setPassportExpiryDate(passportDate);
+            setPassportMonth(passportDate);
+            setVisaExpiryDate(visaDate);
+            setVisaMonth(visaDate);
+        }
+    }, [visa]);
 
     const resetForm = () => {
-        setNationality(initialNationality || "");
-        setVisaType(initialVisaType || "");
-        setIssuedBy(initialVisaIssueBy || "");
-
-        const passportDate = initialPassportExpDate ? new Date(initialPassportExpDate) : undefined;
-        const visaDate = initialVisaExpDateString ? new Date(initialVisaExpDateString) : undefined;
-
-        setPassportExpiryDate(passportDate);
-        setPassportMonth(passportDate);
-        setVisaExpiryDate(visaDate);
-        setVisaMonth(visaDate);
+        if (visa) {
+            setNationality(visa.nationality || "");
+            setVisaType(visa.visa_type || "");
+            setIssuedBy(visa.visa_issued_by || "");
+            
+            const passportDate = visa.passport_expiry_date ? new Date(visa.passport_expiry_date) : undefined;
+            const visaDate = visa.visa_expiry_date ? new Date(visa.visa_expiry_date) : undefined;
+            
+            setPassportExpiryDate(passportDate);
+            setPassportMonth(passportDate);
+            setVisaExpiryDate(visaDate);
+            setVisaMonth(visaDate);
+        } else {
+            setNationality("");
+            setVisaType("");
+            setIssuedBy("");
+            setPassportExpiryDate(undefined);
+            setPassportMonth(undefined);
+            setVisaExpiryDate(undefined);
+            setVisaMonth(undefined);
+        }
     };
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         const hasChanges = [
-            nationality !== (initialNationality || ""),
-            passportExpiryDate?.getTime() !== (initialPassportExpDate ? new Date(initialPassportExpDate).getTime() : undefined),
-            visaType !== (initialVisaType || ""),
-            issuedBy !== (initialVisaIssueBy || ""),
-            visaExpiryDate?.getTime() !== (initialVisaExpDateString ? new Date(initialVisaExpDateString).getTime() : undefined),
+            nationality !== (visa?.nationality || ""),
+            passportExpiryDate?.getTime() !== (visa?.passport_expiry_date ? new Date(visa.passport_expiry_date).getTime() : undefined),
+            visaType !== (visa?.visa_type || ""),
+            issuedBy !== (visa?.visa_issued_by || ""),
+            visaExpiryDate?.getTime() !== (visa?.visa_expiry_date ? new Date(visa.visa_expiry_date).getTime() : undefined),
         ].some(Boolean);
 
         if (!hasChanges) {
@@ -97,16 +113,28 @@ export default function VisaSection({
             return;
         }
 
-        console.log("Passport & visa details:", {
-            nationality,
-            passportExpDate: passportExpiryDate ? formatDate(passportExpiryDate) : "",
-            visaType,
-            issuedBy,
-            visaExpDate: visaExpiryDate ? formatDate(visaExpiryDate) : "",
-        });
+        setSaving(true);
+        try {
+            const result = await updateVisa({
+                nationality: nationality || undefined,
+                passport_expiry_date: passportExpiryDate ? passportExpiryDate.toISOString().split('T')[0] : undefined,
+                visa_type: visaType || undefined,
+                visa_issued_by: issuedBy || undefined,
+                visa_expiry_date: visaExpiryDate ? visaExpiryDate.toISOString().split('T')[0] : undefined,
+            });
 
-        toast.success("Passport & visa details ready to submit!");
-        setIsDialogOpen(false);
+            if (result.success) {
+                toast.success(result.message);
+                setIsDialogOpen(false);
+                onUpdate?.();
+            } else {
+                toast.error(result.message);
+            }
+        } catch (error) {
+            toast.error('Failed to update visa information');
+        } finally {
+            setSaving(false);
+        }
     };
 
     const handleCancel = () => {
@@ -268,9 +296,10 @@ export default function VisaSection({
                             </Button>
                             <Button
                                 type="submit"
+                                disabled={saving}
                                 className="h-11 flex-1 rounded-[16px] bg-[#31A7AC] text-base font-medium text-white hover:bg-[#2b9497]"
                             >
-                                Save
+                                {saving ? 'Saving...' : 'Save'}
                             </Button>
                         </div>
                     </div>

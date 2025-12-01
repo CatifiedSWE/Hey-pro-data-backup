@@ -134,11 +134,47 @@ export default function AddNewSkill({ trigger }: AddNewSkillProps) {
         setExperienceVisibility({});
     };
 
-    const handleSaveChanges = () => {
-        setIsDialogOpen(false);
-        console.log("New skill submission:", skills);
-        toast.success("Skills ready to submit!");
-        resetForm();
+    const handleSaveChanges = async () => {
+        // Validate that all skills have required fields
+        const invalidSkills = skills.filter(skill => !skill.department || !skill.role);
+        if (invalidSkills.length > 0) {
+            toast.error('Please fill in department and role for all skills');
+            return;
+        }
+
+        setSaving(true);
+        try {
+            // Import useProfile at the component level
+            const { addSkill, fetchSkills } = useProfile();
+            
+            // Add all new skills
+            for (const skill of skills) {
+                const skillData = {
+                    skill_name: `${skill.department} - ${skill.role}`,
+                    department: skill.department,
+                    role: skill.role,
+                    description: skill.description || undefined,
+                    proficiency_level: skill.experience?.title || undefined,
+                    experience_level: skill.experience?.value || undefined,
+                    day_rate: skill.rate ? parseFloat(skill.rate) : undefined,
+                    is_public: skill.isPublic ?? true,
+                };
+                
+                await addSkill(skillData);
+            }
+
+            // Refresh skills data
+            await fetchSkills();
+            
+            toast.success("Skills added successfully!");
+            setIsDialogOpen(false);
+            resetForm();
+            onUpdate?.();
+        } catch (error) {
+            toast.error('Failed to add skills');
+        } finally {
+            setSaving(false);
+        }
     };
 
     const handleCancel = () => {
