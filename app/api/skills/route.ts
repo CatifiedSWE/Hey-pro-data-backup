@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { skill_name, proficiency_level, sort_order } = body;
+    const { skill_name, description, sort_order } = body;
 
     // Validate required fields
     if (!skill_name || typeof skill_name !== 'string' || skill_name.trim().length === 0) {
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
       .insert({
         user_id: user.id,
         skill_name: skill_name.trim(),
-        proficiency_level: proficiency_level || 'Intermediate',
+        description: description || null,
         sort_order: sort_order || 0
       })
       .select()
