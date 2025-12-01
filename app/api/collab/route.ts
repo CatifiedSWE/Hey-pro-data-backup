@@ -20,14 +20,12 @@ export async function GET(request: NextRequest) {
     const offset = (page - 1) * limit;
 
     // Build base query
+    // Note: Fetch user data separately as direct foreign key joins to auth.users 
+    // may not work in all Supabase configurations
     let query = supabase
       .from('collab_posts')
       .select(`
         *,
-        author:user_id (
-          id,
-          raw_user_meta_data
-        ),
         tags:collab_tags(tag_name),
         interests:collab_interests(count)
       `, { count: 'exact' });
