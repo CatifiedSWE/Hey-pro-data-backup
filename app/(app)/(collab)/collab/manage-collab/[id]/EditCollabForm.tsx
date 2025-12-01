@@ -251,70 +251,98 @@ export function EditCollabForm({ collab }: EditCollabFormProps) {
                     <div className="flex flex-wrap items-center gap-3 pt-2">
                         <button
                             type="submit"
-                            className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-[#31A7AC] px-6 py-3 text-sm font-semibold text-white shadow-lg hover:bg-[#289398]"
+                            disabled={submitting}
+                            className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-[#31A7AC] px-6 py-3 text-sm font-semibold text-white shadow-lg hover:bg-[#289398] disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            <Save className="h-4 w-4" />
-                            Save changes
+                            {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+                            {!submitting && <Save className="h-4 w-4" />}
+                            {submitting ? 'Saving...' : 'Save changes'}
                         </button>
                         <button
                             type="button"
                             onClick={handleReset}
-                            className="inline-flex items-center justify-center gap-2 rounded-full border border-[#E4E7EC] px-6 py-3 text-sm font-semibold text-gray-600 hover:border-[#D0D5DD]"
+                            disabled={submitting}
+                            className="inline-flex items-center justify-center gap-2 rounded-full border border-[#E4E7EC] px-6 py-3 text-sm font-semibold text-gray-600 hover:border-[#D0D5DD] disabled:opacity-50"
                         >
                             <RefreshCw className="h-4 w-4" />
                             Reset
                         </button>
                     </div>
-                    {actionMessage && <p className="text-sm font-medium text-gray-500">{actionMessage}</p>}
+                    {actionMessage && <p className="text-sm font-medium text-green-600">{actionMessage}</p>}
                 </div>
             </form>
             <div>
                 <div className="flex flex-col-reverse mt-5 sm:mt-0 gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <span className="font-semibold text-2xl">Collaborators</span>
-                    <button className="ml-0 w-full rounded-[10px] border border-transparent bg-[#31A7AC] px-4 py-2 text-white transition hover:opacity-90 sm:ml-2 sm:w-auto">Close Collab</button>
+                    <span className="font-semibold text-2xl">Collaborators ({collaborators.length})</span>
+                    <div className="flex gap-2">
+                        <button 
+                            onClick={handleClose}
+                            disabled={closing || collab.status === 'closed'}
+                            className="w-full rounded-[10px] border border-transparent bg-[#31A7AC] px-4 py-2 text-white transition hover:opacity-90 sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        >
+                            {closing && <Loader2 className="h-4 w-4 animate-spin" />}
+                            {collab.status === 'closed' ? 'Closed' : 'Close Collab'}
+                        </button>
+                        <button 
+                            onClick={handleDelete}
+                            disabled={deleting}
+                            className="w-full rounded-[10px] border border-red-500 bg-red-500 px-4 py-2 text-white transition hover:bg-red-600 sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        >
+                            {deleting && <Loader2 className="h-4 w-4 animate-spin" />}
+                            {!deleting && <Trash2 className="h-4 w-4" />}
+                            {deleting ? 'Deleting...' : 'Delete'}
+                        </button>
+                    </div>
                 </div>
-                <div className="w-full overflow-x-auto">
-                    <Table className="w-full min-w-[600px] table-fixed">
-                        <TableHeader>
-                            <TableRow className="border-b border-gray-300">
-                                <TableHead className="w-2/3">Name</TableHead>
-                                <TableHead className="w-1/3">Role</TableHead>
-                                <TableHead className="w-1/3">Chat</TableHead>
-                                <TableHead className="w-1/3">Add To Group</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {collaborators.map((c) => (
-                                <TableRow key={c.id} className="w-full last:[&>td]:border-b-0">
-                                    <TableCell className="w-2/3 border-b border-gray-200">
-                                        <div className="flex items-center gap-3">
-                                            <Image
-                                                src={c.avatar}
-                                                alt={c.name}
-                                                width={40}
-                                                height={40}
-                                                className="rounded-full flex-shrink-0"
-                                            />
-                                            <div className="min-w-0">
-                                                <span className="font-medium block truncate">{c.name}</span>
-                                                <span className="text-xs text-gray-500 truncate">{c.department}</span>
-                                            </div>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell className="w-1/3 border-b border-gray-200">
-                                        <span className="inline-block truncate">{c.role}</span>
-                                    </TableCell>
-                                    <TableCell className="w-1/3 border-b border-gray-200">
-                                        <button className="text-sm text-[#31A7AC] underline"><MessageCircle className="h-6 w-6" /></button>
-                                    </TableCell>
-                                    <TableCell className="w-1/3 border-b border-gray-200">
-                                        <button className="text-sm px-4 py-2 text-[#31A7AC] "><Plus className="h-6 w-6" /></button>
-                                    </TableCell>
+                {collaborators.length > 0 ? (
+                    <div className="w-full overflow-x-auto mt-4">
+                        <Table className="w-full min-w-[600px] table-fixed">
+                            <TableHeader>
+                                <TableRow className="border-b border-gray-300">
+                                    <TableHead className="w-2/3">Name</TableHead>
+                                    <TableHead className="w-1/3">Role</TableHead>
+                                    <TableHead className="w-1/3">Chat</TableHead>
+                                    <TableHead className="w-1/3">Add To Group</TableHead>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </div>
+                            </TableHeader>
+                            <TableBody>
+                                {collaborators.map((c) => (
+                                    <TableRow key={c.id} className="w-full last:[&>td]:border-b-0">
+                                        <TableCell className="w-2/3 border-b border-gray-200">
+                                            <div className="flex items-center gap-3">
+                                                <Image
+                                                    src={c.avatar}
+                                                    alt={c.name}
+                                                    width={40}
+                                                    height={40}
+                                                    className="rounded-full flex-shrink-0"
+                                                    unoptimized
+                                                />
+                                                <div className="min-w-0">
+                                                    <span className="font-medium block truncate">{c.name}</span>
+                                                    <span className="text-xs text-gray-500 truncate">{c.department}</span>
+                                                </div>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="w-1/3 border-b border-gray-200">
+                                            <span className="inline-block truncate">{c.role}</span>
+                                        </TableCell>
+                                        <TableCell className="w-1/3 border-b border-gray-200">
+                                            <button className="text-sm text-[#31A7AC] underline"><MessageCircle className="h-6 w-6" /></button>
+                                        </TableCell>
+                                        <TableCell className="w-1/3 border-b border-gray-200">
+                                            <button className="text-sm px-4 py-2 text-[#31A7AC]"><Plus className="h-6 w-6" /></button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
+                ) : (
+                    <div className="text-center py-8 text-gray-500">
+                        No collaborators yet. Interested users will appear here.
+                    </div>
+                )}
             </div>
         </section>
     );
