@@ -50,8 +50,10 @@ export default function WhatupNumbers({
     // Get profile methods
     const { updateProfile, refetch } = useProfile();
 
+    // Find country by dial_code if provided (e.g., "+971"), otherwise default to India
     const defaultCountry =
-        countries.find((c) => c.code === (initialCountryCode || "IN")) ||
+        countries.find((c) => c.dial_code === initialCountryCode) ||
+        countries.find((c) => c.code === "IN") ||
         countries[0];
     const [selectedCountry, setSelectedCountry] =
         useState<Country>(defaultCountry);

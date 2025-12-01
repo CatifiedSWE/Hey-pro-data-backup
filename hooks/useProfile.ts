@@ -2,6 +2,21 @@ import { useState, useEffect, useCallback } from 'react';
 import apiCalling from '@/lib/apiCalling';
 import { getAccessToken } from '@/lib/supabase/client';
 
+export interface WorkIdentities {
+  freelance: boolean;
+  employee: {
+    enabled: boolean;
+    company: string;
+    designation: string;
+  };
+  businessOwner: {
+    enabled: boolean;
+    designation: string;
+    businessName: string;
+    businessType: string;
+  };
+}
+
 export interface ProfileData {
   user_id: string;
   first_name?: string;
@@ -15,10 +30,12 @@ export interface ProfileData {
   city?: string;
   email?: string;
   phone?: string;
+  country_code?: string;
   portfolio_url?: string;
   imdb_url?: string;
   day_rate?: number;
   day_rate_currency?: string;
+  work_identities?: WorkIdentities;
   visible_in_explore?: boolean;
   is_profile_complete?: boolean;
   profile_completion_percentage?: number;

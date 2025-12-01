@@ -127,6 +127,26 @@ export default function Profile() {
     return result;
   };
 
+  // Helper function to parse phone number
+  const parsePhoneNumber = (phone?: string) => {
+    if (!phone) return { countryCode: undefined, phoneNumber: undefined };
+    
+    // Match pattern: +XXX followed by the rest
+    const match = phone.match(/^(\+\d{1,4})(.*)$/);
+    if (match) {
+      return {
+        countryCode: match[1], // e.g., "+971"
+        phoneNumber: match[2].replace(/\D/g, '') // Remove any non-digit characters from the number part
+      };
+    }
+    
+    // If no match, return the full phone as number
+    return {
+      countryCode: undefined,
+      phoneNumber: phone.replace(/\D/g, '')
+    };
+  };
+
   // Show loading state - AFTER all hooks are called
   if (loading) {
     return <ProfileSkeleton />;
@@ -211,15 +231,18 @@ export default function Profile() {
                     <VisaSection visaType={''} visaIssueBy={''} visaExpData={''} />
                   </div>
                   <div className="flex-none ">
-                    <WorkStatusSection statusProp={(profile as ExtendedProfileData)?.persionalDetails?.availability} />
+                    <WorkStatusSection 
+                      statusProp={(profile as ExtendedProfileData)?.persionalDetails?.availability}
+                      initialIdentities={profile?.work_identities}
+                    />
                   </div>
                   <div className="flex-none ">
                     <AddLanguageSection languages={(profile as ExtendedProfileData)?.language || []} />
                   </div>
                   <div className="flex-none ">
                     <WhatupNumbers
-                      countryCode={(profile as ExtendedProfileData)?.countryCode}
-                      phoneNumber={(profile as ExtendedProfileData)?.phoneNumber}
+                      countryCode={parsePhoneNumber(profile?.phone).countryCode}
+                      phoneNumber={parsePhoneNumber(profile?.phone).phoneNumber}
                     />
                   </div>
 
