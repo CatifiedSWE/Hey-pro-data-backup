@@ -13,23 +13,10 @@ export async function GET(
     const collabId = params.id;
     const supabase = createServerClient();
 
-    // Fetch collaborators with user details
+    // Fetch collaborators
     const { data: collaborators, error } = await supabase
       .from('collab_collaborators')
-      .select(`
-        id,
-        role,
-        department,
-        added_at,
-        user:user_id(
-          id,
-          raw_user_meta_data
-        ),
-        added_by_user:added_by(
-          id,
-          raw_user_meta_data
-        )
-      `)
+      .select('id, role, department, added_at, user_id, added_by')
       .eq('collab_id', collabId)
       .order('added_at', { ascending: false });
 
@@ -41,22 +28,48 @@ export async function GET(
       );
     }
 
-    // Format collaborators
-    const formattedCollaborators = (collaborators || []).map((collab: any) => ({
-      id: collab.id,
-      user: {
-        id: collab.user?.id,
-        name: collab.user?.raw_user_meta_data?.name || collab.user?.raw_user_meta_data?.full_name || 'Unknown',
-        avatar: collab.user?.raw_user_meta_data?.avatar_url || collab.user?.raw_user_meta_data?.profile_photo_url || '/placeholder-avatar.png'
-      },
-      role: collab.role,
-      department: collab.department,
-      added_at: collab.added_at,
-      added_by: {
-        id: collab.added_by_user?.id,
-        name: collab.added_by_user?.raw_user_meta_data?.name || collab.added_by_user?.raw_user_meta_data?.full_name || 'Unknown'
-      }
-    }));
+    // Get user profiles for collaborators
+    let formattedCollaborators: any[] = [];
+    if (collaborators && collaborators.length > 0) {
+      const userIds = [...new Set([
+        ...collaborators.map((c: any) => c.user_id),
+        ...collaborators.map((c: any) => c.added_by)
+      ])];
+
+      const { data: userProfiles } = await supabase
+        .from('user_profiles')
+        .select('user_id, first_name, surname, profile_photo_url')
+        .in('user_id', userIds);
+
+      formattedCollaborators = collaborators.map((collab: any) => {
+        const userProfile = userProfiles?.find((p: any) => p.user_id === collab.user_id);
+        const addedByProfile = userProfiles?.find((p: any) => p.user_id === collab.added_by);
+        
+        const userName = userProfile 
+          ? `${userProfile.first_name || ''} ${userProfile.surname || ''}`.trim() || 'Unknown'
+          : 'Unknown';
+        
+        const addedByName = addedByProfile 
+          ? `${addedByProfile.first_name || ''} ${addedByProfile.surname || ''}`.trim() || 'Unknown'
+          : 'Unknown';
+
+        return {
+          id: collab.id,
+          user: {
+            id: collab.user_id,
+            name: userName,
+            avatar: userProfile?.profile_photo_url || '/placeholder-avatar.png'
+          },
+          role: collab.role,
+          department: collab.department,
+          added_at: collab.added_at,
+          added_by: {
+            id: collab.added_by,
+            name: addedByName
+          }
+        };
+      });
+    }
 
     return NextResponse.json(
       successResponse(
