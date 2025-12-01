@@ -34,7 +34,20 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
             setGroups(groupsData);
         } catch (err: any) {
             console.error('Error fetching chat data:', err);
-            setError('Failed to load chats');
+            
+            // Check if it's an authentication error (401) or empty response
+            const isAuthError = err?.response?.status === 401;
+            const isNotFound = err?.response?.status === 404;
+            
+            // For auth errors or not found, treat as empty data (no error message)
+            if (isAuthError || isNotFound) {
+                setConversations([]);
+                setGroups([]);
+                setError(null);
+            } else {
+                // Only show error for actual server errors
+                setError('Failed to load chats');
+            }
         } finally {
             setLoading(false);
         }
