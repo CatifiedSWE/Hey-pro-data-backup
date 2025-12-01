@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Plus, X } from "lucide-react"
 import { toast } from "sonner"
-import { RoleData } from "@/hooks/useProfile"
+import { RoleData } from "@/contexts/ProfileContext"
 
 interface RoleDialogProps {
     roles?: RoleData[];

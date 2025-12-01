@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import apiCalling from "@/lib/apiCalling"
-import type { LinkData } from "@/hooks/useProfile"
+import type { LinkData } from "@/contexts/ProfileContext"
 
 interface LinksDialogProps {
     links: LinkData[]

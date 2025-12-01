@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
 import { Separator } from "@/components/ui/separator"
-import { useProfile, type LanguageData } from "@/hooks/useProfile"
+import { useProfile, type LanguageData } from "@/contexts/ProfileContext"
 
 interface Language {
     id?: string;

@@ -9,7 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, X } from "lucide-react";
 import { countries, type Country } from "@/lib/countries";
 import { toast } from "sonner";
-import { useProfile, type TravelCountryData } from "@/hooks/useProfile";
+import { useProfile, type TravelCountryData } from "@/contexts/ProfileContext";
 
 interface AvailableCountryProps {
     onUpdate?: () => void;

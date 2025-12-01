@@ -19,7 +19,7 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover";
 import { toast } from "sonner";
-import { useProfile, type VisaData } from "@/hooks/useProfile";
+import { useProfile, type VisaData } from "@/contexts/ProfileContext";
 
 function formatDate(date: Date | undefined) {
     if (!date) {

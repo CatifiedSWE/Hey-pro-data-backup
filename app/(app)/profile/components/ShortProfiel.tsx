@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { ProfileProgress } from "@/app/(app)/profile/components/profileProgress"
 import { countries } from "@/lib/countries"
 import { toast } from "sonner"
-import { useProfile, type ProfileData, type LinkData, type RoleData } from "@/hooks/useProfile"
+import { useProfile, type ProfileData, type LinkData, type RoleData } from "@/contexts/ProfileContext"
 import { useAuth } from "@/contexts/AuthContext"
 
 import AvalableDilog from "./Avalable"

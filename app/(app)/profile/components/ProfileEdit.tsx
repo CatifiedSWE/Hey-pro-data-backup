@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { toast } from "sonner"
 import apiCalling from "@/lib/apiCalling"
-import type { ProfileData } from "@/hooks/useProfile"
+import type { ProfileData } from "@/contexts/ProfileContext"
 
 interface EditProfileInfoProps {
     profile: ProfileData | null;

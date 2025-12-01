@@ -46,7 +46,7 @@ import { highlightsData } from "@/data/profile";
 import SlateView from "./components/slate";
 import AddNewSkill from "./components/add-new-skill";
 import { RoleDialog } from "./components/role";
-import { useProfile, ProfileData } from "@/hooks/useProfile";
+import { useProfile, ProfileData } from "@/contexts/ProfileContext";
 import { toast } from "sonner";
 
 type SectionType = "about" | "skills" | "credits" | "recommendations"

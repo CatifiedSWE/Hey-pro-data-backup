@@ -34,7 +34,7 @@ import { useState } from "react";
 import { countries, type Country } from "@/lib/countries";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { useProfile } from "@/hooks/useProfile";
+import { useProfile } from "@/contexts/ProfileContext";
 
 export default function WhatupNumbers({
     countryCode: initialCountryCode,
