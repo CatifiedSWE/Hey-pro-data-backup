@@ -1,24 +1,52 @@
-import { notFound } from "next/navigation";
+"use client";
 
-import { getCollabById } from "@/data/collabPosts";
+import { useEffect, useState } from "react";
+import { notFound, useParams } from "next/navigation";
+import { Loader2 } from "lucide-react";
 
 import { ManageCollabHeader } from "../../../components/Header";
 import { EditCollabForm } from "./EditCollabForm";
+import { getCollabById, type CollabDetail } from "@/lib/api/collab";
 
-type ManageCollabPageProps = {
-    params: { id: string };
-};
+export default function ManageCollabPage() {
+    const params = useParams();
+    const id = params.id as string;
+    
+    const [collab, setCollab] = useState<CollabDetail | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
 
-export default async function ManageCollabPage({ params }: ManageCollabPageProps) {
-    const { id } = await params;
-    const collabId = Number(id);
-    if (Number.isNaN(collabId)) {
-        notFound();
+    useEffect(() => {
+        const fetchCollab = async () => {
+            try {
+                const data = await getCollabById(id);
+                setCollab(data);
+            } catch (err) {
+                console.error('Failed to fetch collab:', err);
+                setError(true);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (id) {
+            fetchCollab();
+        }
+    }, [id]);
+
+    if (loading) {
+        return (
+            <div className="space-y-10">
+                <ManageCollabHeader />
+                <div className="flex justify-center py-20">
+                    <Loader2 className="h-8 w-8 animate-spin text-[#2FD3D8]" />
+                </div>
+            </div>
+        );
     }
 
-    const collab = getCollabById(collabId);
-    if (!collab) {
-        notFound();
+    if (error || !collab) {
+        return notFound();
     }
 
     return (
