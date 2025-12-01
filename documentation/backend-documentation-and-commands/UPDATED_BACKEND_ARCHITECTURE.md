@@ -5,11 +5,32 @@
 This document provides a comprehensive overview of the **UPDATED** backend architecture including all profile-related enhancements.
 
 **Last Updated:** January 2025  
-**Version:** 2.7 (Jobs Feature Enhancement - SQL Commands Ready)
+**Version:** 2.7.1 (Profile Enhancement - user_credits & user_profiles tables enhanced)
 
 ---
 
-## 🆕 Latest Update - Jobs Feature (v2.7)
+## 🆕 Latest Update - Profile Enhancement (v2.7.1)
+
+**New Implementation:** Enhanced profile tables to support rich professional portfolios and marketplace functionality.
+
+### What's New in v2.7.1:
+- ✅ Enhanced `user_credits` table with 11 new columns (production details, awards, clients, statistics)
+- ✅ Enhanced `user_profiles` table with 3 new columns (day_rate, day_rate_currency, work_identities)
+- ✅ New JSONB structures for awards and work identities
+- ✅ 9+ new indexes for efficient querying
+- ✅ Validation constraints for data quality
+- ✅ Helper function for work_identities validation
+
+### Quick Links:
+- **Implementation README:** `/documentation/backend-documentation-and-commands/profile-page-update/README.md`
+- **Analysis Document:** `/documentation/backend-documentation-and-commands/profile-page-update/00_ANALYSIS.md`
+- **SQL Migration Scripts:** `/documentation/backend-documentation-and-commands/profile-page-update/01_*.sql` through 04
+
+**Status:** SQL scripts ready for execution. See `/documentation/backend-documentation-and-commands/profile-page-update/` for complete implementation.
+
+---
+
+## 🔄 Previous Update - Jobs Feature (v2.7)
 
 **New Implementation Ready:** Complete SQL migration scripts for Jobs feature are available in `/backend-command/jobs/`
 
@@ -170,11 +191,11 @@ This document provides a comprehensive overview of the **UPDATED** backend archi
 
 ## 🗄️ Database Schema Summary
 
-### Core Tables (41 Total) ⭐ UPDATED v2.7
+### Core Tables (41 Total) ⭐ ENHANCED v2.7.1
 
-#### PROFILE TABLES (10 Tables)
+#### PROFILE TABLES (10 Tables) ⭐ ENHANCED v2.7.1
 
-##### 1. `user_profiles` ⭐ UPDATED (Version 2.1)
+##### 1. `user_profiles` ⭐ ENHANCED (Version 2.7.1)
 Stores user profile information linked to authentication.
 
 **Key Fields:**
@@ -199,9 +220,32 @@ Stores user profile information linked to authentication.
 - `visible_in_explore` - Boolean flag for explore visibility
 - `primary_category` - Main role category for filtering (Director, Cinematographer, etc.)
 
+**Profile Enhancement Fields (v2.7.1):** ⭐ NEW
+- `day_rate` (INTEGER) - Daily rate in cents (e.g., 150000 = $1,500/day) for marketplace functionality
+- `day_rate_currency` (TEXT, DEFAULT 'USD') - Currency code (USD, AED, EUR, GBP, INR, etc.)
+- `work_identities` (JSONB) - Flexible work status configuration with default structure:
+  ```json
+  {
+    "freelance": false,
+    "employee": {"enabled": false, "company": "", "designation": ""},
+    "businessOwner": {"enabled": false, "designation": "", "businessName": "", "businessType": ""}
+  }
+  ```
+
+**Constraints:**
+- CHECK: `day_rate` must be positive if specified ⭐ NEW
+- CHECK: `day_rate_currency` must be valid currency code ⭐ NEW
+- CHECK: `work_identities` must match required JSONB structure ⭐ NEW
+
 **Indexes:**
 - Primary key on `user_id`
 - Foreign key to `auth.users(id)`
+- `idx_user_profiles_day_rate` on `day_rate` (WHERE day_rate IS NOT NULL) ⭐ NEW
+- `idx_user_profiles_rate_currency` on `(day_rate_currency, day_rate)` ⭐ NEW
+- `idx_user_profiles_work_identities_gin` (GIN) on `work_identities` ⭐ NEW
+- `idx_user_profiles_freelance` on `(work_identities->>'freelance')` (partial) ⭐ NEW
+- `idx_user_profiles_employee` on `(work_identities->'employee'->>'enabled')` (partial) ⭐ NEW
+- `idx_user_profiles_business_owner` on `(work_identities->'businessOwner'->>'enabled')` (partial) ⭐ NEW
 
 ##### 2. `user_links` ⭐ NEW
 Social media and portfolio links for user profiles.
@@ -285,8 +329,8 @@ Countries available for work travel.
 **Indexes:**
 - `idx_user_travel_countries_user_id` on `user_id`
 
-##### 7. `user_credits` ⭐ NEW
-Work history, credits, and past projects.
+##### 7. `user_credits` ⭐ ENHANCED (Version 2.7.1)
+Work history, credits, and past projects with rich professional portfolio information.
 
 **Key Fields:**
 - `id` (PK, UUID)
@@ -299,13 +343,33 @@ Work history, credits, and past projects.
 - `sort_order` - Display order
 - `created_at`, `updated_at`
 
+**Enhanced Fields (v2.7.1):** ⭐ NEW
+- `production_type` (TEXT) - Type of production (Commercial, Film, TV Series, Music Video, Documentary)
+- `role` (TEXT) - User's role in the project (Director, Cinematographer, Editor, Producer)
+- `project_title` (TEXT) - Specific project name
+- `brand_client` (TEXT) - Brand or client name (Nike, Apple, Coca-Cola, Government agencies)
+- `local_company` (TEXT) - Local production company or studio
+- `international_company` (TEXT) - International production company (Warner Bros, Universal Pictures, BBC Studios)
+- `country` (TEXT) - Production country or location
+- `release_year` (TEXT) - Year of release (e.g., "2024", "Coming 2025")
+- `is_unreleased` (BOOLEAN, DEFAULT false) - Flag for unreleased projects
+- `headline_stats` (TEXT) - Key statistics or achievements (e.g., "500M+ views", "#1 on Netflix", "Box office $100M")
+- `awards` (JSONB, DEFAULT '[]') - Array of awards: `[{"title": "Best Film", "detail": "Cannes 2024"}]`
+
 **Constraints:**
 - CHECK: `end_date >= start_date` (if not NULL)
+- CHECK: `release_year` format validation (matches "YYYY" or "Coming YYYY") ⭐ NEW
 
 **Indexes:**
 - `idx_user_credits_user_id` on `user_id`
 - `idx_user_credits_user_id_sort` on `(user_id, sort_order)`
 - `idx_user_credits_user_id_dates` on `(user_id, start_date DESC)`
+- `idx_user_credits_production_type` on `production_type` ⭐ NEW
+- `idx_user_credits_role` on `role` ⭐ NEW
+- `idx_user_credits_country` on `country` ⭐ NEW
+- `idx_user_credits_release_year` on `release_year` ⭐ NEW
+- `idx_user_credits_awards_gin` (GIN) on `awards` ⭐ NEW - For JSONB queries
+- `idx_user_credits_type_role` on `(user_id, production_type, role)` ⭐ NEW - Composite index
 
 ##### 8. `user_highlights` ⭐ NEW
 Profile highlights and featured achievements.
@@ -1372,6 +1436,75 @@ Triggers automatically update `updated_at` columns on:
 - user_visa_info
 - user_credits
 - user_highlights
+
+### 7. Advanced JSONB Usage (v2.7.1) ⭐ NEW
+
+#### Awards in user_credits
+Store multiple awards with structured data:
+```json
+[
+  {"title": "Best Director", "detail": "Cannes Film Festival 2024"},
+  {"title": "Audience Choice Award", "detail": "Dubai International Film Festival"},
+  {"title": "Golden Globe Nominee"}
+]
+```
+
+**Query Examples:**
+```sql
+-- Find credits with specific awards
+SELECT * FROM user_credits 
+WHERE awards @> '[{"title": "Best Film"}]'::jsonb;
+
+-- Find users with any awards
+SELECT DISTINCT user_id FROM user_credits 
+WHERE jsonb_array_length(awards) > 0;
+```
+
+#### Work Identities in user_profiles
+Flexible work status configuration:
+```json
+{
+  "freelance": true,
+  "employee": {
+    "enabled": true,
+    "company": "Warner Bros",
+    "designation": "Senior Cinematographer"
+  },
+  "businessOwner": {
+    "enabled": true,
+    "designation": "Founder & CEO",
+    "businessName": "Creative Productions LLC",
+    "businessType": "Film Production"
+  }
+}
+```
+
+**Query Examples:**
+```sql
+-- Find freelancers
+SELECT * FROM user_profiles 
+WHERE (work_identities->>'freelance')::boolean = true;
+
+-- Find employees at specific company
+SELECT * FROM user_profiles 
+WHERE work_identities->'employee'->>'company' = 'Warner Bros';
+
+-- Find business owners
+SELECT * FROM user_profiles 
+WHERE (work_identities->'businessOwner'->>'enabled')::boolean = true;
+```
+
+### 8. Day Rate Filtering (v2.7.1) ⭐ NEW
+
+**Query Example:**
+```sql
+-- Find crew members within budget range
+SELECT first_name, surname, day_rate / 100.0 AS daily_rate, day_rate_currency
+FROM user_profiles
+WHERE day_rate_currency = 'USD'
+  AND day_rate BETWEEN 50000 AND 200000  -- $500 to $2000
+ORDER BY day_rate ASC;
+```
 
 ---
 
@@ -3596,16 +3729,19 @@ The What's On feature integrates seamlessly with:
 
 ---
 
-**Document Version:** 2.5.0  
+**Document Version:** 2.7.1  
 **Last Updated:** January 2025  
-**Backend Status:** ✅ Production Ready (Profile, Gigs, Collab, Slate, What's On)  
-**Database Schema:** ✅ 34 Tables (10 Profile + 9 Gigs/Apps + 4 Collab + 6 Slate + 5 What's On)  
-**API Endpoints:** ✅ 60+ Total | ⭐ +12 What's On Endpoints (v2.5)
+**Backend Status:** ✅ Production Ready (Profile Enhanced, Gigs, Collab, Slate, What's On)  
+**Database Schema:** ✅ 41 Tables (10 Profile + 11 Gigs/Apps + 4 Collab + 6 Slate + 5 What's On + 5 Projects)  
+**API Endpoints:** ✅ 73+ Total | ⭐ All Features Fully Documented
 
 ### Recent Updates
-- **v2.5 (What's On Feature):** ⭐ NEW - Complete events platform with 5 tables, 12 endpoints, 25 RLS policies, multi-date scheduling, RSVP system with ticket generation
+- **v2.7.1 (Profile Enhancement):** ⭐ NEW - Enhanced `user_credits` (+11 columns: production details, awards, clients, statistics) and `user_profiles` (+3 columns: day_rate, work_identities) for rich professional portfolios. Added 9+ new indexes, JSONB validation, and helper functions. Full SQL migration scripts available.
+- **v2.7 (Jobs Feature):** Enhanced gigs table with 4 new columns, new gig_skills and gig_project_details tables, 15 RLS policies, 12+ indexes
+- **v2.6 (Design Projects):** Project collaboration platform with 5 tables (projects, team, files, links, comments)
+- **v2.5 (What's On Feature):** Complete events platform with 5 tables, 12 endpoints, 25 RLS policies, multi-date scheduling, RSVP system with ticket generation
 - **v2.4 (Slate Feature):** Social media platform with 6 tables, 19 endpoints, posts, likes, comments, shares
 - **v2.2 (Collab Feature):** Collaboration platform with 4 tables, 14 endpoints, 17 RLS policies
-- **v2.1 (Explore/Search):** Added comprehensive implementation plan for crew directory feature
+- **v2.1 (Explore/Search):** Comprehensive implementation plan for crew directory feature
 - **v2.0 (Profile Schema):** Enhanced profile system with 8 new tables and advanced features
 - **v1.0 (Core System):** Initial gigs, applications, and authentication system
