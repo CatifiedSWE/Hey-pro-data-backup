@@ -1,8 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { MessageCircle, Plus, RefreshCw, Save, X } from "lucide-react";
-import React from "react";
+import { MessageCircle, Plus, RefreshCw, Save, X, Loader2, Trash2 } from "lucide-react";
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
     Table,
     TableBody,
@@ -11,12 +12,12 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import type { CollabPost } from "@/data/collabPosts";
+import { updateCollab, deleteCollab, uploadCollabCover, closeCollab, type CollabDetail } from "@/lib/api/collab";
 
 const inputBase = "w-full rounded-[18px] border border-[#444444] bg-white/40 px-5 py-3 text-sm text-gray-900 placeholder:text-gray-500 focus:border-[#444444] focus:outline-none";
 
 type EditCollabFormProps = {
-    collab: CollabPost;
+    collab: CollabDetail;
 };
 
 
