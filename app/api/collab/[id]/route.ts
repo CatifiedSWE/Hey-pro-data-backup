@@ -16,15 +16,11 @@ export async function GET(
 
     const supabase = createServerClient();
 
-    // Fetch collab with author info and tags
+    // Fetch collab with tags
     const { data: collab, error } = await supabase
       .from('collab_posts')
       .select(`
         *,
-        author:user_id(
-          id,
-          raw_user_meta_data
-        ),
         tags:collab_tags(tag_name)
       `)
       .eq('id', collabId)
