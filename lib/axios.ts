@@ -3,7 +3,7 @@ import { getAccessToken } from "./supabase/client";
 
 const axiosInstance = axios.create({
   baseURL: `${process.env.NEXT_PUBLIC_BASE_URL}/api`,
-  timeout: 10000,
+  timeout: 30000, // Increased to 30 seconds for better reliability
   headers: { "Content-Type": "application/json" },
 });
 

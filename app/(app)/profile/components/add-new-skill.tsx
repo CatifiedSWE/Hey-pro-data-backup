@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import SkillFormCard from "./SkillFormCard";
+import { useProfile } from "@/hooks/useProfile";
 
 export interface Skill {
     id: string;
@@ -67,9 +68,10 @@ const specialtyOptions = [
 
 interface AddNewSkillProps {
     trigger: React.ReactNode;
+    onUpdate?: () => void;
 }
 
-export default function AddNewSkill({ trigger }: AddNewSkillProps) {
+export default function AddNewSkill({ trigger, onUpdate }: AddNewSkillProps) {
     const hydrateSkill = (skill: Skill): Skill => ({
         ...skill,
         experience: skill.experience ?? { value: "intern", title: "Intern", description: "helped on set, shadowed role" },
@@ -90,6 +92,10 @@ export default function AddNewSkill({ trigger }: AddNewSkillProps) {
     const [skills, setSkills] = useState<Skill[]>([createBlankSkill()]);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [experienceVisibility, setExperienceVisibility] = useState<Record<string, boolean>>({});
+    const [saving, setSaving] = useState(false);
+    
+    // Get profile methods
+    const { addSkill, fetchSkills } = useProfile();
 
 
 
@@ -144,9 +150,6 @@ export default function AddNewSkill({ trigger }: AddNewSkillProps) {
 
         setSaving(true);
         try {
-            // Import useProfile at the component level
-            const { addSkill, fetchSkills } = useProfile();
-            
             // Add all new skills
             for (const skill of skills) {
                 const skillData = {
@@ -238,9 +241,10 @@ export default function AddNewSkill({ trigger }: AddNewSkillProps) {
                             </Button>
                             <Button
                                 onClick={handleSaveChanges}
+                                disabled={saving}
                                 className="h-[47px] min-w-[120px] rounded-[10px] bg-[#FA6E80] px-6 text-sm font-semibold text-white hover:bg-[#f2576b]"
                             >
-                                Save
+                                {saving ? 'Saving...' : 'Save'}
                             </Button>
                         </div>
                     </div>
