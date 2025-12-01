@@ -28,7 +28,7 @@ import {
 import { CSS } from "@dnd-kit/utilities"
 import { HighlightCard } from "@/app/(app)/profile/components/Highlights"
 import HighlightsText from "@/app/(app)/profile/components/highlights-text"
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import AboutSectionComponent from "./components/About";
 import VisaSection from "./components/visa";
 import WorkStatusSection from "./components/WorkStatus";
@@ -188,12 +188,13 @@ export default function Profile() {
     }
   }
 
-  const sectionComponents = {
+  // Memoize section components to prevent unnecessary re-creation and unmounting
+  const sectionComponents = useMemo(() => ({
     about: <AboutSection key="about" bio={profile?.bio || ''} />,
     skills: <SkillsSectionWrapper key="skills" skills={skills} onUpdate={fetchSkills} />,
     credits: <CreditsSection key="credits" />,
     recommendations: <RecommendationsComponent key="recommendations" recommendations={recommendations} onUpdate={fetchRecommendations} />,
-  }
+  }), [profile?.bio, skills, fetchSkills, recommendations, fetchRecommendations])
 
   return (
     <section className="relative mx-auto flex w-full max-w-[1180px] flex-col items-center gap-8 px-3 xs:px-4 sm:px-6 lg:flex-row lg:items-start lg:justify-center lg:gap-12 pt-6 pb-20">
