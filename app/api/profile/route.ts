@@ -36,7 +36,32 @@ export async function GET(request: NextRequest) {
     // Get profile from user_profiles table
     const { data: profile, error } = await supabase
       .from('user_profiles')
-      .select('*')
+      .select(`
+        user_id,
+        first_name,
+        surname,
+        alias_first_name,
+        alias_surname,
+        profile_photo_url,
+        banner_url,
+        bio,
+        country,
+        city,
+        email,
+        phone,
+        country_code,
+        availability,
+        profile_completion_percentage,
+        is_profile_complete,
+        visible_in_explore,
+        portfolio_url,
+        imdb_url,
+        day_rate,
+        day_rate_currency,
+        work_identities,
+        created_at,
+        updated_at
+      `)
       .eq('user_id', user.id)
       .single();
 
@@ -94,6 +119,86 @@ export async function PATCH(request: NextRequest) {
         errorResponse('Invalid request body'),
         { status: 400 }
       );
+    }
+
+    // Extract and validate new fields
+    const { day_rate, day_rate_currency, work_identities } = body;
+
+    // Validate day_rate if provided
+    if (day_rate !== undefined && day_rate !== null) {
+      if (typeof day_rate !== 'number' || day_rate <= 0) {
+        return NextResponse.json(
+          errorResponse('day_rate must be a positive number or null'),
+          { status: 400 }
+        );
+      }
+    }
+
+    // Validate day_rate_currency if provided
+    if (day_rate_currency !== undefined && day_rate_currency !== null) {
+      const validCurrencies = ['USD', 'AED', 'EUR', 'GBP', 'INR', 'CAD', 'AUD', 'JPY', 'CNY', 'SGD'];
+      if (!validCurrencies.includes(day_rate_currency)) {
+        return NextResponse.json(
+          errorResponse(`Invalid currency. Allowed: ${validCurrencies.join(', ')}`),
+          { status: 400 }
+        );
+      }
+    }
+
+    // Validate work_identities structure if provided
+    if (work_identities !== undefined && work_identities !== null) {
+      if (typeof work_identities !== 'object') {
+        return NextResponse.json(
+          errorResponse('work_identities must be an object'),
+          { status: 400 }
+        );
+      }
+
+      // Validate required keys exist
+      const requiredKeys = ['freelance', 'employee', 'businessOwner'];
+      for (const key of requiredKeys) {
+        if (!(key in work_identities)) {
+          return NextResponse.json(
+            errorResponse(`work_identities missing required key: ${key}`),
+            { status: 400 }
+          );
+        }
+      }
+
+      // Validate freelance is boolean
+      if (typeof work_identities.freelance !== 'boolean') {
+        return NextResponse.json(
+          errorResponse('work_identities.freelance must be boolean'),
+          { status: 400 }
+        );
+      }
+
+      // Validate employee structure
+      if (
+        typeof work_identities.employee !== 'object' ||
+        !('enabled' in work_identities.employee) ||
+        !('company' in work_identities.employee) ||
+        !('designation' in work_identities.employee)
+      ) {
+        return NextResponse.json(
+          errorResponse('work_identities.employee must have enabled, company, designation'),
+          { status: 400 }
+        );
+      }
+
+      // Validate businessOwner structure
+      if (
+        typeof work_identities.businessOwner !== 'object' ||
+        !('enabled' in work_identities.businessOwner) ||
+        !('designation' in work_identities.businessOwner) ||
+        !('businessName' in work_identities.businessOwner) ||
+        !('businessType' in work_identities.businessOwner)
+      ) {
+        return NextResponse.json(
+          errorResponse('work_identities.businessOwner must have enabled, designation, businessName, businessType'),
+          { status: 400 }
+        );
+      }
     }
 
     // Check if profile exists

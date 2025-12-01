@@ -24,7 +24,29 @@ export async function GET(request: NextRequest) {
 
     const { data: credits, error } = await supabase
       .from('user_credits')
-      .select('*')
+      .select(`
+        id,
+        user_id,
+        credit_title,
+        description,
+        start_date,
+        end_date,
+        image_url,
+        sort_order,
+        production_type,
+        role,
+        project_title,
+        brand_client,
+        local_company,
+        international_company,
+        country,
+        release_year,
+        is_unreleased,
+        headline_stats,
+        awards,
+        created_at,
+        updated_at
+      `)
       .eq('user_id', user.id)
       .order('start_date', { ascending: false });
 
@@ -65,7 +87,26 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { credit_title, description, start_date, end_date, image_url, sort_order } = body;
+    const {
+      credit_title,
+      description,
+      start_date,
+      end_date,
+      image_url,
+      sort_order,
+      // NEW FIELDS:
+      production_type,
+      role,
+      project_title,
+      brand_client,
+      local_company,
+      international_company,
+      country,
+      release_year,
+      is_unreleased,
+      headline_stats,
+      awards
+    } = body;
 
     // Validate required fields
     if (!credit_title || !start_date) {
@@ -83,16 +124,58 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate release_year format if provided
+    if (release_year) {
+      const yearPattern = /^\d{4}$|^Coming \d{4}$/;
+      if (!yearPattern.test(release_year)) {
+        return NextResponse.json(
+          errorResponse('Invalid release_year format. Use "YYYY" or "Coming YYYY"'),
+          { status: 400 }
+        );
+      }
+    }
+
+    // Validate awards structure if provided
+    if (awards) {
+      if (!Array.isArray(awards)) {
+        return NextResponse.json(
+          errorResponse('Awards must be an array'),
+          { status: 400 }
+        );
+      }
+
+      for (const award of awards) {
+        if (!award.title || typeof award.title !== 'string') {
+          return NextResponse.json(
+            errorResponse('Each award must have a title'),
+            { status: 400 }
+          );
+        }
+      }
+    }
+
     const { data, error } = await supabase
       .from('user_credits')
       .insert({
         user_id: user.id,
         credit_title,
-        description,
+        description: description || null,
         start_date,
-        end_date,
-        image_url,
-        sort_order: sort_order || 0
+        end_date: end_date || null,
+        image_url: image_url || null,
+        sort_order: sort_order || 0,
+        // NEW FIELDS:
+        production_type: production_type || null,
+        role: role || null,
+        project_title: project_title || null,
+        brand_client: brand_client || null,
+        local_company: local_company || null,
+        international_company: international_company || null,
+        country: country || null,
+        release_year: release_year || null,
+        is_unreleased: is_unreleased || false,
+        headline_stats: headline_stats || null,
+        awards: awards || []
       })
       .select()
       .single();
@@ -134,7 +217,27 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { id, credit_title, description, start_date, end_date, image_url, sort_order } = body;
+    const {
+      id,
+      credit_title,
+      description,
+      start_date,
+      end_date,
+      image_url,
+      sort_order,
+      // NEW FIELDS:
+      production_type,
+      role,
+      project_title,
+      brand_client,
+      local_company,
+      international_company,
+      country,
+      release_year,
+      is_unreleased,
+      headline_stats,
+      awards
+    } = body;
 
     if (!id) {
       return NextResponse.json(
@@ -151,6 +254,36 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
+    // Validate release_year format if provided
+    if (release_year !== undefined && release_year !== null) {
+      const yearPattern = /^\d{4}$|^Coming \d{4}$/;
+      if (!yearPattern.test(release_year)) {
+        return NextResponse.json(
+          errorResponse('Invalid release_year format. Use "YYYY" or "Coming YYYY"'),
+          { status: 400 }
+        );
+      }
+    }
+
+    // Validate awards structure if provided
+    if (awards !== undefined && awards !== null) {
+      if (!Array.isArray(awards)) {
+        return NextResponse.json(
+          errorResponse('Awards must be an array'),
+          { status: 400 }
+        );
+      }
+
+      for (const award of awards) {
+        if (!award.title || typeof award.title !== 'string') {
+          return NextResponse.json(
+            errorResponse('Each award must have a title'),
+            { status: 400 }
+          );
+        }
+      }
+    }
+
     const updateData: any = {};
     if (credit_title !== undefined) updateData.credit_title = credit_title;
     if (description !== undefined) updateData.description = description;
@@ -158,6 +291,19 @@ export async function PATCH(request: NextRequest) {
     if (end_date !== undefined) updateData.end_date = end_date;
     if (image_url !== undefined) updateData.image_url = image_url;
     if (sort_order !== undefined) updateData.sort_order = sort_order;
+
+    // NEW FIELDS:
+    if (production_type !== undefined) updateData.production_type = production_type;
+    if (role !== undefined) updateData.role = role;
+    if (project_title !== undefined) updateData.project_title = project_title;
+    if (brand_client !== undefined) updateData.brand_client = brand_client;
+    if (local_company !== undefined) updateData.local_company = local_company;
+    if (international_company !== undefined) updateData.international_company = international_company;
+    if (country !== undefined) updateData.country = country;
+    if (release_year !== undefined) updateData.release_year = release_year;
+    if (is_unreleased !== undefined) updateData.is_unreleased = is_unreleased;
+    if (headline_stats !== undefined) updateData.headline_stats = headline_stats;
+    if (awards !== undefined) updateData.awards = awards;
 
     const { data, error } = await supabase
       .from('user_credits')
@@ -172,6 +318,13 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json(
         errorResponse('Failed to update credit', error.message),
         { status: 500 }
+      );
+    }
+
+    if (!data) {
+      return NextResponse.json(
+        errorResponse('Credit not found or access denied'),
+        { status: 404 }
       );
     }
 

@@ -966,20 +966,37 @@ app/api/
   "success": true,
   "data": {
     "user_id": "uuid",
-    "name": "John Doe",
+    "first_name": "John",
+    "surname": "Doe",
     "alias_first_name": "John",
     "alias_surname": "D.",
     "profile_photo_url": "https://...",
-    "banner_photo_url": "https://...",
+    "banner_url": "https://...",
     "bio": "...",
     "country": "United Arab Emirates",
     "city": "Dubai",
     "email": "john@example.com",
     "phone": "+971501234567",
+    "country_code": "+971",
     "portfolio_url": "https://...",
     "imdb_url": "https://...",
-    "day_rate": 500,
-    "day_rate_currency": "AED",
+    "availability": "available",
+    "day_rate": 150000,
+    "day_rate_currency": "USD",
+    "work_identities": {
+      "freelance": true,
+      "employee": {
+        "enabled": false,
+        "company": "",
+        "designation": ""
+      },
+      "businessOwner": {
+        "enabled": false,
+        "designation": "",
+        "businessName": "",
+        "businessType": ""
+      }
+    },
     "visible_in_explore": true,
     "is_profile_complete": true,
     "profile_completion_percentage": 100,
@@ -989,12 +1006,47 @@ app/api/
 }
 ```
 
+**Note:** `day_rate` is stored in cents (150000 = $1,500.00)
+
 ---
 
 ### PATCH `/api/profile`
 **Description:** Create or update user profile  
 **Authentication:** Required  
 **Status:** ✅ Implemented
+
+**Request Body:**
+```json
+{
+  "first_name": "John",
+  "surname": "Doe",
+  "bio": "Professional cinematographer...",
+  "country": "United Arab Emirates",
+  "city": "Dubai",
+  "phone": "+971501234567",
+  "day_rate": 150000,
+  "day_rate_currency": "USD",
+  "work_identities": {
+    "freelance": true,
+    "employee": {
+      "enabled": true,
+      "company": "Warner Bros",
+      "designation": "Senior Cinematographer"
+    },
+    "businessOwner": {
+      "enabled": false,
+      "designation": "",
+      "businessName": "",
+      "businessType": ""
+    }
+  }
+}
+```
+
+**Validation Rules:**
+- `day_rate`: Must be a positive number (stored in cents) or null
+- `day_rate_currency`: Must be one of: USD, AED, EUR, GBP, INR, CAD, AUD, JPY, CNY, SGD
+- `work_identities`: Must include all three keys (freelance, employee, businessOwner) with proper structure
 
 ---
 
@@ -1066,6 +1118,44 @@ app/api/
 **Authentication:** Required  
 **Status:** ✅ Implemented
 
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "uuid",
+      "user_id": "uuid",
+      "credit_title": "Nike Summer Campaign 2024",
+      "description": "Directed major commercial campaign",
+      "start_date": "2024-01-15",
+      "end_date": "2024-02-28",
+      "image_url": "https://...",
+      "sort_order": 0,
+      "production_type": "Commercial",
+      "role": "Director",
+      "project_title": "Just Do It - Summer Edition",
+      "brand_client": "Nike",
+      "local_company": "Dubai Media Productions",
+      "international_company": "Wieden+Kennedy",
+      "country": "UAE",
+      "release_year": "2024",
+      "is_unreleased": false,
+      "headline_stats": "100M+ views across platforms",
+      "awards": [
+        {
+          "title": "Best Commercial",
+          "detail": "Dubai Advertising Awards 2024"
+        }
+      ],
+      "created_at": "2025-01-15T10:00:00Z",
+      "updated_at": "2025-01-15T10:00:00Z"
+    }
+  ],
+  "message": "Credits retrieved successfully"
+}
+```
+
 ---
 
 ### POST `/api/profile/credits`
@@ -1073,12 +1163,153 @@ app/api/
 **Authentication:** Required  
 **Status:** ✅ Implemented
 
+**Request Body:**
+```json
+{
+  "credit_title": "Nike Summer Campaign 2024",
+  "description": "Directed major commercial campaign",
+  "start_date": "2024-01-15",
+  "end_date": "2024-02-28",
+  "image_url": "https://...",
+  "sort_order": 0,
+  "production_type": "Commercial",
+  "role": "Director",
+  "project_title": "Just Do It - Summer Edition",
+  "brand_client": "Nike",
+  "local_company": "Dubai Media Productions",
+  "international_company": "Wieden+Kennedy",
+  "country": "UAE",
+  "release_year": "2024",
+  "is_unreleased": false,
+  "headline_stats": "100M+ views across platforms",
+  "awards": [
+    {
+      "title": "Best Commercial",
+      "detail": "Dubai Advertising Awards 2024"
+    }
+  ]
+}
+```
+
+**Required Fields:**
+- `credit_title` (string)
+- `start_date` (date in YYYY-MM-DD format)
+
+**Optional Fields:**
+- `description`, `end_date`, `image_url`, `sort_order`
+- `production_type`: Commercial, Film, TV Series, Music Video, Documentary
+- `role`: Director, Cinematographer, Editor, Producer, etc.
+- `project_title`, `brand_client`, `local_company`, `international_company`, `country`
+- `release_year`: Format "YYYY" or "Coming YYYY" (e.g., "2024" or "Coming 2025")
+- `is_unreleased`: boolean (default: false)
+- `headline_stats`: string
+- `awards`: Array of objects with `title` (required) and `detail` (optional)
+
+**Validation:**
+- `end_date` must be after `start_date`
+- `release_year` must match format: "YYYY" or "Coming YYYY"
+- `awards` must be an array, each award must have a `title` field
+
+---
+
+### PATCH `/api/profile/credits`
+**Description:** Update a credit  
+**Authentication:** Required  
+**Status:** ✅ Implemented
+
+**Request Body:**
+```json
+{
+  "id": "credit-uuid",
+  "credit_title": "Updated Title",
+  "production_type": "Film",
+  "release_year": "Coming 2025",
+  "awards": [
+    {
+      "title": "Best Film",
+      "detail": "Cannes 2025"
+    }
+  ]
+}
+```
+
+**Required Fields:**
+- `id` (string, UUID of credit to update)
+
+**Optional Fields:** All fields from POST (partial updates supported)
+
+**Validation:** Same as POST endpoint
+
+**Note:** Only the credit owner can update their credits
+
 ---
 
 ### DELETE `/api/profile/credits?id=[creditId]`
 **Description:** Delete a credit  
 **Authentication:** Required  
 **Status:** ✅ Implemented
+
+**Query Parameters:**
+- `id` (required): Credit UUID to delete
+
+**Note:** Only the credit owner can delete their credits
+
+---
+
+## Profile API - Enhanced Features (v2.7.1)
+
+### Credits Enhancement Summary
+
+The credits API has been enhanced with **11 new fields** to support rich professional portfolios:
+
+| Field | Type | Description | Example |
+|-------|------|-------------|---------|
+| `production_type` | TEXT | Type of production | Commercial, Film, TV Series, Music Video, Documentary |
+| `role` | TEXT | User's role in production | Director, Cinematographer, Editor, Producer |
+| `project_title` | TEXT | Specific project name | "Just Do It - Summer Edition" |
+| `brand_client` | TEXT | Brand or client name | Nike, Apple, Coca-Cola |
+| `local_company` | TEXT | Local production company | Dubai Media Productions |
+| `international_company` | TEXT | International studio | Warner Bros, Universal Pictures |
+| `country` | TEXT | Production country | UAE, USA, UK |
+| `release_year` | TEXT | Release year | "2024" or "Coming 2025" |
+| `is_unreleased` | BOOLEAN | Unreleased project flag | true/false |
+| `headline_stats` | TEXT | Key statistics | "500M+ views across platforms" |
+| `awards` | JSONB | Array of awards | `[{"title": "Best Film", "detail": "Cannes 2024"}]` |
+
+### Profile Enhancement Summary
+
+The profile API has been enhanced with **3 new fields** for day rates and work identities:
+
+| Field | Type | Description | Example |
+|-------|------|-------------|---------|
+| `day_rate` | INTEGER | Daily rate in cents (e.g., 150000 = $1,500) | 150000 |
+| `day_rate_currency` | TEXT | Currency code | USD, AED, EUR, GBP, INR, CAD, AUD, JPY, CNY, SGD |
+| `work_identities` | JSONB | Work identity configuration | See structure below |
+
+**work_identities Structure:**
+```json
+{
+  "freelance": true,
+  "employee": {
+    "enabled": true,
+    "company": "Warner Bros",
+    "designation": "Senior Cinematographer"
+  },
+  "businessOwner": {
+    "enabled": false,
+    "designation": "",
+    "businessName": "",
+    "businessType": ""
+  }
+}
+```
+
+### Backward Compatibility
+
+✅ **All new fields are optional** - Existing API clients will continue to work without modification  
+✅ **Default values provided** - New fields return null or default values for existing records  
+✅ **Partial updates supported** - Update only the fields you need in PATCH requests  
+✅ **Validation only when provided** - No validation errors for omitted fields
 
 ---
 
