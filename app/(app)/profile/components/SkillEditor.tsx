@@ -247,13 +247,8 @@ export default function SkillEditor({ initialSkills, trigger, onUpdate }: SkillE
             for (const skill of skills) {
                 const skillData = {
                     skill_name: `${skill.department} - ${skill.role}`,
-                    department: skill.department,
-                    role: skill.role,
                     description: skill.description || undefined,
-                    proficiency_level: skill.experience?.title || undefined,
-                    experience_level: skill.experience?.value || undefined,
-                    day_rate: skill.rate ? parseFloat(skill.rate) : undefined,
-                    is_public: skill.isPublic ?? true,
+                    sort_order: skills.indexOf(skill),
                 };
                 
                 await updateSkill(skill.id, skillData);
