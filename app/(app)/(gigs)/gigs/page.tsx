@@ -2,22 +2,87 @@
 
 import Image from "next/image";
 import { Calendar, FileText, MapPin, Search } from "lucide-react";
+import { useState, useEffect, FormEvent } from "react";
 
 import { Input } from "@/components/ui/input";
-import { gigsData } from "@/data/gigs";
+import apiCalling from "@/lib/apiCalling";
 
 import { MainGigHeader } from "../components/gigs-header";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
+import { toast } from "sonner";
+
+interface Gig {
+    id: string;
+    slug: string;
+    title: string;
+    description: string;
+    qualifyingCriteria: string;
+    budgetLabel: string;
+    postedOn: string;
+    postedBy: {
+        name: string;
+        avatar: string;
+    };
+    dateWindows: Array<{
+        label: string;
+        range: string;
+    }>;
+    location: string;
+    supportingFileLabel: string;
+    applyBefore: string;
+    applicationCount: number;
+}
 
 export default function GigsPage() {
+    const [gigs, setGigs] = useState<Gig[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+
+    const fetchGigs = async (search?: string) => {
+        try {
+            setLoading(true);
+            const searchParam = search ? `&search=${encodeURIComponent(search)}` : '';
+            const response = await apiCalling({
+                method: 'get',
+                route: `/gigs?page=${currentPage}&limit=20${searchParam}`,
+            });
+
+            if (response.status && response.data?.data?.gigs) {
+                setGigs(response.data.data.gigs);
+            } else {
+                toast.error('Failed to fetch gigs');
+            }
+        } catch (error) {
+            console.error('Error fetching gigs:', error);
+            toast.error('Failed to load gigs');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchGigs();
+    }, [currentPage]);
+
+    const handleSearch = (event: FormEvent) => {
+        event.preventDefault();
+        fetchGigs(searchQuery);
+    };
+
+    const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    };
+
     return (
         <>
             <MainGigHeader />
             <div className="px-4 pb-10 overflow-x-auto">
                 <section className="mx-auto max-w-[739px]">
                     <form
-                        onSubmit={(event) => event.preventDefault()}
+                        onSubmit={handleSearch}
                         className="relative flex h-[38px] sm:h-[48px] w-full items-center justify-center rounded-full border border-[#FA6E80] bg-white"
                         role="search"
                         aria-label="Search gigs"
@@ -25,6 +90,8 @@ export default function GigsPage() {
                         <Input
                             type="search"
                             placeholder="Search gigs..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
                             className="border-none bg-transparent pr-14 shadow-none text-sm text-slate-700 focus-visible:ring-0"
                             aria-label="Search gigs"
                         />
@@ -39,7 +106,16 @@ export default function GigsPage() {
                 </section>
 
                 <section className="mx-auto mt-10 w-full max-w-[729px] px-1 sm:px-0">
-                    {gigsData.map((gig) => (
+                    {loading ? (
+                        <div className="flex justify-center items-center py-20">
+                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FA6E80]"></div>
+                        </div>
+                    ) : gigs.length === 0 ? (
+                        <div className="text-center py-20">
+                            <p className="text-lg text-slate-600">No gigs found</p>
+                        </div>
+                    ) : (
+                        gigs.map((gig) => (
                         <Link
                             href={`/gigs/${gig.slug}`}
                             key={gig.id}
