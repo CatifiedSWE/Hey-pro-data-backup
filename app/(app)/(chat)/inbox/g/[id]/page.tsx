@@ -1,200 +1,197 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { EllipsisVertical, Paperclip, Send } from "lucide-react";
-import { getChatUser, Groups, getGroupChatMessages, chatData, getGroupChat } from "@/data/chatMessage";
+import { ArrowLeft, EllipsisVertical, Paperclip, Send } from "lucide-react";
+import { getGroupChat, getGroupChatMessages, chatData } from "@/data/chatMessage";
 import Image from "next/image";
+import Link from "next/link";
+
 type paramsType = { id: string };
-type GroupMessage = {
-    id: string;
-    groupId: string;
-    senderId: string;
-    content: string;
-    timestamp: string;
-    status: string;
-};
+
 export default function MessageInbox({ params }: { params: paramsType }) {
     const { id } = params;
+
+    // Refs for auto-scrolling
+    const scrollRef = useRef<HTMLDivElement>(null);
+
     // Simulate current user
     const currentUser = {
-        id: 1,
-        groupid: ["grp-1", "grp-2", "grp-3", "grp-4", "grp-5", "grp-6", "grp-7", "grp-8"],
         messageId: "msg-1",
-        name: 'Victor George',
-        message: 'Who can I get started worki...',
-        image: '/image (1).png',
-        badge: null,
-        state: 'online'
+        name: "Anand Kumar",
+        image: "/image (3).png",
+        state: "online",
     };
-    // console.log(currentUser)
-    // Get chat user and messages
-    const group = Groups.find((group) => group.messageId === id);
-    const chatUser = getChatUser(id);
-    const groups = getGroupChat(id)
-    // console.log(groups)
-    // Get all group messages for this group
-    const initialMessages: GroupMessage[] = group
-        ? getGroupChatMessages(group.messageId)
-        : [];
-    // Message input state
-    const [message, setMessage] = useState("");
-    const [messages, setMessages] = useState<GroupMessage[]>(initialMessages)
-    // console.log(messages);
 
-    // Simulate sending a group message
+    // Get group data and messages
+    const group = getGroupChat(id);
+    const initialMessages = group ? getGroupChatMessages(group.messageId) : [];
+
+    const [message, setMessage] = useState("");
+    const [messages, setMessages] = useState(initialMessages);
+
+    // Auto-scroll to bottom when messages change
+    useEffect(() => {
+        if (scrollRef.current) {
+            scrollRef.current.scrollTo({
+                top: scrollRef.current.scrollHeight,
+                behavior: "smooth",
+            });
+        }
+    }, [messages]);
+
     const handleSend = () => {
         if (message.trim().length === 0 || !group) return;
-        const newMsg: GroupMessage = {
-            id: `groupMsg-${messages.length + 1}`,
+        const newMsg = {
+            id: `messageId-${messages.length + 1}`,
             groupId: group.messageId,
             senderId: currentUser.messageId,
-            content: message,
             timestamp: new Date().toISOString(),
+            content: message,
             status: "sending",
+            attachments: null,
         };
         setMessages([...messages, newMsg]);
         setMessage("");
+
         setTimeout(() => {
-            setMessages((msgs: GroupMessage[]) =>
-                msgs.map((msg: GroupMessage) =>
+            setMessages((msgs) =>
+                msgs.map((msg) =>
                     msg.id === newMsg.id ? { ...msg, status: "sent" } : msg
                 )
             );
         }, 800);
     };
+
     return (
-        <div className="">
-            <div className="min-h-[calc(485px)]">
-                <div className="flex flex-row justify-between items-center mx-auto px-5 bg-[#F4F4F4] rounded-t-[25px] h-[80px]">
-                    <div className=" flex items-center justify-start gap-3 relative">
-                        <div className="flex -space-x-4">
-                            {groups?.image.slice(0, 2).map((imgSrc, imgIdx) => (
-                                <div className="" key={imgIdx} >
-                                    <Image
-                                        key={imgIdx}
-                                        src={imgSrc}
-                                        alt={groups.name}
-                                        className="w-[35px] h-[35px] rounded-full object-cover bg-[#D9D9D9] border-2 border-white"
-                                        width={35}
-                                        height={35}
-                                    />
-                                </div>
-
-                            ))}
-                        </div>
-
-
-                        <div>
-                            <div className="text-black font-medium text-lg ">
-                                {groups?.name || "User Name"}
-                            </div>
-                            {
-                                groups && groups.noofOnlinePeople > 0 && (
-                                    <div className="text-[#34A353] text-sm font-normal">
-                                        {groups.noofOnlinePeople} Online
-                                    </div>
-                                )
-                            }
-
-                        </div>
+        <div className="w-full  flex flex-col bg-white overflow-hidden relative sm:h-[calc(100vh-80px)] h-[calc(100vh-80px)]">
+            {/* Header - Group Info */}
+            <div className="shrink-0 w-full flex flex-row justify-between items-center px-4 sm:px-6 bg-[#F8F8F8] border-b border-gray-100 h-[80px] z-10 relative">
+                <div className="flex items-center gap-3 relative">
+                    {/* Back Button only visible on Mobile */}
+                    <Link href={"/inbox"} className="md:hidden flex p-2 -ml-2 rounded-full hover:bg-gray-200">
+                        <ArrowLeft className="h-6 w-6 text-[#444444]" />
+                    </Link>
+                    {/* Group Avatars */}
+                    <div className="flex -space-x-3">
+                        {Array.isArray(group?.image) && group.image.slice(0, 2).map((imgSrc, imgIdx) => (
+                            <Image
+                                key={imgIdx}
+                                src={imgSrc}
+                                alt={group.name}
+                                width={38}
+                                height={38}
+                                className="rounded-full object-cover border-2 border-white bg-[#D9D9D9]"
+                            />
+                        ))}
                     </div>
-                    <div>
-                        <EllipsisVertical className=" text-black" />
+                    <div className="flex flex-col">
+                        <div className="text-black font-semibold text-[16px] sm:text-[18px] leading-tight">
+                            {group?.name || "Group Name"}
+                        </div>
+                        <div className="text-[12px] sm:text-[14px] font-medium text-gray-500">
+                            {group?.message || "Group Info"}
+                        </div>
                     </div>
                 </div>
-                {/* Chat messages */}
-                <div className="">
-                    <div className="mx-auto max-w-[675px] h-[calc(484px-90px)] overflow-y-auto flex flex-col px-4 py-6 bg-white no-scrollbar">
-                        {messages.map((msg: GroupMessage, index: number) => {
-                            const isSender = msg.senderId === currentUser.messageId;
-                            const prevMsg = messages[index - 1];
-                            const nextMsg = messages[index + 1];
+                <button className="p-2 rounded-full hover:bg-gray-200">
+                    <EllipsisVertical className="text-[#444444]" />
+                </button>
+            </div>
 
-                            const isPrevSameSender = prevMsg && prevMsg.senderId === msg.senderId;
-                            const isNextSameSender = nextMsg && nextMsg.senderId === msg.senderId;
-                            const marginBottom = isNextSameSender ? "mb-1" : "mb-6";
-
-                            let borderRadiusClass = "rounded-2xl";
-
-                            if (isSender) {
-                                if (isNextSameSender && !isPrevSameSender) {
-                                    borderRadiusClass = "rounded-2xl rounded-br-none";
-                                } else if (isPrevSameSender && isNextSameSender) {
-                                    borderRadiusClass = "rounded-2xl rounded-tr-none rounded-br-none";
-                                } else if (isPrevSameSender && !isNextSameSender) {
-                                    borderRadiusClass = "rounded-2xl rounded-tr-none";
-                                }
-                            } else {
-                                if (isNextSameSender && !isPrevSameSender) {
-                                    borderRadiusClass = "rounded-2xl rounded-bl-none";
-                                } else if (isPrevSameSender && isNextSameSender) {
-                                    borderRadiusClass = "rounded-2xl rounded-tl-none rounded-bl-none";
-                                } else if (isPrevSameSender && !isNextSameSender) {
-                                    borderRadiusClass = "rounded-2xl rounded-tl-none";
-                                }
-                            }
-
-                            // Find sender info
-                            const sender = chatData.find((user) => user.messageId === msg.senderId);
-                            // Show time only for last message in a group with same timestamp
-                            const showTime = !nextMsg || nextMsg.timestamp !== msg.timestamp;
-                            const formattedTime = format(new Date(msg.timestamp), "h:mm a");
-
-                            return (
-                                <div key={msg.id || index} className={`flex w-full flex-col ${isSender ? 'items-end' : 'items-start'} ${marginBottom}`}>
-                                    <div className={`flex items-center gap-2 ${isSender ? 'justify-end' : 'justify-start'}`}>
-                                        {!isSender && sender && (
-                                            <Image
-                                                src={sender.image || "/default-profile.png"}
-                                                alt={sender.name || "Sender"}
-                                                width={28}
-                                                height={28}
-                                                className="rounded-full"
-                                            />
-                                        )}
-                                        <div
-                                            className={`max-w-[70%] px-5 py-3 text-[14px] leading-relaxed ${borderRadiusClass} ${isSender ? 'bg-[#F2F2F2] text-[#181818] font-[500] text-[12px]' : 'bg-[#31A7AC] text-white font-[500] text-[12px]'}`}
-                                        >
-                                            {msg.content}
-                                            {isSender && msg.status === "sending" && (
-                                                <span className="ml-2 text-xs text-gray-400">Sending...</span>
-                                            )}
-                                        </div>
-                                        {isSender && sender && (
-                                            <Image
-                                                src={sender.image || "/default-profile.png"}
-                                                alt={sender.name || "Sender"}
-                                                width={28}
-                                                height={28}
-                                                className="rounded-full"
-                                            />
-                                        )}
+            {/* Messages Area */}
+            <div
+                ref={scrollRef}
+                className="flex-1 min-h-0 w-full overflow-y-auto px-2 sm:px-4 py-6 bg-white no-scrollbar"
+            >
+                <div className="mx-auto w-full max-w-5xl flex flex-col">
+                    {messages.map((msg, index) => {
+                        const isSender = msg.senderId === currentUser.messageId;
+                        const prevMsg = messages[index - 1];
+                        const nextMsg = messages[index + 1];
+                        const isPrevSameSender = prevMsg && prevMsg.senderId === msg.senderId;
+                        const isNextSameSender = nextMsg && nextMsg.senderId === msg.senderId;
+                        const marginBottom = isNextSameSender ? "mb-[2px]" : "mb-6";
+                        let borderRadiusClass = "rounded-[18px]";
+                        if (isSender) {
+                            if (isNextSameSender && !isPrevSameSender) borderRadiusClass = "rounded-[18px] rounded-br-none";
+                            else if (isPrevSameSender && isNextSameSender) borderRadiusClass = "rounded-[18px] rounded-tr-none rounded-br-none";
+                            else if (isPrevSameSender && !isNextSameSender) borderRadiusClass = "rounded-[18px] rounded-tr-none";
+                        } else {
+                            if (isNextSameSender && !isPrevSameSender) borderRadiusClass = "rounded-[18px] rounded-bl-none";
+                            else if (isPrevSameSender && isNextSameSender) borderRadiusClass = "rounded-[18px] rounded-tl-none rounded-bl-none";
+                            else if (isPrevSameSender && !isNextSameSender) borderRadiusClass = "rounded-[18px] rounded-tl-none";
+                        }
+                        const showTime = !nextMsg || nextMsg.timestamp !== msg.timestamp || !isNextSameSender;
+                        const formattedTime = format(new Date(msg.timestamp), "h:mm a");
+                        // Find sender info
+                        const sender = chatData.find((user) => user.messageId === msg.senderId);
+                        return (
+                            <div key={msg.id || index} className={`flex w-full flex-col ${isSender ? 'items-end' : 'items-start'} ${marginBottom}`}>
+                                <div className={`flex items-center gap-2 ${isSender ? 'justify-end' : 'justify-start'}`}>
+                                    {!isSender && sender && (
+                                        <Image
+                                            src={sender.image || "/default-profile.png"}
+                                            alt={sender.name || "Sender"}
+                                            width={28}
+                                            height={28}
+                                            className="rounded-full"
+                                        />
+                                    )}
+                                    <div
+                                        className={`max-w-[85vw] sm:max-w-[90%] px-5 py-3 text-[14px] leading-relaxed break-words ${borderRadiusClass} ${isSender ? 'bg-[#F2F2F2] text-[#181818]' : 'bg-[#31A7AC] text-white'}`}
+                                    >
+                                        {msg.content}
                                     </div>
-                                    {showTime && (
-                                        <span className={`text-xs text-gray-400 mt-1 ${isSender ? 'text-right' : 'text-left'}`}>{formattedTime}</span>
+                                    {isSender && sender && (
+                                        <Image
+                                            src={sender.image || "/default-profile.png"}
+                                            alt={sender.name || "Sender"}
+                                            width={28}
+                                            height={28}
+                                            className="rounded-full"
+                                        />
                                     )}
                                 </div>
-                            );
-                        })}
-                    </div>
+                                {showTime && (
+                                    <span className={`text-[11px] text-gray-400 mt-1 px-1 ${isSender ? 'text-right' : 'text-left'}`}>
+                                        {formattedTime}
+                                        {isSender && msg.status === "sending" && " • Sending..."}
+                                    </span>
+                                )}
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
-            <div className="mx-auto max-w-[675px] w-full border border-[#FA596E] rounded-[52px] flex items-center gap-3 h-[53px] px-2.5 bg-white z-50">
-                <Input
-                    placeholder="Message ..."
-                    className="border-none shadow-none text-[14px] font-[400] flex-1"
-                    value={message}
-                    onChange={e => setMessage(e.target.value)}
-                    onKeyDown={e => { if (e.key === "Enter") handleSend(); }}
-                />
-                <Button className="size-11 rounded-full flex items-center justify-center bg-[#FA596E]" type="button">
-                    <Paperclip className="text-[#ffffff] size-6" />
-                </Button>
-                <Button className="size-11 rounded-full flex items-center justify-center bg-[#FA596E]" type="button" onClick={handleSend}>
-                    <Send className="text-[#ffffff] size-6" />
-                </Button>
+
+            {/* Input Bar */}
+            <div className="shrink-0 w-full bg-white px-4 pb-4 pt-2 z-10 relative">
+                <div className="mx-auto w-full max-w-3xl bg-[#F0F0F0] border border-[#FA596E] rounded-full flex items-center gap-2 p-1 pl-4 h-[56px] shadow-sm">
+                    <Input
+                        placeholder="Message ..."
+                        className="border-none shadow-none text-[15px] font-normal flex-1 focus-visible:ring-0 px-0 bg-transparent placeholder:text-gray-500"
+                        value={message}
+                        onChange={e => setMessage(e.target.value)}
+                        onKeyDown={e => { if (e.key === "Enter") handleSend(); }}
+                    />
+                    <div className="flex items-center gap-1 pr-1 shrink-0">
+                        <Button
+                            className="h-10 w-10 rounded-full flex items-center justify-center bg-[#FA596E] hover:bg-[#fa4059] transition-colors p-0"
+                            type="button"
+                        >
+                            <Paperclip className="text-white h-5 w-5" />
+                        </Button>
+                        <Button
+                            className="h-10 w-10 rounded-full flex items-center justify-center bg-[#FA596E] hover:bg-[#fa4059] transition-colors p-0"
+                            type="button"
+                            onClick={handleSend}
+                        >
+                            <Send className="text-white h-5 w-5 ml-0.5" />
+                        </Button>
+                    </div>
+                </div>
             </div>
         </div>
     );
