@@ -462,6 +462,26 @@ export const useProfile = () => {
     }
   }, []);
 
+  // Add travel countries in batch (no auto-refetch - caller should refetch manually)
+  const addTravelCountriesBatch = useCallback(async (countries: Array<{ country_name: string; country_code: string }>) => {
+    try {
+      const response = await apiCalling({
+        method: 'post',
+        route: '/profile/travel-countries',
+        data: countries
+      });
+
+      if (response.status) {
+        return { success: true, message: response.data?.message || 'Travel countries added successfully', data: response.data?.data };
+      } else {
+        return { success: false, message: response.message || 'Failed to add travel countries' };
+      }
+    } catch (err) {
+      console.error('Error adding travel countries in batch:', err);
+      return { success: false, message: 'Failed to add travel countries' };
+    }
+  }, []);
+
   // Delete travel country (no auto-refetch - caller should refetch manually)
   const deleteTravelCountry = useCallback(async (id: string) => {
     try {
@@ -478,6 +498,25 @@ export const useProfile = () => {
     } catch (err) {
       console.error('Error deleting travel country:', err);
       return { success: false, message: 'Failed to delete travel country' };
+    }
+  }, []);
+
+  // Delete travel countries in batch (no auto-refetch - caller should refetch manually)
+  const deleteTravelCountriesBatch = useCallback(async (ids: string[]) => {
+    try {
+      const response = await apiCalling({
+        method: 'delete',
+        route: `/profile/travel-countries?ids=${ids.join(',')}`
+      });
+
+      if (response.status) {
+        return { success: true, message: response.data?.message || 'Travel countries deleted successfully' };
+      } else {
+        return { success: false, message: response.message || 'Failed to delete travel countries' };
+      }
+    } catch (err) {
+      console.error('Error deleting travel countries in batch:', err);
+      return { success: false, message: 'Failed to delete travel countries' };
     }
   }, []);
 
@@ -736,7 +775,9 @@ export const useProfile = () => {
     // Travel country methods
     fetchTravelCountries,
     addTravelCountry,
+    addTravelCountriesBatch,
     deleteTravelCountry,
+    deleteTravelCountriesBatch,
     
     // Highlight methods
     fetchHighlights,

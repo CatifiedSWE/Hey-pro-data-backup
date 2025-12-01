@@ -22,7 +22,7 @@ const haveSameCountries = (a: Country[], b: Country[]) => {
 };
 
 export default function AvalableCountryForTravel({ onUpdate }: AvailableCountryProps) {
-    const { travelCountries: apiTravelCountries, addTravelCountry, deleteTravelCountry, fetchTravelCountries } = useProfile();
+    const { travelCountries: apiTravelCountries, addTravelCountry, addTravelCountriesBatch, deleteTravelCountry, deleteTravelCountriesBatch, fetchTravelCountries } = useProfile();
     
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [visaCountries, setVisaCountries] = useState<Country[]>([]);
@@ -123,30 +123,41 @@ export default function AvalableCountryForTravel({ onUpdate }: AvailableCountryP
                 !nextCountries.find(nc => nc.code === vc.code)
             );
 
-            // Delete removed countries
-            for (const country of countriesToDelete) {
-                const apiCountry = apiTravelCountries?.find(tc => 
-                    tc.country_name.toLowerCase() === country.name.toLowerCase() ||
-                    tc.country_name === country.code
-                );
-                if (apiCountry?.id) {
-                    const result = await deleteTravelCountry(apiCountry.id);
+            let deleteSuccess = true;
+            let addSuccess = true;
+
+            // BATCH DELETE: Delete removed countries in a single request
+            if (countriesToDelete.length > 0) {
+                const idsToDelete = countriesToDelete
+                    .map(country => {
+                        const apiCountry = apiTravelCountries?.find(tc => 
+                            tc.country_name.toLowerCase() === country.name.toLowerCase() ||
+                            tc.country_name === country.code
+                        );
+                        return apiCountry?.id;
+                    })
+                    .filter((id): id is string => id !== undefined);
+
+                if (idsToDelete.length > 0) {
+                    const result = await deleteTravelCountriesBatch(idsToDelete);
                     if (!result.success) {
-                        console.warn(`Failed to delete ${country.name}:`, result.message);
+                        console.warn('Failed to delete countries:', result.message);
+                        deleteSuccess = false;
                     }
                 }
             }
 
-            // Add new countries
-            let successCount = 0;
-            let failCount = 0;
-            for (const country of countriesToAdd) {
-                const result = await addTravelCountry(country.name, country.code);
-                if (result.success) {
-                    successCount++;
-                } else {
-                    failCount++;
-                    console.warn(`Failed to add ${country.name}:`, result.message);
+            // BATCH ADD: Add new countries in a single request
+            if (countriesToAdd.length > 0) {
+                const countriesData = countriesToAdd.map(country => ({
+                    country_name: country.name,
+                    country_code: country.code
+                }));
+
+                const result = await addTravelCountriesBatch(countriesData);
+                if (!result.success) {
+                    console.warn('Failed to add countries:', result.message);
+                    addSuccess = false;
                 }
             }
 
@@ -155,10 +166,10 @@ export default function AvalableCountryForTravel({ onUpdate }: AvailableCountryP
             
             setVisaCountries(nextCountries);
             
-            if (failCount === 0) {
+            if (deleteSuccess && addSuccess) {
                 toast.success("Travel availability updated successfully!");
-            } else if (successCount > 0) {
-                toast.warning(`Updated partially: ${successCount} succeeded, ${failCount} failed`);
+            } else if (deleteSuccess || addSuccess) {
+                toast.warning('Updated partially. Some changes may have failed.');
             } else {
                 toast.error('Failed to update travel availability');
             }
