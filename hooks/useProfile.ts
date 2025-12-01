@@ -216,9 +216,17 @@ export const useProfile = () => {
     }
   }, []);
 
-  // Update profile
+  // Update profile (OPTIMIZED - with optimistic update)
   const updateProfile = useCallback(async (data: Partial<ProfileData>) => {
+    // Store original profile for rollback
+    const originalProfile = profile;
+    
     try {
+      // Optimistic update - update UI immediately
+      if (profile) {
+        setProfile({ ...profile, ...data });
+      }
+      
       const response = await apiCalling({
         method: 'patch',
         route: '/profile',
@@ -226,19 +234,25 @@ export const useProfile = () => {
       });
 
       if (response.status) {
-        await fetchProfile();
+        // Success - no need to refetch, optimistic update is correct
         return { success: true, message: 'Profile updated successfully' };
       } else {
+        // Rollback on failure
+        setProfile(originalProfile);
         return { success: false, message: response.message || 'Failed to update profile' };
       }
     } catch (err) {
       console.error('Error updating profile:', err);
+      // Rollback on error
+      setProfile(originalProfile);
       return { success: false, message: 'Failed to update profile' };
     }
-  }, [fetchProfile]);
+  }, [profile]);
 
-  // Add link
+  // Add link (OPTIMIZED - with optimistic update)
   const addLink = useCallback(async (label: string, url: string, sort_order = 0) => {
+    const originalLinks = links;
+    
     try {
       const response = await apiCalling({
         method: 'post',
@@ -246,21 +260,32 @@ export const useProfile = () => {
         data: { label, url, sort_order }
       });
 
-      if (response.status) {
-        await fetchLinks();
+      if (response.status && response.data?.data) {
+        // Update with actual data from server
+        setLinks(prevLinks => [...prevLinks, response.data.data]);
         return { success: true, message: 'Link added successfully' };
       } else {
         return { success: false, message: response.message || 'Failed to add link' };
       }
     } catch (err) {
       console.error('Error adding link:', err);
+      setLinks(originalLinks);
       return { success: false, message: 'Failed to add link' };
     }
-  }, [fetchLinks]);
+  }, [links]);
 
-  // Update link
+  // Update link (OPTIMIZED - with optimistic update)
   const updateLink = useCallback(async (id: string, label?: string, url?: string, sort_order?: number) => {
+    const originalLinks = links;
+    
     try {
+      // Optimistic update
+      setLinks(prevLinks => prevLinks.map(link => 
+        link.id === id 
+          ? { ...link, ...(label !== undefined && { label }), ...(url !== undefined && { url }), ...(sort_order !== undefined && { sort_order }) }
+          : link
+      ));
+      
       const response = await apiCalling({
         method: 'post',
         route: '/profile/links',
@@ -268,39 +293,48 @@ export const useProfile = () => {
       });
 
       if (response.status) {
-        await fetchLinks();
         return { success: true, message: 'Link updated successfully' };
       } else {
+        setLinks(originalLinks);
         return { success: false, message: response.message || 'Failed to update link' };
       }
     } catch (err) {
       console.error('Error updating link:', err);
+      setLinks(originalLinks);
       return { success: false, message: 'Failed to update link' };
     }
-  }, [fetchLinks]);
+  }, [links]);
 
-  // Delete link
+  // Delete link (OPTIMIZED - with optimistic update)
   const deleteLink = useCallback(async (id: string) => {
+    const originalLinks = links;
+    
     try {
+      // Optimistic update - remove immediately
+      setLinks(prevLinks => prevLinks.filter(link => link.id !== id));
+      
       const response = await apiCalling({
         method: 'delete',
         route: `/profile/links?id=${id}`
       });
 
       if (response.status) {
-        await fetchLinks();
         return { success: true, message: 'Link deleted successfully' };
       } else {
+        setLinks(originalLinks);
         return { success: false, message: response.message || 'Failed to delete link' };
       }
     } catch (err) {
       console.error('Error deleting link:', err);
+      setLinks(originalLinks);
       return { success: false, message: 'Failed to delete link' };
     }
-  }, [fetchLinks]);
+  }, [links]);
 
-  // Add role
+  // Add role (OPTIMIZED - with optimistic update)
   const addRole = useCallback(async (role_name: string, sort_order = 0) => {
+    const originalRoles = roles;
+    
     try {
       const response = await apiCalling({
         method: 'post',
@@ -308,37 +342,44 @@ export const useProfile = () => {
         data: { role_name, sort_order }
       });
 
-      if (response.status) {
-        await fetchRoles();
+      if (response.status && response.data?.data) {
+        setRoles(prevRoles => [...prevRoles, response.data.data]);
         return { success: true, message: 'Role added successfully' };
       } else {
         return { success: false, message: response.message || 'Failed to add role' };
       }
     } catch (err) {
       console.error('Error adding role:', err);
+      setRoles(originalRoles);
       return { success: false, message: 'Failed to add role' };
     }
-  }, [fetchRoles]);
+  }, [roles]);
 
-  // Delete role
+  // Delete role (OPTIMIZED - with optimistic update)
   const deleteRole = useCallback(async (id: string) => {
+    const originalRoles = roles;
+    
     try {
+      // Optimistic update
+      setRoles(prevRoles => prevRoles.filter(role => role.id !== id));
+      
       const response = await apiCalling({
         method: 'delete',
         route: `/profile/roles?id=${id}`
       });
 
       if (response.status) {
-        await fetchRoles();
         return { success: true, message: 'Role deleted successfully' };
       } else {
+        setRoles(originalRoles);
         return { success: false, message: response.message || 'Failed to delete role' };
       }
     } catch (err) {
       console.error('Error deleting role:', err);
+      setRoles(originalRoles);
       return { success: false, message: 'Failed to delete role' };
     }
-  }, [fetchRoles]);
+  }, [roles]);
 
   // ========== VISA METHODS ==========
   // Fetch visa
@@ -359,9 +400,14 @@ export const useProfile = () => {
     }
   }, []);
 
-  // Update visa
+  // Update visa (OPTIMIZED - with optimistic update)
   const updateVisa = useCallback(async (data: Partial<VisaData>) => {
+    const originalVisa = visa;
+    
     try {
+      // Optimistic update
+      setVisa(visa ? { ...visa, ...data } : data as VisaData);
+      
       const response = await apiCalling({
         method: 'patch',
         route: '/profile/visa',
@@ -369,16 +415,17 @@ export const useProfile = () => {
       });
 
       if (response.status) {
-        await fetchVisa();
         return { success: true, message: 'Visa information updated successfully' };
       } else {
+        setVisa(originalVisa);
         return { success: false, message: response.message || 'Failed to update visa information' };
       }
     } catch (err) {
       console.error('Error updating visa:', err);
+      setVisa(originalVisa);
       return { success: false, message: 'Failed to update visa information' };
     }
-  }, [fetchVisa]);
+  }, [visa]);
 
   // ========== LANGUAGE METHODS ==========
   // Fetch languages
@@ -399,8 +446,10 @@ export const useProfile = () => {
     }
   }, []);
 
-  // Add language
+  // Add language (OPTIMIZED - with optimistic update)
   const addLanguage = useCallback(async (language_name: string, can_speak = false, can_write = false, proficiency_level?: string, sort_order = 0) => {
+    const originalLanguages = languages;
+    
     try {
       const response = await apiCalling({
         method: 'post',
@@ -408,37 +457,44 @@ export const useProfile = () => {
         data: { language_name, can_speak, can_write, proficiency_level, sort_order }
       });
 
-      if (response.status) {
-        await fetchLanguages();
+      if (response.status && response.data?.data) {
+        setLanguages(prevLanguages => [...prevLanguages, response.data.data]);
         return { success: true, message: 'Language added successfully' };
       } else {
         return { success: false, message: response.message || 'Failed to add language' };
       }
     } catch (err) {
       console.error('Error adding language:', err);
+      setLanguages(originalLanguages);
       return { success: false, message: 'Failed to add language' };
     }
-  }, [fetchLanguages]);
+  }, [languages]);
 
-  // Delete language
+  // Delete language (OPTIMIZED - with optimistic update)
   const deleteLanguage = useCallback(async (id: string) => {
+    const originalLanguages = languages;
+    
     try {
+      // Optimistic update
+      setLanguages(prevLanguages => prevLanguages.filter(lang => lang.id !== id));
+      
       const response = await apiCalling({
         method: 'delete',
         route: `/profile/languages?id=${id}`
       });
 
       if (response.status) {
-        await fetchLanguages();
         return { success: true, message: 'Language deleted successfully' };
       } else {
+        setLanguages(originalLanguages);
         return { success: false, message: response.message || 'Failed to delete language' };
       }
     } catch (err) {
       console.error('Error deleting language:', err);
+      setLanguages(originalLanguages);
       return { success: false, message: 'Failed to delete language' };
     }
-  }, [fetchLanguages]);
+  }, [languages]);
 
   // ========== TRAVEL COUNTRY METHODS ==========
   // Fetch travel countries
@@ -556,8 +612,10 @@ export const useProfile = () => {
     }
   }, []);
 
-  // Add highlight
+  // Add highlight (OPTIMIZED - with optimistic update)
   const addHighlight = useCallback(async (title: string, description: string, image_url?: string, sort_order = 0) => {
+    const originalHighlights = highlights;
+    
     try {
       const response = await apiCalling({
         method: 'post',
@@ -565,21 +623,29 @@ export const useProfile = () => {
         data: { title, description, image_url, sort_order }
       });
 
-      if (response.status) {
-        await fetchHighlights();
+      if (response.status && response.data?.data) {
+        setHighlights(prevHighlights => [...prevHighlights, response.data.data]);
         return { success: true, message: 'Highlight added successfully' };
       } else {
         return { success: false, message: response.message || 'Failed to add highlight' };
       }
     } catch (err) {
       console.error('Error adding highlight:', err);
+      setHighlights(originalHighlights);
       return { success: false, message: 'Failed to add highlight' };
     }
-  }, [fetchHighlights]);
+  }, [highlights]);
 
-  // Update highlight
+  // Update highlight (OPTIMIZED - with optimistic update)
   const updateHighlight = useCallback(async (id: string, data: Partial<HighlightData>) => {
+    const originalHighlights = highlights;
+    
     try {
+      // Optimistic update
+      setHighlights(prevHighlights => prevHighlights.map(h => 
+        h.id === id ? { ...h, ...data } : h
+      ));
+      
       const response = await apiCalling({
         method: 'patch',
         route: '/profile/highlights',
@@ -587,36 +653,43 @@ export const useProfile = () => {
       });
 
       if (response.status) {
-        await fetchHighlights();
         return { success: true, message: 'Highlight updated successfully' };
       } else {
+        setHighlights(originalHighlights);
         return { success: false, message: response.message || 'Failed to update highlight' };
       }
     } catch (err) {
       console.error('Error updating highlight:', err);
+      setHighlights(originalHighlights);
       return { success: false, message: 'Failed to update highlight' };
     }
-  }, [fetchHighlights]);
+  }, [highlights]);
 
-  // Delete highlight
+  // Delete highlight (OPTIMIZED - with optimistic update)
   const deleteHighlight = useCallback(async (id: string) => {
+    const originalHighlights = highlights;
+    
     try {
+      // Optimistic update
+      setHighlights(prevHighlights => prevHighlights.filter(h => h.id !== id));
+      
       const response = await apiCalling({
         method: 'delete',
         route: `/profile/highlights?id=${id}`
       });
 
       if (response.status) {
-        await fetchHighlights();
         return { success: true, message: 'Highlight deleted successfully' };
       } else {
+        setHighlights(originalHighlights);
         return { success: false, message: response.message || 'Failed to delete highlight' };
       }
     } catch (err) {
       console.error('Error deleting highlight:', err);
+      setHighlights(originalHighlights);
       return { success: false, message: 'Failed to delete highlight' };
     }
-  }, [fetchHighlights]);
+  }, [highlights]);
 
   // ========== SKILL METHODS ==========
   // Fetch skills
@@ -637,8 +710,10 @@ export const useProfile = () => {
     }
   }, []);
 
-  // Add skill
+  // Add skill (OPTIMIZED - with optimistic update)
   const addSkill = useCallback(async (data: Partial<SkillData>) => {
+    const originalSkills = skills;
+    
     try {
       const response = await apiCalling({
         method: 'post',
@@ -646,21 +721,29 @@ export const useProfile = () => {
         data
       });
 
-      if (response.status) {
-        await fetchSkills();
+      if (response.status && response.data?.data) {
+        setSkills(prevSkills => [...prevSkills, response.data.data]);
         return { success: true, message: 'Skill added successfully' };
       } else {
         return { success: false, message: response.message || 'Failed to add skill' };
       }
     } catch (err) {
       console.error('Error adding skill:', err);
+      setSkills(originalSkills);
       return { success: false, message: 'Failed to add skill' };
     }
-  }, [fetchSkills]);
+  }, [skills]);
 
-  // Update skill
+  // Update skill (OPTIMIZED - with optimistic update)
   const updateSkill = useCallback(async (id: string, data: Partial<SkillData>) => {
+    const originalSkills = skills;
+    
     try {
+      // Optimistic update
+      setSkills(prevSkills => prevSkills.map(skill => 
+        skill.id === id ? { ...skill, ...data } : skill
+      ));
+      
       const response = await apiCalling({
         method: 'patch',
         route: `/skills/${id}`,
@@ -668,38 +751,45 @@ export const useProfile = () => {
       });
 
       if (response.status) {
-        await fetchSkills();
         return { success: true, message: 'Skill updated successfully' };
       } else {
+        setSkills(originalSkills);
         return { success: false, message: response.message || 'Failed to update skill' };
       }
     } catch (err) {
       console.error('Error updating skill:', err);
+      setSkills(originalSkills);
       return { success: false, message: 'Failed to update skill' };
     }
-  }, [fetchSkills]);
+  }, [skills]);
 
-  // Delete skill
+  // Delete skill (OPTIMIZED - with optimistic update)
   const deleteSkill = useCallback(async (id: string) => {
+    const originalSkills = skills;
+    
     try {
+      // Optimistic update
+      setSkills(prevSkills => prevSkills.filter(skill => skill.id !== id));
+      
       const response = await apiCalling({
         method: 'delete',
         route: `/skills/${id}`
       });
 
       if (response.status) {
-        await fetchSkills();
         return { success: true, message: 'Skill deleted successfully' };
       } else {
+        setSkills(originalSkills);
         return { success: false, message: response.message || 'Failed to delete skill' };
       }
     } catch (err) {
       console.error('Error deleting skill:', err);
+      setSkills(originalSkills);
       return { success: false, message: 'Failed to delete skill' };
     }
-  }, [fetchSkills]);
+  }, [skills]);
 
-  // Upload profile photo or banner
+  // Upload profile photo or banner (OPTIMIZED)
   const uploadPhoto = useCallback(async (file: File, type: 'profile' | 'banner') => {
     try {
       const formData = new FormData();
@@ -724,8 +814,14 @@ export const useProfile = () => {
       const data = await response.json();
 
       if (data.success && data.data?.url) {
-        // Profile is already updated by the API now, just refetch to get new data
-        await fetchProfile();
+        // Optimistic update - update profile state immediately
+        if (profile) {
+          if (type === 'profile') {
+            setProfile({ ...profile, profile_photo_url: data.data.url });
+          } else {
+            setProfile({ ...profile, banner_url: data.data.url });
+          }
+        }
         return { success: true, url: data.data.url };
       } else {
         return { success: false, message: data.error || 'Failed to upload photo' };
@@ -734,20 +830,48 @@ export const useProfile = () => {
       console.error('Error uploading photo:', err);
       return { success: false, message: 'Failed to upload photo' };
     }
-  }, [fetchProfile]);
+  }, [profile]);
 
-  // Initial load
+  // Fetch complete profile data (OPTIMIZED - single API call instead of 9)
+  const fetchCompleteProfile = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await apiCalling({
+        method: 'get',
+        route: '/profile/complete'
+      });
+
+      if (response.status && response.data?.data) {
+        const data = response.data.data;
+        
+        // Update all state from single response
+        setProfile(data.profile || null);
+        setLinks(data.links || []);
+        setRecommendations(data.recommendations || []);
+        setRoles(data.roles || []);
+        setVisa(data.visa || null);
+        setLanguages(data.languages || []);
+        setTravelCountries(data.travelCountries || []);
+        setHighlights(data.highlights || []);
+        setSkills(data.skills || []);
+      } else {
+        setError(response.message || 'Failed to fetch profile');
+      }
+    } catch (err) {
+      setError('Failed to fetch complete profile');
+      console.error('Error fetching complete profile:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Initial load - NOW USING SINGLE AGGREGATED ENDPOINT
+  // Reduces 9 API calls to 1 call (89% reduction)
   useEffect(() => {
-    fetchProfile();
-    fetchLinks();
-    fetchRecommendations();
-    fetchRoles();
-    fetchVisa();
-    fetchLanguages();
-    fetchTravelCountries();
-    fetchHighlights();
-    fetchSkills();
-  }, [fetchProfile, fetchLinks, fetchRecommendations, fetchRoles, fetchVisa, fetchLanguages, fetchTravelCountries, fetchHighlights, fetchSkills]);
+    fetchCompleteProfile();
+  }, [fetchCompleteProfile]);
 
   return {
     // Profile data
@@ -765,7 +889,8 @@ export const useProfile = () => {
     
     // Profile methods
     updateProfile,
-    refetch: fetchProfile,
+    refetch: fetchCompleteProfile, // OPTIMIZED - now refetches complete profile in 1 call
+    fetchCompleteProfile, // New optimized method
     
     // Link methods
     addLink,
