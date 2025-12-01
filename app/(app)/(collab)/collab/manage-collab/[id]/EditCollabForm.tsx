@@ -30,25 +30,38 @@ const TagPill = ({ label, onRemove }: { label: string; onRemove: () => void }) =
     </span>
 );
 
-const collaborators = [
-    { id: 1, name: "Alice Johnson", role: "Designer", department: "Creative", avatar: "/image (1).png" },
-    { id: 2, name: "Bob Smith", role: "Designer", department: "Engineering", avatar: "/image (2).png" },
-    { id: 3, name: "Carol Davis", role: "Designer", department: "Operations", avatar: "/image (3).png" },
-
-]
-
 export function EditCollabForm({ collab }: EditCollabFormProps) {
-    const [posterPreview, setPosterPreview] = React.useState<string>(collab.cover);
-    const [title, setTitle] = React.useState(collab.title);
-    const [summary, setSummary] = React.useState(collab.summary);
-    const [tagInput, setTagInput] = React.useState("");
-    const [tags, setTags] = React.useState<string[]>(collab.tags);
-    const [status, setStatus] = React.useState<CollabPost["status"]>(collab.status);
-    const [actionMessage, setActionMessage] = React.useState<string | null>(null);
+    const router = useRouter();
+    const [posterPreview, setPosterPreview] = useState<string>(collab.cover_image_url || '');
+    const [posterFile, setPosterFile] = useState<File | null>(null);
+    const [title, setTitle] = useState(collab.title);
+    const [summary, setSummary] = useState(collab.summary);
+    const [tagInput, setTagInput] = useState("");
+    const [tags, setTags] = useState<string[]>(collab.tags);
+    const [actionMessage, setActionMessage] = useState<string | null>(null);
+    const [submitting, setSubmitting] = useState(false);
+    const [deleting, setDeleting] = useState(false);
+    const [closing, setClosing] = useState(false);
+
+    const collaborators = collab.collaborators || [];
 
     const handlePosterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (!file) return;
+        
+        // Validate file size (5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            alert('File size must be less than 5MB');
+            return;
+        }
+
+        // Validate file type
+        if (!['image/jpeg', 'image/jpg', 'image/png'].includes(file.type)) {
+            alert('Only JPG and PNG files are allowed');
+            return;
+        }
+
+        setPosterFile(file);
         const reader = new FileReader();
         reader.onload = (loadEvent) => {
             if (typeof loadEvent.target?.result === "string") {
@@ -61,6 +74,10 @@ export function EditCollabForm({ collab }: EditCollabFormProps) {
     const handleAddTag = () => {
         const value = tagInput.trim();
         if (!value || tags.includes(value)) return;
+        if (tags.length >= 10) {
+            alert('Maximum 10 tags allowed');
+            return;
+        }
         setTags((prev) => [...prev, value]);
         setTagInput("");
     };
@@ -69,29 +86,102 @@ export function EditCollabForm({ collab }: EditCollabFormProps) {
         setTags((prev) => prev.filter((tag) => tag !== value));
     };
 
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        console.log("Updated collab", {
-            id: collab.id,
-            title,
-            summary,
-            tags,
-            status,
-            posterPreview,
-        });
-        setActionMessage("Changes saved locally");
-        setTimeout(() => setActionMessage(null), 2500);
+        
+        // Validation
+        if (!title.trim()) {
+            alert('Please enter a title');
+            return;
+        }
+        
+        if (title.length < 3 || title.length > 200) {
+            alert('Title must be between 3 and 200 characters');
+            return;
+        }
+
+        if (!summary.trim()) {
+            alert('Please enter a summary');
+            return;
+        }
+
+        if (summary.length < 10 || summary.length > 5000) {
+            alert('Summary must be between 10 and 5000 characters');
+            return;
+        }
+
+        setSubmitting(true);
+
+        try {
+            let coverImageUrl: string | undefined = undefined;
+
+            // Upload new cover image if changed
+            if (posterFile) {
+                const uploadResult = await uploadCollabCover(posterFile, collab.id);
+                coverImageUrl = uploadResult.url;
+            }
+
+            // Update collab
+            await updateCollab(collab.id, {
+                title,
+                summary,
+                tags: tags.length > 0 ? tags : undefined,
+                cover_image_url: coverImageUrl || (posterPreview || undefined)
+            });
+
+            setActionMessage("Changes saved successfully!");
+            setTimeout(() => setActionMessage(null), 2500);
+        } catch (error) {
+            console.error('Failed to update collab:', error);
+            alert(error instanceof Error ? error.message : 'Failed to update collab. Please try again.');
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     const handleReset = () => {
-        setPosterPreview(collab.cover);
+        setPosterPreview(collab.cover_image_url || '');
+        setPosterFile(null);
         setTitle(collab.title);
         setSummary(collab.summary);
         setTags(collab.tags);
-        setStatus(collab.status);
         setTagInput("");
         setActionMessage("Form reset");
         setTimeout(() => setActionMessage(null), 1500);
+    };
+
+    const handleDelete = async () => {
+        if (!confirm('Are you sure you want to delete this collab? This action cannot be undone.')) {
+            return;
+        }
+
+        setDeleting(true);
+        try {
+            await deleteCollab(collab.id);
+            alert('Collab deleted successfully!');
+            router.push('/collab/manage-collab');
+        } catch (error) {
+            console.error('Failed to delete collab:', error);
+            alert(error instanceof Error ? error.message : 'Failed to delete collab. Please try again.');
+            setDeleting(false);
+        }
+    };
+
+    const handleClose = async () => {
+        if (!confirm('Are you sure you want to close this collab? You can reopen it later by editing.')) {
+            return;
+        }
+
+        setClosing(true);
+        try {
+            await closeCollab(collab.id);
+            alert('Collab closed successfully!');
+            router.push('/collab/manage-collab');
+        } catch (error) {
+            console.error('Failed to close collab:', error);
+            alert(error instanceof Error ? error.message : 'Failed to close collab. Please try again.');
+            setClosing(false);
+        }
     };
 
     return (
