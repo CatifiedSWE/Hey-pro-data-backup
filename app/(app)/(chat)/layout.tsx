@@ -28,7 +28,7 @@ export default function RootLayout({
             <body
                 className={`${geistSans.variable} overflow-y-hidden ${geistMono.variable} antialiased`}
             >
-                <Header />
+            
                 <div className="mt-20">
                     {children}
                 </div>
