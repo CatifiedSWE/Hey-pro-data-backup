@@ -54,8 +54,6 @@ export async function GET(request: NextRequest) {
         profile_completion_percentage,
         is_profile_complete,
         visible_in_explore,
-        portfolio_url,
-        imdb_url,
         day_rate,
         day_rate_currency,
         work_identities,
