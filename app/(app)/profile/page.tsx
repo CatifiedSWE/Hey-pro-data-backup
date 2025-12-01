@@ -128,11 +128,19 @@ export default function Profile() {
   };
 
   // Helper function to parse phone number
-  const parsePhoneNumber = (phone?: string) => {
+  const parsePhoneNumber = (phone?: string, storedCountryCode?: string) => {
     if (!phone) return { countryCode: undefined, phoneNumber: undefined };
     
-    // Match pattern: +XXX followed by the rest
-    const match = phone.match(/^(\+\d{1,4})(.*)$/);
+    // If we have a stored country code, use it to parse the phone number
+    if (storedCountryCode && phone.startsWith(storedCountryCode)) {
+      return {
+        countryCode: storedCountryCode,
+        phoneNumber: phone.substring(storedCountryCode.length).replace(/\D/g, '')
+      };
+    }
+    
+    // Fallback: Match pattern with non-greedy regex for country code
+    const match = phone.match(/^(\+\d{1,3}?)(\d+)$/);
     if (match) {
       return {
         countryCode: match[1], // e.g., "+971"
@@ -241,8 +249,8 @@ export default function Profile() {
                   </div>
                   <div className="flex-none ">
                     <WhatupNumbers
-                      countryCode={parsePhoneNumber(profile?.phone).countryCode}
-                      phoneNumber={parsePhoneNumber(profile?.phone).phoneNumber}
+                      countryCode={parsePhoneNumber(profile?.phone, profile?.country_code).countryCode}
+                      phoneNumber={parsePhoneNumber(profile?.phone, profile?.country_code).phoneNumber}
                       email={profile?.email}
                     />
                   </div>

@@ -107,7 +107,8 @@ export default function WhatupNumbers({
             
             // Prepare update data
             const updateData: any = {
-                phone: fullPhoneNumber
+                phone: fullPhoneNumber,
+                country_code: selectedCountry.dial_code
             };
 
             // Only include email if it's provided
