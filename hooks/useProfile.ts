@@ -442,7 +442,7 @@ export const useProfile = () => {
     }
   }, []);
 
-  // Add travel country
+  // Add travel country (no auto-refetch - caller should refetch manually)
   const addTravelCountry = useCallback(async (country_name: string, country_code?: string, sort_order = 0) => {
     try {
       const response = await apiCalling({
@@ -452,7 +452,6 @@ export const useProfile = () => {
       });
 
       if (response.status) {
-        await fetchTravelCountries();
         return { success: true, message: 'Travel country added successfully' };
       } else {
         return { success: false, message: response.message || 'Failed to add travel country' };
@@ -461,9 +460,9 @@ export const useProfile = () => {
       console.error('Error adding travel country:', err);
       return { success: false, message: 'Failed to add travel country' };
     }
-  }, [fetchTravelCountries]);
+  }, []);
 
-  // Delete travel country
+  // Delete travel country (no auto-refetch - caller should refetch manually)
   const deleteTravelCountry = useCallback(async (id: string) => {
     try {
       const response = await apiCalling({
@@ -472,7 +471,6 @@ export const useProfile = () => {
       });
 
       if (response.status) {
-        await fetchTravelCountries();
         return { success: true, message: 'Travel country deleted successfully' };
       } else {
         return { success: false, message: response.message || 'Failed to delete travel country' };
@@ -481,7 +479,7 @@ export const useProfile = () => {
       console.error('Error deleting travel country:', err);
       return { success: false, message: 'Failed to delete travel country' };
     }
-  }, [fetchTravelCountries]);
+  }, []);
 
   // ========== HIGHLIGHT METHODS ==========
   // Fetch highlights
