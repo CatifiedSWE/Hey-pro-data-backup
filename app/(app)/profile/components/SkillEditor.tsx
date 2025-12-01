@@ -31,6 +31,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { toast } from "sonner";
 import SkillFormCard from "./SkillFormCard";
+import { useProfile } from "@/hooks/useProfile";
 
 export interface Skill {
     id: string;
@@ -125,9 +126,10 @@ function SortableSkillItem({ skill }: { skill: Skill }) {
 interface SkillEditorProps {
     initialSkills: Skill[];
     trigger: React.ReactNode;
+    onUpdate?: () => void;
 }
 
-export default function SkillEditor({ initialSkills, trigger }: SkillEditorProps) {
+export default function SkillEditor({ initialSkills, trigger, onUpdate }: SkillEditorProps) {
     const hydrateSkill = (skill: Skill): Skill => ({
         ...skill,
         experience: skill.experience ?? { value: "intern", title: "Intern", description: "helped on set, shadowed role" },
@@ -140,6 +142,11 @@ export default function SkillEditor({ initialSkills, trigger }: SkillEditorProps
     const [isReorderOpen, setIsReorderOpen] = useState(false);
     const [tempSkills, setTempSkills] = useState<Skill[]>([]);
     const [experienceVisibility, setExperienceVisibility] = useState<Record<string, boolean>>({});
+    const [saving, setSaving] = useState(false);
+    const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
+    
+    // Get profile methods
+    const { updateSkill, deleteSkill, fetchSkills } = useProfile();
 
     const sensors = useSensors(
         useSensor(PointerSensor),
@@ -173,9 +180,36 @@ export default function SkillEditor({ initialSkills, trigger }: SkillEditorProps
 
 
 
-    const handleRemoveSkill = (id: string) => {
-        toast.success("Skill removed!");
-        setSkills(skills.filter((skill) => skill.id !== id));
+    const handleRemoveSkill = async (id: string) => {
+        // Prevent multiple simultaneous deletes
+        if (deletingIds.has(id)) return;
+        
+        setDeletingIds(prev => new Set(prev).add(id));
+        
+        try {
+            const result = await deleteSkill(id);
+            
+            if (result.success) {
+                // Remove from local state
+                setSkills(skills.filter((skill) => skill.id !== id));
+                toast.success("Skill removed successfully!");
+                
+                // Refresh skills data
+                await fetchSkills();
+                onUpdate?.();
+            } else {
+                toast.error(result.message || "Failed to remove skill");
+            }
+        } catch (error) {
+            console.error('Error removing skill:', error);
+            toast.error("Failed to remove skill");
+        } finally {
+            setDeletingIds(prev => {
+                const next = new Set(prev);
+                next.delete(id);
+                return next;
+            });
+        }
     };
 
     const handleSkillChange = <K extends keyof Skill>(
@@ -196,10 +230,47 @@ export default function SkillEditor({ initialSkills, trigger }: SkillEditorProps
             [id]: !(prev[id] ?? true),
         }));
     };
-    const handleSaveChanges = () => {
-        setIsDialogOpen(false);
-        console.log("Saving skills from child:", skills);
-        toast.success("Skills updated successfully!");
+    const handleSaveChanges = async () => {
+        // Validate that all skills have required fields
+        const invalidSkills = skills.filter(skill => !skill.department || !skill.role);
+        if (invalidSkills.length > 0) {
+            toast.error('Please fill in department and role for all skills');
+            return;
+        }
+
+        // Prevent multiple simultaneous saves
+        if (saving) return;
+
+        setSaving(true);
+        try {
+            // Update all modified skills
+            for (const skill of skills) {
+                const skillData = {
+                    skill_name: `${skill.department} - ${skill.role}`,
+                    department: skill.department,
+                    role: skill.role,
+                    description: skill.description || undefined,
+                    proficiency_level: skill.experience?.title || undefined,
+                    experience_level: skill.experience?.value || undefined,
+                    day_rate: skill.rate ? parseFloat(skill.rate) : undefined,
+                    is_public: skill.isPublic ?? true,
+                };
+                
+                await updateSkill(skill.id, skillData);
+            }
+
+            // Refresh skills data
+            await fetchSkills();
+            
+            toast.success("Skills updated successfully!");
+            setIsDialogOpen(false);
+            onUpdate?.();
+        } catch (error) {
+            console.error('Skill update error:', error);
+            toast.error('Failed to update skills');
+        } finally {
+            setSaving(false);
+        }
     };
 
     const handleCancel = () => {
@@ -267,9 +338,10 @@ export default function SkillEditor({ initialSkills, trigger }: SkillEditorProps
                             </Button>
                             <Button
                                 onClick={handleSaveChanges}
+                                disabled={saving}
                                 className="h-[47px] min-w-[120px] rounded-[10px] bg-[#FA6E80] px-6 text-sm font-semibold text-white hover:bg-[#f2576b]"
                             >
-                                Save
+                                {saving ? 'Saving...' : 'Save'}
                             </Button>
                         </div>
                     </div>

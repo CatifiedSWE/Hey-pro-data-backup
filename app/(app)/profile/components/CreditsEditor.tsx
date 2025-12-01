@@ -27,6 +27,7 @@ import Image from "next/image";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
 import React from "react";
+import apiCalling from "@/lib/apiCalling";
 interface CreditsEditorProps {
     trigger: React.ReactNode;
     initialCredits?: {
@@ -37,6 +38,7 @@ interface CreditsEditorProps {
         endDate: Date;
         imgUrl?: string;
     }[];
+    onUpdate?: () => void;
 }
 
 const defaultCreditForm = {
@@ -105,7 +107,7 @@ interface Accolade {
     by: string;
     year: string;
 }
-export default function CreditsEditor({ trigger, initialCredits }: CreditsEditorProps) {
+export default function CreditsEditor({ trigger, initialCredits, onUpdate }: CreditsEditorProps) {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [creditForm, setCreditForm] = useState(defaultCreditForm);
     const [accoladeForm, setAccoladeForm] = useState(defaultAccoladeForm);
@@ -116,6 +118,7 @@ export default function CreditsEditor({ trigger, initialCredits }: CreditsEditor
     const [open, setOpen] = useState(false);
     const [accolades, setAccolades] = React.useState<Accolade[]>([]);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
+    const [saving, setSaving] = useState(false);
 
     useEffect(() => {
         if (isDialogOpen && initialCredits?.length) {
@@ -179,11 +182,81 @@ export default function CreditsEditor({ trigger, initialCredits }: CreditsEditor
         toast.success("Award added");
     };
 
-    const handleSave = () => {
-        console.log("Credit form", creditForm);
-        console.log("Accolades", accolades);
-        toast.success("Credits saved");
-        setIsDialogOpen(false);
+    const handleSave = async () => {
+        // Validate required fields
+        if (!creditForm.productionType || !creditForm.role) {
+            toast.error("Please fill in production type and role");
+            return;
+        }
+
+        if (!startDate) {
+            toast.error("Please select a start date");
+            return;
+        }
+
+        // Prevent multiple simultaneous saves
+        if (saving) return;
+
+        setSaving(true);
+        try {
+            // Format dates
+            const formatDate = (date: Date | undefined) => {
+                if (!date) return undefined;
+                return date.toISOString().split('T')[0]; // YYYY-MM-DD format
+            };
+
+            // Prepare credit data according to API specification
+            const creditData = {
+                credit_title: creditForm.projectTitle || `${creditForm.productionType} - ${creditForm.role}`,
+                start_date: formatDate(startDate),
+                end_date: endDate ? formatDate(endDate) : undefined,
+                description: creditForm.description || undefined,
+                image_url: creditForm.image || undefined,
+                production_type: creditForm.productionType,
+                role: creditForm.role,
+                project_title: creditForm.projectTitle || undefined,
+                brand_client: creditForm.brandClient || undefined,
+                local_company: creditForm.localCompany || undefined,
+                international_company: creditForm.internationalCompany || undefined,
+                country: creditForm.country || undefined,
+                release_year: creditForm.releaseYear || undefined,
+                is_unreleased: creditForm.isUnreleased,
+                headline_stats: undefined, // Can be added later if needed
+                awards: accolades.length > 0 ? accolades.map(acc => ({
+                    title: `${acc.type} - ${acc.category}`,
+                    detail: `${acc.by} ${acc.year}`
+                })) : undefined
+            };
+
+            // Call API to create credit
+            const response = await apiCalling({
+                method: 'post',
+                route: '/profile/credits',
+                data: creditData
+            });
+
+            if (response.status) {
+                toast.success("Credit added successfully!");
+                setIsDialogOpen(false);
+                
+                // Reset form
+                setCreditForm(defaultCreditForm);
+                setAccoladeForm(defaultAccoladeForm);
+                setStartDate(undefined);
+                setEndDate(undefined);
+                setAccolades([]);
+                
+                // Trigger parent update
+                onUpdate?.();
+            } else {
+                toast.error(response.message || "Failed to add credit");
+            }
+        } catch (error) {
+            console.error('Error saving credit:', error);
+            toast.error("Failed to add credit");
+        } finally {
+            setSaving(false);
+        }
     };
 
     const handleCancel = () => {
@@ -563,8 +636,9 @@ export default function CreditsEditor({ trigger, initialCredits }: CreditsEditor
                     <Button
                         className="rounded-[15px] h-[47px] px-8"
                         onClick={handleSave}
+                        disabled={saving}
                     >
-                        Save changes
+                        {saving ? 'Saving...' : 'Save changes'}
                     </Button>
                 </div>
             </DialogContent>

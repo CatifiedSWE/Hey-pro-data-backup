@@ -122,50 +122,50 @@ export default function CreditsSection() {
     const [error, setError] = useState<string | null>(null)
 
     // Fetch credits data
-    useEffect(() => {
-        const fetchCredits = async () => {
-            try {
-                setLoading(true)
-                const response = await apiCalling({
-                    method: 'get',
-                    route: '/profile/credits'
-                })
+    const fetchCredits = async () => {
+        try {
+            setLoading(true)
+            const response = await apiCalling({
+                method: 'get',
+                route: '/profile/credits'
+            })
 
-                if (response.status && response.data?.data) {
-                    // Map the API response to match the expected CreditType format
-                    const mappedCredits = response.data.data.map((credit: Record<string, unknown>) => ({
-                        id: credit.id,
-                        creditTitle: credit.credit_title || '',
-                        startDate: credit.start_date || '',
-                        endDate: credit.end_date || '',
-                        description: credit.description || '',
-                        imgUrl: credit.image_url || '',
-                        productionType: credit.production_type || '',
-                        role: credit.role || '',
-                        projectTitle: credit.project_title || '',
-                        brandClient: credit.brand_client || '',
-                        localCompany: credit.local_company || '',
-                        internationalCompany: credit.international_company || '',
-                        country: credit.country || '',
-                        releaseYear: credit.release_year || '',
-                        isUnreleased: credit.is_unreleased || false,
-                        headlineStats: credit.headline_stats || '',
-                        awardsSummary: credit.awards_summary || '',
-                        awards: credit.awards || []
-                    }))
-                    setCredits(mappedCredits)
-                } else {
-                    setCredits([])
-                }
-            } catch (err) {
-                console.error('Error fetching credits:', err)
-                setError('Failed to load credits')
+            if (response.status && response.data?.data) {
+                // Map the API response to match the expected CreditType format
+                const mappedCredits = response.data.data.map((credit: Record<string, unknown>) => ({
+                    id: credit.id,
+                    creditTitle: credit.credit_title || '',
+                    startDate: credit.start_date || '',
+                    endDate: credit.end_date || '',
+                    description: credit.description || '',
+                    imgUrl: credit.image_url || '',
+                    productionType: credit.production_type || '',
+                    role: credit.role || '',
+                    projectTitle: credit.project_title || '',
+                    brandClient: credit.brand_client || '',
+                    localCompany: credit.local_company || '',
+                    internationalCompany: credit.international_company || '',
+                    country: credit.country || '',
+                    releaseYear: credit.release_year || '',
+                    isUnreleased: credit.is_unreleased || false,
+                    headlineStats: credit.headline_stats || '',
+                    awardsSummary: credit.awards_summary || '',
+                    awards: credit.awards || []
+                }))
+                setCredits(mappedCredits)
+            } else {
                 setCredits([])
-            } finally {
-                setLoading(false)
             }
+        } catch (err) {
+            console.error('Error fetching credits:', err)
+            setError('Failed to load credits')
+            setCredits([])
+        } finally {
+            setLoading(false)
         }
+    }
 
+    useEffect(() => {
         fetchCredits()
     }, [])
 
@@ -202,6 +202,7 @@ export default function CreditsSection() {
                             </Button>
                         </div>
                     }
+                    onUpdate={fetchCredits}
                 />
             </header>
 

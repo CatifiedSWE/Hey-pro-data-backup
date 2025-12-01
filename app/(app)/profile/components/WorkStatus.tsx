@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { useProfile } from "@/hooks/useProfile";
 
 type WorkIdentities = {
     freelance: boolean;
@@ -40,6 +41,10 @@ const defaultIdentities: WorkIdentities = {
 
 export default function WorkStatusSection({ statusProp, initialIdentities }: WorkStatusSectionProps) {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [saving, setSaving] = useState(false);
+    
+    // Get profile methods
+    const { updateProfile, refetch } = useProfile();
 
     const initialState = useMemo<WorkIdentities>(() => ({
         freelance:
@@ -108,17 +113,40 @@ export default function WorkStatusSection({ statusProp, initialIdentities }: Wor
         setIdentities(initialState);
     };
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        
         if (!hasChanges()) {
             toast.info("No changes were made.");
             setIsDialogOpen(false);
             return;
         }
 
-        console.log("Work identities submitted:", identities);
-        toast.success("Work identities ready to submit!");
-        setIsDialogOpen(false);
+        // Prevent multiple simultaneous saves
+        if (saving) return;
+
+        setSaving(true);
+        try {
+            // Call API to update profile with work_identities
+            const result = await updateProfile({
+                work_identities: identities as any
+            });
+
+            if (result.success) {
+                toast.success("Work identities updated successfully!");
+                setIsDialogOpen(false);
+                
+                // Refresh profile data
+                await refetch();
+            } else {
+                toast.error(result.message || "Failed to update work identities");
+            }
+        } catch (error) {
+            console.error('Error updating work identities:', error);
+            toast.error("Failed to update work identities");
+        } finally {
+            setSaving(false);
+        }
     };
 
     const handleCancel = () => {
@@ -231,9 +259,10 @@ export default function WorkStatusSection({ statusProp, initialIdentities }: Wor
                             </Button>
                             <Button
                                 type="submit"
+                                disabled={saving}
                                 className="h-11 flex-1 rounded-[16px] bg-[#31A7AC] text-base font-medium text-white hover:bg-[#2b9497]"
                             >
-                                Save
+                                {saving ? 'Saving...' : 'Save'}
                             </Button>
                         </div>
                     </div>

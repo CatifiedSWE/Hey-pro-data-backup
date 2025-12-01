@@ -34,6 +34,7 @@ import { useState } from "react";
 import { countries, type Country } from "@/lib/countries";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useProfile } from "@/hooks/useProfile";
 
 export default function WhatupNumbers({
     countryCode: initialCountryCode,
@@ -44,6 +45,10 @@ export default function WhatupNumbers({
 }) {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [open, setOpen] = useState(false);
+    const [saving, setSaving] = useState(false);
+    
+    // Get profile methods
+    const { updateProfile, refetch } = useProfile();
 
     const defaultCountry =
         countries.find((c) => c.code === (initialCountryCode || "IN")) ||
@@ -63,7 +68,7 @@ export default function WhatupNumbers({
         setEmail(e.target.value);
     };
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         if (!phoneNumber || phoneNumber.length < 5) {
@@ -81,11 +86,34 @@ export default function WhatupNumbers({
             return;
         }
 
-        // const fullPhoneNumber = `${selectedCountry.dial_code}${phoneNumber}`
-        // console.log("Submitted Phone Number:", fullPhoneNumber)
-        // Here you can add logic to save the number
-        toast.success("WhatsApp number updated successfully!");
-        setIsDialogOpen(false);
+        // Prevent multiple simultaneous saves
+        if (saving) return;
+
+        setSaving(true);
+        try {
+            // Construct full phone number with country code
+            const fullPhoneNumber = `${selectedCountry.dial_code}${phoneNumber}`;
+            
+            // Call API to update profile with phone number
+            const result = await updateProfile({
+                phone: fullPhoneNumber
+            });
+
+            if (result.success) {
+                toast.success("Contact details updated successfully!");
+                setIsDialogOpen(false);
+                
+                // Refresh profile data
+                await refetch();
+            } else {
+                toast.error(result.message || "Failed to update contact details");
+            }
+        } catch (error) {
+            console.error('Error updating contact details:', error);
+            toast.error("Failed to update contact details");
+        } finally {
+            setSaving(false);
+        }
     };
 
     return (
@@ -199,9 +227,10 @@ export default function WhatupNumbers({
                         </DialogClose>
                         <Button
                             type="submit"
+                            disabled={saving}
                             className="bg-[#31A7AC] h-[44px] hover:bg-[#31A7AC] text-[#FFFFFF] rounded-xl"
                         >
-                            Save changes
+                            {saving ? 'Saving...' : 'Save changes'}
                         </Button>
                     </DialogFooter>
                 </form>
