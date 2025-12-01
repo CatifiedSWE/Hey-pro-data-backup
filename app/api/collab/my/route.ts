@@ -59,16 +59,26 @@ export async function GET(request: NextRequest) {
     // Format collabs with details
     const collabsWithDetails = await Promise.all(
       (collabs || []).map(async (collab: any) => {
-        // Get first 3 interested users' avatars
-        const { data: interestedUsers } = await supabase
+        // Get first 3 interested users' avatars from user_profiles
+        const { data: interestedUserIds } = await supabase
           .from('collab_interests')
-          .select('user_id(id, raw_user_meta_data)')
+          .select('user_id')
           .eq('collab_id', collab.id)
           .limit(3);
 
-        const interestAvatars = interestedUsers?.map((interest: any) => 
-          interest.user_id?.raw_user_meta_data?.avatar_url || interest.user_id?.raw_user_meta_data?.profile_photo_url || '/placeholder-avatar.png'
-        ) || [];
+        let interestAvatars: string[] = [];
+        if (interestedUserIds && interestedUserIds.length > 0) {
+          const userIds = interestedUserIds.map((u: any) => u.user_id);
+          const { data: interestedProfiles } = await supabase
+            .from('user_profiles')
+            .select('profile_photo_url')
+            .in('user_id', userIds)
+            .limit(3);
+
+          interestAvatars = interestedProfiles?.map((profile: any) => 
+            profile.profile_photo_url || '/placeholder-avatar.png'
+          ) || [];
+        }
 
         return {
           id: collab.id,
