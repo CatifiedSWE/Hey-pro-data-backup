@@ -116,6 +116,15 @@ export default function Profile() {
     return () => container?.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Memoize section components to prevent unnecessary re-creation and unmounting
+  // MUST be before conditional returns to maintain hook call order
+  const sectionComponents = useMemo(() => ({
+    about: <AboutSection key="about" bio={profile?.bio || ''} />,
+    skills: <SkillsSectionWrapper key="skills" skills={skills} onUpdate={fetchSkills} />,
+    credits: <CreditsSection key="credits" />,
+    recommendations: <RecommendationsComponent key="recommendations" recommendations={recommendations} onUpdate={fetchRecommendations} />,
+  }), [profile?.bio, skills, fetchSkills, recommendations, fetchRecommendations]);
+
   // Non-hook data and functions
   const highlights = highlightsData
 
@@ -187,14 +196,6 @@ export default function Profile() {
       })
     }
   }
-
-  // Memoize section components to prevent unnecessary re-creation and unmounting
-  const sectionComponents = useMemo(() => ({
-    about: <AboutSection key="about" bio={profile?.bio || ''} />,
-    skills: <SkillsSectionWrapper key="skills" skills={skills} onUpdate={fetchSkills} />,
-    credits: <CreditsSection key="credits" />,
-    recommendations: <RecommendationsComponent key="recommendations" recommendations={recommendations} onUpdate={fetchRecommendations} />,
-  }), [profile?.bio, skills, fetchSkills, recommendations, fetchRecommendations])
 
   return (
     <section className="relative mx-auto flex w-full max-w-[1180px] flex-col items-center gap-8 px-3 xs:px-4 sm:px-6 lg:flex-row lg:items-start lg:justify-center lg:gap-12 pt-6 pb-20">
