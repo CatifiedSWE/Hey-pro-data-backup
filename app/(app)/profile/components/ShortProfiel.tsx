@@ -258,6 +258,28 @@ export default function ShortProfile({ profile, links, roles = [], onPhotoUpload
             </div>
             <div className="flex sm:mt-10 -mt-10 flex-col gap-4 px-4 sm:px-[58px]">
                 <div className="space-y-2">
+                    {/* Work Identities Display */}
+                    {profile?.work_identities && (
+                        <div className="flex flex-wrap gap-2 items-center text-sm text-[#444444]">
+                            {profile.work_identities.freelance && (
+                                <span className="inline-flex items-center rounded-full bg-[#F0F0F0] px-3 py-1 text-sm font-medium text-[#444444]">
+                                    Freelance
+                                </span>
+                            )}
+                            {profile.work_identities.employee?.enabled && (
+                                <span className="inline-flex items-center rounded-full bg-[#F0F0F0] px-3 py-1 text-sm font-medium text-[#444444]">
+                                    {profile.work_identities.employee.designation || 'Employee'} 
+                                    {profile.work_identities.employee.company && ` at ${profile.work_identities.employee.company}`}
+                                </span>
+                            )}
+                            {profile.work_identities.businessOwner?.enabled && (
+                                <span className="inline-flex items-center rounded-full bg-[#F0F0F0] px-3 py-1 text-sm font-medium text-[#444444]">
+                                    {profile.work_identities.businessOwner.designation || 'Business Owner'}
+                                    {profile.work_identities.businessOwner.businessName && ` at ${profile.work_identities.businessOwner.businessName}`}
+                                </span>
+                            )}
+                        </div>
+                    )}
                     <div className="flex flex-wrap items-center gap-4">
                         <h1 className="text-[22px] font-semibold leading-[33px] text-black">{displayName}</h1>
                     </div>

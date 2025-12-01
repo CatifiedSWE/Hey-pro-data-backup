@@ -243,6 +243,7 @@ export default function Profile() {
                     <WhatupNumbers
                       countryCode={parsePhoneNumber(profile?.phone).countryCode}
                       phoneNumber={parsePhoneNumber(profile?.phone).phoneNumber}
+                      email={profile?.email}
                     />
                   </div>
 

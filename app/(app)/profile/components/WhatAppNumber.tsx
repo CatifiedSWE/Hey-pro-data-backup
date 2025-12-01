@@ -39,9 +39,11 @@ import { useProfile } from "@/hooks/useProfile";
 export default function WhatupNumbers({
     countryCode: initialCountryCode,
     phoneNumber: initialPhoneNumber,
+    email: initialEmail,
 }: {
     countryCode?: string;
     phoneNumber?: string;
+    email?: string;
 }) {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [open, setOpen] = useState(false);
@@ -58,7 +60,7 @@ export default function WhatupNumbers({
     const [selectedCountry, setSelectedCountry] =
         useState<Country>(defaultCountry);
     const [phoneNumber, setPhoneNumber] = useState(initialPhoneNumber || "");
-    const [email, setEmail] = useState("");
+    const [email, setEmail] = useState(initialEmail || "");
 
     const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value.replace(/\D/g, ""); // Remove non-digit characters
@@ -78,11 +80,18 @@ export default function WhatupNumbers({
             return;
         }
 
+        // Validate email format if provided
+        if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            toast.error("Please enter a valid email address.");
+            return;
+        }
+
         const countryChanged =
             selectedCountry.code !== (initialCountryCode || "IN");
         const numberChanged = phoneNumber !== (initialPhoneNumber || "");
+        const emailChanged = email !== (initialEmail || "");
 
-        if (!countryChanged && !numberChanged) {
+        if (!countryChanged && !numberChanged && !emailChanged) {
             toast.info("No changes were made.");
             setIsDialogOpen(false);
             return;
@@ -96,10 +105,18 @@ export default function WhatupNumbers({
             // Construct full phone number with country code
             const fullPhoneNumber = `${selectedCountry.dial_code}${phoneNumber}`;
             
-            // Call API to update profile with phone number
-            const result = await updateProfile({
+            // Prepare update data
+            const updateData: any = {
                 phone: fullPhoneNumber
-            });
+            };
+
+            // Only include email if it's provided
+            if (email) {
+                updateData.email = email;
+            }
+            
+            // Call API to update profile with phone number and email
+            const result = await updateProfile(updateData);
 
             if (result.success) {
                 toast.success("Contact details updated successfully!");
