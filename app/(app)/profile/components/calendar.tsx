@@ -1,8 +1,10 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Calendar } from "lucide-react"
+import { Calendar, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { getAccessToken } from "@/lib/supabase/client"
 import {
     Dialog,
     DialogContent,
@@ -10,20 +12,27 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
-import { addDays, endOfMonth, endOfWeek, format, getDate, isSameMonth, startOfMonth, startOfWeek } from "date-fns"
+import { addDays, endOfMonth, endOfWeek, format, getDate, isSameMonth, startOfMonth, startOfWeek, subMonths, addMonths } from "date-fns"
+import { toast } from "sonner"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 
 const WEEKDAY_LABELS = ["M", "T", "W", "T", "F", "S", "S"]
 const WEEK_START_OPTIONS = { weekStartsOn: 1 as const }
 
-const calendarMonths = [
-    {
-        id: "sep-2025",
-        title: "Sep, 2025",
-        year: 2025,
-        month: 8, // September (0-indexed)
-        highlightedDays: [1, 2, 4, 13, 14, 15, 16, 17],
-    },
-]
+type AvailabilityStatus = 'available' | 'hold' | 'na'
+
+type AvailabilityData = {
+    id: string
+    availability_date: string
+    status: AvailabilityStatus
+}
 
 const buildMonthMatrix = (year: number, month: number) => {
     const firstDay = startOfMonth(new Date(year, month, 1))
@@ -50,6 +59,141 @@ type CalendarDialogProps = {
 }
 
 export function CalendarDialog({ triggerClassName, triggerLabel }: CalendarDialogProps) {
+    const [currentDate, setCurrentDate] = useState(new Date())
+    const [availabilityData, setAvailabilityData] = useState<Map<string, AvailabilityData>>(new Map())
+    const [isLoading, setIsLoading] = useState(false)
+    const [selectedStatus, setSelectedStatus] = useState<AvailabilityStatus>('available')
+    const [isUpdating, setIsUpdating] = useState(false)
+
+    const currentYear = currentDate.getFullYear()
+    const currentMonth = currentDate.getMonth()
+
+    useEffect(() => {
+        fetchAvailability()
+    }, [currentYear, currentMonth])
+
+    const fetchAvailability = async () => {
+        setIsLoading(true)
+        try {
+            const token = await getAccessToken()
+            if (!token) {
+                toast.error('Not authenticated')
+                return
+            }
+
+            // Format month as YYYY-MM
+            const monthStr = format(new Date(currentYear, currentMonth, 1), 'yyyy-MM')
+            
+            const response = await fetch(`/api/availability?month=${monthStr}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+
+            const data = await response.json()
+
+            if (data.success) {
+                const dataMap = new Map<string, AvailabilityData>()
+                data.data.forEach((item: AvailabilityData) => {
+                    dataMap.set(item.availability_date, item)
+                })
+                setAvailabilityData(dataMap)
+            } else {
+                toast.error('Failed to load availability')
+            }
+        } catch (error) {
+            console.error('Error fetching availability:', error)
+            toast.error('Failed to load availability')
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    const handleDateClick = async (date: Date) => {
+        if (!isSameMonth(date, new Date(currentYear, currentMonth, 1))) {
+            return // Don't allow clicking dates outside current month
+        }
+
+        const dateStr = format(date, 'yyyy-MM-dd')
+        
+        setIsUpdating(true)
+        try {
+            const token = await getAccessToken()
+            if (!token) {
+                toast.error('Not authenticated')
+                return
+            }
+
+            const response = await fetch('/api/availability', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    availability_date: dateStr,
+                    status: selectedStatus
+                })
+            })
+
+            const data = await response.json()
+
+            if (data.success) {
+                // Update local state
+                setAvailabilityData(prev => {
+                    const newMap = new Map(prev)
+                    newMap.set(dateStr, data.data)
+                    return newMap
+                })
+                toast.success(`Date marked as ${selectedStatus}`)
+            } else {
+                toast.error(data.error || 'Failed to update availability')
+            }
+        } catch (error) {
+            console.error('Error updating availability:', error)
+            toast.error('Failed to update availability')
+        } finally {
+            setIsUpdating(false)
+        }
+    }
+
+    const goToPreviousMonth = () => {
+        setCurrentDate(prev => subMonths(prev, 1))
+    }
+
+    const goToNextMonth = () => {
+        setCurrentDate(prev => addMonths(prev, 1))
+    }
+
+    const monthDate = new Date(currentYear, currentMonth, 1)
+    const matrix = buildMonthMatrix(currentYear, currentMonth)
+
+    const getStatusColor = (status: AvailabilityStatus) => {
+        switch (status) {
+            case 'available':
+                return 'bg-[#1F9BA7]'
+            case 'hold':
+                return 'bg-[#FFA500]'
+            case 'na':
+                return 'bg-[#FF6B6B]'
+            default:
+                return 'bg-[#1F9BA7]'
+        }
+    }
+
+    const getStatusTextColor = (status: AvailabilityStatus) => {
+        switch (status) {
+            case 'available':
+                return 'text-white'
+            case 'hold':
+                return 'text-white'
+            case 'na':
+                return 'text-white'
+            default:
+                return 'text-white'
+        }
+    }
+
     return (
         <Dialog>
             <DialogTrigger asChild>
@@ -62,60 +206,150 @@ export function CalendarDialog({ triggerClassName, triggerLabel }: CalendarDialo
                     )}
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[360px] rounded-[24px] border-none px-0 pb-6 pt-4">
+            <DialogContent className="sm:max-w-[400px] rounded-[24px] border-none px-0 pb-6 pt-4">
                 <DialogHeader className="px-6">
                     <DialogTitle className="text-left text-base font-semibold text-[#FA6E80]">Availability calendar</DialogTitle>
                 </DialogHeader>
+                
+                {/* Status Selector */}
+                <div className="px-6">
+                    <div className="mb-4">
+                        <label className="text-sm font-medium text-gray-700 mb-2 block">
+                            Select status to mark dates:
+                        </label>
+                        <Select value={selectedStatus} onValueChange={(value) => setSelectedStatus(value as AvailabilityStatus)}>
+                            <SelectTrigger className="w-full rounded-lg">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="available">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-3 h-3 rounded-full bg-[#1F9BA7]"></div>
+                                        Available
+                                    </div>
+                                </SelectItem>
+                                <SelectItem value="hold">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-3 h-3 rounded-full bg-[#FFA500]"></div>
+                                        Hold
+                                    </div>
+                                </SelectItem>
+                                <SelectItem value="na">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-3 h-3 rounded-full bg-[#FF6B6B]"></div>
+                                        Not Available
+                                    </div>
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <p className="text-xs text-gray-500 mt-1">
+                            Click on dates to mark them with the selected status
+                        </p>
+                    </div>
+                </div>
+
                 <div className="mt-2 px-6">
-                    {calendarMonths.map((month) => {
-                        const monthDate = new Date(month.year, month.month, 1)
-                        const matrix = buildMonthMatrix(month.year, month.month)
-                        const highlighted = new Set(month.highlightedDays)
+                    {isLoading ? (
+                        <div className="flex items-center justify-center py-12">
+                            <Loader2 className="h-8 w-8 animate-spin text-[#31A7AC]" />
+                        </div>
+                    ) : (
+                        <div className="rounded-[24px] bg-white p-4 shadow-[0_8px_24px_rgba(15,139,141,0.12)]">
+                            {/* Month Navigation */}
+                            <div className="mb-4 flex items-center justify-between text-base font-semibold text-[#FA6E80]">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={goToPreviousMonth}
+                                    className="h-8 w-8"
+                                    disabled={isUpdating}
+                                >
+                                    <ChevronLeft className="h-5 w-5" />
+                                </Button>
+                                <span>{format(monthDate, "MMM, yyyy")}</span>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={goToNextMonth}
+                                    className="h-8 w-8"
+                                    disabled={isUpdating}
+                                >
+                                    <ChevronRight className="h-5 w-5" />
+                                </Button>
+                            </div>
+                            
+                            {/* Weekday Labels */}
+                            <div className="grid grid-cols-7 gap-[8px] text-center text-[11px] font-semibold uppercase tracking-wide text-[#FA6E80]">
+                                {WEEKDAY_LABELS.map((label, idx) => (
+                                    <span key={`label-${idx}`}>{label}</span>
+                                ))}
+                            </div>
+                            
+                            {/* Calendar Grid */}
+                            <div className="mt-4 space-y-1">
+                                {matrix.map((week, weekIndex) => (
+                                    <div key={`week-${weekIndex}`} className="grid grid-cols-7 gap-[4px]">
+                                        {week.map((day) => {
+                                            const dayNumber = getDate(day)
+                                            const currentMonth = isSameMonth(day, monthDate)
+                                            const dateStr = format(day, 'yyyy-MM-dd')
+                                            const availability = availabilityData.get(dateStr)
+                                            const hasAvailability = !!availability
+                                            
+                                            const baseColor = currentMonth ? "text-[#1F9BA7]" : "text-[#CAE6E7]"
+                                            
+                                            return (
+                                                <button
+                                                    key={day.toISOString()}
+                                                    onClick={() => handleDateClick(day)}
+                                                    disabled={!currentMonth || isUpdating}
+                                                    className={cn(
+                                                        "relative flex h-9 items-center justify-center overflow-visible rounded-lg transition-colors",
+                                                        currentMonth && "hover:bg-gray-100 cursor-pointer",
+                                                        !currentMonth && "cursor-not-allowed",
+                                                        isUpdating && "opacity-50 cursor-wait"
+                                                    )}
+                                                >
+                                                    {hasAvailability && (
+                                                        <span className={cn(
+                                                            "absolute inset-0 rounded-lg",
+                                                            getStatusColor(availability.status)
+                                                        )} />
+                                                    )}
+                                                    <span className={cn(
+                                                        "relative z-10 text-sm",
+                                                        hasAvailability ? getStatusTextColor(availability.status) : baseColor,
+                                                        hasAvailability && "font-semibold"
+                                                    )}>
+                                                        {currentMonth ? dayNumber : ""}
+                                                    </span>
+                                                </button>
+                                            )
+                                        })}
+                                    </div>
+                                ))}
+                            </div>
 
-                        return (
-                            <div key={month.id} className="rounded-[24px] bg-white p-4 shadow-[0_8px_24px_rgba(15,139,141,0.12)]">
-                                <div className="mb-4 flex items-center justify-between text-base font-semibold text-[#FA6E80]">
-                                    <span>{month.title ?? format(monthDate, "MMM, yyyy")}</span>
-                                    <Calendar className="h-5 w-5 text-[#FA6E80]" />
-                                </div>
-                                <div className="grid grid-cols-7 gap-[8px] text-center text-[11px] font-semibold uppercase tracking-wide text-[#FA6E80]">
-                                    {WEEKDAY_LABELS.map((label) => (
-                                        <span key={`${month.id}-${label}`}>{label}</span>
-                                    ))}
-                                </div>
-                                <div className="mt-4 space-y-1">
-                                    {matrix.map((week, weekIndex) => (
-                                        <div key={`week-${weekIndex}`} className="grid grid-cols-7 gap-[4px]">
-                                            {week.map((day) => {
-                                                const dayNumber = getDate(day)
-                                                const currentMonth = isSameMonth(day, monthDate)
-                                                const isHighlighted = currentMonth && highlighted.has(dayNumber)
-                                                const prevHighlighted = currentMonth && highlighted.has(dayNumber - 1)
-                                                const nextHighlighted = currentMonth && highlighted.has(dayNumber + 1)
-                                                const baseColor = currentMonth ? "text-[#1F9BA7]" : "text-[#CAE6E7]"
-                                                const highlightBgClass = isHighlighted
-                                                    ? [
-                                                        "absolute inset-y-0 bg-[#1F9BA7]",
-                                                        prevHighlighted ? "-left-1" : "left-0 rounded-l-full",
-                                                        nextHighlighted ? "-right-1" : "right-0 rounded-r-full",
-                                                    ].join(" ")
-                                                    : ""
-
-                                                return (
-                                                    <div key={day.toISOString()} className="relative flex h-9 items-center justify-center overflow-visible">
-                                                        {isHighlighted && <span className={highlightBgClass} />}
-                                                        <span className={`relative z-10 text-sm ${isHighlighted ? "font-semibold text-white" : baseColor}`}>
-                                                            {currentMonth ? dayNumber : ""}
-                                                        </span>
-                                                    </div>
-                                                )
-                                            })}
-                                        </div>
-                                    ))}
+                            {/* Legend */}
+                            <div className="mt-4 pt-4 border-t border-gray-200">
+                                <p className="text-xs font-semibold text-gray-700 mb-2">Legend:</p>
+                                <div className="flex flex-wrap gap-3 text-xs">
+                                    <div className="flex items-center gap-1">
+                                        <div className="w-3 h-3 rounded bg-[#1F9BA7]"></div>
+                                        <span className="text-gray-600">Available</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <div className="w-3 h-3 rounded bg-[#FFA500]"></div>
+                                        <span className="text-gray-600">Hold</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <div className="w-3 h-3 rounded bg-[#FF6B6B]"></div>
+                                        <span className="text-gray-600">Not Available</span>
+                                    </div>
                                 </div>
                             </div>
-                        )
-                    })}
+                        </div>
+                    )}
                 </div>
             </DialogContent>
         </Dialog>
