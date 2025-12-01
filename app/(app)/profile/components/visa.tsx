@@ -113,6 +113,9 @@ export default function VisaSection({ onUpdate }: VisaSectionProps) {
             return;
         }
 
+        // Prevent multiple simultaneous saves
+        if (saving) return;
+
         setSaving(true);
         try {
             const result = await updateVisa({
@@ -131,6 +134,7 @@ export default function VisaSection({ onUpdate }: VisaSectionProps) {
                 toast.error(result.message);
             }
         } catch (error) {
+            console.error('Visa update error:', error);
             toast.error('Failed to update visa information');
         } finally {
             setSaving(false);

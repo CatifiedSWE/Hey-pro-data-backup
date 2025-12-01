@@ -443,12 +443,12 @@ export const useProfile = () => {
   }, []);
 
   // Add travel country
-  const addTravelCountry = useCallback(async (country_name: string, sort_order = 0) => {
+  const addTravelCountry = useCallback(async (country_name: string, country_code?: string, sort_order = 0) => {
     try {
       const response = await apiCalling({
         method: 'post',
         route: '/profile/travel-countries',
-        data: { country_name, sort_order }
+        data: { country_name, country_code: country_code || country_name.substring(0, 2).toUpperCase(), sort_order }
       });
 
       if (response.status) {

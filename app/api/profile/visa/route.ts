@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
 
 /**
  * PATCH /api/profile/visa
- * Update visa information
+ * Update or create visa information (upsert)
  */
 export async function PATCH(request: NextRequest) {
   try {
@@ -129,17 +129,23 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { visa_type, issued_by, expiry_date } = body;
+    const { nationality, passport_expiry_date, visa_type, visa_issued_by, visa_expiry_date } = body;
 
-    const updateData: any = {};
+    const updateData: any = { user_id: user.id };
+    if (nationality !== undefined) updateData.nationality = nationality;
+    if (passport_expiry_date !== undefined) updateData.passport_expiry_date = passport_expiry_date;
     if (visa_type !== undefined) updateData.visa_type = visa_type;
-    if (issued_by !== undefined) updateData.issued_by = issued_by;
-    if (expiry_date !== undefined) updateData.expiry_date = expiry_date;
+    if (visa_issued_by !== undefined) updateData.visa_issued_by = visa_issued_by;
+    if (visa_expiry_date !== undefined) updateData.visa_expiry_date = visa_expiry_date;
+    updateData.updated_at = new Date().toISOString();
 
+    // Use upsert to handle both create and update
     const { data, error } = await supabase
       .from('user_visa_info')
-      .update(updateData)
-      .eq('user_id', user.id)
+      .upsert(updateData, {
+        onConflict: 'user_id',
+        ignoreDuplicates: false
+      })
       .select()
       .single();
 
@@ -156,6 +162,7 @@ export async function PATCH(request: NextRequest) {
       { status: 200 }
     );
   } catch (error: any) {
+    console.error('Visa update error:', error);
     return NextResponse.json(
       errorResponse('Internal server error', error.message),
       { status: 500 }

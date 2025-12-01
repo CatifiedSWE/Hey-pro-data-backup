@@ -88,6 +88,9 @@ export default function AddLanguageSection({ onUpdate }: { onUpdate?: () => void
             return;
         }
 
+        // Prevent multiple simultaneous saves
+        if (saving) return;
+
         setSaving(true);
         try {
             // Find languages to add (new ones without id)
@@ -117,6 +120,7 @@ export default function AddLanguageSection({ onUpdate }: { onUpdate?: () => void
             setIsLanguagesDialogOpen(false);
             onUpdate?.();
         } catch (error) {
+            console.error('Language update error:', error);
             toast.error('Failed to update languages');
         } finally {
             setSaving(false);

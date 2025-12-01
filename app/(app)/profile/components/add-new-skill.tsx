@@ -148,6 +148,9 @@ export default function AddNewSkill({ trigger, onUpdate }: AddNewSkillProps) {
             return;
         }
 
+        // Prevent multiple simultaneous saves
+        if (saving) return;
+
         setSaving(true);
         try {
             // Add all new skills
@@ -174,6 +177,7 @@ export default function AddNewSkill({ trigger, onUpdate }: AddNewSkillProps) {
             resetForm();
             onUpdate?.();
         } catch (error) {
+            console.error('Skill save error:', error);
             toast.error('Failed to add skills');
         } finally {
             setSaving(false);

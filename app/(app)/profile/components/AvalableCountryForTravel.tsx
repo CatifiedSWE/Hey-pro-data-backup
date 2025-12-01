@@ -108,6 +108,9 @@ export default function AvalableCountryForTravel({ onUpdate }: AvailableCountryP
             return;
         }
 
+        // Prevent multiple simultaneous saves
+        if (saving) return;
+
         setSaving(true);
         try {
             // Find countries to add (in next but not in current)
@@ -127,23 +130,43 @@ export default function AvalableCountryForTravel({ onUpdate }: AvailableCountryP
                     tc.country_name === country.code
                 );
                 if (apiCountry?.id) {
-                    await deleteTravelCountry(apiCountry.id);
+                    const result = await deleteTravelCountry(apiCountry.id);
+                    if (!result.success) {
+                        console.warn(`Failed to delete ${country.name}:`, result.message);
+                    }
                 }
             }
 
             // Add new countries
+            let successCount = 0;
+            let failCount = 0;
             for (const country of countriesToAdd) {
-                await addTravelCountry(country.name);
+                const result = await addTravelCountry(country.name, country.code);
+                if (result.success) {
+                    successCount++;
+                } else {
+                    failCount++;
+                    console.warn(`Failed to add ${country.name}:`, result.message);
+                }
             }
 
-            // Refresh the data
+            // Refresh the data only once at the end
             await fetchTravelCountries();
             
             setVisaCountries(nextCountries);
-            toast.success("Travel availability updated successfully!");
+            
+            if (failCount === 0) {
+                toast.success("Travel availability updated successfully!");
+            } else if (successCount > 0) {
+                toast.warning(`Updated partially: ${successCount} succeeded, ${failCount} failed`);
+            } else {
+                toast.error('Failed to update travel availability');
+            }
+            
             setIsDialogOpen(false);
             onUpdate?.();
         } catch (error) {
+            console.error('Travel countries save error:', error);
             toast.error('Failed to update travel availability');
         } finally {
             setSaving(false);
