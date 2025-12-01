@@ -32,13 +32,12 @@ export const formatBudgetLabel = (
 /**
  * Generate a unique slug for a gig
  * @param title - The gig title
- * @param existingSlugCheck - Async function to check if slug exists
  * @returns Unique slug string
  */
-export const generateUniqueSlug = async (
-  title: string,
-  existingSlugCheck: (slug: string) => Promise<boolean>
-): Promise<string> => {
+export const generateUniqueSlug = async (title: string): Promise<string> => {
+  const { createServerClient } = await import('@/lib/supabase/server');
+  const supabase = createServerClient();
+  
   // Create base slug from title
   let slug = title
     .toLowerCase()
@@ -52,7 +51,17 @@ export const generateUniqueSlug = async (
   let counter = 1;
   let uniqueSlug = slug;
   
-  while (await existingSlugCheck(uniqueSlug)) {
+  while (true) {
+    const { data } = await supabase
+      .from('gigs')
+      .select('id')
+      .eq('slug', uniqueSlug)
+      .maybeSingle();
+    
+    if (!data) {
+      break; // Slug is unique
+    }
+    
     uniqueSlug = `${slug}-${counter}`;
     counter++;
   }
