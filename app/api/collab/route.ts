@@ -73,19 +73,40 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get interest avatars for each collab (first 3)
+    // Get interest avatars and author details for each collab
     const collabsWithDetails = await Promise.all(
       filteredCollabs.map(async (collab: any) => {
-        // Get first 3 interested users' avatars
-        const { data: interestedUsers } = await supabase
+        // Get author details from user_profiles table
+        const { data: authorProfile } = await supabase
+          .from('user_profiles')
+          .select('user_id, first_name, surname, profile_photo_url')
+          .eq('user_id', collab.user_id)
+          .single();
+
+        // Get first 3 interested users' avatars from user_profiles
+        const { data: interestedUserIds } = await supabase
           .from('collab_interests')
-          .select('user_id(id, raw_user_meta_data)')
+          .select('user_id')
           .eq('collab_id', collab.id)
           .limit(3);
 
-        const interestAvatars = interestedUsers?.map((interest: any) => 
-          interest.user_id?.raw_user_meta_data?.avatar_url || interest.user_id?.raw_user_meta_data?.profile_photo_url || '/placeholder-avatar.png'
-        ) || [];
+        let interestAvatars: string[] = [];
+        if (interestedUserIds && interestedUserIds.length > 0) {
+          const userIds = interestedUserIds.map((u: any) => u.user_id);
+          const { data: interestedProfiles } = await supabase
+            .from('user_profiles')
+            .select('profile_photo_url')
+            .in('user_id', userIds)
+            .limit(3);
+
+          interestAvatars = interestedProfiles?.map((profile: any) => 
+            profile.profile_photo_url || '/placeholder-avatar.png'
+          ) || [];
+        }
+
+        const authorName = authorProfile 
+          ? `${authorProfile.first_name || ''} ${authorProfile.surname || ''}`.trim() || 'Unknown'
+          : 'Unknown';
 
         return {
           id: collab.id,
@@ -98,9 +119,9 @@ export async function GET(request: NextRequest) {
           interests: collab.interests?.[0]?.count || 0,
           interestAvatars,
           author: {
-            id: collab.author?.id,
-            name: collab.author?.raw_user_meta_data?.name || collab.author?.raw_user_meta_data?.full_name || 'Unknown',
-            avatar: collab.author?.raw_user_meta_data?.avatar_url || collab.author?.raw_user_meta_data?.profile_photo_url || '/placeholder-avatar.png'
+            id: collab.user_id,
+            name: authorName,
+            avatar: authorProfile?.profile_photo_url || '/placeholder-avatar.png'
           },
           created_at: collab.created_at,
           updated_at: collab.updated_at
