@@ -52,14 +52,7 @@ export async function GET(
     // Fetch interested users with pagination
     const { data: interests, error, count } = await supabase
       .from('collab_interests')
-      .select(`
-        id,
-        created_at,
-        user:user_id(
-          id,
-          raw_user_meta_data
-        )
-      `, { count: 'exact' })
+      .select('id, created_at, user_id', { count: 'exact' })
       .eq('collab_id', collabId)
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
@@ -72,17 +65,33 @@ export async function GET(
       );
     }
 
-    // Format interested users
-    const formattedInterests = (interests || []).map((interest: any) => ({
-      id: interest.id,
-      user: {
-        id: interest.user?.id,
-        name: interest.user?.raw_user_meta_data?.name || interest.user?.raw_user_meta_data?.full_name || 'Unknown',
-        avatar: interest.user?.raw_user_meta_data?.avatar_url || interest.user?.raw_user_meta_data?.profile_photo_url || '/placeholder-avatar.png',
-        bio: interest.user?.raw_user_meta_data?.bio || ''
-      },
-      created_at: interest.created_at
-    }));
+    // Get user profiles for interested users
+    let formattedInterests: any[] = [];
+    if (interests && interests.length > 0) {
+      const userIds = interests.map((i: any) => i.user_id);
+      const { data: userProfiles } = await supabase
+        .from('user_profiles')
+        .select('user_id, first_name, surname, profile_photo_url, bio')
+        .in('user_id', userIds);
+
+      formattedInterests = interests.map((interest: any) => {
+        const profile = userProfiles?.find((p: any) => p.user_id === interest.user_id);
+        const name = profile 
+          ? `${profile.first_name || ''} ${profile.surname || ''}`.trim() || 'Unknown'
+          : 'Unknown';
+
+        return {
+          id: interest.id,
+          user: {
+            id: interest.user_id,
+            name,
+            avatar: profile?.profile_photo_url || '/placeholder-avatar.png',
+            bio: profile?.bio || ''
+          },
+          created_at: interest.created_at
+        };
+      });
+    }
 
     const totalInterests = count || 0;
     const totalPages = Math.ceil(totalInterests / limit);
