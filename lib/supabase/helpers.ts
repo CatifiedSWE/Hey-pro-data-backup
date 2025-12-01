@@ -72,31 +72,22 @@ export const generateUniqueSlug = async (title: string): Promise<string> => {
 /**
  * Check if a user has a complete profile
  * @param userId - The user ID to check
- * @param supabaseClient - Supabase client instance
- * @returns Whether the profile is complete
+ * @returns Object with isComplete boolean
  */
 export const checkProfileComplete = async (
-  userId: string,
-  supabaseClient: unknown
-): Promise<boolean> => {
-  const supabase = supabaseClient as {
-    from: (table: string) => {
-      select: (columns: string) => {
-        eq: (column: string, value: string) => {
-          single: () => Promise<{ data: unknown; error: unknown }>;
-        };
-      };
-    };
-  };
+  userId: string
+): Promise<{ isComplete: boolean }> => {
+  const { createServerClient } = await import('@/lib/supabase/server');
+  const supabase = createServerClient();
 
   const { data, error } = await supabase
     .from('user_profiles')
     .select('first_name, surname, country, city')
     .eq('user_id', userId)
-    .single();
+    .maybeSingle();
 
   if (error || !data) {
-    return false;
+    return { isComplete: false };
   }
 
   const profile = data as {
@@ -107,12 +98,14 @@ export const checkProfileComplete = async (
   };
 
   // Check if required fields are filled
-  return !!(
+  const isComplete = !!(
     profile.first_name &&
     profile.surname &&
     profile.country &&
     profile.city
   );
+  
+  return { isComplete };
 };
 
 /**
