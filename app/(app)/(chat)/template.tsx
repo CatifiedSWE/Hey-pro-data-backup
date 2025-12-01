@@ -178,56 +178,77 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                                     )}
                                 </TabsContent>
                                 <TabsContent value="groups" className="mt-0">
-                                    <div className="flex flex-col items-start gap-[5px] w-full">
-                                        {Groups.map((chat, index) => (
-                                            <React.Fragment key={index}>
-                                                <Link href={`/inbox/g/${chat.messageId}`} className="flex flex-row items-center p-[10px] gap-[19px] w-full h-[70px] rounded-[10px] hover:bg-gray-50 transition-colors cursor-pointer">
-                                                    {Array.isArray(chat.image) ? (
-                                                        <div className="flex -space-x-4 shrink-0">
-                                                            {chat.image.slice(0, 2).map((imgSrc, imgIdx) => (
-                                                                <Image
-                                                                    key={imgIdx}
-                                                                    src={imgSrc}
-                                                                    alt={chat.name}
-                                                                    className="w-[35px] h-[35px] rounded-full object-cover bg-[#D9D9D9] border-2 border-white"
-                                                                    width={35}
-                                                                    height={35}
-                                                                />
-                                                            ))}
-                                                        </div>
-                                                    ) : (
-                                                        <Image
-                                                            src={chat.image}
-                                                            alt={chat.name}
-                                                            className="w-[40px] h-[41px] rounded-full object-cover bg-[#D9D9D9] shrink-0"
-                                                            width={40}
-                                                            height={40}
-                                                        />
-                                                    )}
-                                                    <div className="flex flex-row items-center gap-[7px] flex-1 min-w-0">
-                                                        <div className="flex flex-col justify-center items-start gap-[1px] flex-1 min-w-0">
-                                                            <span className="w-full font-medium text-[16px] leading-[24px] text-black truncate">
-                                                                {chat.name}
-                                                            </span>
-                                                            <span className="w-full font-medium text-[12px] leading-[15px] text-[#444444] truncate">
-                                                                {chat.message}
-                                                            </span>
-                                                        </div>
-                                                        {chat.badge && (
-                                                            <div className="w-[20px] h-[20px] bg-[#31A7AC] border-2 border-white rounded-full flex items-center justify-center shrink-0">
-                                                                <span className="font-medium text-[10px] leading-[15px] text-white">
-                                                                    {chat.badge}
-                                                                </span>
+                                    {loading ? (
+                                        <div className="flex items-center justify-center h-40">
+                                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#31A7AC]"></div>
+                                        </div>
+                                    ) : error ? (
+                                        <div className="flex flex-col items-center justify-center h-40 text-gray-500">
+                                            <p className="text-sm">{error}</p>
+                                            <button 
+                                                onClick={fetchData}
+                                                className="mt-2 text-[#31A7AC] text-sm hover:underline"
+                                            >
+                                                Try again
+                                            </button>
+                                        </div>
+                                    ) : groups.length === 0 ? (
+                                        <div className="flex items-center justify-center h-40 text-gray-500">
+                                            <p className="text-sm">No groups yet</p>
+                                        </div>
+                                    ) : (
+                                        <div className="flex flex-col items-start gap-[5px] w-full">
+                                            {groups.map((group, index) => {
+                                                const avatarUrls = group.avatarUrls || [];
+                                                return (
+                                                    <React.Fragment key={group.id}>
+                                                        <Link href={`/inbox/g/${group.id}`} className="flex flex-row items-center p-[10px] gap-[19px] w-full h-[70px] rounded-[10px] hover:bg-gray-50 transition-colors cursor-pointer">
+                                                            {avatarUrls.length > 0 ? (
+                                                                <div className="flex -space-x-4 shrink-0">
+                                                                    {avatarUrls.slice(0, 2).map((imgSrc, imgIdx) => (
+                                                                        <Image
+                                                                            key={imgIdx}
+                                                                            src={imgSrc || '/image (1).png'}
+                                                                            alt={group.name}
+                                                                            className="w-[35px] h-[35px] rounded-full object-cover bg-[#D9D9D9] border-2 border-white"
+                                                                            width={35}
+                                                                            height={35}
+                                                                        />
+                                                                    ))}
+                                                                </div>
+                                                            ) : (
+                                                                <div className="w-[40px] h-[41px] rounded-full bg-[#D9D9D9] flex items-center justify-center shrink-0">
+                                                                    <span className="text-white font-semibold text-sm">
+                                                                        {group.name.charAt(0).toUpperCase()}
+                                                                    </span>
+                                                                </div>
+                                                            )}
+                                                            <div className="flex flex-row items-center gap-[7px] flex-1 min-w-0">
+                                                                <div className="flex flex-col justify-center items-start gap-[1px] flex-1 min-w-0">
+                                                                    <span className="w-full font-medium text-[16px] leading-[24px] text-black truncate">
+                                                                        {group.name}
+                                                                    </span>
+                                                                    <span className="w-full font-medium text-[12px] leading-[15px] text-[#444444] truncate">
+                                                                        {group.lastMessage?.content || 'No messages yet'}
+                                                                    </span>
+                                                                </div>
+                                                                {group.unreadCount > 0 && (
+                                                                    <div className="w-[20px] h-[20px] bg-[#31A7AC] border-2 border-white rounded-full flex items-center justify-center shrink-0">
+                                                                        <span className="font-medium text-[10px] leading-[15px] text-white">
+                                                                            {group.unreadCount > 9 ? '9+' : group.unreadCount}
+                                                                        </span>
+                                                                    </div>
+                                                                )}
                                                             </div>
+                                                        </Link>
+                                                        {index < groups.length - 1 && (
+                                                            <div className="w-full h-[1px] border-t border-[#CDCDCD]" />
                                                         )}
-                                                    </div>
-                                                </Link>
-                                                {index < Groups.length - 1 && (
-                                                    <div className="w-full h-[1px] border-t border-[#CDCDCD]" />
-                                                )}
-                                            </React.Fragment>
-                                        ))}
-                                    </div>
+                                                    </React.Fragment>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
                                 </TabsContent>
                             </div>
                         </Tabs>
