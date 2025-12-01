@@ -109,16 +109,59 @@ export const checkProfileComplete = async (
 };
 
 /**
- * Transform calendar months data for frontend
- * @param months - Array of month/days objects
- * @returns Transformed calendar data
+ * Transform gig dates into calendar format for frontend
+ * @param gigDates - Array of gig date objects from database
+ * @returns Array of calendar months with highlighted days
  */
 export const transformCalendarMonths = (
-  months: Array<{ month: string; days: string }>
-): Array<{ label: string; range: string }> => {
-  return months.map(m => ({
-    label: m.month,
-    range: m.days
+  gigDates: Array<{ month: string; days: string }>
+): Array<{ month: number; year: number; highlightedDays: number[] }> => {
+  const monthsMap = new Map<string, { month: number; year: number; highlightedDays: number[] }>();
+  
+  gigDates.forEach(({ month, days }) => {
+    // Parse "Sep 2025" → { month: 8, year: 2025 }
+    const [monthName, yearStr] = month.split(' ');
+    const year = parseInt(yearStr);
+    
+    // Map month names to indices (0-11)
+    const monthMap: { [key: string]: number } = {
+      'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3,
+      'May': 4, 'Jun': 5, 'Jul': 6, 'Aug': 7,
+      'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
+    };
+    const monthIndex = monthMap[monthName] || 0;
+    
+    // Parse "1-5, 10, 15-20" → [1,2,3,4,5,10,15,16,17,18,19,20]
+    const dayNumbers: number[] = [];
+    days.split(',').forEach(range => {
+      range = range.trim();
+      if (range.includes('-')) {
+        const [start, end] = range.split('-').map(d => parseInt(d.trim()));
+        for (let d = start; d <= end; d++) {
+          dayNumbers.push(d);
+        }
+      } else {
+        dayNumbers.push(parseInt(range));
+      }
+    });
+    
+    const key = `${year}-${monthIndex}`;
+    if (monthsMap.has(key)) {
+      const existing = monthsMap.get(key)!;
+      existing.highlightedDays.push(...dayNumbers);
+    } else {
+      monthsMap.set(key, {
+        month: monthIndex,
+        year,
+        highlightedDays: dayNumbers
+      });
+    }
+  });
+  
+  // Convert to array and sort unique days
+  return Array.from(monthsMap.values()).map(cal => ({
+    ...cal,
+    highlightedDays: [...new Set(cal.highlightedDays)].sort((a, b) => a - b)
   }));
 };
 
