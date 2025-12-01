@@ -145,6 +145,28 @@ export default function MessageInbox({ params }: { params: paramsType }) {
         }
     };
 
+    if (loading) {
+        return (
+            <div className="w-full h-full flex items-center justify-center bg-white">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#31A7AC]"></div>
+            </div>
+        );
+    }
+
+    if (error && messages.length === 0) {
+        return (
+            <div className="w-full h-full flex flex-col items-center justify-center bg-white gap-4">
+                <p className="text-gray-500">{error}</p>
+                <button 
+                    onClick={() => fetchMessages(1, false)}
+                    className="px-4 py-2 bg-[#31A7AC] text-white rounded-lg hover:bg-[#2a8f93]"
+                >
+                    Try again
+                </button>
+            </div>
+        );
+    }
+
     return (
         <div className="w-full  flex flex-col bg-white overflow-hidden relative sm:h-[calc(100vh-80px)] h-[calc(100vh-80px)]">
 
@@ -158,23 +180,20 @@ export default function MessageInbox({ params }: { params: paramsType }) {
 
                     <div className="relative">
                         <Image
-                            src={chatUser?.image || "/default-profile.png"}
-                            alt={chatUser?.name || "User Profile"}
+                            src={otherUser?.avatar || "/image (1).png"}
+                            alt={otherUser?.name || "User"}
                             width={45}
                             height={45}
                             className="rounded-full object-cover w-[45px] h-[45px]"
                         />
-                        {chatUser?.state === 'online' && (
-                            <span className="absolute right-0 bottom-0 block h-3 w-3 ring-2 ring-white rounded-full bg-[#34A353]" />
-                        )}
                     </div>
 
                     <div className="flex flex-col">
                         <div className="text-black font-semibold text-[16px] sm:text-[18px] leading-tight">
-                            {chatUser?.name || "User Name"}
+                            {otherUser?.name || "User"}
                         </div>
-                        <div className={`text-[12px] sm:text-[14px] font-medium ${chatUser?.state === 'online' ? 'text-[#34A353]' : 'text-gray-500'}`}>
-                            {chatUser?.state || "Online"}
+                        <div className="text-[12px] sm:text-[14px] font-medium text-gray-500">
+                            {messages.length > 0 ? 'Active' : 'No messages yet'}
                         </div>
                     </div>
                 </div>
@@ -184,61 +203,72 @@ export default function MessageInbox({ params }: { params: paramsType }) {
             </div>
 
             {/* Messages Area - Grow to fill space */}
-            {/* Added min-h-0 to allow flex child to scroll properly */}
             <div
                 ref={scrollRef}
+                onScroll={handleScroll}
                 className="flex-1 min-h-0 w-full overflow-y-auto px-2 sm:px-4 py-6 bg-white no-scrollbar"
             >
+                {loadingMore && (
+                    <div className="flex justify-center mb-4">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#31A7AC]"></div>
+                    </div>
+                )}
+                
                 <div className="mx-auto w-full max-w-3xl flex flex-col">
-                    {messages.map((msg, index) => {
-                        const isSender = msg.senderId === currentUser.messageId;
-                        const prevMsg = messages[index - 1];
-                        const nextMsg = messages[index + 1];
+                    {messages.length === 0 ? (
+                        <div className="flex items-center justify-center h-40 text-gray-500">
+                            <p className="text-sm">No messages yet. Start the conversation!</p>
+                        </div>
+                    ) : (
+                        messages.map((msg, index) => {
+                            const isSender = msg.sender_id === user?.id;
+                            const prevMsg = messages[index - 1];
+                            const nextMsg = messages[index + 1];
 
-                        const isPrevSameSender = prevMsg && prevMsg.senderId === msg.senderId;
-                        const isNextSameSender = nextMsg && nextMsg.senderId === msg.senderId;
+                            const isPrevSameSender = prevMsg && prevMsg.sender_id === msg.sender_id;
+                            const isNextSameSender = nextMsg && nextMsg.sender_id === msg.sender_id;
 
-                        // Spacing logic
-                        const marginBottom = isNextSameSender ? "mb-[2px]" : "mb-6";
+                            // Spacing logic
+                            const marginBottom = isNextSameSender ? "mb-[2px]" : "mb-6";
 
-                        // Border Radius Logic
-                        let borderRadiusClass = "rounded-[18px]";
-                        if (isSender) {
-                            if (isNextSameSender && !isPrevSameSender) borderRadiusClass = "rounded-[18px] rounded-br-none";
-                            else if (isPrevSameSender && isNextSameSender) borderRadiusClass = "rounded-[18px] rounded-tr-none rounded-br-none";
-                            else if (isPrevSameSender && !isNextSameSender) borderRadiusClass = "rounded-[18px] rounded-tr-none";
-                        } else {
-                            if (isNextSameSender && !isPrevSameSender) borderRadiusClass = "rounded-[18px] rounded-bl-none";
-                            else if (isPrevSameSender && isNextSameSender) borderRadiusClass = "rounded-[18px] rounded-tl-none rounded-bl-none";
-                            else if (isPrevSameSender && !isNextSameSender) borderRadiusClass = "rounded-[18px] rounded-tl-none";
-                        }
+                            // Border Radius Logic
+                            let borderRadiusClass = "rounded-[18px]";
+                            if (isSender) {
+                                if (isNextSameSender && !isPrevSameSender) borderRadiusClass = "rounded-[18px] rounded-br-none";
+                                else if (isPrevSameSender && isNextSameSender) borderRadiusClass = "rounded-[18px] rounded-tr-none rounded-br-none";
+                                else if (isPrevSameSender && !isNextSameSender) borderRadiusClass = "rounded-[18px] rounded-tr-none";
+                            } else {
+                                if (isNextSameSender && !isPrevSameSender) borderRadiusClass = "rounded-[18px] rounded-bl-none";
+                                else if (isPrevSameSender && isNextSameSender) borderRadiusClass = "rounded-[18px] rounded-tl-none rounded-bl-none";
+                                else if (isPrevSameSender && !isNextSameSender) borderRadiusClass = "rounded-[18px] rounded-tl-none";
+                            }
 
-                        const showTime = !nextMsg || nextMsg.timestamp !== msg.timestamp || !isNextSameSender;
-                        const formattedTime = format(new Date(msg.timestamp), "h:mm a");
+                            const showTime = !nextMsg || nextMsg.created_at !== msg.created_at || !isNextSameSender;
+                            const formattedTime = format(new Date(msg.created_at), "h:mm a");
 
-                        return (
-                            <div key={msg.id || index} className={`flex w-full flex-col ${isSender ? 'items-end' : 'items-start'} ${marginBottom}`}>
-                                <div
-                                    className={`
-                                        max-w-[85%] sm:max-w-[65%] px-5 py-3 text-[14px] leading-relaxed break-words
-                                        ${borderRadiusClass} 
-                                        ${isSender
-                                            ? 'bg-[#F2F2F2] text-[#181818]'
-                                            : 'bg-[#31A7AC] text-white'
-                                        }
-                                    `}
-                                >
-                                    {msg.content}
+                            return (
+                                <div key={msg.id} className={`flex w-full flex-col ${isSender ? 'items-end' : 'items-start'} ${marginBottom}`}>
+                                    <div
+                                        className={`
+                                            max-w-[85%] sm:max-w-[65%] px-5 py-3 text-[14px] leading-relaxed break-words
+                                            ${borderRadiusClass} 
+                                            ${isSender
+                                                ? 'bg-[#F2F2F2] text-[#181818]'
+                                                : 'bg-[#31A7AC] text-white'
+                                            }
+                                        `}
+                                    >
+                                        {msg.content}
+                                    </div>
+                                    {showTime && (
+                                        <span className={`text-[11px] text-gray-400 mt-1 px-1 ${isSender ? 'text-right' : 'text-left'}`}>
+                                            {formattedTime}
+                                        </span>
+                                    )}
                                 </div>
-                                {showTime && (
-                                    <span className={`text-[11px] text-gray-400 mt-1 px-1 ${isSender ? 'text-right' : 'text-left'}`}>
-                                        {formattedTime}
-                                        {isSender && msg.status === "sending" && " • Sending..."}
-                                    </span>
-                                )}
-                            </div>
-                        );
-                    })}
+                            );
+                        })
+                    )}
                 </div>
             </div>
 
