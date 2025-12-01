@@ -85,7 +85,7 @@ export default function Profile() {
   const [isReorderDialogOpen, setIsReorderDialogOpen] = useState(false)
   
   // Use the profile hook for real data
-  const { profile, links, recommendations, roles, loading, error, uploadPhoto, refetch, fetchLinks, fetchRecommendations, addRole, deleteRole } = useProfile();
+  const { profile, links, recommendations, roles, skills, loading, error, uploadPhoto, refetch, fetchLinks, fetchRecommendations, addRole, deleteRole, fetchSkills } = useProfile();
 
   // Drag and drop sensors - MUST be called before any conditional returns
   const sensors = useSensors(
@@ -190,7 +190,7 @@ export default function Profile() {
 
   const sectionComponents = {
     about: <AboutSection key="about" bio={profile?.bio || ''} />,
-    skills: <SkillsSectionWrapper key="skills" profile={profile} />,
+    skills: <SkillsSectionWrapper key="skills" skills={skills} onUpdate={fetchSkills} />,
     credits: <CreditsSection key="credits" />,
     recommendations: <RecommendationsComponent key="recommendations" recommendations={recommendations} onUpdate={fetchRecommendations} />,
   }
@@ -428,16 +428,16 @@ function AboutSection({ bio }: { bio: string }) {
   )
 }
 
-function SkillsSectionWrapper({ profile }: { profile: ProfileData | null }) {
-  // If profile doesn't have skills or skills is empty, show a placeholder
-  const extendedProfile = profile as ExtendedProfileData;
-  if (!profile || !extendedProfile.skills || extendedProfile.skills.length === 0) {
+function SkillsSectionWrapper({ skills, onUpdate }: { skills: any[]; onUpdate: () => void }) {
+  // If skills is empty, show a placeholder
+  if (!skills || skills.length === 0) {
     return (
       <div className="w-full rounded-[20px] bg-[#FAFAFA] px-6 py-7 shadow-[0_1px_10px_rgba(0,0,0,0.1)] sm:px-10 sm:py-9">
         <div className="mb-5 flex items-center justify-between">
           <h2 className="text-[22px] font-semibold leading-[33px] text-[#000]">Skills</h2>
           <div className="flex gap-1.5">
             <AddNewSkill
+              onUpdate={onUpdate}
               trigger={
                 <Button size="icon" variant="default" className="rounded-full border border-[#31A7AC]/30 bg-[#FA6E80] text-[#ffffff]">
                   <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -453,16 +453,30 @@ function SkillsSectionWrapper({ profile }: { profile: ProfileData | null }) {
     );
   }
 
-  return <SkillsSection Profile={profile} />;
+  // Transform skills data from API format to UI format
+  const transformedSkills = skills.map(skill => ({
+    id: skill.id,
+    department: skill.department || 'General',
+    role: skill.skill_name,
+    description: skill.description || '',
+    experience: skill.experience_level ? {
+      value: skill.experience_level,
+      title: skill.experience_level,
+      description: ''
+    } : undefined
+  }));
+
+  return <SkillsSection skills={transformedSkills} onUpdate={onUpdate} />;
 }
 
-function SkillsSection({ Profile: profile }: { Profile: { skills: { id: string, department: string, role: string, description: string, experience?: { value: string; title: string; description: string; } }[] } }) {
+function SkillsSection({ skills, onUpdate }: { skills: { id: string, department: string, role: string, description: string, experience?: { value: string; title: string; description: string; } }[]; onUpdate: () => void }) {
   return (
     <div className="w-full rounded-[20px] bg-[#FAFAFA] px-6 py-7 shadow-[0_1px_10px_rgba(0,0,0,0.1)] sm:px-10 sm:py-9">
       <div className="mb-5 flex items-center justify-between">
         <h2 className="text-[22px] font-semibold leading-[33px] text-[#000]">Skills</h2>
         <div className="flex gap-1.5">
           <AddNewSkill
+            onUpdate={onUpdate}
             trigger={
               <Button size="icon" variant="default" className="rounded-full border border-[#31A7AC]/30 bg-[#FA6E80] text-[#ffffff]">
                 <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -470,7 +484,8 @@ function SkillsSection({ Profile: profile }: { Profile: { skills: { id: string, 
             }
           />
           <SkillEditor
-            initialSkills={profile.skills}
+            initialSkills={skills}
+            onUpdate={onUpdate}
             trigger={
               <Button size="icon" variant="default" className="rounded-full border border-[#31A7AC]/30 bg-[#31A7AC] text-[#ffffff]">
                 <Edit className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -481,8 +496,8 @@ function SkillsSection({ Profile: profile }: { Profile: { skills: { id: string, 
         </div>
       </div>
       <div className="space-y-4">
-        {profile.skills.map((skill, index) => (
-          <SkillItem key={index} department={skill.department} role={skill.role} description={skill.description} experience={skill.experience} />
+        {skills.map((skill, index) => (
+          <SkillItem key={skill.id || index} department={skill.department} role={skill.role} description={skill.description} experience={skill.experience} />
         ))}
       </div>
     </div>
