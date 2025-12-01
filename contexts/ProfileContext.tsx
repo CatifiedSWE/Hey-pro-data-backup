@@ -11,7 +11,9 @@ import type {
   LanguageData, 
   TravelCountryData, 
   HighlightData, 
-  SkillData 
+  SkillData,
+  CreditData,
+  AvailabilityData
 } from '@/hooks/useProfile';
 
 // Define the context type
@@ -26,6 +28,8 @@ interface ProfileContextType {
   travelCountries: TravelCountryData[];
   highlights: HighlightData[];
   skills: SkillData[];
+  credits: CreditData[];
+  availability: AvailabilityData[];
   loading: boolean;
   error: string | null;
   
@@ -75,6 +79,13 @@ interface ProfileContextType {
   updateSkill: (id: string, data: Partial<SkillData>) => Promise<{ success: boolean; message: string }>;
   deleteSkill: (id: string) => Promise<{ success: boolean; message: string }>;
   
+  // Credits methods
+  fetchCredits: () => Promise<void>;
+  
+  // Availability methods
+  fetchAvailability: (month?: string) => Promise<void>;
+  updateAvailability: (availability_date: string, status: 'available' | 'hold' | 'na') => Promise<{ success: boolean; message: string }>;
+  
   // Upload methods
   uploadPhoto: (file: File, type: 'profile' | 'banner') => Promise<{ success: boolean; message?: string; url?: string }>;
 }
@@ -119,5 +130,7 @@ export type {
   LanguageData, 
   TravelCountryData, 
   HighlightData, 
-  SkillData 
+  SkillData,
+  CreditData,
+  AvailabilityData
 };

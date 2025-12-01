@@ -12,7 +12,7 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
  * GET /api/profile/complete
  * Get ALL profile data in a single aggregated call
  * 
- * This endpoint reduces 9 separate API calls into 1 call:
+ * This endpoint reduces 11 separate API calls into 1 call:
  * - /api/profile
  * - /api/profile/links
  * - /api/profile/recommendations
@@ -22,8 +22,10 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
  * - /api/profile/travel-countries
  * - /api/profile/highlights
  * - /api/skills
+ * - /api/profile/credits
+ * - /api/availability (current month)
  * 
- * Expected reduction: 9 calls → 1 call (89% reduction on page load)
+ * Expected reduction: 11 calls → 1 call (91% reduction on page load)
  */
 export async function GET(request: NextRequest) {
   try {
@@ -37,6 +39,12 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Get current month for availability
+    const now = new Date();
+    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const monthStart = `${currentMonth}-01`;
+    const monthEnd = `${currentMonth}-31`;
+
     // Execute all queries in parallel for maximum performance
     const [
       profileResult,
@@ -47,7 +55,9 @@ export async function GET(request: NextRequest) {
       languagesResult,
       travelCountriesResult,
       highlightsResult,
-      skillsResult
+      skillsResult,
+      creditsResult,
+      availabilityResult
     ] = await Promise.all([
       // Profile data
       supabase
@@ -133,7 +143,45 @@ export async function GET(request: NextRequest) {
         .from('applicant_skills')
         .select('*')
         .eq('user_id', user.id)
-        .order('sort_order', { ascending: true })
+        .order('sort_order', { ascending: true }),
+
+      // Credits
+      supabase
+        .from('user_credits')
+        .select(`
+          id,
+          user_id,
+          credit_title,
+          description,
+          start_date,
+          end_date,
+          image_url,
+          sort_order,
+          production_type,
+          role,
+          project_title,
+          brand_client,
+          local_company,
+          international_company,
+          country,
+          release_year,
+          is_unreleased,
+          headline_stats,
+          awards,
+          created_at,
+          updated_at
+        `)
+        .eq('user_id', user.id)
+        .order('start_date', { ascending: false }),
+
+      // Availability (current month)
+      supabase
+        .from('crew_availability')
+        .select('*')
+        .eq('user_id', user.id)
+        .gte('availability_date', monthStart)
+        .lte('availability_date', monthEnd)
+        .order('availability_date', { ascending: true })
     ]);
 
     // Fetch recommended user profiles if there are any recommendations
@@ -176,6 +224,8 @@ export async function GET(request: NextRequest) {
     if (travelCountriesResult.error) console.error('Travel countries fetch error:', travelCountriesResult.error);
     if (highlightsResult.error) console.error('Highlights fetch error:', highlightsResult.error);
     if (skillsResult.error) console.error('Skills fetch error:', skillsResult.error);
+    if (creditsResult.error) console.error('Credits fetch error:', creditsResult.error);
+    if (availabilityResult.error) console.error('Availability fetch error:', availabilityResult.error);
 
     // Return aggregated data
     const completeProfile = {
@@ -187,7 +237,9 @@ export async function GET(request: NextRequest) {
       languages: languagesResult.data || [],
       travelCountries: travelCountriesResult.data || [],
       highlights: highlightsResult.data || [],
-      skills: skillsResult.data || []
+      skills: skillsResult.data || [],
+      credits: creditsResult.data || [],
+      availability: availabilityResult.data || []
     };
 
     return NextResponse.json(

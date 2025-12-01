@@ -6,7 +6,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { ProfileDataTypes } from "@/types"
-import apiCalling from "@/lib/apiCalling"
+import { useProfile, CreditData } from "@/contexts/ProfileContext"
 
 import CreditsEditor from "./CreditsEditor"
 
@@ -117,57 +117,33 @@ function CreditCard({ credit }: { credit: CreditType }) {
 }
 
 export default function CreditsSection() {
-    const [credits, setCredits] = useState<CreditType[]>([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
+    // Use credits from ProfileContext instead of making separate API call
+    const { credits: profileCredits, loading: profileLoading, fetchCredits } = useProfile();
+    
+    // Map the API response to match the expected CreditType format
+    const credits = profileCredits.map((credit: CreditData) => ({
+        id: credit.id,
+        creditTitle: credit.credit_title || '',
+        startDate: credit.start_date || '',
+        endDate: credit.end_date || '',
+        description: credit.description || '',
+        imgUrl: credit.image_url || '',
+        productionType: credit.production_type || '',
+        role: credit.role || '',
+        projectTitle: credit.project_title || '',
+        brandClient: credit.brand_client || '',
+        localCompany: credit.local_company || '',
+        internationalCompany: credit.international_company || '',
+        country: credit.country || '',
+        releaseYear: credit.release_year || '',
+        isUnreleased: credit.is_unreleased || false,
+        headlineStats: credit.headline_stats || '',
+        awardsSummary: '',
+        awards: credit.awards || []
+    }));
 
-    // Fetch credits data
-    const fetchCredits = async () => {
-        try {
-            setLoading(true)
-            const response = await apiCalling({
-                method: 'get',
-                route: '/profile/credits'
-            })
-
-            if (response.status && response.data?.data) {
-                // Map the API response to match the expected CreditType format
-                const mappedCredits = response.data.data.map((credit: Record<string, unknown>) => ({
-                    id: credit.id,
-                    creditTitle: credit.credit_title || '',
-                    startDate: credit.start_date || '',
-                    endDate: credit.end_date || '',
-                    description: credit.description || '',
-                    imgUrl: credit.image_url || '',
-                    productionType: credit.production_type || '',
-                    role: credit.role || '',
-                    projectTitle: credit.project_title || '',
-                    brandClient: credit.brand_client || '',
-                    localCompany: credit.local_company || '',
-                    internationalCompany: credit.international_company || '',
-                    country: credit.country || '',
-                    releaseYear: credit.release_year || '',
-                    isUnreleased: credit.is_unreleased || false,
-                    headlineStats: credit.headline_stats || '',
-                    awardsSummary: credit.awards_summary || '',
-                    awards: credit.awards || []
-                }))
-                setCredits(mappedCredits)
-            } else {
-                setCredits([])
-            }
-        } catch (err) {
-            console.error('Error fetching credits:', err)
-            setError('Failed to load credits')
-            setCredits([])
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    useEffect(() => {
-        fetchCredits()
-    }, [])
+    const loading = profileLoading;
+    const error = null; // Error is handled at ProfileContext level
 
     // Show loading state
     if (loading) {

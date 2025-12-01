@@ -127,6 +127,38 @@ export interface SkillData {
   created_at?: string;
 }
 
+export interface CreditData {
+  id: string;
+  user_id: string;
+  credit_title: string;
+  description?: string;
+  start_date?: string;
+  end_date?: string;
+  image_url?: string;
+  sort_order?: number;
+  production_type?: string;
+  role?: string;
+  project_title?: string;
+  brand_client?: string;
+  local_company?: string;
+  international_company?: string;
+  country?: string;
+  release_year?: string;
+  is_unreleased?: boolean;
+  headline_stats?: string;
+  awards?: Array<{ title: string; detail?: string }>;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface AvailabilityData {
+  id: string;
+  user_id: string;
+  availability_date: string;
+  status: 'available' | 'hold' | 'na';
+  created_at?: string;
+}
+
 export const useProfile = () => {
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [links, setLinks] = useState<LinkData[]>([]);
@@ -137,6 +169,8 @@ export const useProfile = () => {
   const [travelCountries, setTravelCountries] = useState<TravelCountryData[]>([]);
   const [highlights, setHighlights] = useState<HighlightData[]>([]);
   const [skills, setSkills] = useState<SkillData[]>([]);
+  const [credits, setCredits] = useState<CreditData[]>([]);
+  const [availability, setAvailability] = useState<AvailabilityData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -832,7 +866,75 @@ export const useProfile = () => {
     }
   }, [profile]);
 
-  // Fetch complete profile data (OPTIMIZED - single API call instead of 9)
+  // ========== CREDITS METHODS ==========
+  // Fetch credits (use if you need to refresh only credits)
+  const fetchCredits = useCallback(async () => {
+    try {
+      const response = await apiCalling({
+        method: 'get',
+        route: '/profile/credits'
+      });
+
+      if (response.status && response.data?.data) {
+        setCredits(response.data.data);
+      } else {
+        setCredits([]);
+      }
+    } catch (err) {
+      console.error('Error fetching credits:', err);
+    }
+  }, []);
+
+  // ========== AVAILABILITY METHODS ==========
+  // Fetch availability for a specific month
+  const fetchAvailability = useCallback(async (month?: string) => {
+    try {
+      const url = month ? `/availability?month=${month}` : '/availability';
+      const response = await apiCalling({
+        method: 'get',
+        route: url
+      });
+
+      if (response.status && response.data?.data) {
+        setAvailability(response.data.data);
+      } else {
+        setAvailability([]);
+      }
+    } catch (err) {
+      console.error('Error fetching availability:', err);
+    }
+  }, []);
+
+  // Update availability for a specific date
+  const updateAvailability = useCallback(async (availability_date: string, status: 'available' | 'hold' | 'na') => {
+    try {
+      const response = await apiCalling({
+        method: 'post',
+        route: '/availability',
+        data: { availability_date, status }
+      });
+
+      if (response.status && response.data?.data) {
+        // Update local state optimistically
+        setAvailability(prev => {
+          const exists = prev.find(a => a.availability_date === availability_date);
+          if (exists) {
+            return prev.map(a => a.availability_date === availability_date ? response.data.data : a);
+          } else {
+            return [...prev, response.data.data];
+          }
+        });
+        return { success: true, message: 'Availability updated successfully' };
+      } else {
+        return { success: false, message: response.message || 'Failed to update availability' };
+      }
+    } catch (err) {
+      console.error('Error updating availability:', err);
+      return { success: false, message: 'Failed to update availability' };
+    }
+  }, []);
+
+  // Fetch complete profile data (OPTIMIZED - single API call instead of 11)
   const fetchCompleteProfile = useCallback(async () => {
     try {
       setLoading(true);
@@ -856,6 +958,8 @@ export const useProfile = () => {
         setTravelCountries(data.travelCountries || []);
         setHighlights(data.highlights || []);
         setSkills(data.skills || []);
+        setCredits(data.credits || []);
+        setAvailability(data.availability || []);
       } else {
         setError(response.message || 'Failed to fetch profile');
       }
@@ -865,13 +969,13 @@ export const useProfile = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, []); // FIXED: Empty dependency array - function is stable
 
   // Initial load - NOW USING SINGLE AGGREGATED ENDPOINT
-  // Reduces 9 API calls to 1 call (89% reduction)
+  // Reduces 11 API calls to 1 call (91% reduction)
   useEffect(() => {
     fetchCompleteProfile();
-  }, [fetchCompleteProfile]);
+  }, []); // FIXED: Empty dependency array since fetchCompleteProfile is stable
 
   return {
     // Profile data
@@ -884,6 +988,8 @@ export const useProfile = () => {
     travelCountries,
     highlights,
     skills,
+    credits,
+    availability,
     loading,
     error,
     
@@ -932,6 +1038,13 @@ export const useProfile = () => {
     addSkill,
     updateSkill,
     deleteSkill,
+    
+    // Credits methods
+    fetchCredits,
+    
+    // Availability methods
+    fetchAvailability,
+    updateAvailability,
     
     // Upload methods
     uploadPhoto,

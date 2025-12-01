@@ -1,10 +1,10 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Calendar, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { getAccessToken } from "@/lib/supabase/client"
+import { useProfile } from "@/contexts/ProfileContext"
 import {
     Dialog,
     DialogContent,
@@ -27,12 +27,6 @@ const WEEKDAY_LABELS = ["M", "T", "W", "T", "F", "S", "S"]
 const WEEK_START_OPTIONS = { weekStartsOn: 1 as const }
 
 type AvailabilityStatus = 'available' | 'hold' | 'na'
-
-type AvailabilityData = {
-    id: string
-    availability_date: string
-    status: AvailabilityStatus
-}
 
 const buildMonthMatrix = (year: number, month: number) => {
     const firstDay = startOfMonth(new Date(year, month, 1))
@@ -60,54 +54,34 @@ type CalendarDialogProps = {
 
 export function CalendarDialog({ triggerClassName, triggerLabel }: CalendarDialogProps) {
     const [currentDate, setCurrentDate] = useState(new Date())
-    const [availabilityData, setAvailabilityData] = useState<Map<string, AvailabilityData>>(new Map())
-    const [isLoading, setIsLoading] = useState(false)
     const [selectedStatus, setSelectedStatus] = useState<AvailabilityStatus>('available')
     const [isUpdating, setIsUpdating] = useState(false)
+    const [isOpen, setIsOpen] = useState(false)
+    
+    // Use availability from ProfileContext
+    const { availability: contextAvailability, fetchAvailability, updateAvailability: contextUpdateAvailability } = useProfile();
+    
+    // Track if we've fetched for current month to prevent duplicate calls
+    const fetchedMonthRef = useRef<string>('');
+    const [isLoading, setIsLoading] = useState(false);
 
     const currentYear = currentDate.getFullYear()
     const currentMonth = currentDate.getMonth()
+    const monthStr = format(new Date(currentYear, currentMonth, 1), 'yyyy-MM');
+
+    // Convert array to map for easier lookup
+    const availabilityData = new Map(
+        contextAvailability.map(item => [item.availability_date, item])
+    );
 
     useEffect(() => {
-        fetchAvailability()
-    }, [currentYear, currentMonth])
-
-    const fetchAvailability = async () => {
-        setIsLoading(true)
-        try {
-            const token = await getAccessToken()
-            if (!token) {
-                toast.error('Not authenticated')
-                return
-            }
-
-            // Format month as YYYY-MM
-            const monthStr = format(new Date(currentYear, currentMonth, 1), 'yyyy-MM')
-            
-            const response = await fetch(`/api/availability?month=${monthStr}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            })
-
-            const data = await response.json()
-
-            if (data.success) {
-                const dataMap = new Map<string, AvailabilityData>()
-                data.data.forEach((item: AvailabilityData) => {
-                    dataMap.set(item.availability_date, item)
-                })
-                setAvailabilityData(dataMap)
-            } else {
-                toast.error('Failed to load availability')
-            }
-        } catch (error) {
-            console.error('Error fetching availability:', error)
-            toast.error('Failed to load availability')
-        } finally {
-            setIsLoading(false)
+        // Only fetch if dialog is open and we haven't fetched this month yet
+        if (isOpen && fetchedMonthRef.current !== monthStr) {
+            fetchedMonthRef.current = monthStr;
+            setIsLoading(true);
+            fetchAvailability(monthStr).finally(() => setIsLoading(false));
         }
-    }
+    }, [currentYear, currentMonth, isOpen, monthStr, fetchAvailability])
 
     const handleDateClick = async (date: Date) => {
         if (!isSameMonth(date, new Date(currentYear, currentMonth, 1))) {
@@ -118,36 +92,12 @@ export function CalendarDialog({ triggerClassName, triggerLabel }: CalendarDialo
         
         setIsUpdating(true)
         try {
-            const token = await getAccessToken()
-            if (!token) {
-                toast.error('Not authenticated')
-                return
-            }
-
-            const response = await fetch('/api/availability', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    availability_date: dateStr,
-                    status: selectedStatus
-                })
-            })
-
-            const data = await response.json()
-
-            if (data.success) {
-                // Update local state
-                setAvailabilityData(prev => {
-                    const newMap = new Map(prev)
-                    newMap.set(dateStr, data.data)
-                    return newMap
-                })
+            const result = await contextUpdateAvailability(dateStr, selectedStatus);
+            
+            if (result.success) {
                 toast.success(`Date marked as ${selectedStatus}`)
             } else {
-                toast.error(data.error || 'Failed to update availability')
+                toast.error(result.message || 'Failed to update availability')
             }
         } catch (error) {
             console.error('Error updating availability:', error)
@@ -195,7 +145,7 @@ export function CalendarDialog({ triggerClassName, triggerLabel }: CalendarDialo
     }
 
     return (
-        <Dialog>
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
                 <Button variant="outline" className={cn("border-none text-[#31A7AC]", triggerClassName)}>
                     {triggerLabel ?? (
