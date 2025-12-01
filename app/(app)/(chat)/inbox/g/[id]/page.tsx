@@ -270,19 +270,22 @@ export default function MessageInbox({ params }: { params: paramsType }) {
                         className="border-none shadow-none text-[15px] font-normal flex-1 focus-visible:ring-0 px-0 bg-transparent placeholder:text-gray-500"
                         value={message}
                         onChange={e => setMessage(e.target.value)}
-                        onKeyDown={e => { if (e.key === "Enter") handleSend(); }}
+                        onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }}}
+                        disabled={sending}
                     />
                     <div className="flex items-center gap-1 pr-1 shrink-0">
                         <Button
                             className="h-10 w-10 rounded-full flex items-center justify-center bg-[#FA596E] hover:bg-[#fa4059] transition-colors p-0"
                             type="button"
+                            disabled
                         >
                             <Paperclip className="text-white h-5 w-5" />
                         </Button>
                         <Button
-                            className="h-10 w-10 rounded-full flex items-center justify-center bg-[#FA596E] hover:bg-[#fa4059] transition-colors p-0"
+                            className="h-10 w-10 rounded-full flex items-center justify-center bg-[#FA596E] hover:bg-[#fa4059] transition-colors p-0 disabled:opacity-50"
                             type="button"
                             onClick={handleSend}
+                            disabled={sending || message.trim().length === 0}
                         >
                             <Send className="text-white h-5 w-5 ml-0.5" />
                         </Button>
