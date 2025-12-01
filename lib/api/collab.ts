@@ -63,7 +63,6 @@ export type PaginationResponse = {
 
 // Helper function to get auth token
 async function getAuthToken(): Promise<string | null> {
-  const supabase = createClient();
   const { data: { session } } = await supabase.auth.getSession();
   return session?.access_token || null;
 }
