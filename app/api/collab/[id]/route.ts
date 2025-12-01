@@ -33,6 +33,17 @@ export async function GET(
       );
     }
 
+    // Get author details from user_profiles
+    const { data: authorProfile } = await supabase
+      .from('user_profiles')
+      .select('user_id, first_name, surname, profile_photo_url, bio')
+      .eq('user_id', collab.user_id)
+      .single();
+
+    const authorName = authorProfile 
+      ? `${authorProfile.first_name || ''} ${authorProfile.surname || ''}`.trim() || 'Unknown'
+      : 'Unknown';
+
     // Get interest count
     const { count: interestCount } = await supabase
       .from('collab_interests')
@@ -59,26 +70,32 @@ export async function GET(
     if (isOwner) {
       const { data: collabData } = await supabase
         .from('collab_collaborators')
-        .select(`
-          id,
-          role,
-          department,
-          added_at,
-          user:user_id(
-            id,
-            raw_user_meta_data
-          )
-        `)
+        .select('id, role, department, added_at, user_id')
         .eq('collab_id', collabId);
 
-      collaborators = collabData?.map((c: any) => ({
-        id: c.id,
-        name: c.user?.raw_user_meta_data?.name || c.user?.raw_user_meta_data?.full_name || 'Unknown',
-        avatar: c.user?.raw_user_meta_data?.avatar_url || c.user?.raw_user_meta_data?.profile_photo_url || '/placeholder-avatar.png',
-        role: c.role,
-        department: c.department,
-        added_at: c.added_at
-      })) || [];
+      if (collabData && collabData.length > 0) {
+        const collaboratorUserIds = collabData.map((c: any) => c.user_id);
+        const { data: collaboratorProfiles } = await supabase
+          .from('user_profiles')
+          .select('user_id, first_name, surname, profile_photo_url')
+          .in('user_id', collaboratorUserIds);
+
+        collaborators = collabData.map((c: any) => {
+          const profile = collaboratorProfiles?.find((p: any) => p.user_id === c.user_id);
+          const name = profile 
+            ? `${profile.first_name || ''} ${profile.surname || ''}`.trim() || 'Unknown'
+            : 'Unknown';
+          
+          return {
+            id: c.id,
+            name,
+            avatar: profile?.profile_photo_url || '/placeholder-avatar.png',
+            role: c.role,
+            department: c.department,
+            added_at: c.added_at
+          };
+        });
+      }
     }
 
     const response = {
@@ -91,10 +108,10 @@ export async function GET(
       status: collab.status,
       interests: interestCount || 0,
       author: {
-        id: collab.author?.id,
-        name: collab.author?.raw_user_meta_data?.name || collab.author?.raw_user_meta_data?.full_name || 'Unknown',
-        avatar: collab.author?.raw_user_meta_data?.avatar_url || collab.author?.raw_user_meta_data?.profile_photo_url || '/placeholder-avatar.png',
-        bio: collab.author?.raw_user_meta_data?.bio || ''
+        id: collab.user_id,
+        name: authorName,
+        avatar: authorProfile?.profile_photo_url || '/placeholder-avatar.png',
+        bio: authorProfile?.bio || ''
       },
       ...(user && { userHasInterest, isOwner }),
       ...(isOwner && { collaborators }),
