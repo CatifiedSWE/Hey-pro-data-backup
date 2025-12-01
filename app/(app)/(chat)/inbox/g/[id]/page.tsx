@@ -1,67 +1,148 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, EllipsisVertical, Paperclip, Send } from "lucide-react";
-import { getGroupChat, getGroupChatMessages, chatData } from "@/data/chatMessage";
 import Image from "next/image";
 import Link from "next/link";
+import { getGroupMessages, sendGroupMessage, type Message } from "@/lib/api/chat";
+import { useAuth } from "@/contexts/AuthContext";
 
 type paramsType = { id: string };
 
 export default function MessageInbox({ params }: { params: paramsType }) {
     const { id } = params;
-
-    // Refs for auto-scrolling
+    const { user } = useAuth();
+    
+    // Refs
     const scrollRef = useRef<HTMLDivElement>(null);
+    const isInitialMount = useRef(true);
+    const lastMessageCount = useRef(0);
 
-    // Simulate current user
-    const currentUser = {
-        messageId: "msg-1",
-        name: "Anand Kumar",
-        image: "/image (3).png",
-        state: "online",
-    };
-
-    // Get group data and messages
-    const group = getGroupChat(id);
-    const initialMessages = group ? getGroupChatMessages(group.messageId) : [];
-
+    // State
     const [message, setMessage] = useState("");
-    const [messages, setMessages] = useState(initialMessages);
+    const [messages, setMessages] = useState<Message[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [sending, setSending] = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(false);
+    const [groupInfo, setGroupInfo] = useState<any>(null);
 
-    // Auto-scroll to bottom when messages change
-    useEffect(() => {
-        if (scrollRef.current) {
-            scrollRef.current.scrollTo({
-                top: scrollRef.current.scrollHeight,
-                behavior: "smooth",
-            });
+    // Fetch messages
+    const fetchMessages = useCallback(async (pageNum: number = 1, append: boolean = false) => {
+        try {
+            if (pageNum === 1) {
+                setLoading(true);
+            } else {
+                setLoadingMore(true);
+            }
+            setError(null);
+
+            const data = await getGroupMessages(id, pageNum, 50);
+            
+            if (append) {
+                // Prepend older messages for infinite scroll
+                setMessages(prev => [...data.messages, ...prev]);
+            } else {
+                setMessages(data.messages);
+            }
+            
+            setHasMore(data.pagination.hasMore);
+            setPage(pageNum);
+        } catch (err: any) {
+            console.error('Error fetching messages:', err);
+            setError('Failed to load messages');
+        } finally {
+            setLoading(false);
+            setLoadingMore(false);
         }
+    }, [id]);
+
+    // Initial fetch
+    useEffect(() => {
+        fetchMessages(1, false);
+    }, [fetchMessages]);
+
+    // Poll for new messages every 3 seconds
+    useEffect(() => {
+        const interval = setInterval(async () => {
+            try {
+                const data = await getGroupMessages(id, 1, 50);
+                if (data.messages.length > lastMessageCount.current) {
+                    setMessages(data.messages);
+                    lastMessageCount.current = data.messages.length;
+                }
+            } catch (err) {
+                console.error('Error polling messages:', err);
+            }
+        }, 3000);
+
+        return () => clearInterval(interval);
+    }, [id]);
+
+    // Update last message count
+    useEffect(() => {
+        lastMessageCount.current = messages.length;
     }, [messages]);
 
-    const handleSend = () => {
-        if (message.trim().length === 0 || !group) return;
-        const newMsg = {
-            id: `messageId-${messages.length + 1}`,
-            groupId: group.messageId,
-            senderId: currentUser.messageId,
-            timestamp: new Date().toISOString(),
-            content: message,
-            status: "sending",
-            attachments: null,
-        };
-        setMessages([...messages, newMsg]);
-        setMessage("");
+    // Auto-scroll to bottom on new messages (but not when loading more)
+    useEffect(() => {
+        if (scrollRef.current && !loadingMore) {
+            if (isInitialMount.current || messages.length > lastMessageCount.current) {
+                scrollRef.current.scrollTo({
+                    top: scrollRef.current.scrollHeight,
+                    behavior: isInitialMount.current ? "auto" : "smooth",
+                });
+                isInitialMount.current = false;
+            }
+        }
+    }, [messages, loadingMore]);
 
-        setTimeout(() => {
-            setMessages((msgs) =>
-                msgs.map((msg) =>
-                    msg.id === newMsg.id ? { ...msg, status: "sent" } : msg
-                )
+    // Infinite scroll - load older messages
+    const handleScroll = useCallback(() => {
+        if (scrollRef.current && hasMore && !loadingMore) {
+            const { scrollTop } = scrollRef.current;
+            // Load more when scrolled near top
+            if (scrollTop < 100) {
+                fetchMessages(page + 1, true);
+            }
+        }
+    }, [hasMore, loadingMore, page, fetchMessages]);
+
+    const handleSend = async () => {
+        if (message.trim().length === 0 || sending) return;
+        
+        const optimisticMessage: Message = {
+            id: `temp-${Date.now()}`,
+            group_id: id,
+            sender_id: user?.id || '',
+            content: message.trim(),
+            status: 'sent',
+            created_at: new Date().toISOString(),
+        };
+
+        // Optimistic update
+        setMessages(prev => [...prev, optimisticMessage]);
+        setMessage("");
+        setSending(true);
+
+        try {
+            const sentMessage = await sendGroupMessage(id, message.trim());
+            // Replace optimistic message with real one
+            setMessages(prev => 
+                prev.map(msg => msg.id === optimisticMessage.id ? sentMessage : msg)
             );
-        }, 800);
+        } catch (err: any) {
+            console.error('Error sending message:', err);
+            // Remove optimistic message on error
+            setMessages(prev => prev.filter(msg => msg.id !== optimisticMessage.id));
+            alert('Failed to send message. Please try again.');
+        } finally {
+            setSending(false);
+        }
     };
 
     return (
