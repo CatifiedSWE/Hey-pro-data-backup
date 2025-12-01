@@ -1,6 +1,7 @@
 "use client";
 
 import { CalendarDays, Check, Mail, MessageCircle, MessageCircleMore, Plus, Send, X } from "lucide-react";
+import { useState, useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -9,12 +10,37 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { gigsData } from "@/data/gigs";
+import apiCalling from "@/lib/apiCalling";
+import { toast } from "sonner";
 
-import { sampleApplicants } from "./sample-data";
 import { SeeAllReferralsDialog } from "./see-all-referrals";
 import Image from "next/image";
 import { SendRecommendationDialog } from "../recommend-gigs";
+
+type Applicant = {
+    id: string;
+    gigId: string;
+    status: string;
+    applicant: {
+        id: string;
+        name: string;
+        profilePhoto: string | null;
+        location: string;
+        email: string | null;
+        phone: string | null;
+        skills: Array<{ name: string; level: string }>;
+        recentExperience: any[];
+    };
+};
+
+type Gig = {
+    id: string;
+    title: string;
+    dateWindows: Array<{
+        label: string;
+        range: string;
+    }>;
+};
 
 type ApplicationTabProps = {
     selectedGigIds: string[];
@@ -23,9 +49,95 @@ type ApplicationTabProps = {
 };
 
 export function ApplicationTab({ selectedGigIds, actionIndicators, onActionChange }: ApplicationTabProps) {
-    const selectedGigs = gigsData.filter((gig) => selectedGigIds.includes(gig.id));
+    const [selectedGigs, setSelectedGigs] = useState<Record<string, { gig: Gig; applications: Applicant[] }>>({});
+    const [loading, setLoading] = useState(false);
 
-    if (!selectedGigs.length) {
+    useEffect(() => {
+        const fetchApplications = async () => {
+            if (selectedGigIds.length === 0) {
+                setSelectedGigs({});
+                return;
+            }
+
+            try {
+                setLoading(true);
+                const results: Record<string, { gig: Gig; applications: Applicant[] }> = {};
+
+                // Fetch applications for each selected gig
+                await Promise.all(
+                    selectedGigIds.map(async (gigId) => {
+                        // Fetch gig details
+                        const gigResponse = await apiCalling({
+                            method: 'get',
+                            route: `/gigs/${gigId}`,
+                        });
+
+                        // Fetch applications
+                        const appsResponse = await apiCalling({
+                            method: 'get',
+                            route: `/gigs/${gigId}/applications`,
+                        });
+
+                        if (gigResponse.status && appsResponse.status) {
+                            results[gigId] = {
+                                gig: {
+                                    id: gigResponse.data.data.id,
+                                    title: gigResponse.data.data.title,
+                                    dateWindows: gigResponse.data.data.dateWindows || [],
+                                },
+                                applications: appsResponse.data.data.applications || [],
+                            };
+                        }
+                    })
+                );
+
+                setSelectedGigs(results);
+            } catch (error) {
+                console.error('Error fetching applications:', error);
+                toast.error('Failed to load applications');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchApplications();
+    }, [selectedGigIds]);
+
+    const handleStatusChange = async (applicationId: string, gigId: string, newStatus: string) => {
+        try {
+            const response = await apiCalling({
+                method: 'patch',
+                route: `/gigs/${gigId}/applications/${applicationId}/status`,
+                data: { status: newStatus },
+            });
+
+            if (response.status) {
+                toast.success(`Application status updated to ${newStatus}`);
+                // Refresh applications
+                const appsResponse = await apiCalling({
+                    method: 'get',
+                    route: `/gigs/${gigId}/applications`,
+                });
+
+                if (appsResponse.status) {
+                    setSelectedGigs(prev => ({
+                        ...prev,
+                        [gigId]: {
+                            ...prev[gigId],
+                            applications: appsResponse.data.data.applications || [],
+                        },
+                    }));
+                }
+            } else {
+                toast.error('Failed to update application status');
+            }
+        } catch (error) {
+            console.error('Error updating status:', error);
+            toast.error('Failed to update status');
+        }
+    };
+
+    if (selectedGigIds.length === 0) {
         return (
             <Card className="bg-transparent border-none">
                 <CardHeader>
@@ -33,6 +145,18 @@ export function ApplicationTab({ selectedGigIds, actionIndicators, onActionChang
                     <CardDescription>
                         Choose at least one gig in the Gigs tab to see its applicants here.
                     </CardDescription>
+                </CardHeader>
+            </Card>
+        );
+    }
+
+    if (loading) {
+        return (
+            <Card className="bg-transparent border-none">
+                <CardHeader>
+                    <div className="flex justify-center py-10">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FA6E80]"></div>
+                    </div>
                 </CardHeader>
             </Card>
         );
@@ -46,10 +170,9 @@ export function ApplicationTab({ selectedGigIds, actionIndicators, onActionChang
                     <SendRecommendationDialog className="h-[30px]" />
                 </div>
             </div>
-            {selectedGigs.map((gig) => (
-                <section key={gig.id} className="space-y-4 ">
+            {Object.entries(selectedGigs).map(([gigId, { gig, applications }]) => (
+                <section key={gigId} className="space-y-4 ">
                     <header className="space-y-3">
-
                         <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600 no-scrollbar overflow-x-auto">
                             <p className="text-lg font-semibold text-gray-900">{gig.title}</p>
                             <span className="flex items-center gap-1 justify-center text-[#000000]">
@@ -59,7 +182,6 @@ export function ApplicationTab({ selectedGigIds, actionIndicators, onActionChang
                                         <span className="font-[500] text-[14px]">
                                             <span>{window.label.split(" ")[1]}</span>
                                             <span className="text-[#FA6E80] text-[14px]"> {window.label.split(" ")[0]}</span>
-
                                         </span>
                                         <span className="mx-1">|</span>
                                         {window.range}
@@ -70,106 +192,96 @@ export function ApplicationTab({ selectedGigIds, actionIndicators, onActionChang
                         </div>
                     </header>
 
-                    <div className="overflow-x-auto no-scrollbar">
-                        <table className="min-w-[1057px] border-separate border-spacing-x-[2px] border-spacing-y-0 text-sm">
-                            <thead className="bg-[#FFFFFF] border text-left h-[55px]">
-                                <tr className="space-x-1">
-                                    <th className="border-1 border-[#DEDEDE] px-4 py-3 font-[500] text-[#000000]">Name</th>
-                                    <th className="border-1 border-[#DEDEDE] px-4 py-3 font-[500] text-[#000000]">City</th>
-                                    <th className="border-1 border-[#DEDEDE] px-4 py-3 font-[500] text-[#000000]">Skill Set</th>
-                                    <th className="border-1 border-[#DEDEDE] px-4 py-3 font-[500] text-[#000000]">Credits</th>
-                                    <th className="border-1 border-[#DEDEDE] px-4 py-3 font-[500] text-[#000000]">Referrals</th>
-                                    <th className="border-1 border-[#DEDEDE] px-4 py-3 font-[500] text-[#000000]">Chat</th>
-                                    <th className="border-1 border-[#DEDEDE] px-4 py-3 font-[500] text-[#000000]">Release</th>
-                                    <th className="border-1 border-[#DEDEDE] px-4 py-3 font-[500] text-[#000000]">Shortlist</th>
-                                    <th className="border-1 border-[#DEDEDE] px-4 py-3 font-[500] text-[#000000]">Confirm</th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-transparent">
-                                {sampleApplicants.map((person) => {
-                                    const rowKey = `${gig.id}-${person.id}`;
-                                    const rowState = actionIndicators[rowKey] ?? {};
-                                    const showReleaseEmail = Boolean(rowState.release);
-                                    const showShortlistEmail = Boolean(rowState.shortlist);
-                                    const showConfirmEmail = Boolean(rowState.confirm);
-
-                                    return (
-                                        <tr key={rowKey} className="text-gray-800">
+                    {applications.length === 0 ? (
+                        <Card className="bg-white">
+                            <CardHeader>
+                                <CardDescription>No applications yet for this gig.</CardDescription>
+                            </CardHeader>
+                        </Card>
+                    ) : (
+                        <div className="overflow-x-auto no-scrollbar">
+                            <table className="min-w-[1057px] border-separate border-spacing-x-[2px] border-spacing-y-0 text-sm">
+                                <thead className="bg-[#FFFFFF] border text-left h-[55px]">
+                                    <tr className="space-x-1">
+                                        <th className="border-1 border-[#DEDEDE] px-4 py-3 font-[500] text-[#000000]">Name</th>
+                                        <th className="border-1 border-[#DEDEDE] px-4 py-3 font-[500] text-[#000000]">City</th>
+                                        <th className="border-1 border-[#DEDEDE] px-4 py-3 font-[500] text-[#000000]">Skill Set</th>
+                                        <th className="border-1 border-[#DEDEDE] px-4 py-3 font-[500] text-[#000000]">Status</th>
+                                        <th className="border-1 border-[#DEDEDE] px-4 py-3 font-[500] text-[#000000]">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-transparent">
+                                    {applications.map((app) => (
+                                        <tr key={app.id} className="text-gray-800">
                                             <td className="h-[41px] border border-[#DEDEDE] w-[205px] px-4 py-3">
                                                 <div className="flex items-center gap-3">
-                                                    <Image src={person.avatar} alt={person.name} width={30} height={30} className="rounded-full" />
+                                                    {app.applicant.profilePhoto && (
+                                                        <Image 
+                                                            src={app.applicant.profilePhoto} 
+                                                            alt={app.applicant.name} 
+                                                            width={30} 
+                                                            height={30} 
+                                                            className="rounded-full" 
+                                                        />
+                                                    )}
                                                     <div>
-                                                        <p className="font-[400] text-gray-900">{person.name}</p>
+                                                        <p className="font-[400] text-gray-900">{app.applicant.name}</p>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="h-[41px] border border-[#DEDEDE] w-[100px] px-4 py-3 text-[#27B4BC]">{person.city}</td>
-                                            <td className="h-[41px] border border-[#DEDEDE] w-[204px] px-4 py-3">{person.skills.join(" | ")}</td>
-                                            <td className="h-[41px] border border-[#DEDEDE] w-[105px] px-4 py-3 text-[#27B4BC]">{person.credits}</td>
-                                            <td className="h-[41px]  border border-[#DEDEDE] w-[115px] px-4 py-3">
-                                                <div className="flex -space-x-2">
-                                                    <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-[#27B4BC]/20 text-xs font-semibold text-[#27B4BC]">
-                                                        {person.referrals}
-                                                    </div>
-                                                    <div className="h-8 w-8 rounded-full border-2 border-white bg-[#DEDEDE]" />
+                                            <td className="h-[41px] border border-[#DEDEDE] w-[100px] px-4 py-3 text-[#27B4BC]">
+                                                {app.applicant.location}
+                                            </td>
+                                            <td className="h-[41px] border border-[#DEDEDE] w-[204px] px-4 py-3">
+                                                {app.applicant.skills.slice(0, 2).map(s => s.name).join(' | ')}
+                                            </td>
+                                            <td className="h-[41px] border border-[#DEDEDE] w-[100px] px-4 py-3">
+                                                <span className={`px-2 py-1 rounded text-xs font-medium ${
+                                                    app.status === 'confirmed' ? 'bg-green-100 text-green-700' :
+                                                    app.status === 'shortlisted' ? 'bg-blue-100 text-blue-700' :
+                                                    app.status === 'released' ? 'bg-red-100 text-red-700' :
+                                                    'bg-gray-100 text-gray-700'
+                                                }`}>
+                                                    {app.status}
+                                                </span>
+                                            </td>
+                                            <td className="h-[41px] border border-[#DEDEDE] px-4 py-3">
+                                                <div className="flex gap-2">
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        onClick={() => handleStatusChange(app.id, gigId, 'shortlisted')}
+                                                        disabled={app.status === 'shortlisted'}
+                                                        className="text-xs"
+                                                    >
+                                                        Shortlist
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        onClick={() => handleStatusChange(app.id, gigId, 'confirmed')}
+                                                        disabled={app.status === 'confirmed'}
+                                                        className="text-xs"
+                                                    >
+                                                        Confirm
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        onClick={() => handleStatusChange(app.id, gigId, 'released')}
+                                                        disabled={app.status === 'released'}
+                                                        className="text-xs"
+                                                    >
+                                                        Release
+                                                    </Button>
                                                 </div>
-                                            </td>
-                                            <td className="h-[41px] border border-[#DEDEDE] w-[80px] px-4 py-3 text-center relative">
-                                                <span className="inline-flex h-8 w-8 items-center justify-center relative">
-                                                    <MessageCircleMore className="h-5 w-5" />
-                                                    {/* Small red dot at the bottom left */}
-                                                    <span
-                                                        className="absolute bottom-2 right-2 h-1 w-1 rounded-full bg-[#FA596E]"
-                                                        aria-label="Unread message indicator"
-                                                    />
-                                                </span>
-                                            </td>
-                                            <td className={`h-[50px] border text-center   border-[#DEDEDE] ${showReleaseEmail ? 'bg-[#FA596E]' : 'bg-[#ffffff]'}`}
-                                                onClick={() => onActionChange(rowKey, "release")}
-                                            >
-                                                <span className="inline-flex h-8 w-8 items-center justify-center">{showReleaseEmail ? (
-                                                    <Mail className="h-5 w-5 text-white" />
-                                                ) : (
-                                                    <X className="h-5 w-5 text-[#FA6E80]" />
-                                                )}</span>
-
-
-                                            </td>
-                                            <td className={`h-[41px] border border-[#DEDEDE] w-[80px] bg-[#27B4BC] px-4 py-3 text-center ${showShortlistEmail ? 'bg-[#31A7AC]' : 'bg-[#ffffff]'}`}
-                                                onClick={() => onActionChange(rowKey, "shortlist")}
-                                            >
-                                                <span
-                                                    className={`inline-flex h-8 w-8 items-center justify-center rounded-full text-[#ffffff]`}
-                                                    aria-label="Shortlist via email"
-
-                                                >
-                                                    {showShortlistEmail ? (
-                                                        <Mail className="h-5 w-5 text-white" />
-                                                    ) : (
-                                                        <Plus className="h-6 w-6 text-[#31A7AC]" />
-                                                    )}
-                                                </span>
-                                            </td>
-                                            <td className={`h-[41px] border border-[#DEDEDE] w-[80px] bg-[#27B4BC] px-4 py-3 text-center ${showConfirmEmail ? 'bg-[#31A7AC]' : 'bg-[#ffffff]'}`}
-                                                onClick={() => onActionChange(rowKey, "confirm")}
-                                            >
-                                                <span
-                                                    className="inline-flex h-8 w-8 items-center justify-center rounded-full  text-white"
-                                                    aria-label="Confirm via email"
-                                                >
-                                                    {showConfirmEmail ? (
-                                                        <Mail className="h-5 w-5 text-white" />
-                                                    ) : (
-                                                        <Check className="h-6 w-6 text-[#27B4BC]" />
-                                                    )}
-                                                </span>
                                             </td>
                                         </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                    </div>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
                 </section>
             ))}
         </div>
