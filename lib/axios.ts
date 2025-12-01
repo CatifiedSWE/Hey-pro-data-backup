@@ -2,7 +2,7 @@ import axios, { isAxiosError } from "axios";
 import { getAccessToken } from "./supabase/client";
 
 const axiosInstance = axios.create({
-  baseURL: `${process.env.NEXT_PUBLIC_BASE_URL}/api`,
+  baseURL: typeof window !== 'undefined' ? '/api' : `${process.env.NEXT_PUBLIC_BASE_URL || ''}/api`,
   timeout: 30000, // Increased to 30 seconds for better reliability
   headers: { "Content-Type": "application/json" },
 });
