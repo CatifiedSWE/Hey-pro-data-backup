@@ -321,6 +321,7 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                                     <div>
                                         <div className="p-[2px] rounded-[12.5px] bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC]">
                                             <Button
+                                                onClick={() => setIsCreateSlateOpen(true)}
                                                 className="w-full bg-white hover:bg-white rounded-[10px] text-black"
                                                 style={{
                                                     borderRadius: "10px",
