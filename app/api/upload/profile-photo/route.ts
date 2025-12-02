@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient, validateAuthToken, successResponse, errorResponse } from '@/lib/supabase/server';
+import { calculateAndUpdateProfileCompletion } from '@/lib/profile-completion';
 
 /**
  * POST /api/upload/profile-photo
@@ -109,6 +110,9 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    // Recalculate profile completion percentage
+    await calculateAndUpdateProfileCompletion(user.id);
 
     return NextResponse.json(
       successResponse(

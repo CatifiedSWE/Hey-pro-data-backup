@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validateAuthToken, successResponse, errorResponse } from '@/lib/supabase/server';
 import { createClient } from '@supabase/supabase-js';
+import { calculateAndUpdateProfileCompletion } from '@/lib/profile-completion';
 
 export const dynamic = 'force-dynamic';
 
@@ -250,6 +251,16 @@ export async function PATCH(request: NextRequest) {
 
       result = data;
     }
+
+    // Recalculate profile completion percentage
+    const completion = await calculateAndUpdateProfileCompletion(user.id);
+    
+    // Merge completion data into result
+    result = {
+      ...result,
+      profile_completion_percentage: completion.completionPercentage,
+      is_profile_complete: completion.isComplete
+    };
 
     return NextResponse.json(
       successResponse(result, 'Profile saved successfully'),

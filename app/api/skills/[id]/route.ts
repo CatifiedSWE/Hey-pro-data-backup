@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient, validateAuthToken, successResponse, errorResponse } from '@/lib/supabase/server';
+import { calculateAndUpdateProfileCompletion } from '@/lib/profile-completion';
 
 /**
  * PATCH /api/skills/[id]
@@ -61,6 +62,9 @@ export async function PATCH(
       );
     }
 
+    // Recalculate profile completion percentage
+    await calculateAndUpdateProfileCompletion(user.id);
+
     return NextResponse.json(
       successResponse(skill, 'Skill updated successfully'),
       { status: 200 }
@@ -119,6 +123,9 @@ export async function DELETE(
         { status: 404 }
       );
     }
+
+    // Recalculate profile completion percentage
+    await calculateAndUpdateProfileCompletion(user.id);
 
     return NextResponse.json(
       successResponse(null, 'Skill deleted successfully'),
