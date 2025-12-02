@@ -208,14 +208,30 @@ export default function ManageCollab() {
                                                 </div>
                                                 
                                                 <div className="flex items-center gap-3">
-                                                     <div className="flex items-center gap-4 text-gray-400">
-                                                        <Heart className="h-5 w-5" />
-                                                        <Share2 className="h-5 w-5" />
-                                                        <MessageSquare className="h-5 w-5" />
-                                                    </div>
-                                                    <button className="rounded-full border border-[#2FD3D8] bg-white px-6 py-2 text-sm font-semibold text-[#2FD3D8]">
-                                                        I'm interested
+                                                    <button 
+                                                        onClick={() => handleSaveToggle(post.id, post.userHasSaved || false)}
+                                                        disabled={saveLoading[post.id]}
+                                                        className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-50 text-[#FA6E80] hover:bg-[#FA6E80]/10 transition-colors disabled:opacity-50 border border-gray-200"
+                                                        title={post.userHasSaved ? "Unsave" : "Save"}
+                                                    >
+                                                        {saveLoading[post.id] ? (
+                                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                                        ) : (
+                                                            <Heart className={`h-4 w-4 ${post.userHasSaved ? 'fill-current' : ''}`} />
+                                                        )}
                                                     </button>
+                                                    <button className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-50 text-[#31A7AC] hover:bg-[#31A7AC]/10 transition-colors border border-gray-200">
+                                                        <Share2 className="h-4 w-4" />
+                                                    </button>
+                                                    <button className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors border border-gray-200">
+                                                        <MessageSquare className="h-4 w-4" />
+                                                    </button>
+                                                    <InterestButton
+                                                        collabId={post.id}
+                                                        userHasInterest={post.userHasInterest || false}
+                                                        onToggle={() => handleInterestToggle(post.id, post.userHasInterest || false)}
+                                                        isLoading={interestLoading[post.id] || false}
+                                                    />
                                                 </div>
                                             </div>
                                         </div>
