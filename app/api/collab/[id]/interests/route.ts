@@ -71,21 +71,27 @@ export async function GET(
       const userIds = interests.map((i: any) => i.user_id);
       const { data: userProfiles } = await supabase
         .from('user_profiles')
-        .select('user_id, first_name, surname, profile_photo_url, bio')
+        .select('user_id, first_name, surname, alias_first_name, alias_surname, profile_photo_url, bio')
         .in('user_id', userIds);
 
       formattedInterests = interests.map((interest: any) => {
         const profile = userProfiles?.find((p: any) => p.user_id === interest.user_id);
-        const name = profile 
-          ? `${profile.first_name || ''} ${profile.surname || ''}`.trim() || 'Unknown'
-          : 'Unknown';
+        // Use alias name if available, otherwise use regular name
+        const firstName = profile?.alias_first_name || profile?.first_name || '';
+        const surname = profile?.alias_surname || profile?.surname || '';
+        const name = `${firstName} ${surname}`.trim() || 'Unknown';
+        
+        // Ensure profile photo URL is valid and not empty
+        const avatar = profile?.profile_photo_url && profile.profile_photo_url.trim() !== '' 
+          ? profile.profile_photo_url 
+          : '/placeholder-avatar.png';
 
         return {
           id: interest.id,
           user: {
             id: interest.user_id,
             name,
-            avatar: profile?.profile_photo_url || '/placeholder-avatar.png',
+            avatar,
             bio: profile?.bio || ''
           },
           created_at: interest.created_at
