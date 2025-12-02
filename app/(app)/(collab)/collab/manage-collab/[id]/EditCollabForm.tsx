@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { MessageCircle, Plus, RefreshCw, Save, X, Loader2, Trash2 } from "lucide-react";
+import { MessageCircle, Plus, RefreshCw, Save, X, Loader2 } from "lucide-react";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -13,7 +13,7 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { Avatar } from "../../../components/Avatar";
-import { updateCollab, deleteCollab, uploadCollabCover, closeCollab, type CollabDetail } from "@/lib/api/collab";
+import { updateCollab, uploadCollabCover, closeCollab, type CollabDetail } from "@/lib/api/collab";
 
 const inputBase = "w-full rounded-xl border border-[#E4E7EC] bg-white px-4 py-3.5 text-sm text-gray-900 placeholder:text-gray-500 focus:border-[#2FD3D8] focus:outline-none focus:ring-1 focus:ring-[#2FD3D8] transition-colors";
 
@@ -40,7 +40,6 @@ export function EditCollabForm({ collab }: EditCollabFormProps) {
     const [tags, setTags] = useState<string[]>(collab.tags);
     const [actionMessage, setActionMessage] = useState<string | null>(null);
     const [submitting, setSubmitting] = useState(false);
-    const [deleting, setDeleting] = useState(false);
     const [closing, setClosing] = useState(false);
 
     const collaborators = collab.collaborators || [];
@@ -148,23 +147,6 @@ export function EditCollabForm({ collab }: EditCollabFormProps) {
         setTagInput("");
         setActionMessage("Form reset");
         setTimeout(() => setActionMessage(null), 1500);
-    };
-
-    const handleDelete = async () => {
-        if (!confirm('Are you sure you want to delete this collab? This action cannot be undone.')) {
-            return;
-        }
-
-        setDeleting(true);
-        try {
-            await deleteCollab(collab.id);
-            alert('Collab deleted successfully!');
-            router.push('/collab/manage-collab');
-        } catch (error) {
-            console.error('Failed to delete collab:', error);
-            alert(error instanceof Error ? error.message : 'Failed to delete collab. Please try again.');
-            setDeleting(false);
-        }
     };
 
     const handleClose = async () => {
@@ -315,16 +297,6 @@ export function EditCollabForm({ collab }: EditCollabFormProps) {
                                 >
                                     {closing && <Loader2 className="h-4 w-4 animate-spin" />}
                                     {collab.status === 'closed' ? 'Closed' : 'Close Collab'}
-                                </button>
-                                
-                                <button 
-                                    onClick={handleDelete}
-                                    disabled={deleting}
-                                    className="rounded-xl border border-red-200 bg-red-50 px-6 py-2.5 text-sm font-semibold text-red-700 transition-colors hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                                >
-                                    {deleting && <Loader2 className="h-4 w-4 animate-spin" />}
-                                    {!deleting && <Trash2 className="h-4 w-4" />}
-                                    {deleting ? 'Deleting...' : 'Delete'}
                                 </button>
                             </div>
                         </div>
