@@ -19,6 +19,7 @@ export type CollabPost = {
   created_at: string;
   updated_at: string;
   userHasInterest?: boolean;
+  userHasSaved?: boolean;
   isOwner?: boolean;
 };
 
