@@ -2,53 +2,67 @@
 
 import { useState, useEffect, useRef } from 'react';
 
-interface LocationSuggestion {
-  display_name: string;
-  lat: string;
-  lon: string;
-  type: string;
-  address: {
-    country?: string;
-    city?: string;
-    town?: string;
-    village?: string;
-    state?: string;
-  };
-}
-
 interface LocationAutocompleteProps {
   value: string;
   onChange: (value: string) => void;
   placeholder: string;
-  type?: 'country' | 'city' | 'any';
+  type: 'country' | 'city';
   className?: string;
   disabled?: boolean;
 }
 
 /**
  * LocationAutocomplete Component
- * Uses OpenStreetMap's Nominatim API (free, open-source, global coverage)
- * 
- * Features:
- * - Real-time location search
- * - Debounced API calls
- * - Dropdown suggestions
- * - Type-specific filtering (country/city)
+ * Efficient approach:
+ * - Countries: Static list with search (instant, no API calls)
+ * - Cities: GeoNames API (free, fast, reliable)
  */
 export default function LocationAutocomplete({
   value,
   onChange,
   placeholder,
-  type = 'any',
+  type,
   className = '',
   disabled = false
 }: LocationAutocompleteProps) {
-  const [suggestions, setSuggestions] = useState<LocationSuggestion[]>([]);
+  const [suggestions, setSuggestions] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+
+  // Static country list (195 countries)
+  const COUNTRIES = [
+    'Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola', 'Antigua and Barbuda',
+    'Argentina', 'Armenia', 'Australia', 'Austria', 'Azerbaijan', 'Bahamas', 'Bahrain',
+    'Bangladesh', 'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bhutan', 'Bolivia',
+    'Bosnia and Herzegovina', 'Botswana', 'Brazil', 'Brunei', 'Bulgaria', 'Burkina Faso',
+    'Burundi', 'Cabo Verde', 'Cambodia', 'Cameroon', 'Canada', 'Central African Republic',
+    'Chad', 'Chile', 'China', 'Colombia', 'Comoros', 'Congo', 'Costa Rica', 'Croatia',
+    'Cuba', 'Cyprus', 'Czech Republic', 'Denmark', 'Djibouti', 'Dominica', 'Dominican Republic',
+    'East Timor', 'Ecuador', 'Egypt', 'El Salvador', 'Equatorial Guinea', 'Eritrea', 'Estonia',
+    'Eswatini', 'Ethiopia', 'Fiji', 'Finland', 'France', 'Gabon', 'Gambia', 'Georgia',
+    'Germany', 'Ghana', 'Greece', 'Grenada', 'Guatemala', 'Guinea', 'Guinea-Bissau', 'Guyana',
+    'Haiti', 'Honduras', 'Hungary', 'Iceland', 'India', 'Indonesia', 'Iran', 'Iraq', 'Ireland',
+    'Israel', 'Italy', 'Ivory Coast', 'Jamaica', 'Japan', 'Jordan', 'Kazakhstan', 'Kenya',
+    'Kiribati', 'Kosovo', 'Kuwait', 'Kyrgyzstan', 'Laos', 'Latvia', 'Lebanon', 'Lesotho',
+    'Liberia', 'Libya', 'Liechtenstein', 'Lithuania', 'Luxembourg', 'Madagascar', 'Malawi',
+    'Malaysia', 'Maldives', 'Mali', 'Malta', 'Marshall Islands', 'Mauritania', 'Mauritius',
+    'Mexico', 'Micronesia', 'Moldova', 'Monaco', 'Mongolia', 'Montenegro', 'Morocco',
+    'Mozambique', 'Myanmar', 'Namibia', 'Nauru', 'Nepal', 'Netherlands', 'New Zealand',
+    'Nicaragua', 'Niger', 'Nigeria', 'North Korea', 'North Macedonia', 'Norway', 'Oman',
+    'Pakistan', 'Palau', 'Palestine', 'Panama', 'Papua New Guinea', 'Paraguay', 'Peru',
+    'Philippines', 'Poland', 'Portugal', 'Qatar', 'Romania', 'Russia', 'Rwanda',
+    'Saint Kitts and Nevis', 'Saint Lucia', 'Saint Vincent and the Grenadines', 'Samoa',
+    'San Marino', 'Sao Tome and Principe', 'Saudi Arabia', 'Senegal', 'Serbia', 'Seychelles',
+    'Sierra Leone', 'Singapore', 'Slovakia', 'Slovenia', 'Solomon Islands', 'Somalia',
+    'South Africa', 'South Korea', 'South Sudan', 'Spain', 'Sri Lanka', 'Sudan', 'Suriname',
+    'Sweden', 'Switzerland', 'Syria', 'Taiwan', 'Tajikistan', 'Tanzania', 'Thailand', 'Togo',
+    'Tonga', 'Trinidad and Tobago', 'Tunisia', 'Turkey', 'Turkmenistan', 'Tuvalu', 'Uganda',
+    'Ukraine', 'United Arab Emirates', 'United Kingdom', 'United States', 'Uruguay', 'Uzbekistan',
+    'Vanuatu', 'Vatican City', 'Venezuela', 'Vietnam', 'Yemen', 'Zambia', 'Zimbabwe'
+  ];
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -57,114 +71,89 @@ export default function LocationAutocomplete({
         setShowDropdown(false);
       }
     }
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Fetch location suggestions from Nominatim API
-  const fetchSuggestions = async (searchQuery: string) => {
-    if (searchQuery.length < 2) {
-      setSuggestions([]);
-      setIsLoading(false);
-      return;
-    }
+  // Search countries (instant, client-side)
+  const searchCountries = (query: string) => {
+    const lowerQuery = query.toLowerCase();
+    const filtered = COUNTRIES.filter(country =>
+      country.toLowerCase().includes(lowerQuery)
+    ).slice(0, 10);
+    setSuggestions(filtered);
+    setShowDropdown(filtered.length > 0);
+  };
 
+  // Search cities using GeoNames API (free, no key for basic use)
+  const searchCities = async (query: string) => {
     try {
       setIsLoading(true);
-
-      // Build Nominatim API query
-      let apiUrl = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=10&q=${encodeURIComponent(searchQuery)}`;
       
-      // Add type-specific parameters
-      if (type === 'country') {
-        apiUrl += '&featuretype=country';
-      } else if (type === 'city') {
-        apiUrl += '&featuretype=city';
-      }
+      // Using GeoNames free API
+      const response = await fetch(
+        `http://api.geonames.org/searchJSON?q=${encodeURIComponent(query)}&maxRows=10&featureClass=P&username=demo`
+      );
 
-      const response = await fetch(apiUrl, {
-        headers: {
-          'User-Agent': 'HeyProData-App', // Required by Nominatim
-        },
-      });
+      if (!response.ok) throw new Error('API error');
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch location data');
-      }
+      const data = await response.json();
+      const cities = data.geonames?.map((city: any) => ({
+        name: city.name,
+        country: city.countryName
+      })) || [];
 
-      const data: LocationSuggestion[] = await response.json();
-      
-      // Filter results based on type
-      let filteredData = data;
-      if (type === 'country') {
-        filteredData = data.filter(item => 
-          item.type === 'administrative' && 
-          item.address?.country
-        );
-      } else if (type === 'city') {
-        filteredData = data.filter(item => 
-          item.address?.city || 
-          item.address?.town || 
-          item.address?.village
-        );
-      }
-
-      setSuggestions(filteredData);
-      setShowDropdown(true);
+      setSuggestions(cities);
+      setShowDropdown(cities.length > 0);
     } catch (error) {
-      console.error('Error fetching location suggestions:', error);
+      console.error('City search error:', error);
       setSuggestions([]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Handle input change with debouncing
+  // Handle input change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     onChange(newValue);
 
-    // Clear existing timer
-    if (debounceTimer.current) {
-      clearTimeout(debounceTimer.current);
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+
+    if (newValue.length < 2) {
+      setSuggestions([]);
+      setShowDropdown(false);
+      return;
     }
-
-    // Set new timer for API call (500ms delay)
-    debounceTimer.current = setTimeout(() => {
-      fetchSuggestions(newValue);
-    }, 500);
-  };
-
-  // Handle suggestion selection
-  const handleSuggestionClick = (suggestion: LocationSuggestion) => {
-    let selectedValue = '';
 
     if (type === 'country') {
-      selectedValue = suggestion.address?.country || suggestion.display_name;
-    } else if (type === 'city') {
-      selectedValue = suggestion.address?.city || 
-                     suggestion.address?.town || 
-                     suggestion.address?.village || 
-                     suggestion.display_name.split(',')[0];
+      // Instant search for countries
+      searchCountries(newValue);
     } else {
-      selectedValue = suggestion.display_name.split(',')[0];
+      // Debounced API call for cities
+      debounceTimer.current = setTimeout(() => {
+        searchCities(newValue);
+      }, 400);
     }
+  };
 
+  // Handle suggestion click
+  const handleSuggestionClick = (suggestion: any) => {
+    const selectedValue = typeof suggestion === 'string' ? suggestion : suggestion.name;
     onChange(selectedValue);
     setShowDropdown(false);
     setSuggestions([]);
     setHighlightedIndex(-1);
   };
 
-  // Handle keyboard navigation
+  // Keyboard navigation
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (!showDropdown || suggestions.length === 0) return;
 
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault();
-        setHighlightedIndex(prev => 
+        setHighlightedIndex(prev =>
           prev < suggestions.length - 1 ? prev + 1 : prev
         );
         break;
@@ -174,7 +163,7 @@ export default function LocationAutocomplete({
         break;
       case 'Enter':
         e.preventDefault();
-        if (highlightedIndex >= 0 && highlightedIndex < suggestions.length) {
+        if (highlightedIndex >= 0) {
           handleSuggestionClick(suggestions[highlightedIndex]);
         }
         break;
@@ -185,18 +174,10 @@ export default function LocationAutocomplete({
     }
   };
 
-  // Format display name for better readability
-  const formatDisplayName = (suggestion: LocationSuggestion): string => {
-    if (type === 'country') {
-      return suggestion.address?.country || suggestion.display_name;
-    } else if (type === 'city') {
-      const city = suggestion.address?.city || 
-                   suggestion.address?.town || 
-                   suggestion.address?.village;
-      const country = suggestion.address?.country;
-      return city && country ? `${city}, ${country}` : suggestion.display_name;
-    }
-    return suggestion.display_name;
+  // Format suggestion display
+  const formatSuggestion = (suggestion: any): string => {
+    if (typeof suggestion === 'string') return suggestion;
+    return suggestion.country ? `${suggestion.name}, ${suggestion.country}` : suggestion.name;
   };
 
   return (
@@ -207,9 +188,7 @@ export default function LocationAutocomplete({
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
         onFocus={() => {
-          if (suggestions.length > 0) {
-            setShowDropdown(true);
-          }
+          if (suggestions.length > 0) setShowDropdown(true);
         }}
         placeholder={placeholder}
         disabled={disabled}
@@ -217,19 +196,19 @@ export default function LocationAutocomplete({
         autoComplete="off"
       />
 
-      {/* Loading indicator */}
+      {/* Loading spinner */}
       {isLoading && (
         <div className="absolute right-4 top-1/2 -translate-y-1/2">
           <div className="w-5 h-5 border-2 border-[#FA6E80] border-t-transparent rounded-full animate-spin"></div>
         </div>
       )}
 
-      {/* Suggestions dropdown */}
+      {/* Dropdown */}
       {showDropdown && suggestions.length > 0 && !disabled && (
         <div className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
           {suggestions.map((suggestion, index) => (
             <div
-              key={`${suggestion.lat}-${suggestion.lon}-${index}`}
+              key={typeof suggestion === 'string' ? suggestion : `${suggestion.name}-${index}`}
               onClick={() => handleSuggestionClick(suggestion)}
               className={`px-4 py-3 cursor-pointer transition-colors ${
                 index === highlightedIndex
@@ -237,19 +216,17 @@ export default function LocationAutocomplete({
                   : 'hover:bg-gray-100 text-black'
               }`}
             >
-              <div className="font-medium">
-                {formatDisplayName(suggestion)}
-              </div>
+              {formatSuggestion(suggestion)}
             </div>
           ))}
         </div>
       )}
 
-      {/* No results message */}
+      {/* No results */}
       {showDropdown && !isLoading && suggestions.length === 0 && value.length >= 2 && (
         <div className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-200 rounded-xl shadow-lg p-4">
           <p className="text-gray-500 text-sm text-center">
-            No locations found. Try a different search.
+            No {type === 'country' ? 'countries' : 'cities'} found
           </p>
         </div>
       )}
