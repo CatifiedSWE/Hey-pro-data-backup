@@ -126,7 +126,7 @@ export default function AvalableDilog({ initialProfile, triggerClassName, onUpda
             <DialogTrigger asChild>
                 <Button
                     variant="ghost"
-                    className={cn("flex items-center gap-2", statusColor, triggerClassName)}
+                    className={cn("flex items-center gap-2 hover:bg-transparent", statusColor, triggerClassName)}
                     disabled={isLoading}
                 >
                     {isLoading ? (
