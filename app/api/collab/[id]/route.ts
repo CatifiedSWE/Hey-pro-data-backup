@@ -122,7 +122,7 @@ export async function GET(
       author: {
         id: collab.user_id,
         name: authorName,
-        avatar: authorProfile?.profile_photo_url || '/placeholder-avatar.png',
+        avatar: authorAvatar,
         bio: authorProfile?.bio || ''
       },
       ...(user && { userHasInterest, isOwner }),
