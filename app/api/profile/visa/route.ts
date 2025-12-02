@@ -43,8 +43,17 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Map database columns to frontend expected fields
+    const mappedVisaInfo = visaInfo ? {
+      ...visaInfo,
+      visa_issued_by: visaInfo.issued_by,
+      visa_expiry_date: visaInfo.expiry_date,
+      nationality: null,
+      passport_expiry_date: null
+    } : null;
+
     return NextResponse.json(
-      successResponse(visaInfo, 'Visa information retrieved successfully'),
+      successResponse(mappedVisaInfo, 'Visa information retrieved successfully'),
       { status: 200 }
     );
   } catch (error: any) {
@@ -131,12 +140,14 @@ export async function PATCH(request: NextRequest) {
     const body = await request.json();
     const { nationality, passport_expiry_date, visa_type, visa_issued_by, visa_expiry_date } = body;
 
+    // Map frontend fields to database columns
     const updateData: any = { user_id: user.id };
-    if (nationality !== undefined) updateData.nationality = nationality;
-    if (passport_expiry_date !== undefined) updateData.passport_expiry_date = passport_expiry_date;
+    // Note: nationality and passport_expiry_date are not stored in current DB schema
     if (visa_type !== undefined) updateData.visa_type = visa_type;
-    if (visa_issued_by !== undefined) updateData.visa_issued_by = visa_issued_by;
-    if (visa_expiry_date !== undefined) updateData.visa_expiry_date = visa_expiry_date;
+    // Map visa_issued_by -> issued_by (database column)
+    if (visa_issued_by !== undefined) updateData.issued_by = visa_issued_by;
+    // Map visa_expiry_date -> expiry_date (database column)
+    if (visa_expiry_date !== undefined) updateData.expiry_date = visa_expiry_date;
     updateData.updated_at = new Date().toISOString();
 
     // Use upsert to handle both create and update
@@ -157,8 +168,17 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
+    // Map database columns back to frontend expected fields
+    const mappedData = {
+      ...data,
+      visa_issued_by: data.issued_by,
+      visa_expiry_date: data.expiry_date,
+      nationality: null,
+      passport_expiry_date: null
+    };
+
     return NextResponse.json(
-      successResponse(data, 'Visa information updated successfully'),
+      successResponse(mappedData, 'Visa information updated successfully'),
       { status: 200 }
     );
   } catch (error: any) {
