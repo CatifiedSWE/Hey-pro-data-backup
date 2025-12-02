@@ -178,8 +178,6 @@ export default function SkillEditor({ initialSkills, trigger, onUpdate }: SkillE
         toast.success("Skill order saved!");
     };
 
-
-
     const handleRemoveSkill = async (id: string) => {
         // Prevent multiple simultaneous deletes
         if (deletingIds.has(id)) return;

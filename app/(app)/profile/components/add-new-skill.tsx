@@ -97,14 +97,6 @@ export default function AddNewSkill({ trigger, onUpdate }: AddNewSkillProps) {
     // Get profile methods
     const { addSkill, fetchSkills } = useProfile();
 
-
-
-
-
-
-
-
-
     const handleAddSkill = () => {
         setSkills((prev) => [...prev, createBlankSkill()]);
     };
@@ -240,7 +232,6 @@ export default function AddNewSkill({ trigger, onUpdate }: AddNewSkillProps) {
                             </Button>
                             <Button
                                 onClick={handleSaveChanges}
-                                disabled={saving}
                                 className="h-[47px] min-w-[120px] rounded-[10px] bg-[#FA6E80] px-6 text-sm font-semibold text-white hover:bg-[#f2576b]"
                             >
                                 {saving ? 'Saving...' : 'Save'}

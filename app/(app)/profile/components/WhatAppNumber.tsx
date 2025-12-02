@@ -9,7 +9,6 @@ import {
     Dialog,
     DialogClose,
     DialogContent,
-    DialogDescription,
     DialogFooter,
     DialogHeader,
     DialogTitle,
@@ -247,8 +246,8 @@ export default function WhatupNumbers({
                         </DialogClose>
                         <Button
                             type="submit"
-                            disabled={saving}
                             className="bg-[#31A7AC] h-[44px] hover:bg-[#31A7AC] text-[#FFFFFF] rounded-xl"
+                            disabled={saving}
                         >
                             {saving ? 'Saving...' : 'Save changes'}
                         </Button>
