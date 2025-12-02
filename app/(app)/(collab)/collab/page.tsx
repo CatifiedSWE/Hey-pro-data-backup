@@ -59,6 +59,8 @@ const formatDate = (dateString: string) => {
     return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
 };
 
+const inputBase = "w-full rounded-[15px] border border-[#2FD3D8]/40 bg-transparent px-5 py-3 text-sm text-black placeholder:text-black focus:border-[#2FD3D8] focus:outline-none";
+
 export default function Collab() {
     const [collabPosts, setCollabPosts] = useState<CollabPost[]>([]);
     const [page, setPage] = useState(1);
