@@ -15,17 +15,16 @@ import {
 import { Avatar } from "../../../components/Avatar";
 import { updateCollab, deleteCollab, uploadCollabCover, closeCollab, type CollabDetail } from "@/lib/api/collab";
 
-const inputBase = "w-full rounded-[18px] border border-[#444444] bg-white/40 px-5 py-3 text-sm text-gray-900 placeholder:text-gray-500 focus:border-[#444444] focus:outline-none";
+const inputBase = "w-full rounded-xl border border-[#E4E7EC] bg-white px-4 py-3.5 text-sm text-gray-900 placeholder:text-gray-500 focus:border-[#2FD3D8] focus:outline-none focus:ring-1 focus:ring-[#2FD3D8] transition-colors";
 
 type EditCollabFormProps = {
     collab: CollabDetail;
 };
 
-
 const TagPill = ({ label, onRemove }: { label: string; onRemove: () => void }) => (
-    <span className="inline-flex items-center gap-2 rounded-full border border-[#444444] px-4 py-1 text-xs font-medium text-[#0FC6D1]">
+    <span className="inline-flex items-center gap-2 rounded-full border border-[#2FD3D8] px-4 py-2 text-xs font-medium text-[#2FD3D8] bg-white">
         {label}
-        <button type="button" onClick={onRemove} aria-label={`Remove ${label}`} className="text-[#0FC6D1]">
+        <button type="button" onClick={onRemove} aria-label={`Remove ${label}`} className="text-[#2FD3D8] hover:text-red-500">
             <X className="h-3 w-3" />
         </button>
     </span>
@@ -186,164 +185,208 @@ export function EditCollabForm({ collab }: EditCollabFormProps) {
     };
 
     return (
-        <section className="rounded-[36px] bg-white p-1 sm:p-6 shadow-[0_25px_120px_rgba(0,0,0,0.06)]">
-            <form onSubmit={handleSubmit} className="flex w-full flex-col gap-6 lg:flex-row">
-                <div className="w-full flex-shrink-0 space-y-6 lg:max-w-[360px]">
-                    <div className="rounded-[30px] text-center text-sm text-gray-500">
-                        <div className="relative mx-auto flex w-[353px] overflow-hidden rounded-[10px] bg-white sm:w-[348px] h-[410px]">
-                            <input
-                                type="file"
-                                accept="image/png,image/jpeg,image/jpg"
-                                className="absolute inset-0 cursor-pointer opacity-0"
-                                onChange={handlePosterChange}
-                            />
-                            {posterPreview ? (
-                                <Image src={posterPreview} alt={title || "Poster preview"} fill className="object-cover rounded-[10px]" sizes="360px" unoptimized />
-                            ) : (
-                                <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-gray-400">
-                                    <Plus className="h-5 w-5" />
-                                    <span>Upload poster / moodboard</span>
+        <div className="min-h-screen bg-gray-50 pb-10">
+            <div className="max-w-[1200px] mx-auto px-4">
+                <div className="space-y-8">
+                    {/* Edit Form */}
+                    <section className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+                        <form onSubmit={handleSubmit} className="flex flex-col lg:flex-row gap-8">
+                            <div className="flex-shrink-0">
+                                <div className="relative flex h-[400px] w-full lg:w-[400px] items-center justify-center overflow-hidden rounded-xl bg-gray-100 border-2 border-dashed border-gray-300 hover:border-[#2FD3D8] transition-colors group">
+                                    <input
+                                        type="file"
+                                        accept="image/png,image/jpeg,image/jpg"
+                                        className="absolute inset-0 cursor-pointer opacity-0"
+                                        onChange={handlePosterChange}
+                                    />
+                                    {posterPreview ? (
+                                        <Image 
+                                            src={posterPreview} 
+                                            alt={title || "Poster preview"} 
+                                            fill 
+                                            className="object-cover rounded-xl" 
+                                            sizes="400px" 
+                                            unoptimized 
+                                        />
+                                    ) : (
+                                        <div className="flex flex-col items-center gap-3 text-gray-500 group-hover:text-[#2FD3D8] transition-colors">
+                                            <Plus className="h-8 w-8" />
+                                            <span className="text-sm font-medium">Upload poster / moodboard</span>
+                                        </div>
+                                    )}
                                 </div>
-                            )}
-                        </div>
-                        <p className="mt-3 text-xs text-gray-500">16:9 recommended • PNG / JPG up to 5MB</p>
-                    </div>
+                                <p className="mt-3 text-xs text-gray-500 text-center">16:9 recommended • PNG / JPG up to 5MB</p>
+                            </div>
+                            
+                            <div className="flex-1 space-y-6">
+                                <input 
+                                    className={inputBase} 
+                                    value={title} 
+                                    onChange={(event) => setTitle(event.target.value)} 
+                                    placeholder="Collab title"
+                                    disabled={submitting}
+                                />
+                                
+                                <textarea
+                                    className={`${inputBase} min-h-[120px] resize-none`}
+                                    value={summary}
+                                    onChange={(event) => setSummary(event.target.value)}
+                                    placeholder="Describe what you need collaborators for"
+                                    disabled={submitting}
+                                />
+                                
+                                <div className="space-y-4">
+                                    <div className="flex gap-3 p-2 border border-gray-200 rounded-xl bg-gray-50">
+                                        <input
+                                            className="flex-1 border-none bg-transparent text-sm text-gray-900 placeholder:text-gray-500 focus:outline-none px-2"
+                                            placeholder="Add tags and press enter"
+                                            value={tagInput}
+                                            onChange={(event) => setTagInput(event.target.value)}
+                                            onKeyDown={(event) => {
+                                                if (event.key === "Enter") {
+                                                    event.preventDefault();
+                                                    handleAddTag();
+                                                }
+                                            }}
+                                            disabled={submitting}
+                                        />
+                                        <button 
+                                            type="button" 
+                                            onClick={handleAddTag} 
+                                            className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#FA6E80] text-white hover:bg-[#f5576b] transition-colors"
+                                            disabled={submitting}
+                                        >
+                                            <Plus className="h-4 w-4" />
+                                        </button>
+                                    </div>
+                                    
+                                    {tags.length > 0 && (
+                                        <div className="flex flex-wrap gap-2">
+                                            {tags.map((tag) => (
+                                                <TagPill key={tag} label={tag} onRemove={() => handleRemoveTag(tag)} />
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                                
+                                <div className="flex flex-wrap items-center gap-4 pt-4">
+                                    <button
+                                        type="submit"
+                                        disabled={submitting}
+                                        className="flex-1 min-w-[160px] rounded-xl bg-[#31A7AC] px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#289398] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors"
+                                    >
+                                        {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+                                        {!submitting && <Save className="h-4 w-4" />}
+                                        {submitting ? 'Saving...' : 'Save changes'}
+                                    </button>
+                                    
+                                    <button
+                                        type="button"
+                                        onClick={handleReset}
+                                        disabled={submitting}
+                                        className="rounded-xl border border-gray-300 px-6 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50 flex items-center gap-2 transition-colors"
+                                    >
+                                        <RefreshCw className="h-4 w-4" />
+                                        Reset
+                                    </button>
+                                </div>
+                                
+                                {actionMessage && (
+                                    <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                                        <p className="text-sm font-medium text-green-700">{actionMessage}</p>
+                                    </div>
+                                )}
+                            </div>
+                        </form>
+                    </section>
 
-                </div>
-                <div className="flex-1 space-y-5">
-                    <div>
-                        <input id="collabTitle" className={inputBase} value={title} onChange={(event) => setTitle(event.target.value)} />
-                    </div>
-                    <div>
-                        <textarea
-                            id="collabSummary"
-                            className={`${inputBase} min-h-[140px] resize-none rounded-[24px]`}
-                            value={summary}
-                            onChange={(event) => setSummary(event.target.value)}
-                            placeholder="Describe what you need collaborators for"
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <div className="flex gap-3 rounded-[18px] border border-[#444444] px-3 py-2">
-                            <input
-                                className="flex-1 border-none bg-transparent text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none"
-                                placeholder="Add tags and press enter"
-                                value={tagInput}
-                                onChange={(event) => setTagInput(event.target.value)}
-                                onKeyDown={(event) => {
-                                    if (event.key === "Enter") {
-                                        event.preventDefault();
-                                        handleAddTag();
-                                    }
-                                }}
-                            />
-                            <button type="button" onClick={handleAddTag} className="rounded-full bg-[#FA6E80] p-2 text-white">
-                                <Plus className="h-4 w-4" />
-                            </button>
+                    {/* Collaborators Section */}
+                    <section className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-2xl font-semibold text-gray-900">
+                                Collaborators ({collaborators.length})
+                            </h2>
+                            
+                            <div className="flex gap-3">
+                                <button 
+                                    onClick={handleClose}
+                                    disabled={closing || collab.status === 'closed'}
+                                    className="rounded-xl bg-[#31A7AC] px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#289398] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                >
+                                    {closing && <Loader2 className="h-4 w-4 animate-spin" />}
+                                    {collab.status === 'closed' ? 'Closed' : 'Close Collab'}
+                                </button>
+                                
+                                <button 
+                                    onClick={handleDelete}
+                                    disabled={deleting}
+                                    className="rounded-xl border border-red-200 bg-red-50 px-6 py-2.5 text-sm font-semibold text-red-700 transition-colors hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                >
+                                    {deleting && <Loader2 className="h-4 w-4 animate-spin" />}
+                                    {!deleting && <Trash2 className="h-4 w-4" />}
+                                    {deleting ? 'Deleting...' : 'Delete'}
+                                </button>
+                            </div>
                         </div>
-                        {tags.length > 0 && (
-                            <div className="flex flex-wrap gap-2">
-                                {tags.map((tag) => (
-                                    <TagPill key={tag} label={tag} onRemove={() => handleRemoveTag(tag)} />
-                                ))}
+                        
+                        {collaborators.length > 0 ? (
+                            <div className="overflow-hidden rounded-xl border border-gray-200">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow className="bg-gray-50">
+                                            <TableHead className="font-semibold text-gray-900 py-4">Name</TableHead>
+                                            <TableHead className="font-semibold text-gray-900 py-4">Role</TableHead>
+                                            <TableHead className="font-semibold text-gray-900 py-4">Chat</TableHead>
+                                            <TableHead className="font-semibold text-gray-900 py-4">Add to Group</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {collaborators.map((collaborator) => (
+                                            <TableRow key={collaborator.id} className="hover:bg-gray-50 transition-colors">
+                                                <TableCell className="py-4">
+                                                    <div className="flex items-center gap-3">
+                                                        <Avatar
+                                                            src={collaborator.avatar}
+                                                            alt={collaborator.name}
+                                                            width={40}
+                                                            height={40}
+                                                            className="rounded-full flex-shrink-0"
+                                                        />
+                                                        <div>
+                                                            <p className="font-medium text-gray-900">{collaborator.name}</p>
+                                                            <p className="text-sm text-gray-500">{collaborator.department}</p>
+                                                        </div>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell className="py-4">
+                                                    <span className="text-sm text-gray-700">{collaborator.role}</span>
+                                                </TableCell>
+                                                <TableCell className="py-4">
+                                                    <button className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#31A7AC]/10 text-[#31A7AC] hover:bg-[#31A7AC]/20 transition-colors">
+                                                        <MessageCircle className="h-4 w-4" />
+                                                    </button>
+                                                </TableCell>
+                                                <TableCell className="py-4">
+                                                    <button className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#31A7AC]/10 text-[#31A7AC] hover:bg-[#31A7AC]/20 transition-colors">
+                                                        <Plus className="h-4 w-4" />
+                                                    </button>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        ) : (
+                            <div className="text-center py-12 text-gray-500 bg-gray-50 rounded-xl">
+                                <div className="max-w-md mx-auto">
+                                    <h3 className="text-lg font-medium text-gray-900 mb-2">No collaborators yet</h3>
+                                    <p className="text-sm">Interested users will appear here.</p>
+                                </div>
                             </div>
                         )}
-                    </div>
-                    <div className="flex flex-wrap items-center gap-3 pt-2">
-                        <button
-                            type="submit"
-                            disabled={submitting}
-                            className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-[#31A7AC] px-6 py-3 text-sm font-semibold text-white shadow-lg hover:bg-[#289398] disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
-                            {!submitting && <Save className="h-4 w-4" />}
-                            {submitting ? 'Saving...' : 'Save changes'}
-                        </button>
-                        <button
-                            type="button"
-                            onClick={handleReset}
-                            disabled={submitting}
-                            className="inline-flex items-center justify-center gap-2 rounded-full border border-[#E4E7EC] px-6 py-3 text-sm font-semibold text-gray-600 hover:border-[#D0D5DD] disabled:opacity-50"
-                        >
-                            <RefreshCw className="h-4 w-4" />
-                            Reset
-                        </button>
-                    </div>
-                    {actionMessage && <p className="text-sm font-medium text-green-600">{actionMessage}</p>}
+                    </section>
                 </div>
-            </form>
-            <div>
-                <div className="flex flex-col-reverse mt-5 sm:mt-0 gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <span className="font-semibold text-2xl">Collaborators ({collaborators.length})</span>
-                    <div className="flex gap-2">
-                        <button 
-                            onClick={handleClose}
-                            disabled={closing || collab.status === 'closed'}
-                            className="w-full rounded-[10px] border border-transparent bg-[#31A7AC] px-4 py-2 text-white transition hover:opacity-90 sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                        >
-                            {closing && <Loader2 className="h-4 w-4 animate-spin" />}
-                            {collab.status === 'closed' ? 'Closed' : 'Close Collab'}
-                        </button>
-                        <button 
-                            onClick={handleDelete}
-                            disabled={deleting}
-                            className="w-full rounded-[10px] border border-red-500 bg-red-500 px-4 py-2 text-white transition hover:bg-red-600 sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                        >
-                            {deleting && <Loader2 className="h-4 w-4 animate-spin" />}
-                            {!deleting && <Trash2 className="h-4 w-4" />}
-                            {deleting ? 'Deleting...' : 'Delete'}
-                        </button>
-                    </div>
-                </div>
-                {collaborators.length > 0 ? (
-                    <div className="w-full overflow-x-auto mt-4">
-                        <Table className="w-full min-w-[600px] table-fixed">
-                            <TableHeader>
-                                <TableRow className="border-b border-gray-300">
-                                    <TableHead className="w-2/3">Name</TableHead>
-                                    <TableHead className="w-1/3">Role</TableHead>
-                                    <TableHead className="w-1/3">Chat</TableHead>
-                                    <TableHead className="w-1/3">Add To Group</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {collaborators.map((c) => (
-                                    <TableRow key={c.id} className="w-full last:[&>td]:border-b-0">
-                                        <TableCell className="w-2/3 border-b border-gray-200">
-                                            <div className="flex items-center gap-3">
-                                                <Avatar
-                                                    src={c.avatar}
-                                                    alt={c.name}
-                                                    width={40}
-                                                    height={40}
-                                                    className="rounded-full flex-shrink-0"
-                                                />
-                                                <div className="min-w-0">
-                                                    <span className="font-medium block truncate">{c.name}</span>
-                                                    <span className="text-xs text-gray-500 truncate">{c.department}</span>
-                                                </div>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="w-1/3 border-b border-gray-200">
-                                            <span className="inline-block truncate">{c.role}</span>
-                                        </TableCell>
-                                        <TableCell className="w-1/3 border-b border-gray-200">
-                                            <button className="text-sm text-[#31A7AC] underline"><MessageCircle className="h-6 w-6" /></button>
-                                        </TableCell>
-                                        <TableCell className="w-1/3 border-b border-gray-200">
-                                            <button className="text-sm px-4 py-2 text-[#31A7AC]"><Plus className="h-6 w-6" /></button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </div>
-                ) : (
-                    <div className="text-center py-8 text-gray-500">
-                        No collaborators yet. Interested users will appear here.
-                    </div>
-                )}
             </div>
-        </section>
+        </div>
     );
 }
