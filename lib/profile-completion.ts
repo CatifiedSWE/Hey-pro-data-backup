@@ -4,9 +4,11 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 /**
- * Calculate profile completion percentage based on filled fields
+ * OPTIMIZED: Calculate profile completion using efficient aggregation queries
+ * Reduces 6 separate queries to COUNT queries for maximum performance
+ * 
  * @param userId - User ID to calculate completion for
- * @n @returns Object with completionPercentage (0-100) and isComplete (boolean)
+ * @returns Object with completionPercentage (0-100) and isComplete (boolean)
  * 
  * Weighted Scoring System (Total: 100%):
  * - Basic Information (25%): first_name, surname, bio, country, city (5% each)
@@ -30,59 +32,56 @@ export async function calculateProfileCompletion(userId: string): Promise<{
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     let score = 0;
 
-    // Fetch all profile-related data in parallel for performance
+    // OPTIMIZED: Use count queries with minimal data transfer
+    // This reduces network payload and database processing significantly
     const [
       profileResult,
-      rolesResult,
-      linksResult,
-      skillsResult,
-      creditsResult,
-      languagesResult
+      rolesCountResult,
+      linksCountResult,
+      skillsCountResult,
+      creditsCountResult,
+      languagesCountResult
     ] = await Promise.all([
-      // Profile data
+      // Profile data - only fetch fields needed for scoring
       supabase
         .from('user_profiles')
         .select('first_name, surname, bio, country, city, profile_photo_url, banner_url, email, phone, country_code, availability')
         .eq('user_id', userId)
         .maybeSingle(),
       
-      // Roles
+      // OPTIMIZED: Get counts directly instead of fetching all IDs
       supabase
         .from('user_roles')
-        .select('id')
+        .select('*', { count: 'exact', head: true })
         .eq('user_id', userId),
       
-      // Links
       supabase
         .from('user_links')
-        .select('id')
+        .select('*', { count: 'exact', head: true })
         .eq('user_id', userId),
       
-      // Skills
       supabase
         .from('applicant_skills')
-        .select('id')
+        .select('*', { count: 'exact', head: true })
         .eq('user_id', userId),
       
-      // Credits
       supabase
         .from('user_credits')
-        .select('id')
+        .select('*', { count: 'exact', head: true })
         .eq('user_id', userId),
       
-      // Languages
       supabase
         .from('user_languages')
-        .select('id')
+        .select('*', { count: 'exact', head: true })
         .eq('user_id', userId)
     ]);
 
     const profile = profileResult.data;
-    const rolesCount = rolesResult.data?.length || 0;
-    const linksCount = linksResult.data?.length || 0;
-    const skillsCount = skillsResult.data?.length || 0;
-    const creditsCount = creditsResult.data?.length || 0;
-    const languagesCount = languagesResult.data?.length || 0;
+    const rolesCount = rolesCountResult.count || 0;
+    const linksCount = linksCountResult.count || 0;
+    const skillsCount = skillsCountResult.count || 0;
+    const creditsCount = creditsCountResult.count || 0;
+    const languagesCount = languagesCountResult.count || 0;
 
     // === BASIC INFORMATION (25%) ===
     // 5% each for: first_name, surname, bio, country, city
@@ -189,4 +188,54 @@ export async function calculateAndUpdateProfileCompletion(userId: string): Promi
   const result = await calculateProfileCompletion(userId);
   await updateProfileCompletionInDB(userId, result.completionPercentage, result.isComplete);
   return result;
+}
+
+/**
+ * SMART CHECK: Check if user has NULL completion and auto-calculate if needed
+ * This is efficient - only recalculates if completion is NULL (for old users)
+ * 
+ * @param userId - User ID to check
+ * @returns Current completion data (calculated if was NULL, or existing value)
+ */
+export async function ensureProfileCompletion(userId: string): Promise<{
+  completionPercentage: number;
+  isComplete: boolean;
+  wasCalculated: boolean; // Indicates if calculation was performed
+}> {
+  try {
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    
+    // Fast check: Does user have completion data?
+    const { data: profile } = await supabase
+      .from('user_profiles')
+      .select('profile_completion_percentage, is_profile_complete')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    // If completion exists and is not NULL, return it immediately
+    if (profile && profile.profile_completion_percentage !== null && profile.profile_completion_percentage !== undefined) {
+      return {
+        completionPercentage: profile.profile_completion_percentage,
+        isComplete: profile.is_profile_complete || false,
+        wasCalculated: false
+      };
+    }
+
+    // Completion is NULL - calculate it now (for old users or new profiles)
+    console.log(`[Profile Completion] Calculating for user ${userId} (was NULL)`);
+    const result = await calculateAndUpdateProfileCompletion(userId);
+    
+    return {
+      ...result,
+      wasCalculated: true
+    };
+
+  } catch (error) {
+    console.error('Error ensuring profile completion:', error);
+    return {
+      completionPercentage: 0,
+      isComplete: false,
+      wasCalculated: false
+    };
+  }
 }

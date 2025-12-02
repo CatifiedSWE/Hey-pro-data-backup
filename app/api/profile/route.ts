@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validateAuthToken, successResponse, errorResponse } from '@/lib/supabase/server';
 import { createClient } from '@supabase/supabase-js';
-import { calculateAndUpdateProfileCompletion } from '@/lib/profile-completion';
+import { calculateAndUpdateProfileCompletion, ensureProfileCompletion } from '@/lib/profile-completion';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,6 +21,7 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 /**
  * GET /api/profile
  * Get current user's profile with all related data
+ * OPTIMIZED: Auto-calculates completion for old users on first access
  */
 export async function GET(request: NextRequest) {
   try {
@@ -77,6 +78,17 @@ export async function GET(request: NextRequest) {
         errorResponse('Failed to fetch profile', error.message),
         { status: 500 }
       );
+    }
+
+    // OPTIMIZED: Auto-calculate completion for old users with NULL values
+    // This ensures all users have accurate completion data
+    if (profile && (profile.profile_completion_percentage === null || profile.profile_completion_percentage === undefined)) {
+      console.log(`[Profile GET API] Auto-calculating completion for user ${user.id} (was NULL)`);
+      const completion = await ensureProfileCompletion(user.id);
+      
+      // Update the profile object with calculated values
+      profile.profile_completion_percentage = completion.completionPercentage;
+      profile.is_profile_complete = completion.isComplete;
     }
 
     return NextResponse.json(

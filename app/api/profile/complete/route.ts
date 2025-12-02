@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validateAuthToken, successResponse, errorResponse } from '@/lib/supabase/server';
 import { createClient } from '@supabase/supabase-js';
+import { ensureProfileCompletion } from '@/lib/profile-completion';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,6 +38,14 @@ export async function GET(request: NextRequest) {
         errorResponse('Authentication required'),
         { status: 401 }
       );
+    }
+
+    // OPTIMIZED: Auto-calculate completion for old users with NULL values
+    // This runs efficiently - only calculates if needed
+    const completionCheck = await ensureProfileCompletion(user.id);
+    
+    if (completionCheck.wasCalculated) {
+      console.log(`[Profile Complete API] Auto-calculated completion for user ${user.id}: ${completionCheck.completionPercentage}%`);
     }
 
     // Get current month for availability
