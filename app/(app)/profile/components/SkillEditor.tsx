@@ -276,7 +276,7 @@ export default function SkillEditor({ initialSkills, trigger, onUpdate }: SkillE
         <>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>{trigger}</DialogTrigger>
-                <DialogContent className="w-[560px] max-h-[50vh] flex flex-col overflow-hidden rounded-[15px] border-0 p-0 shadow-[2px_3px_8px_rgba(0,0,0,0.09)]">
+                <DialogContent className="w-[560px] max-h-[80vh] flex flex-col overflow-hidden rounded-[15px] border-0 p-0 shadow-[2px_3px_8px_rgba(0,0,0,0.09)]">
                     <div className="flex flex-col h-full">
                         <div className="flex-1 overflow-y-auto custom-scrollbar">
                             <div className="flex flex-col gap-[35px] bg-white p-[30px]">
@@ -343,7 +343,7 @@ export default function SkillEditor({ initialSkills, trigger, onUpdate }: SkillE
 
             {/* Reorder Dialog */}
             <Dialog open={isReorderOpen} onOpenChange={setIsReorderOpen}>
-                <DialogContent className="max-w-md max-h-[50vh] overflow-hidden flex flex-col">
+                <DialogContent className="max-w-md max-h-[80vh] overflow-hidden flex flex-col">
                     <DialogHeader>
                         <DialogTitle className="text-2xl font-bold">
                             Reorder Skills

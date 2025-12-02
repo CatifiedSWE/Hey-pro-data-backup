@@ -33,7 +33,17 @@ export default function ShortProfile({ profile, links, roles = [], recommendatio
     const bannerInputRef = useRef<HTMLInputElement>(null)
     const profileInputRef = useRef<HTMLInputElement>(null)
     
+    // Local state for availability to ensure instant updates
+    const [localAvailability, setLocalAvailability] = useState<string>(profile?.availability || "Available")
+
     const { user } = useAuth();
+
+    // Sync local state when profile prop changes
+    useEffect(() => {
+        if (profile?.availability) {
+            setLocalAvailability(profile.availability)
+        }
+    }, [profile?.availability])
 
     const displayName = profile?.alias_first_name && profile?.alias_surname
         ? `${profile.alias_first_name} ${profile.alias_surname}`
@@ -133,12 +143,10 @@ export default function ShortProfile({ profile, links, roles = [], recommendatio
         }
     };
 
-
     const updateFilterScrollState = () => {
         const container = filterScrollRef.current
         if (!container) return
     }
-
 
     useEffect(() => {
         updateFilterScrollState()
@@ -152,8 +160,12 @@ export default function ShortProfile({ profile, links, roles = [], recommendatio
         }
     }, [])
     
-    // Default to "Available" if undefined to match AvalableDialog logic
-    const isAvailable = (profile?.availability || "Available") === "Available";
+    const handleAvailabilityUpdate = (newStatus: string) => {
+        setLocalAvailability(newStatus);
+        onLinksUpdate?.();
+    }
+
+    const isAvailable = localAvailability === "Available";
     const dotColor = isAvailable ? "bg-[#34A353]" : "bg-[#FA6E80]";
     const statusTextColor = isAvailable ? "text-[#34A353]" : "text-[#FA6E80]";
 
@@ -255,9 +267,9 @@ export default function ShortProfile({ profile, links, roles = [], recommendatio
                 <div className={`flex items-center gap-2 bg-white px-4 py-2 ${statusTextColor}`}>
                     <span className={`h-2.5 w-2.5 rounded-full ${dotColor}`} />
                      <AvalableDilog
-                        initialProfile={{ availability: profile?.availability || "Available" }}
+                        initialProfile={{ availability: localAvailability }}
                         triggerClassName="h-auto border-none bg-transparent p-0 text-[11px] font-[400] hover:bg-transparent"
-                        onUpdate={onLinksUpdate}
+                        onUpdate={handleAvailabilityUpdate}
                     />
                 </div>
                 <CalendarDialog

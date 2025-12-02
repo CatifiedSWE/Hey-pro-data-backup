@@ -21,7 +21,7 @@ interface EditAvalableProps {
         availability: string
     }
     triggerClassName?: string
-    onUpdate?: () => void
+    onUpdate?: (newStatus: string) => void
 }
 
 export default function AvalableDilog({ initialProfile, triggerClassName, onUpdate }: EditAvalableProps) {
@@ -45,7 +45,6 @@ export default function AvalableDilog({ initialProfile, triggerClassName, onUpda
         try {
             const token = await getAccessToken()
             if (!token) {
-                // toast.error('Not authenticated') // Suppress on mount to avoid spam if public
                 return
             }
 
@@ -102,7 +101,8 @@ export default function AvalableDilog({ initialProfile, triggerClassName, onUpda
                 setAvailability(draftAvailability)
                 toast.success('Availability updated successfully!')
                 setOpen(false)
-                onUpdate?.()
+                // Pass the new status back to the parent for immediate UI update
+                onUpdate?.(draftAvailability)
             } else {
                 toast.error(data.error || 'Failed to update availability')
             }
