@@ -77,9 +77,10 @@ export async function GET(request: NextRequest) {
     const collabsWithDetails = await Promise.all(
       filteredCollabs.map(async (collab: any) => {
         // Get author details from user_profiles table
+        // Try both first_name/surname and alias_first_name/alias_surname for compatibility
         const { data: authorProfile } = await supabase
           .from('user_profiles')
-          .select('user_id, first_name, surname, profile_photo_url')
+          .select('user_id, first_name, surname, alias_first_name, alias_surname, profile_photo_url')
           .eq('user_id', collab.user_id)
           .single();
 
@@ -100,13 +101,21 @@ export async function GET(request: NextRequest) {
             .limit(3);
 
           interestAvatars = interestedProfiles?.map((profile: any) => 
-            profile.profile_photo_url || '/placeholder-avatar.png'
+            profile.profile_photo_url && profile.profile_photo_url.trim() !== '' 
+              ? profile.profile_photo_url 
+              : '/placeholder-avatar.png'
           ) || [];
         }
 
-        const authorName = authorProfile 
-          ? `${authorProfile.first_name || ''} ${authorProfile.surname || ''}`.trim() || 'Unknown'
-          : 'Unknown';
+        // Use alias name if available, otherwise use regular name
+        const firstName = authorProfile?.alias_first_name || authorProfile?.first_name || '';
+        const surname = authorProfile?.alias_surname || authorProfile?.surname || '';
+        const authorName = `${firstName} ${surname}`.trim() || 'Unknown';
+        
+        // Ensure profile photo URL is valid and not empty
+        const authorAvatar = authorProfile?.profile_photo_url && authorProfile.profile_photo_url.trim() !== '' 
+          ? authorProfile.profile_photo_url 
+          : '/placeholder-avatar.png';
 
         return {
           id: collab.id,
@@ -121,7 +130,7 @@ export async function GET(request: NextRequest) {
           author: {
             id: collab.user_id,
             name: authorName,
-            avatar: authorProfile?.profile_photo_url || '/placeholder-avatar.png'
+            avatar: authorAvatar
           },
           created_at: collab.created_at,
           updated_at: collab.updated_at
