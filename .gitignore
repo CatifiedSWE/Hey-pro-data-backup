@@ -44,5 +44,3 @@ next-env.d.ts
 # Ignore documentation folder
 documentation/
 
-# Ignore all Markdown files
-*.md
