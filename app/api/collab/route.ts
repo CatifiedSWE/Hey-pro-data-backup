@@ -166,6 +166,30 @@ export async function GET(request: NextRequest) {
           authorAvatar = googleAvatarMap.get(collab.user_id)!;
         }
 
+        // Check if current user has expressed interest
+        let userHasInterest = false;
+        if (currentUserId) {
+          const { data: interestCheck } = await supabase
+            .from('collab_interests')
+            .select('id')
+            .eq('collab_id', collab.id)
+            .eq('user_id', currentUserId)
+            .single();
+          userHasInterest = !!interestCheck;
+        }
+
+        // Check if current user has saved this collab
+        let userHasSaved = false;
+        if (currentUserId) {
+          const { data: saveCheck } = await supabase
+            .from('collab_saves')
+            .select('id')
+            .eq('collab_id', collab.id)
+            .eq('user_id', currentUserId)
+            .single();
+          userHasSaved = !!saveCheck;
+        }
+
         return {
           id: collab.id,
           title: collab.title,
@@ -182,7 +206,9 @@ export async function GET(request: NextRequest) {
             avatar: authorAvatar
           },
           created_at: collab.created_at,
-          updated_at: collab.updated_at
+          updated_at: collab.updated_at,
+          userHasInterest,
+          userHasSaved
         };
       })
     );
