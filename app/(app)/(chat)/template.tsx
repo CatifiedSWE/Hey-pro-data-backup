@@ -11,9 +11,11 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { getConversations, getGroups, type Conversation, type Group } from '@/lib/api/chat';
 import { format } from 'date-fns';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function AppLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     const pathname = usePathname();
+    const { user, loading: authLoading } = useAuth();
     const [conversations, setConversations] = useState<Conversation[]>([]);
     const [groups, setGroups] = useState<Group[]>([]);
     const [loading, setLoading] = useState(true);
@@ -24,6 +26,11 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
 
     // Fetch conversations and groups
     const fetchData = async () => {
+        // Don't fetch if auth is still loading or user is not authenticated
+        if (authLoading || !user) {
+            return;
+        }
+
         try {
             setError(null);
             const [conversationsData, groupsData] = await Promise.all([
@@ -53,19 +60,26 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
         }
     };
 
-    // Initial fetch
+    // Initial fetch - only after auth is ready and user is authenticated
     useEffect(() => {
-        fetchData();
-    }, []);
+        if (!authLoading && user) {
+            fetchData();
+        } else if (!authLoading && !user) {
+            // Auth is ready but no user - stop loading
+            setLoading(false);
+        }
+    }, [authLoading, user]);
 
-    // Poll for updates every 5 seconds
+    // Poll for updates every 5 seconds - only if user is authenticated
     useEffect(() => {
+        if (authLoading || !user) return;
+
         const interval = setInterval(() => {
             fetchData();
         }, 5000);
 
         return () => clearInterval(interval);
-    }, []);
+    }, [authLoading, user]);
 
     return (
         <div className="w-full h-screen bg-[#F8F8F8] md:bg-white overflow-hidden flex flex-col md:flex-row justify-center items-stretch gap-4 p-0 md:p-6 max-w-[1600px] mx-auto">
