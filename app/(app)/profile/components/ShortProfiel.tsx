@@ -322,7 +322,6 @@ export default function ShortProfile({ profile, links, roles = [], recommendatio
                 )}
                
                 {/* Hardcoded award text from design */}
-                <p className="text-[14px] leading-[21px] text-[#181818]">140+ Awards were received</p>
 
                 <LinksDialog
                     links={links}
