@@ -8,6 +8,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase/client";
+import CreateSlateDialog from "@/components/modules/slate/CreateSlateDialog";
 
 export default function AppLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     // Fetch real profile data
