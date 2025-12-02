@@ -1,5 +1,5 @@
 "use client";
-import { Calendar, ChevronDown, ChevronLeft, ChevronRight, Filter, MapPin, Search } from "lucide-react";
+import { Calendar, ChevronDown, ChevronLeft, ChevronRight, Filter, MapPin, Search, X } from "lucide-react";
 import Link from "next/link";
 import React, { JSX, useState, useEffect } from "react";
 import { format } from "date-fns";
@@ -223,10 +223,12 @@ export default function WhatsOnHeader() {
 
                 <div className="flex flex-row mx-auto  justify-center w-full items-center gap-0.5 space-x-4 mt-4 sm:w-full">
                     <div
-                        className={`sm:flex items-center hidden justify-center space-x-2 h-[48px] w-[111px] border rounded-full px-4 py-2 cursor-pointer transition-all ${isFilterOpen ? 'w-[300px] bg-[#FA6E80]' : 'w-[150px] bg-[#f7f7f700] border-[#FA6E80] '}`}
+                        className={`sm:flex items-center hidden justify-center space-x-2 h-[48px] border rounded-full px-4 py-2 cursor-pointer transition-all ${isFilterOpen ? 'w-[150px] bg-[#FA6E80]' : 'w-[150px] bg-[#f7f7f700] border-[#FA6E80] '}`}
                         onClick={() => setIsFilterOpen(!isFilterOpen)}
                     >
-                        <button className={`text-sm font-medium ${isFilterOpen ? 'text-white' : 'text-[#FA6E80]'}`}>Filter (<span>{"3"}</span>)</button>
+                        <button className={`text-sm font-medium whitespace-nowrap ${isFilterOpen ? 'text-white' : 'text-[#FA6E80]'}`}>
+                            {isFilterOpen ? 'Close Filter' : 'Filter (3)'}
+                        </button>
                         <Filter className={`h-5 w-5 ${isFilterOpen ? 'text-white' : 'text-[#FA6E80]'}`} />
                     </div>
                     <div className="flex flex-row border rounded-full px-1 py-2 justify-between items-center h-[48px] w-[240px] sm:w-[960px]">
@@ -273,6 +275,17 @@ export default function WhatsOnHeader() {
                     {isFilterOpen && (
                         <div className="hidden w-full max-w-[280px] overflow-y-auto p-4 space-y-2 sm:block">
                             <form onSubmit={handleFilterSubmit} className="space-y-5 rounded-[10px] border bg-white p-4 text-[#017A7C] shadow-sm">
+                                <div className="flex items-center justify-between mb-2">
+                                    <h3 className="text-lg font-semibold text-[#017A7C]">Filters</h3>
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsFilterOpen(false)}
+                                        className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                                        aria-label="Close filters"
+                                    >
+                                        <X className="h-5 w-5 text-gray-500" />
+                                    </button>
+                                </div>
                                 <div className="space-y-2">
                                     <div className="flex gap-3">
                                         {["free", "paid"].map((price) => (
@@ -472,6 +485,9 @@ function MobileFilter({
                 <DropdownMenuContent className="w-[273px] border-none" align="start">
                     <div className="h-screen max-w-[280px] w-full overflow-y-auto p-4 space-y-2">
                         <form onSubmit={handleFilterSubmit} className="space-y-5 rounded-[10px] border bg-white p-4 text-[#017A7C] shadow-sm">
+                            <div className="mb-3">
+                                <h3 className="text-lg font-semibold text-[#017A7C]">Filters</h3>
+                            </div>
                             <div className="flex gap-3">
                                 {["free", "paid"].map((price) => (
                                     <button
