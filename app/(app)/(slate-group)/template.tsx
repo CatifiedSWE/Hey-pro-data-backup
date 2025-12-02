@@ -41,6 +41,84 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
 
     const [similarAccounts, setSimilarAccounts] = useState<SimilarAccount[]>([]);
     const [loadingSimilar, setLoadingSimilar] = useState(true);
+    
+    // Referrals state
+    const [referralsCount, setReferralsCount] = useState(0);
+    const [referralsAvatars, setReferralsAvatars] = useState<string[]>([]);
+    const [loadingReferrals, setLoadingReferrals] = useState(true);
+
+    // Fetch referrals data
+    useEffect(() => {
+        const fetchReferrals = async () => {
+            try {
+                setLoadingReferrals(true);
+                
+                // Get auth session for API call
+                const { data: { session } } = await supabase.auth.getSession();
+                const token = session?.access_token;
+                
+                if (!token || !user?.id) {
+                    setLoadingReferrals(false);
+                    return;
+                }
+                
+                const headers: HeadersInit = {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                };
+                
+                const response = await fetch('/api/referrals', {
+                    method: 'GET',
+                    headers,
+                    cache: 'no-store'
+                });
+
+                if (!response.ok) {
+                    console.error('Failed to fetch referrals:', response.statusText);
+                    setLoadingReferrals(false);
+                    return;
+                }
+
+                const result = await response.json();
+
+                if (!result.success || !result.data) {
+                    setLoadingReferrals(false);
+                    return;
+                }
+
+                // Filter to show only RECEIVED referrals (where current user is the referred person)
+                const receivedReferrals = result.data.filter((ref: any) => 
+                    ref.referred?.id === user.id || ref.contextId === user.id
+                );
+
+                setReferralsCount(receivedReferrals.length);
+
+                // Get avatars from referrers (people who referred the current user)
+                const avatars = receivedReferrals
+                    .filter((ref: any) => ref.referrer?.avatar)
+                    .slice(0, 3) // Show max 3 avatars
+                    .map((ref: any) => ref.referrer.avatar);
+                
+                // Add fallback images if we have less than 3 avatars
+                const fallbackImages = ["/image (1).png", "/image (2).png", "/image (3).png"];
+                while (avatars.length < 3) {
+                    avatars.push(fallbackImages[avatars.length]);
+                }
+                
+                setReferralsAvatars(avatars);
+
+            } catch (error) {
+                console.error('Error fetching referrals:', error);
+            } finally {
+                setLoadingReferrals(false);
+            }
+        };
+
+        // Fetch when auth has finished loading and user is available
+        if (!authLoading && user?.id) {
+            fetchReferrals();
+        }
+    }, [authLoading, user?.id]);
 
     useEffect(() => {
         const fetchSimilarUsers = async () => {
