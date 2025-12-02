@@ -24,6 +24,10 @@ function getProfilePhotoWithFallback(profilePhotoUrl: string | null | undefined,
 }
 
 export function transformEventForCard(event: WhatsOnEvent) {
+  // Handle null creator gracefully
+  const creatorName = event.creator?.name || 'Unknown';
+  const creatorAvatar = event.creator?.profile_photo_url || null;
+  
   return {
     id: event.id,
     slug: event.slug,
@@ -37,9 +41,9 @@ export function transformEventForCard(event: WhatsOnEvent) {
     heroImage: event.hero_image_url || '/whats-on.png',
     thumbnail: event.thumbnail_url || '/whats-on.png',
     host: {
-      name: event.creator.name,
-      avatar: getProfilePhotoWithFallback(event.creator.profile_photo_url),
-      organization: event.creator.name
+      name: creatorName,
+      avatar: getProfilePhotoWithFallback(creatorAvatar),
+      organization: creatorName
     },
     rsvpCount: event.rsvp_count,
     isFullyBooked: event.is_fully_booked
@@ -70,6 +74,10 @@ export function formatDateRange(schedule: any[]): string {
 }
 
 export function transformEventForDetail(event: WhatsOnEvent) {
+  // Handle null creator gracefully
+  const creatorName = event.creator?.name || 'Unknown';
+  const creatorAvatar = event.creator?.profile_photo_url || null;
+  
   return {
     id: event.id,
     slug: event.slug,
@@ -83,9 +91,9 @@ export function transformEventForDetail(event: WhatsOnEvent) {
     dateRangeLabel: formatDateRange(event.schedule),
     rsvpBy: event.rsvp_deadline ? format(new Date(event.rsvp_deadline), 'EEE, MMM d yyyy') : 'TBA',
     host: {
-      name: event.creator.name,
-      organization: event.creator.name,
-      avatar: getProfilePhotoWithFallback(event.creator.profile_photo_url)
+      name: creatorName,
+      organization: creatorName,
+      avatar: getProfilePhotoWithFallback(creatorAvatar)
     },
     schedule: event.schedule.map(slot => ({
       dateLabel: format(new Date(slot.event_date), 'EEE, MMM d yyyy'),

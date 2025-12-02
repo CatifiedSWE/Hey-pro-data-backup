@@ -27,8 +27,8 @@ export interface WhatsOnEvent {
   tags: string[];
   creator: {
     name: string;
-    profile_photo_url: string;
-  };
+    profile_photo_url: string | null;
+  } | null;
   rsvp_count: number;
   spots_booked: number;
   is_fully_booked: boolean;
