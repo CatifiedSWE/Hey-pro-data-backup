@@ -161,7 +161,7 @@ export default function ManageWhatsOnPage() {
             setLoading(true);
             setError(null);
             const response = await whatsOnAPI.getMyEvents();
-            setEvents(response.data || []);
+            setEvents(response.data?.events || []);
         } catch (err: any) {
             console.error('Failed to fetch events:', err);
             setError(err.response?.data?.error || 'Failed to load events');
