@@ -7,11 +7,12 @@ import { createServerClient, validateAuthToken, successResponse, errorResponse }
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = createServerClient();
-    const eventIdentifier = params.id;
+    const { id } = await params;
+    const eventIdentifier = id;
     const authHeader = request.headers.get('Authorization');
     const user = await validateAuthToken(authHeader);
 
@@ -153,7 +154,7 @@ export async function GET(
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -168,7 +169,8 @@ export async function PATCH(
 
     const body = await request.json();
     const supabase = createServerClient();
-    const eventId = params.id;
+    const { id } = await params;
+    const eventId = id;
 
     // Verify user is event creator
     const { data: event, error: fetchError } = await supabase
@@ -317,7 +319,7 @@ export async function PATCH(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -331,7 +333,8 @@ export async function DELETE(
     }
 
     const supabase = createServerClient();
-    const eventId = params.id;
+    const { id } = await params;
+    const eventId = id;
 
     // Verify user is event creator
     const { data: event, error: fetchError } = await supabase
