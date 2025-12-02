@@ -95,8 +95,26 @@ export default function Collab() {
             
             if (pageNum === 1) {
                 setCollabPosts(response.collabs);
+                // Initialize saved collabs from backend data
+                const savedIds = new Set<string>();
+                response.collabs.forEach(collab => {
+                    if (collab.userHasSaved) {
+                        savedIds.add(collab.id);
+                    }
+                });
+                setSavedCollabs(savedIds);
             } else {
                 setCollabPosts(prev => [...prev, ...response.collabs]);
+                // Update saved collabs for new page data
+                setSavedCollabs(prev => {
+                    const newSet = new Set(prev);
+                    response.collabs.forEach(collab => {
+                        if (collab.userHasSaved) {
+                            newSet.add(collab.id);
+                        }
+                    });
+                    return newSet;
+                });
             }
             
             setHasMore(response.pagination.hasNextPage);
