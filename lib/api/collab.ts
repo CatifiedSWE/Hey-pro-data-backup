@@ -91,7 +91,14 @@ export async function getCollabs(params?: {
   if (params?.sortBy) searchParams.set('sortBy', params.sortBy);
   if (params?.sortOrder) searchParams.set('sortOrder', params.sortOrder);
 
-  const response = await fetch(`/api/collab?${searchParams.toString()}`);
+  // Include auth token if available to get user-specific data (saved, interest status)
+  const token = await getAuthToken();
+  const headers: HeadersInit = {};
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`/api/collab?${searchParams.toString()}`, { headers });
   
   if (!response.ok) {
     throw new Error('Failed to fetch collabs');
