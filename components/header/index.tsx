@@ -21,11 +21,9 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import {
   NavigationMenu,
-  NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
-  NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
 import Logo from "../logo"
@@ -69,28 +67,6 @@ const notifications = [
     read: true,
   },
 ]
-const components: { title: string; href: string; category: string }[] = [
-  // Pre Production
-  { title: "Casting", href: "/explore/casting", category: "Pre Production" },
-  { title: "Camera Operator", href: "/explore/camera-operator", category: "Pre Production" },
-  { title: "Cinematographer", href: "/explore/cinematographer", category: "Pre Production" },
-  { title: "Director", href: "/explore/director", category: "Pre Production" },
-  { title: "Location Manager", href: "/explore/location manager", category: "Pre Production" },
-  { title: "Screenwriter", href: "/explore/screenwriter", category: "Pre Production" },
-
-  // Post Production
-  { title: "Animator", href: "/explore/animator", category: "Post Production" },
-  { title: "Editor", href: "/explore/editor", category: "Post Production" },
-  { title: "Sound Technician", href: "/explore/sound-technician", category: "Post Production" },
-  { title: "VFX / SFX", href: "/explore/vfx-sfx", category: "Post Production" },
-
-
-  // Craft Services
-  { title: "Hairstylist", href: "/explore/hairstylist", category: "Craft Services" },
-  { title: "Makeup Artist", href: "/explore/makeup-artist", category: "Craft Services" },
-  { title: "Set Designer", href: "/explore/set-designer", category: "Craft Services" },
-
-]
 
 interface NavigationMenuItem {
   title: string;
@@ -101,6 +77,7 @@ const navigationMenuItems: NavigationMenuItem[] = [
   { title: "What’s on", href: "/whats-on" },
   { title: "Collab", href: "/collab" },
 ]
+
 export default function Header() {
   const [notificationOpen, setNotificationOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
@@ -160,46 +137,12 @@ export default function Header() {
               <NavigationMenu>
                 <NavigationMenuList className="flex-wrap">
                   <NavigationMenuItem>
-                    <NavigationMenuTrigger><Link href="/explore">Explore</Link></NavigationMenuTrigger>
-                    <NavigationMenuContent>
-                      <ul className="grid grid-cols-3 gap-4 w-[748px]">
-                        {["Pre Production", "Post Production", "Craft Services"].map(
-                          (category, idx, arr) => {
-                            const items = components.filter(c => c.category === category)
-                            return (
-                              <div key={category} className="flex">
-                                <div className="flex-1">
-                                  <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide">
-                                    {category}
-                                  </h3>
-                                  <div className="space-y-1">
-                                    {items.length > 0 ? (
-                                      items.map(component => (
-                                        <ListItem
-                                          key={component.title}
-                                          title={component.title}
-                                          href={component.href}
-                                        />
-                                      ))
-                                    ) : (
-                                      <p className="text-xs text-muted-foreground italic">
-                                        Coming soon
-                                      </p>
-                                    )}
-                                  </div>
-                                </div>
-                                {idx < arr.length - 1 && (
-                                  <Separator orientation="vertical" className="mx-4 h-auto hidden lg:block" />
-                                )}
-                              </div>
-                            )
-                          }
-                        )}
-                      </ul>
-                      <div className=" text-sm flex flex-row justify-center items-center mx-auto gap-3.5">
-                        <p>Discover on more field, jobs, events, etc,. </p> <Link href={"#"} className="text-[#31A7AC] font-[400]"> See More</Link>
-                      </div>
-                    </NavigationMenuContent>
+                    <NavigationMenuLink
+                        asChild
+                        className={navigationMenuTriggerStyle()}
+                    >
+                        <Link href="/explore">Crew Directory</Link>
+                    </NavigationMenuLink>
                   </NavigationMenuItem>
                   <NavigationMenuItem>
                     <div>
@@ -477,23 +420,5 @@ export default function Header() {
         </div>
       </div>
     </>
-  )
-}
-
-
-
-function ListItem({
-  title,
-  href,
-  ...props
-}: React.ComponentPropsWithoutRef<"li"> & { href: string }) {
-  return (
-    <li {...props}>
-      <NavigationMenuLink asChild>
-        <Link href={href}>
-          <div className="text-sm leading-none font-medium">{title}</div>
-        </Link>
-      </NavigationMenuLink>
-    </li>
   )
 }
