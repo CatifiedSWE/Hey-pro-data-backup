@@ -72,6 +72,15 @@ export default function Collab() {
     const observerRef = useRef<IntersectionObserver | null>(null);
     const loadMoreRef = useRef<HTMLDivElement>(null);
 
+    // Creation form state
+    const [submitting, setSubmitting] = useState(false);
+    const [posterPreview, setPosterPreview] = useState<string>("");
+    const [posterFile, setPosterFile] = useState<File | null>(null);
+    const [collabTitle, setCollabTitle] = useState("");
+    const [collabIdea, setCollabIdea] = useState("");
+    const [tagInput, setTagInput] = useState("");
+    const [tags, setTags] = useState<string[]>([]);
+
     // Fetch collabs
     const fetchCollabs = useCallback(async (pageNum: number) => {
         if (loading) return;
