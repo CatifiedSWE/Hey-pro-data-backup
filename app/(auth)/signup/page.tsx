@@ -23,43 +23,11 @@ const PasswordGeneratorIcon = () => (
 );
 
 interface PasswordValidation {
+  hasMinLength: boolean;
   hasUppercase: boolean;
   hasNumber: boolean;
   hasSpecialChar: boolean;
 }
-
-interface PasswordRuleProps {
-  label: string;
-  valid: boolean;
-  color?: "green" | "red";
-}
-
-const PasswordRule: React.FC<PasswordRuleProps> = ({
-  label,
-  valid,
-  color = "green",
-}) => (
-  <div className="flex items-center space-x-2">
-    <div
-      className={`w-1.5 h-1.5 md:w-2 md:h-2 rounded-full ${valid
-        ? color === "red"
-          ? "bg-red-500"
-          : "bg-green-500"
-        : "bg-gray-400"
-        }`}
-    ></div>
-    <span
-      className={`text-[10px] md:text-sm ${valid
-        ? color === "red"
-          ? "text-red-500"
-          : "text-green-500"
-        : "text-gray-500"
-        }`}
-    >
-      Password must contain <span className="font-medium">{label}</span>
-    </span>
-  </div>
-);
 
 const Divider: React.FC<{ label: string }> = ({ label }) => (
   <div className="flex items-center my-5 md:my-8">
