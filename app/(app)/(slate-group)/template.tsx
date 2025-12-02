@@ -391,6 +391,17 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                 </div>
 
             </div>
+            
+             <div className="fixed bottom-6 right-6 md:hidden z-50">
+                <div className="p-[2px] rounded-full bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC] shadow-lg">
+                    <Button
+                        className="h-14 w-14 rounded-full bg-white hover:bg-white p-0 flex items-center justify-center"
+                    >
+                        <Plus className="h-6 w-6 text-[#FA6E80]" />
+                    </Button>
+                </div>
+            </div>
+
         </div>
     );
 }
