@@ -200,8 +200,8 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
         bio: userProfile?.bio || "No bio available",
         backgroundImage: userProfile?.banner_url || "/bg.jpg",
         avatarImage: userProfile?.profile_photo_url || user?.user_metadata?.avatar_url || "/image (1).png",
-        referencesavatar: ["/image (1).png", "/image (2).png", "/image (3).png"],
-        totalref: 3000,
+        referencesavatar: referralsAvatars,
+        totalref: referralsCount,
         profileurl: "/profile",
         urls: [
             {
