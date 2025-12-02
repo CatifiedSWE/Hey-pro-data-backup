@@ -19,6 +19,11 @@ export async function GET(request: NextRequest) {
     const supabase = createServerClient();
     const offset = (page - 1) * limit;
 
+    // Get current user if authenticated (optional for public feed)
+    const authHeader = request.headers.get('Authorization');
+    const currentUser = await validateAuthToken(authHeader);
+    const currentUserId = currentUser?.id || null;
+
     // Build base query
     // Note: Fetch user data separately as direct foreign key joins to auth.users 
     // may not work in all Supabase configurations
