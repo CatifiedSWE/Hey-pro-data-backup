@@ -1,13 +1,13 @@
 "use client";
 import Image from "next/image";
-import { Heart, Loader2 } from "lucide-react";
+import { Heart, Loader2, Plus, X } from "lucide-react";
 import React, { useEffect, useState, useRef, useCallback } from "react";
 
 import { Header } from "../components/Header";
 import { Avatar } from "../components/Avatar";
 import CollabComment from "@/components/collab/CollabComment";
 import { ShareModal } from "@/components/collab/ShareModal";
-import { getCollabs, expressInterest, removeInterest, saveCollab, unsaveCollab, type CollabPost } from "@/lib/api/collab";
+import { getCollabs, expressInterest, removeInterest, saveCollab, unsaveCollab, createCollab, uploadCollabCover, type CollabPost } from "@/lib/api/collab";
 
 const TagPill = ({ label }: { label: string }) => (
     <span className="rounded-[40px] h-[24px] flex justify-center items-center border border-[#2FD3D8] px-4 py-1 text-xs font-medium text-[#2FD3D8]">{label}</span>
