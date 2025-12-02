@@ -87,11 +87,14 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                 }
 
                 // Filter to show only RECEIVED referrals (where current user is the referred person)
-                // The API returns enriched referrals with referred.id matching user profiles id
+                // The API returns all referrals (sent + received)
+                // We need to count only where the current user was referred BY someone else
+                // The referral structure from API has referred_user_id that we need to check
+                // But since API enriches data, we check if referrer exists (meaning we are the referred one)
                 const receivedReferrals = result.data.filter((ref: any) => {
-                    // Check if this referral is where current user was referred
-                    // The referred object contains the user who was referred
-                    return ref.referred && ref.referred.id;
+                    // If there's a referrer, it means someone referred us
+                    // Count this as a received referral
+                    return ref.referrer && ref.referrer.id;
                 });
 
                 setReferralsCount(receivedReferrals.length);
