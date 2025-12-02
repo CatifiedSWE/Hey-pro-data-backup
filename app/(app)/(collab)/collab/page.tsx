@@ -302,6 +302,95 @@ export default function Collab() {
             <Header />
 
             <div className="mt-16 sm:max-w-[960px] max-w-[393px] w-full space-y-10 text-black bg-transparent pb-10">
+                {/* Creation Form */}
+                <section className="rounded-[36px] bg-white p-6 shadow-[0_25px_120px_rgba(0,0,0,0.06)]">
+                    <form onSubmit={handleCreateSubmit} className="flex sm:flex-row flex-col gap-6">
+                        <div className="rounded-[32px] p-2 text-center text-sm text-black/70">
+                            <div className="relative flex h-[197px] w-[326px] items-center justify-center overflow-hidden rounded-[24px] bg-[#D9D9D9]">
+                                <input
+                                    type="file"
+                                    accept="image/png,image/jpeg,image/jpg"
+                                    className="absolute inset-0 cursor-pointer opacity-0"
+                                    onChange={handlePosterChange}
+                                    disabled={submitting}
+                                />
+                                {posterPreview ? (
+                                    <Image
+                                        src={posterPreview}
+                                        alt="Poster preview"
+                                        fill
+                                        sizes="(max-width: 960px) 100vw, 340px"
+                                        className="object-cover"
+                                        unoptimized
+                                    />
+                                ) : (
+                                    <span>Upload poster / moodboard</span>
+                                )}
+                            </div>
+                            <p className="mt-4 text-xs text-black/60">16:9 recommended • PNG / JPG up to 5MB</p>
+                        </div>
+                        <div className="space-y-4 text-black w-full">
+                            <input
+                                className={inputBase}
+                                placeholder="Collab title"
+                                value={collabTitle}
+                                onChange={(e) => setCollabTitle(e.target.value)}
+                                disabled={submitting}
+                                required
+                            />
+                            <textarea
+                                className={`${inputBase} min-h-[110px] rounded-3xl`}
+                                placeholder="What's your collab idea?"
+                                value={collabIdea}
+                                onChange={(e) => setCollabIdea(e.target.value)}
+                                disabled={submitting}
+                                required
+                            />
+                            <div className="space-y-2">
+                                <div className="flex gap-3 border rounded-2xl p-1 border-[#2FD3D8]">
+                                    <input
+                                        className="border-none focus:outline-none px-3.5 bg-transparent w-full"
+                                        placeholder="Add collab tags"
+                                        value={tagInput}
+                                        onChange={(e) => setTagInput(e.target.value)}
+                                        onKeyDown={(event) => {
+                                            if (event.key === "Enter") {
+                                                event.preventDefault();
+                                                handleAddTag();
+                                            }
+                                        }}
+                                        disabled={submitting}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={handleAddTag}
+                                        className="whitespace-nowrap rounded-[15px] h-[41px] px-4 py-3 text-sm font-[400] text-[#FA6E80]"
+                                        disabled={submitting}
+                                    >
+                                        <Plus className="h-6 w-6" />
+                                    </button>
+                                </div>
+                                {tags.length > 0 && (
+                                    <div className="flex flex-wrap gap-2">
+                                        {tags.map((tag) => (
+                                            <CreateTagPill key={tag} label={tag} onRemove={() => handleRemoveTag(tag)} />
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                            <button 
+                                type="submit" 
+                                className="w-full rounded-[15px] h-[41px] bg-[#FA6E80] py-3 text-sm font-semibold text-white shadow-lg hover:bg-[#f5576b] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                disabled={submitting}
+                            >
+                                {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+                                {submitting ? 'Posting...' : 'Post your collab'}
+                            </button>
+                        </div>
+                    </form>
+                </section>
+
+                {/* Collab Posts Feed */}
                 <section className="space-y-8">
                     {collabPosts.map((post) => (
                         <article key={post.id} className="grid gap-6 md:grid-cols-[360px_auto] p-2">
