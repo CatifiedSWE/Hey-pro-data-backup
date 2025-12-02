@@ -43,8 +43,8 @@ export default function EventListingPage({ isFilterOpen, events, loading }: Even
 
     return (
         <div className={`flex justify-center items-center py-1 ${poppins.variable} font-poppins`}>
-            <div className="w-full mx-autopx-2 md:px-0">
-                <div className={`grid ${isFilterOpen ? "sm:grid-cols-3 grid-cols-2 -mt-15" : "grid-cols-2 md:grid-cols-3 lg:grid-cols-4"} auto-rows-fr gap-[7.46px] md:gap-[10px]`}>
+            <div className="w-full mx-auto px-2 md:px-0">
+                <div className={`grid ${isFilterOpen ? "sm:grid-cols-3 grid-cols-2 -mt-15" : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"} auto-rows-fr gap-[7.46px] md:gap-[10px]`}>
                     {events.map((event) => (
                         <EventCard key={event.id} event={event} />
                     ))}
@@ -58,7 +58,7 @@ const EventCard = ({ event }: { event: TransformedEvent }) => {
     const dateLabel = event.dateRangeLabel;
     return (
         <Link href={`/whats-on/${event.slug}`}>
-            <div className="flex flex-col items-start bg-[#FAFAFA] rounded-[18px] md:rounded-[24px] p-[6.4px] md:p-[8.6px] gap-[7.46px] md:gap-[10px] w-full transition-shadow duration-300 hover:shadow-md">
+            <div className="flex flex-col items-start bg-[#FAFAFA] rounded-[18px] md:rounded-[24px] p-[6.4px] md:p-[8.6px] gap-[7.46px] md:gap-[10px] w-full transition-shadow duration-300 hover:shadow-md h-full">
                 <div className="relative w-full aspect-[160/105] md:aspect-[214/140]">
                     <Image
                         src={event.heroImage}
@@ -77,7 +77,7 @@ const EventCard = ({ event }: { event: TransformedEvent }) => {
                 </div>
 
                 {/* Content Section */}
-                <div className="flex flex-col w-full relative">
+                <div className="flex flex-col w-full relative flex-grow">
 
                     {/* Title - Frame 37333 */}
                     <h3 className="text-black text-[11.5px] md:text-[15.5px] leading-[17px] md:leading-[23px] font-normal mb-[4.5px] md:mb-[6px] truncate w-full">
@@ -96,7 +96,7 @@ const EventCard = ({ event }: { event: TransformedEvent }) => {
                     <div className="flex items-center justify-between w-full mt-auto">
                         {/* Author */}
                         <span className="text-[#444444] text-[7.5px] md:text-[10px] leading-[11px] md:leading-[15px]">
-                            {event.host.name}
+                            Posted by {event.host.name}
                         </span>
                         <div className={`${event.isPaid ? 'bg-[#FCAF45]' : 'bg-[#31A7AC]'} rounded-full w-[17px] h-[17px] md:w-[23px] md:h-[23px] flex items-center justify-center shadow-sm`}>
                             {event.isPaid ? (
@@ -116,8 +116,8 @@ const EventCard = ({ event }: { event: TransformedEvent }) => {
 function EventListingSkeleton({ isFilterOpen }: { isFilterOpen?: boolean }) {
     return (
         <div className={`flex justify-center items-center py-1 ${poppins.variable} font-poppins`}>
-            <div className="w-full mx-autopx-2 md:px-0">
-                <div className={`grid ${isFilterOpen ? "sm:grid-cols-3 grid-cols-2 -mt-15" : "grid-cols-2 md:grid-cols-3 lg:grid-cols-4"} auto-rows-fr gap-[7.46px] md:gap-[10px]`}>
+            <div className="w-full mx-auto px-2 md:px-0">
+                <div className={`grid ${isFilterOpen ? "sm:grid-cols-3 grid-cols-2 -mt-15" : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"} auto-rows-fr gap-[7.46px] md:gap-[10px]`}>
                     {[...Array(8)].map((_, i) => (
                         <div key={i} className="flex flex-col items-start bg-[#FAFAFA] rounded-[18px] md:rounded-[24px] p-[6.4px] md:p-[8.6px] gap-[7.46px] md:gap-[10px] w-full animate-pulse">
                             <div className="relative w-full aspect-[160/105] md:aspect-[214/140] bg-gray-200 rounded-[11.5px] md:rounded-[15.5px]" />
