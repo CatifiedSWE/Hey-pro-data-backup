@@ -12,7 +12,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { Avatar } from "../../components/Avatar";
+import { Avatar } from "../../../components/Avatar";
 import { updateCollab, deleteCollab, uploadCollabCover, closeCollab, type CollabDetail } from "@/lib/api/collab";
 
 const inputBase = "w-full rounded-[18px] border border-[#444444] bg-white/40 px-5 py-3 text-sm text-gray-900 placeholder:text-gray-500 focus:border-[#444444] focus:outline-none";
