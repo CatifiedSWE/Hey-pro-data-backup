@@ -135,6 +135,7 @@ export default function AddGigPage() {
     const fileInputRef = useRef<HTMLInputElement | null>(null)
     const previewUrlRef = useRef<string | null>(null)
     const [oscarAiSuggestion, setOscarAiSuggestion] = useState(false)
+    const [isSubmitting, setIsSubmitting] = useState(false)
 
     // Sample data for Oscar AI
     const fillSampleGigData = () => {
