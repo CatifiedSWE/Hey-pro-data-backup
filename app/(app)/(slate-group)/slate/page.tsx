@@ -223,10 +223,15 @@ function SlateCard({ profileAvtar,
                     />
                 )}
             </div>
-            <div className="flex flex-row gap-3.5 justify-start">
-                <span><Heart className="h-6 w-6 md:h-7 md:w-7" /></span>
-                <span><MessageCircle className="h-6 w-6 md:h-7 md:w-7" /></span>
-                <span><Send className="h-6 w-6 md:h-7 md:w-7" /></span>
+            <div className="flex items-center justify-between">
+                <div className="flex flex-row gap-3.5 justify-start">
+                    <span><Heart className="h-6 w-6 md:h-7 md:w-7" /></span>
+                    <span><MessageCircle className="h-6 w-6 md:h-7 md:w-7" /></span>
+                    <span><Send className="h-6 w-6 md:h-7 md:w-7" /></span>
+                </div>
+                <div>
+                    <span><Bookmark className="h-6 w-6 md:h-7 md:w-7" /></span>
+                </div>
             </div>
             <DescriptionWithShowMore description={description} />
             <Separator className="" />
