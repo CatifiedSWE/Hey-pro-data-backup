@@ -232,19 +232,33 @@ export default function AddGigPage() {
         [formValues, crewCount, isTbc, requestQuote, referenceFile, monthDateSummaries, formattedSelectedDates],
     )
 
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault()
-        const payload = {
-            crewCount,
-            ...formValues,
-            dates: selectedDates.map((key) => new Date(key)),
-            isTbc,
-            requestQuote,
-            referenceFileName: referenceFile?.name || null,
-            referenceFile,
-            expiryDate,
+    const handleSubmit = async (status: 'draft' | 'published') => {
+        setIsSubmitting(true)
+        try {
+            const payload = {
+                crewCount,
+                ...formValues,
+                dates: selectedDates.map((key) => new Date(key)),
+                isTbc,
+                requestQuote,
+                referenceFileName: referenceFile?.name || null,
+                referenceFile,
+                expiryDate,
+                status,
+            }
+            console.log(`${status === 'published' ? 'Publishing' : 'Saving to draft'} gig payload:`, payload)
+            
+            // TODO: Add API call here to save/publish the gig
+            // await createGig(payload)
+            
+            // Show success message
+            alert(`Gig ${status === 'published' ? 'published' : 'saved to draft'} successfully!`)
+        } catch (error) {
+            console.error('Error submitting gig:', error)
+            alert('Failed to submit gig. Please try again.')
+        } finally {
+            setIsSubmitting(false)
         }
-        console.log("Create gig payload", payload)
     }
 
     const resetForm = () => {
