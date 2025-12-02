@@ -363,3 +363,167 @@ export async function getInterestedUsers(collabId: string, params?: {
   const result = await response.json();
   return result.data;
 }
+
+/**
+ * Save/bookmark a collab post
+ */
+export async function saveCollab(collabId: string): Promise<{ totalSaves: number }> {
+  const token = await getAuthToken();
+  if (!token) {
+    throw new Error('Authentication required');
+  }
+
+  const response = await fetch(`/api/collab/${collabId}/save`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to save collab');
+  }
+
+  const result = await response.json();
+  return result.data;
+}
+
+/**
+ * Remove save/bookmark from a collab post
+ */
+export async function unsaveCollab(collabId: string): Promise<{ totalSaves: number }> {
+  const token = await getAuthToken();
+  if (!token) {
+    throw new Error('Authentication required');
+  }
+
+  const response = await fetch(`/api/collab/${collabId}/save`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to unsave collab');
+  }
+
+  const result = await response.json();
+  return result.data;
+}
+
+/**
+ * Share a collab post
+ */
+export async function shareCollab(
+  collabId: string, 
+  shareType: 'link' | 'twitter' | 'linkedin' | 'facebook'
+): Promise<{ totalShares: number }> {
+  const token = await getAuthToken();
+  if (!token) {
+    throw new Error('Authentication required');
+  }
+
+  const response = await fetch(`/api/collab/${collabId}/share`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ share_type: shareType })
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to share collab');
+  }
+
+  const result = await response.json();
+  return result.data;
+}
+
+// Comment types
+export type Comment = {
+  id: string;
+  collab_id: string;
+  user_id: string;
+  parent_id: string | null;
+  content: string;
+  created_at: string;
+  updated_at: string;
+  user: {
+    name: string;
+    avatar: string;
+  };
+  replies: Comment[];
+};
+
+/**
+ * Get comments for a collab post
+ */
+export async function getComments(collabId: string): Promise<{ comments: Comment[]; totalComments: number }> {
+  const response = await fetch(`/api/collab/${collabId}/comments`);
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to fetch comments');
+  }
+
+  const result = await response.json();
+  return result.data;
+}
+
+/**
+ * Add a comment or reply
+ */
+export async function addComment(
+  collabId: string, 
+  content: string, 
+  parentId?: string
+): Promise<Comment> {
+  const token = await getAuthToken();
+  if (!token) {
+    throw new Error('Authentication required');
+  }
+
+  const response = await fetch(`/api/collab/${collabId}/comments`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ content, parent_id: parentId })
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to add comment');
+  }
+
+  const result = await response.json();
+  return result.data;
+}
+
+/**
+ * Delete a comment
+ */
+export async function deleteComment(collabId: string, commentId: string): Promise<void> {
+  const token = await getAuthToken();
+  if (!token) {
+    throw new Error('Authentication required');
+  }
+
+  const response = await fetch(`/api/collab/${collabId}/comments/${commentId}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to delete comment');
+  }
+}
