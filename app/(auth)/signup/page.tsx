@@ -87,10 +87,40 @@ export default function SignUpPage() {
   }, [router]);
 
   const validatePassword = (password: string): PasswordValidation => ({
+    hasMinLength: password.length >= 8,
     hasUppercase: /[A-Z]/.test(password),
     hasNumber: /[0-9]/.test(password),
     hasSpecialChar: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password),
   });
+
+  // Generate secure random password
+  const generatePassword = () => {
+    const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const lowercase = 'abcdefghijklmnopqrstuvwxyz';
+    const numbers = '0123456789';
+    const specialChars = '!@#$%^&*()_+-=[]{};\':"|,.<>/?';
+    
+    // Ensure at least one of each required type
+    let password = '';
+    password += uppercase[Math.floor(Math.random() * uppercase.length)];
+    password += numbers[Math.floor(Math.random() * numbers.length)];
+    password += specialChars[Math.floor(Math.random() * specialChars.length)];
+    
+    // Fill the rest with random characters from all sets
+    const allChars = uppercase + lowercase + numbers + specialChars;
+    for (let i = password.length; i < 12; i++) {
+      password += allChars[Math.floor(Math.random() * allChars.length)];
+    }
+    
+    // Shuffle the password to randomize positions
+    password = password.split('').sort(() => Math.random() - 0.5).join('');
+    
+    setFormData({ ...formData, password });
+    setPasswordValidation(validatePassword(password));
+    setShowPassword(true); // Show the generated password
+    if (error) setError('');
+    toast.success('Password generated successfully!');
+  };
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newPassword = e.target.value;
