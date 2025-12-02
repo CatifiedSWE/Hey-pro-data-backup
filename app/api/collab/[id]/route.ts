@@ -93,43 +93,87 @@ export async function GET(
     const isOwner = user?.id === collab.user_id;
     
     if (isOwner) {
-      const { data: collabData } = await supabase
-        .from('collab_collaborators')
-        .select('id, role, department, added_at, user_id')
-        .eq('collab_id', collabId);
+        // Get interested users for the collaborators table
+        const { data: interestedUsers, error: interestedError } = await supabase
+          .from('collab_interests')
+          .select('id, created_at, user_id')
+          .eq('collab_id', collabId)
+          .order('created_at', { ascending: false });
 
-      if (collabData && collabData.length > 0) {
-        const collaboratorUserIds = collabData.map((c: any) => c.user_id);
-        const { data: collaboratorProfiles } = await supabase
-          .from('user_profiles')
-          .select('user_id, first_name, surname, alias_first_name, alias_surname, profile_photo_url')
-          .in('user_id', collaboratorUserIds);
+        if (interestedUsers && interestedUsers.length > 0) {
+            const interestedUserIds = interestedUsers.map((i: any) => i.user_id);
+            const { data: interestedProfiles } = await supabase
+                .from('user_profiles')
+                .select('user_id, first_name, surname, alias_first_name, alias_surname, profile_photo_url')
+                .in('user_id', interestedUserIds);
 
-        collaborators = collabData.map((c: any) => {
-          const profile = collaboratorProfiles?.find((p: any) => p.user_id === c.user_id);
-          // Use alias name if available, otherwise use regular name
-          const firstName = profile?.alias_first_name || profile?.first_name || '';
-          const surname = profile?.alias_surname || profile?.surname || '';
-          const name = `${firstName} ${surname}`.trim() || 'Unknown';
-          
-          // Priority: uploaded profile photo -> Google metadata -> placeholder
-          let avatar = '/placeholder-avatar.png';
-          if (profile?.profile_photo_url && profile.profile_photo_url.trim() !== '') {
-            avatar = profile.profile_photo_url;
-          } else if (googleAvatarMap.has(c.user_id)) {
-            avatar = googleAvatarMap.get(c.user_id)!;
-          }
-          
-          return {
-            id: c.id,
-            name,
-            avatar,
-            role: c.role,
-            department: c.department,
-            added_at: c.added_at
-          };
-        });
-      }
+            collaborators = interestedUsers.map((interest: any) => {
+                const profile = interestedProfiles?.find((p: any) => p.user_id === interest.user_id);
+                // Use alias name if available, otherwise use regular name
+                const firstName = profile?.alias_first_name || profile?.first_name || '';
+                const surname = profile?.alias_surname || profile?.surname || '';
+                const name = `${firstName} ${surname}`.trim() || 'Unknown';
+                
+                // Priority: uploaded profile photo -> Google metadata -> placeholder
+                let avatar = '/placeholder-avatar.png';
+                if (profile?.profile_photo_url && profile.profile_photo_url.trim() !== '') {
+                    avatar = profile.profile_photo_url;
+                } else if (googleAvatarMap.has(interest.user_id)) {
+                    avatar = googleAvatarMap.get(interest.user_id)!;
+                }
+                
+                return {
+                    id: interest.id,
+                    name,
+                    avatar,
+                    role: 'DOP', // Default role for interested users
+                    department: '', // Empty department for interested users
+                    added_at: interest.created_at
+                };
+            });
+        }
+
+        // Also get actual confirmed collaborators if any exist
+        const { data: confirmedCollabData } = await supabase
+            .from('collab_collaborators')
+            .select('id, role, department, added_at, user_id')
+            .eq('collab_id', collabId);
+
+        if (confirmedCollabData && confirmedCollabData.length > 0) {
+            const collaboratorUserIds = confirmedCollabData.map((c: any) => c.user_id);
+            const { data: collaboratorProfiles } = await supabase
+                .from('user_profiles')
+                .select('user_id, first_name, surname, alias_first_name, alias_surname, profile_photo_url')
+                .in('user_id', collaboratorUserIds);
+
+            const confirmedCollaborators = confirmedCollabData.map((c: any) => {
+                const profile = collaboratorProfiles?.find((p: any) => p.user_id === c.user_id);
+                // Use alias name if available, otherwise use regular name
+                const firstName = profile?.alias_first_name || profile?.first_name || '';
+                const surname = profile?.alias_surname || profile?.surname || '';
+                const name = `${firstName} ${surname}`.trim() || 'Unknown';
+                
+                // Priority: uploaded profile photo -> Google metadata -> placeholder
+                let avatar = '/placeholder-avatar.png';
+                if (profile?.profile_photo_url && profile.profile_photo_url.trim() !== '') {
+                    avatar = profile.profile_photo_url;
+                } else if (googleAvatarMap.has(c.user_id)) {
+                    avatar = googleAvatarMap.get(c.user_id)!;
+                }
+                
+                return {
+                    id: c.id,
+                    name,
+                    avatar,
+                    role: c.role || 'DOP',
+                    department: c.department || '',
+                    added_at: c.added_at
+                };
+            });
+
+            // Add confirmed collaborators to the list (they should appear first)
+            collaborators = [...confirmedCollaborators, ...collaborators];
+        }
     }
 
     const response = {
