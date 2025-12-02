@@ -140,8 +140,7 @@ export default function AvalableDilog({ initialProfile, triggerClassName, onUpda
                         </SelectTrigger>
                         <SelectContent className="rounded-2xl">
                             <SelectItem value="Available">Available</SelectItem>
-                            <SelectItem value="Busy">Busy</SelectItem>
-                            <SelectItem value="Unavailable">Unavailable</SelectItem>
+                            <SelectItem value="Not Available">Not Available</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
