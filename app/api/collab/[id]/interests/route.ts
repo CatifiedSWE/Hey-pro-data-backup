@@ -74,6 +74,22 @@ export async function GET(
         .select('user_id, first_name, surname, alias_first_name, alias_surname, profile_photo_url, bio')
         .in('user_id', userIds);
 
+      // Fetch Google OAuth avatars for interested users
+      const { data: authUsersResponse } = await supabase.auth.admin.listUsers();
+      
+      // Create a map of user_id to Google avatar
+      const googleAvatarMap = new Map<string, string>();
+      if (authUsersResponse?.users) {
+        authUsersResponse.users.forEach(authUser => {
+          if (authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture) {
+            googleAvatarMap.set(
+              authUser.id, 
+              authUser.user_metadata.avatar_url || authUser.user_metadata.picture
+            );
+          }
+        });
+      }
+
       formattedInterests = interests.map((interest: any) => {
         const profile = userProfiles?.find((p: any) => p.user_id === interest.user_id);
         // Use alias name if available, otherwise use regular name
@@ -81,10 +97,13 @@ export async function GET(
         const surname = profile?.alias_surname || profile?.surname || '';
         const name = `${firstName} ${surname}`.trim() || 'Unknown';
         
-        // Ensure profile photo URL is valid and not empty
-        const avatar = profile?.profile_photo_url && profile.profile_photo_url.trim() !== '' 
-          ? profile.profile_photo_url 
-          : '/placeholder-avatar.png';
+        // Priority: uploaded profile photo -> Google metadata -> placeholder
+        let avatar = '/placeholder-avatar.png';
+        if (profile?.profile_photo_url && profile.profile_photo_url.trim() !== '') {
+          avatar = profile.profile_photo_url;
+        } else if (googleAvatarMap.has(interest.user_id)) {
+          avatar = googleAvatarMap.get(interest.user_id)!;
+        }
 
         return {
           id: interest.id,

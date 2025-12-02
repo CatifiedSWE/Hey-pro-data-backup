@@ -40,15 +40,34 @@ export async function GET(
       .eq('user_id', collab.user_id)
       .single();
 
+    // Fetch Google OAuth avatar for author
+    const { data: authUsersResponse } = await supabase.auth.admin.listUsers();
+    
+    // Create a map of user_id to Google avatar
+    const googleAvatarMap = new Map<string, string>();
+    if (authUsersResponse?.users) {
+      authUsersResponse.users.forEach(authUser => {
+        if (authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture) {
+          googleAvatarMap.set(
+            authUser.id, 
+            authUser.user_metadata.avatar_url || authUser.user_metadata.picture
+          );
+        }
+      });
+    }
+
     // Use alias name if available, otherwise use regular name
     const firstName = authorProfile?.alias_first_name || authorProfile?.first_name || '';
     const surname = authorProfile?.alias_surname || authorProfile?.surname || '';
     const authorName = `${firstName} ${surname}`.trim() || 'Unknown';
     
-    // Ensure profile photo URL is valid and not empty
-    const authorAvatar = authorProfile?.profile_photo_url && authorProfile.profile_photo_url.trim() !== '' 
-      ? authorProfile.profile_photo_url 
-      : '/placeholder-avatar.png';
+    // Priority: uploaded profile photo -> Google metadata -> placeholder
+    let authorAvatar = '/placeholder-avatar.png';
+    if (authorProfile?.profile_photo_url && authorProfile.profile_photo_url.trim() !== '') {
+      authorAvatar = authorProfile.profile_photo_url;
+    } else if (googleAvatarMap.has(collab.user_id)) {
+      authorAvatar = googleAvatarMap.get(collab.user_id)!;
+    }
 
     // Get interest count
     const { count: interestCount } = await supabase
@@ -93,10 +112,13 @@ export async function GET(
           const surname = profile?.alias_surname || profile?.surname || '';
           const name = `${firstName} ${surname}`.trim() || 'Unknown';
           
-          // Ensure profile photo URL is valid and not empty
-          const avatar = profile?.profile_photo_url && profile.profile_photo_url.trim() !== '' 
-            ? profile.profile_photo_url 
-            : '/placeholder-avatar.png';
+          // Priority: uploaded profile photo -> Google metadata -> placeholder
+          let avatar = '/placeholder-avatar.png';
+          if (profile?.profile_photo_url && profile.profile_photo_url.trim() !== '') {
+            avatar = profile.profile_photo_url;
+          } else if (googleAvatarMap.has(c.user_id)) {
+            avatar = googleAvatarMap.get(c.user_id)!;
+          }
           
           return {
             id: c.id,

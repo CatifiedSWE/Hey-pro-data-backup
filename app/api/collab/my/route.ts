@@ -56,6 +56,35 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Fetch Google OAuth avatars for all interested users (batch query)
+    const allInterestedUserIds = new Set<string>();
+    await Promise.all(
+      (collabs || []).map(async (collab: any) => {
+        const { data } = await supabase
+          .from('collab_interests')
+          .select('user_id')
+          .eq('collab_id', collab.id)
+          .limit(3);
+        data?.forEach((u: any) => allInterestedUserIds.add(u.user_id));
+      })
+    );
+
+    // Fetch Google OAuth metadata for all interested users
+    const { data: authUsersResponse } = await supabase.auth.admin.listUsers();
+    
+    // Create a map of user_id to Google avatar
+    const googleAvatarMap = new Map<string, string>();
+    if (authUsersResponse?.users) {
+      authUsersResponse.users.forEach(authUser => {
+        if (authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture) {
+          googleAvatarMap.set(
+            authUser.id, 
+            authUser.user_metadata.avatar_url || authUser.user_metadata.picture
+          );
+        }
+      });
+    }
+
     // Format collabs with details
     const collabsWithDetails = await Promise.all(
       (collabs || []).map(async (collab: any) => {
@@ -71,15 +100,20 @@ export async function GET(request: NextRequest) {
           const userIds = interestedUserIds.map((u: any) => u.user_id);
           const { data: interestedProfiles } = await supabase
             .from('user_profiles')
-            .select('profile_photo_url')
+            .select('user_id, profile_photo_url')
             .in('user_id', userIds)
             .limit(3);
 
-          interestAvatars = interestedProfiles?.map((profile: any) => 
-            profile.profile_photo_url && profile.profile_photo_url.trim() !== '' 
-              ? profile.profile_photo_url 
-              : '/placeholder-avatar.png'
-          ) || [];
+          interestAvatars = interestedProfiles?.map((profile: any) => {
+            // Priority: uploaded profile photo -> Google metadata -> placeholder
+            if (profile.profile_photo_url && profile.profile_photo_url.trim() !== '') {
+              return profile.profile_photo_url;
+            } else if (googleAvatarMap.has(profile.user_id)) {
+              return googleAvatarMap.get(profile.user_id)!;
+            } else {
+              return '/placeholder-avatar.png';
+            }
+          }) || [];
         }
 
         return {
@@ -93,7 +127,7 @@ export async function GET(request: NextRequest) {
           interests: collab.interests?.[0]?.count || 0,
           collaborators: collab.collaborators?.[0]?.count || 0,
           interestAvatars,
-          created_at: collab.created_at,
+          created_at: collab.updated_at,
           updated_at: collab.updated_at
         };
       })

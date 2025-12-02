@@ -73,6 +73,45 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Fetch Google OAuth avatars for all users at once (batch query)
+    // Collect all unique user IDs (authors + interested users)
+    const allUserIds = new Set<string>();
+    filteredCollabs.forEach((collab: any) => {
+      allUserIds.add(collab.user_id);
+    });
+
+    // Also collect interested user IDs
+    const interestedUsersData = await Promise.all(
+      filteredCollabs.map(async (collab: any) => {
+        const { data } = await supabase
+          .from('collab_interests')
+          .select('user_id')
+          .eq('collab_id', collab.id)
+          .limit(3);
+        return { collabId: collab.id, users: data || [] };
+      })
+    );
+
+    interestedUsersData.forEach((item: any) => {
+      item.users.forEach((u: any) => allUserIds.add(u.user_id));
+    });
+
+    // Fetch Google OAuth metadata for all users
+    const { data: authUsersResponse } = await supabase.auth.admin.listUsers();
+    
+    // Create a map of user_id to Google avatar
+    const googleAvatarMap = new Map<string, string>();
+    if (authUsersResponse?.users) {
+      authUsersResponse.users.forEach(authUser => {
+        if (authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture) {
+          googleAvatarMap.set(
+            authUser.id, 
+            authUser.user_metadata.avatar_url || authUser.user_metadata.picture
+          );
+        }
+      });
+    }
+
     // Get interest avatars and author details for each collab
     const collabsWithDetails = await Promise.all(
       filteredCollabs.map(async (collab: any) => {
@@ -84,27 +123,29 @@ export async function GET(request: NextRequest) {
           .eq('user_id', collab.user_id)
           .single();
 
-        // Get first 3 interested users' avatars from user_profiles
-        const { data: interestedUserIds } = await supabase
-          .from('collab_interests')
-          .select('user_id')
-          .eq('collab_id', collab.id)
-          .limit(3);
+        // Get interested users data from cached results
+        const interestedData = interestedUsersData.find((item: any) => item.collabId === collab.id);
+        const interestedUserIds = interestedData?.users || [];
 
         let interestAvatars: string[] = [];
-        if (interestedUserIds && interestedUserIds.length > 0) {
+        if (interestedUserIds.length > 0) {
           const userIds = interestedUserIds.map((u: any) => u.user_id);
           const { data: interestedProfiles } = await supabase
             .from('user_profiles')
-            .select('profile_photo_url')
+            .select('user_id, profile_photo_url')
             .in('user_id', userIds)
             .limit(3);
 
-          interestAvatars = interestedProfiles?.map((profile: any) => 
-            profile.profile_photo_url && profile.profile_photo_url.trim() !== '' 
-              ? profile.profile_photo_url 
-              : '/placeholder-avatar.png'
-          ) || [];
+          interestAvatars = interestedProfiles?.map((profile: any) => {
+            // Priority: uploaded profile photo -> Google metadata -> placeholder
+            if (profile.profile_photo_url && profile.profile_photo_url.trim() !== '') {
+              return profile.profile_photo_url;
+            } else if (googleAvatarMap.has(profile.user_id)) {
+              return googleAvatarMap.get(profile.user_id)!;
+            } else {
+              return '/placeholder-avatar.png';
+            }
+          }) || [];
         }
 
         // Use alias name if available, otherwise use regular name
@@ -112,10 +153,13 @@ export async function GET(request: NextRequest) {
         const surname = authorProfile?.alias_surname || authorProfile?.surname || '';
         const authorName = `${firstName} ${surname}`.trim() || 'Unknown';
         
-        // Ensure profile photo URL is valid and not empty
-        const authorAvatar = authorProfile?.profile_photo_url && authorProfile.profile_photo_url.trim() !== '' 
-          ? authorProfile.profile_photo_url 
-          : '/placeholder-avatar.png';
+        // Priority: uploaded profile photo -> Google metadata -> placeholder
+        let authorAvatar = '/placeholder-avatar.png';
+        if (authorProfile?.profile_photo_url && authorProfile.profile_photo_url.trim() !== '') {
+          authorAvatar = authorProfile.profile_photo_url;
+        } else if (googleAvatarMap.has(collab.user_id)) {
+          authorAvatar = googleAvatarMap.get(collab.user_id)!;
+        }
 
         return {
           id: collab.id,

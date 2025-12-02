@@ -41,6 +41,22 @@ export async function GET(
         .select('user_id, first_name, surname, profile_photo_url')
         .in('user_id', userIds);
 
+      // Fetch Google OAuth avatars for collaborators
+      const { data: authUsersResponse } = await supabase.auth.admin.listUsers();
+      
+      // Create a map of user_id to Google avatar
+      const googleAvatarMap = new Map<string, string>();
+      if (authUsersResponse?.users) {
+        authUsersResponse.users.forEach(authUser => {
+          if (authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture) {
+            googleAvatarMap.set(
+              authUser.id, 
+              authUser.user_metadata.avatar_url || authUser.user_metadata.picture
+            );
+          }
+        });
+      }
+
       formattedCollaborators = collaborators.map((collab: any) => {
         const userProfile = userProfiles?.find((p: any) => p.user_id === collab.user_id);
         const addedByProfile = userProfiles?.find((p: any) => p.user_id === collab.added_by);
@@ -53,12 +69,20 @@ export async function GET(
           ? `${addedByProfile.first_name || ''} ${addedByProfile.surname || ''}`.trim() || 'Unknown'
           : 'Unknown';
 
+        // Priority: uploaded profile photo -> Google metadata -> placeholder
+        let userAvatar = '/placeholder-avatar.png';
+        if (userProfile?.profile_photo_url && userProfile.profile_photo_url.trim() !== '') {
+          userAvatar = userProfile.profile_photo_url;
+        } else if (googleAvatarMap.has(collab.user_id)) {
+          userAvatar = googleAvatarMap.get(collab.user_id)!;
+        }
+
         return {
           id: collab.id,
           user: {
             id: collab.user_id,
             name: userName,
-            avatar: userProfile?.profile_photo_url || '/placeholder-avatar.png'
+            avatar: userAvatar
           },
           role: collab.role,
           department: collab.department,
