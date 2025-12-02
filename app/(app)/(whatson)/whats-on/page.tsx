@@ -285,7 +285,7 @@ export default function WhatsOnHeader() {
                     </div>
                 )}
                 
-                <div className=" flex flex-row mx-auto justify-center ">
+                <div className=" flex flex-row mx-auto justify-center w-full px-4 sm:px-6 lg:px-8">
                     {isFilterOpen && (
                         <div className="hidden w-full max-w-[280px] overflow-y-auto p-4 space-y-2 sm:block">
                             <form onSubmit={handleFilterSubmit} className="space-y-5 rounded-[10px] border bg-white p-4 text-[#017A7C] shadow-sm">

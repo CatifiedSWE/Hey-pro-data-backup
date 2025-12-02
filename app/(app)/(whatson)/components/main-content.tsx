@@ -42,9 +42,9 @@ export default function EventListingPage({ isFilterOpen, events, loading }: Even
     }
 
     return (
-        <div className={`flex justify-center items-center py-1 ${poppins.variable} font-poppins`}>
-            <div className="w-full mx-auto px-2 md:px-0">
-                <div className={`grid ${isFilterOpen ? "sm:grid-cols-3 grid-cols-2 -mt-15" : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"} auto-rows-fr gap-[7.46px] md:gap-[10px]`}>
+        <div className={`flex justify-center items-center py-4 w-full ${poppins.variable} font-poppins`}>
+            <div className="w-full mx-auto px-4 md:px-6">
+                <div className={`grid ${isFilterOpen ? "sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 -mt-15" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"} auto-rows-fr gap-6 md:gap-8`}>
                     {events.map((event) => (
                         <EventCard key={event.id} event={event} />
                     ))}
@@ -57,52 +57,52 @@ export default function EventListingPage({ isFilterOpen, events, loading }: Even
 const EventCard = ({ event }: { event: TransformedEvent }) => {
     const dateLabel = event.dateRangeLabel;
     return (
-        <Link href={`/whats-on/${event.slug}`}>
-            <div className="flex flex-col items-start bg-[#FAFAFA] rounded-[18px] md:rounded-[24px] p-[6.4px] md:p-[8.6px] gap-[7.46px] md:gap-[10px] w-full transition-shadow duration-300 hover:shadow-md h-full">
-                <div className="relative w-full aspect-[160/105] md:aspect-[214/140]">
+        <Link href={`/whats-on/${event.slug}`} className="block h-full">
+            <div className="flex flex-col items-start bg-[#FAFAFA] rounded-3xl p-4 gap-4 w-full transition-all duration-300 hover:shadow-lg h-full border border-transparent hover:border-gray-100">
+                <div className="relative w-full aspect-[16/10] overflow-hidden rounded-2xl shadow-sm">
                     <Image
                         src={event.heroImage}
                         alt={event.title}
                         fill
-                        className="object-cover rounded-[11.5px] md:rounded-[15.5px]"
+                        className="object-cover transition-transform duration-300 hover:scale-105"
                     />
 
-                    {/* Date Badge - Frame 158 */}
-                    <div className="absolute bottom-[4px] left-[4px] md:bottom-[10px] md:left-[5px] bg-white rounded-[21px] md:rounded-[28px] px-[6.4px] py-[3.2px] md:px-[8.6px] md:py-[4.3px] flex items-center gap-[3px] md:gap-[4px] shadow-[0_0.6px_5.6px_rgba(0,0,0,0.04)]">
-                        <Calendar className="w-[9.6px] h-[9.6px] md:w-[13px] md:h-[13px] text-[#444444]" strokeWidth={1.5} />
-                        <span className="text-[#444444] text-[7.7px] md:text-[10.3px] leading-[12px] md:leading-[15px] whitespace-nowrap">
+                    {/* Date Badge */}
+                    <div className="absolute bottom-3 left-3 bg-white/95 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center gap-1.5 shadow-sm border border-gray-100">
+                        <Calendar className="w-3.5 h-3.5 text-gray-600" strokeWidth={2} />
+                        <span className="text-gray-700 text-xs font-medium whitespace-nowrap">
                             {dateLabel}
                         </span>
                     </div>
                 </div>
 
                 {/* Content Section */}
-                <div className="flex flex-col w-full relative flex-grow">
+                <div className="flex flex-col w-full relative flex-grow gap-3">
 
-                    {/* Title - Frame 37333 */}
-                    <h3 className="text-black text-[11.5px] md:text-[15.5px] leading-[17px] md:leading-[23px] font-normal mb-[4.5px] md:mb-[6px] truncate w-full">
+                    {/* Title */}
+                    <h3 className="text-gray-900 text-lg md:text-xl font-medium leading-tight truncate w-full" title={event.title}>
                         {event.title}
                     </h3>
 
-                    {/* Location - Frame 37325 */}
-                    <div className="flex items-center gap-[3.26px] md:gap-[4.38px] mb-[4.5px] md:mb-[6px]">
-                        <MapPin className="w-[9.6px] h-[9.6px] md:w-[13px] md:h-[13px] text-[#444444]" strokeWidth={1.5} />
-                        <span className="text-[#444444] text-[7.7px] md:text-[10.3px] leading-[12px] md:leading-[15px]">
+                    {/* Location */}
+                    <div className="flex items-center gap-1.5">
+                        <MapPin className="w-4 h-4 text-gray-500 shrink-0" strokeWidth={2} />
+                        <span className="text-gray-600 text-sm truncate">
                             {event.location}
                         </span>
                     </div>
 
                     {/* Footer: Author + Price Button */}
-                    <div className="flex items-center justify-between w-full mt-auto">
+                    <div className="flex items-center justify-between w-full mt-auto pt-2">
                         {/* Author */}
-                        <span className="text-[#444444] text-[7.5px] md:text-[10px] leading-[11px] md:leading-[15px]">
-                            Posted by {event.host.name}
+                        <span className="text-gray-500 text-xs md:text-sm font-medium truncate pr-2">
+                            Posted by <span className="text-gray-700">{event.host.name}</span>
                         </span>
-                        <div className={`${event.isPaid ? 'bg-[#FCAF45]' : 'bg-[#31A7AC]'} rounded-full w-[17px] h-[17px] md:w-[23px] md:h-[23px] flex items-center justify-center shadow-sm`}>
+                        <div className={`${event.isPaid ? 'bg-[#FCAF45]' : 'bg-[#31A7AC]'} rounded-full w-8 h-8 flex items-center justify-center shadow-sm shrink-0`}>
                             {event.isPaid ? (
-                                <DollarSign className="w-[9.6px] h-[9.6px] md:w-[13px] md:h-[13px] text-white" strokeWidth={2.5} />
+                                <DollarSign className="w-4 h-4 text-white" strokeWidth={2.5} />
                             ) : (
-                                <span className="text-white text-[8px] md:text-[10px] font-semibold">F</span>
+                                <span className="text-white text-xs font-bold">Free</span>
                             )}
                         </div>
                     </div>
@@ -115,18 +115,18 @@ const EventCard = ({ event }: { event: TransformedEvent }) => {
 // Loading skeleton component
 function EventListingSkeleton({ isFilterOpen }: { isFilterOpen?: boolean }) {
     return (
-        <div className={`flex justify-center items-center py-1 ${poppins.variable} font-poppins`}>
-            <div className="w-full mx-auto px-2 md:px-0">
-                <div className={`grid ${isFilterOpen ? "sm:grid-cols-3 grid-cols-2 -mt-15" : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"} auto-rows-fr gap-[7.46px] md:gap-[10px]`}>
+        <div className={`flex justify-center items-center py-4 w-full ${poppins.variable} font-poppins`}>
+            <div className="w-full mx-auto px-4 md:px-6">
+                <div className={`grid ${isFilterOpen ? "sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 -mt-15" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"} auto-rows-fr gap-6 md:gap-8`}>
                     {[...Array(8)].map((_, i) => (
-                        <div key={i} className="flex flex-col items-start bg-[#FAFAFA] rounded-[18px] md:rounded-[24px] p-[6.4px] md:p-[8.6px] gap-[7.46px] md:gap-[10px] w-full animate-pulse">
-                            <div className="relative w-full aspect-[160/105] md:aspect-[214/140] bg-gray-200 rounded-[11.5px] md:rounded-[15.5px]" />
-                            <div className="flex flex-col w-full space-y-2">
-                                <div className="h-4 bg-gray-200 rounded w-3/4" />
-                                <div className="h-3 bg-gray-200 rounded w-1/2" />
-                                <div className="flex items-center justify-between w-full mt-2">
-                                    <div className="h-3 bg-gray-200 rounded w-1/3" />
-                                    <div className="w-[17px] h-[17px] md:w-[23px] md:h-[23px] bg-gray-200 rounded-full" />
+                        <div key={i} className="flex flex-col items-start bg-[#FAFAFA] rounded-3xl p-4 gap-4 w-full animate-pulse">
+                            <div className="relative w-full aspect-[16/10] bg-gray-200 rounded-2xl" />
+                            <div className="flex flex-col w-full space-y-3 mt-2">
+                                <div className="h-6 bg-gray-200 rounded w-3/4" />
+                                <div className="h-4 bg-gray-200 rounded w-1/2" />
+                                <div className="flex items-center justify-between w-full mt-4 pt-2">
+                                    <div className="h-4 bg-gray-200 rounded w-1/3" />
+                                    <div className="w-8 h-8 bg-gray-200 rounded-full" />
                                 </div>
                             </div>
                         </div>
