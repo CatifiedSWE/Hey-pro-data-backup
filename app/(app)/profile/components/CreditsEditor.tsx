@@ -31,15 +31,29 @@ import apiCalling from "@/lib/apiCalling";
 
 interface CreditsEditorProps {
     trigger: React.ReactNode;
-    initialCredits?: {
+    mode?: 'add' | 'edit';
+    creditToEdit?: {
         id: string;
         creditTitle: string;
         description: string;
-        startDate: Date;
-        endDate: Date;
+        startDate: Date | string;
+        endDate: Date | string;
         imgUrl?: string;
-    }[];
+        productionType?: string;
+        role?: string;
+        projectTitle?: string;
+        brandClient?: string;
+        localCompany?: string;
+        internationalCompany?: string;
+        country?: string;
+        releaseYear?: string;
+        isUnreleased?: boolean;
+        headlineStats?: string;
+        awards?: Array<{ title: string; detail?: string }>;
+    };
     onUpdate?: () => void;
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
 }
 
 const defaultCreditForm = {
@@ -108,8 +122,18 @@ interface Accolade {
     by: string;
     year: string;
 }
-export default function CreditsEditor({ trigger, initialCredits, onUpdate }: CreditsEditorProps) {
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
+export default function CreditsEditor({ trigger, mode = 'add', creditToEdit, onUpdate, open: controlledOpen, onOpenChange }: CreditsEditorProps) {
+    const [internalOpen, setInternalOpen] = useState(false);
+    
+    // Use controlled state if provided, otherwise use internal state
+    const isDialogOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
+    const setIsDialogOpen = (open: boolean) => {
+        if (onOpenChange) {
+            onOpenChange(open);
+        } else {
+            setInternalOpen(open);
+        }
+    };
     const [creditForm, setCreditForm] = useState(defaultCreditForm);
     const [accoladeForm, setAccoladeForm] = useState(defaultAccoladeForm);
     const [startDateOpen, setStartDateOpen] = React.useState(false)
@@ -120,19 +144,69 @@ export default function CreditsEditor({ trigger, initialCredits, onUpdate }: Cre
     const [accolades, setAccolades] = React.useState<Accolade[]>([]);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     const [saving, setSaving] = useState(false);
+    const [editingCreditId, setEditingCreditId] = useState<string | null>(null);
 
     useEffect(() => {
-        if (isDialogOpen && initialCredits?.length) {
-            const first = initialCredits[0];
-            setCreditForm((prev) => ({
-                ...prev,
-                productionType: prev.productionType || "Feature Film",
-                role: prev.role || "Director",
-                projectTitle: first.creditTitle || "",
-                description: first.description || "",
-            }));
+        if (isDialogOpen && mode === 'edit' && creditToEdit) {
+            // Populate form with credit data for editing
+            setCreditForm({
+                productionType: creditToEdit.productionType || "",
+                role: creditToEdit.role || "",
+                projectTitle: creditToEdit.projectTitle || "",
+                brandClient: creditToEdit.brandClient || "",
+                localCompany: creditToEdit.localCompany || "",
+                internationalCompany: creditToEdit.internationalCompany || "",
+                country: creditToEdit.country || "",
+                releaseYear: creditToEdit.releaseYear || "",
+                isUnreleased: creditToEdit.isUnreleased || false,
+                startDate: "",
+                endDate: "",
+                description: creditToEdit.description || "",
+                image: creditToEdit.imgUrl || "",
+            });
+
+            // Set dates
+            if (creditToEdit.startDate) {
+                const parsedStartDate = typeof creditToEdit.startDate === 'string' 
+                    ? new Date(creditToEdit.startDate) 
+                    : creditToEdit.startDate;
+                setStartDate(parsedStartDate);
+            }
+            
+            if (creditToEdit.endDate) {
+                const parsedEndDate = typeof creditToEdit.endDate === 'string' 
+                    ? new Date(creditToEdit.endDate) 
+                    : creditToEdit.endDate;
+                setEndDate(parsedEndDate);
+            }
+
+            // Set accolades/awards
+            if (creditToEdit.awards && creditToEdit.awards.length > 0) {
+                const mappedAwards = creditToEdit.awards.map((award, index) => {
+                    // Parse the award title and detail
+                    const titleParts = award.title?.split(' - ') || [];
+                    const detailParts = award.detail?.split(' ') || [];
+                    return {
+                        id: `award-${index}`,
+                        type: titleParts[0] || '',
+                        category: titleParts[1] || '',
+                        by: detailParts.slice(0, -1).join(' ') || '',
+                        year: detailParts[detailParts.length - 1] || '',
+                    };
+                });
+                setAccolades(mappedAwards);
+            }
+
+            setEditingCreditId(creditToEdit.id);
+        } else if (isDialogOpen && mode === 'add') {
+            // Reset form for adding new credit
+            setCreditForm(defaultCreditForm);
+            setStartDate(undefined);
+            setEndDate(undefined);
+            setAccolades([]);
+            setEditingCreditId(null);
         }
-    }, [isDialogOpen, initialCredits]);
+    }, [isDialogOpen, mode, creditToEdit]);
 
     const handleCreditChange = (field: keyof typeof creditForm, value: string | boolean) => {
         setCreditForm((prev) => ({ ...prev, [field]: value }));
@@ -207,7 +281,7 @@ export default function CreditsEditor({ trigger, initialCredits, onUpdate }: Cre
             };
 
             // Prepare credit data according to API specification
-            const creditData = {
+            const creditData: any = {
                 credit_title: creditForm.projectTitle || `${creditForm.productionType} - ${creditForm.role}`,
                 start_date: formatDate(startDate),
                 end_date: endDate ? formatDate(endDate) : undefined,
@@ -229,15 +303,20 @@ export default function CreditsEditor({ trigger, initialCredits, onUpdate }: Cre
                 })) : undefined
             };
 
-            // Call API to create credit
+            // Add ID for edit mode
+            if (mode === 'edit' && editingCreditId) {
+                creditData.id = editingCreditId;
+            }
+
+            // Call API to create or update credit
             const response = await apiCalling({
-                method: 'post',
+                method: mode === 'edit' ? 'patch' : 'post',
                 route: '/profile/credits',
                 data: creditData
             });
 
             if (response.status) {
-                toast.success("Credit added successfully!");
+                toast.success(mode === 'edit' ? "Credit updated successfully!" : "Credit added successfully!");
                 setIsDialogOpen(false);
                 
                 // Reset form
@@ -246,15 +325,16 @@ export default function CreditsEditor({ trigger, initialCredits, onUpdate }: Cre
                 setStartDate(undefined);
                 setEndDate(undefined);
                 setAccolades([]);
+                setEditingCreditId(null);
                 
                 // Trigger parent update
                 onUpdate?.();
             } else {
-                toast.error(response.message || "Failed to add credit");
+                toast.error(response.message || `Failed to ${mode === 'edit' ? 'update' : 'add'} credit`);
             }
         } catch (error) {
             console.error('Error saving credit:', error);
-            toast.error("Failed to add credit");
+            toast.error(`Failed to ${mode === 'edit' ? 'update' : 'add'} credit`);
         } finally {
             setSaving(false);
         }
@@ -263,6 +343,10 @@ export default function CreditsEditor({ trigger, initialCredits, onUpdate }: Cre
     const handleCancel = () => {
         setCreditForm(defaultCreditForm);
         setAccoladeForm(defaultAccoladeForm);
+        setStartDate(undefined);
+        setEndDate(undefined);
+        setAccolades([]);
+        setEditingCreditId(null);
         setIsDialogOpen(false);
     };
 
@@ -279,7 +363,9 @@ export default function CreditsEditor({ trigger, initialCredits, onUpdate }: Cre
                 <div className="px-[30px] pt-[30px] pb-6 flex flex-col gap-6">
                     <div className="flex flex-wrap items-start justify-between gap-4">
                         <div>
-                            <h2 className="text-[20px] leading-[34px] font-[400]  text-[#211536]">Manage Credits</h2>
+                            <h2 className="text-[20px] leading-[34px] font-[400]  text-[#211536]">
+                                {mode === 'edit' ? 'Edit Credit' : 'Add New Credit'}
+                            </h2>
                         </div>
                     </div>
 
@@ -639,7 +725,7 @@ export default function CreditsEditor({ trigger, initialCredits, onUpdate }: Cre
                         onClick={handleSave}
                         disabled={saving}
                     >
-                        {saving ? 'Saving...' : 'Save changes'}
+                        {saving ? 'Saving...' : (mode === 'edit' ? 'Update Credit' : 'Add Credit')}
                     </Button>
                 </div>
             </DialogContent>

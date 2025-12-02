@@ -27,7 +27,7 @@ const formatRange = (start?: Date | string, end?: Date | string) => {
     return startLabel || endLabel
 }
 
-function CreditCard({ credit }: { credit: CreditType }) {
+function CreditCard({ credit, onEdit }: { credit: CreditType; onEdit: () => void }) {
     const headingParts = [credit.brandClient || credit.creditTitle]
     if (credit.projectTitle && credit.projectTitle !== credit.brandClient) {
         headingParts.push(credit.projectTitle)
@@ -44,15 +44,27 @@ function CreditCard({ credit }: { credit: CreditType }) {
 
     return (
         <>
-            <article className="flex sm:w-[540px] sm:h-[281px] mb-5 flex-col gap-4 border-b border-[#E6E6E6] pb-6 last:border-b-0">
+            <article className="relative flex sm:w-[540px] sm:h-[281px] mb-5 flex-col gap-4 border-b border-[#E6E6E6] pb-6 last:border-b-0 group">
                 <div className="flex flex-col gap-1">
-                    <p className="text-[18px] font-semibold text-[#181818]">
-                        {heading}
-                        {releaseSuffix}
-                    </p>
-                    {credit.headlineStats && (
-                        <p className="text-[12px] font-semibold text-[#31A7AC]">{credit.headlineStats}</p>
-                    )}
+                    <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1">
+                            <p className="text-[18px] font-semibold text-[#181818]">
+                                {heading}
+                                {releaseSuffix}
+                            </p>
+                            {credit.headlineStats && (
+                                <p className="text-[12px] font-semibold text-[#31A7AC]">{credit.headlineStats}</p>
+                            )}
+                        </div>
+                        <Button 
+                            size="icon" 
+                            variant="ghost"
+                            className="h-8 w-8 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={onEdit}
+                        >
+                            <Edit className="h-4 w-4 text-[#31A7AC]" />
+                        </Button>
+                    </div>
                 </div>
 
                 <div className="flex flex-col sm:w-[540px]  gap-5 lg:flex-row">
@@ -119,6 +131,8 @@ function CreditCard({ credit }: { credit: CreditType }) {
 export default function CreditsSection() {
     // Use credits from ProfileContext instead of making separate API call
     const { credits: profileCredits, loading: profileLoading, fetchCredits } = useProfile();
+    const [selectedCredit, setSelectedCredit] = useState<CreditType | null>(null);
+    const [editDialogOpen, setEditDialogOpen] = useState(false);
     
     // Map the API response to match the expected CreditType format
     const credits = profileCredits.map((credit: CreditData) => ({
@@ -145,6 +159,18 @@ export default function CreditsSection() {
     const loading = profileLoading;
     const error = null; // Error is handled at ProfileContext level
 
+    const handleEditCredit = (credit: CreditType) => {
+        setSelectedCredit(credit);
+        setEditDialogOpen(true);
+    };
+
+    const handleEditDialogChange = (open: boolean) => {
+        setEditDialogOpen(open);
+        if (!open) {
+            setSelectedCredit(null);
+        }
+    };
+
     // Show loading state
     if (loading) {
         return (
@@ -167,20 +193,31 @@ export default function CreditsSection() {
                     <h2 className="text-[22px] font-[400] leading-[33px] text-black">Credits</h2>
                 </div>
                 <CreditsEditor
-                    // initialCredits={credits}
+                    mode="add"
                     trigger={
-                        <div className="flex gap-3">
-                            <Button size="icon" className="h-10 w-10 rounded-2xl bg-[#FA6E80] text-white hover:bg-[#fa6e80]/90">
-                                <Plus className="h-4 w-4" />
-                            </Button>
-                            <Button size="icon" className="h-10 w-10 rounded-2xl bg-[#31A7AC] text-white hover:bg-[#27939f]">
-                                <Edit className="h-4 w-4" />
-                            </Button>
-                        </div>
+                        <Button 
+                            size="icon" 
+                            className="h-10 w-10 rounded-2xl bg-[#FA6E80] text-white hover:bg-[#fa6e80]/90"
+                            data-testid="add-credit-button"
+                        >
+                            <Plus className="h-4 w-4" />
+                        </Button>
                     }
                     onUpdate={fetchCredits}
                 />
             </header>
+
+            {/* Edit dialog controlled by state */}
+            {selectedCredit && (
+                <CreditsEditor
+                    mode="edit"
+                    creditToEdit={selectedCredit}
+                    trigger={<div />}
+                    open={editDialogOpen}
+                    onOpenChange={handleEditDialogChange}
+                    onUpdate={fetchCredits}
+                />
+            )}
 
             {error && (
                 <div className="text-center py-8 text-red-500">
@@ -196,20 +233,22 @@ export default function CreditsSection() {
 
             {!error && credits.length > 0 && (
                 <div className="flex flex-col gap-8">
-                    {credits.map((credit) => (
-                        <>
-                            <CreditCard key={credit.id} credit={credit} />
-                            <div
-                                className="h-0 w-full rounded-full"
-                                style={{
-                                    border: '1px solid transparent',
-                                    backgroundImage: 'linear-gradient(white, white), linear-gradient(90deg, #FA6E80 0%, #6A89BE 33%, #85AAB7 66%, #31A7AC 100%)',
-                                    backgroundOrigin: 'border-box',
-                                    backgroundClip: 'padding-box, border-box'
-                                }}
-                                aria-hidden
-                            />
-                        </>
+                    {credits.map((credit, index) => (
+                        <div key={credit.id}>
+                            <CreditCard credit={credit} onEdit={() => handleEditCredit(credit)} />
+                            {index < credits.length - 1 && (
+                                <div
+                                    className="h-0 w-full rounded-full mt-8"
+                                    style={{
+                                        border: '1px solid transparent',
+                                        backgroundImage: 'linear-gradient(white, white), linear-gradient(90deg, #FA6E80 0%, #6A89BE 33%, #85AAB7 66%, #31A7AC 100%)',
+                                        backgroundOrigin: 'border-box',
+                                        backgroundClip: 'padding-box, border-box'
+                                    }}
+                                    aria-hidden
+                                />
+                            )}
+                        </div>
                     ))}
                 </div>
             )}
