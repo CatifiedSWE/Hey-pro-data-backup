@@ -287,8 +287,8 @@ export default function CreditsEditor({ trigger, mode = 'add', creditToEdit, onU
                 end_date: endDate ? formatDate(endDate) : undefined,
                 description: creditForm.description || undefined,
                 image_url: creditForm.image || undefined,
-                production_type: creditForm.productionType,
-                role: creditForm.role,
+                production_type: creditForm.productionType || undefined,
+                role: creditForm.role || undefined,
                 project_title: creditForm.projectTitle || undefined,
                 brand_client: creditForm.brandClient || undefined,
                 local_company: creditForm.localCompany || undefined,
@@ -308,12 +308,18 @@ export default function CreditsEditor({ trigger, mode = 'add', creditToEdit, onU
                 creditData.id = editingCreditId;
             }
 
+            // Debug: Log data being sent
+            console.log('Sending credit data:', JSON.stringify(creditData, null, 2));
+
             // Call API to create or update credit
             const response = await apiCalling({
                 method: mode === 'edit' ? 'patch' : 'post',
                 route: '/profile/credits',
                 data: creditData
             });
+
+            // Debug: Log response
+            console.log('API Response:', response);
 
             if (response.status) {
                 toast.success(mode === 'edit' ? "Credit updated successfully!" : "Credit added successfully!");
@@ -330,7 +336,10 @@ export default function CreditsEditor({ trigger, mode = 'add', creditToEdit, onU
                 // Trigger parent update
                 onUpdate?.();
             } else {
-                toast.error(response.message || `Failed to ${mode === 'edit' ? 'update' : 'add'} credit`);
+                // Show more detailed error message
+                const errorMsg = response.data?.error || response.message || `Failed to ${mode === 'edit' ? 'update' : 'add'} credit`;
+                console.error('API Error:', errorMsg, response.data);
+                toast.error(errorMsg);
             }
         } catch (error) {
             console.error('Error saving credit:', error);
