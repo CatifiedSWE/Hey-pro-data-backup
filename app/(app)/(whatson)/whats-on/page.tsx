@@ -184,7 +184,31 @@ export default function WhatsOnHeader() {
         );
     };
 
-    const resetForm = () => setFilterForm(initialFilterState);
+    const resetForm = async () => {
+        setFilterForm(initialFilterState);
+        setSearchKeyword("");
+        
+        // Fetch events with cleared filters
+        try {
+            setLoading(true);
+            setError(null);
+            
+            // Build filters with initial/default state
+            const filters: WhatsOnFilters = {
+                status: 'published',
+                limit: 50
+            };
+            
+            const data = await whatsOnAPI.listEvents(filters);
+            const transformedEvents = data.data.events.map(transformEventForCard);
+            setEvents(transformedEvents);
+        } catch (err: any) {
+            console.error('Failed to load events:', err);
+            setError(err.response?.data?.error || 'Failed to load events');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const goToMonth = (delta: number) => {
         setCalendarMonth((prev) => new Date(prev.getFullYear(), prev.getMonth() + delta, 1));
