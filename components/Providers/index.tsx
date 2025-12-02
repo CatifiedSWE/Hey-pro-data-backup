@@ -10,7 +10,7 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
     <AuthProvider>
       <ProfileProvider>
         {children}
-        <Toaster richColors />
+        <Toaster />
       </ProfileProvider>
     </AuthProvider>
   );
