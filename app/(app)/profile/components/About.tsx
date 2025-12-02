@@ -32,15 +32,6 @@ export default function AboutSectionComponent({ icon, title, about: initialAbout
             return;
         }
 
-        // 2. Check for invalid special characters
-        const allowedCharsRegex = /^[a-zA-Z0-9\s.,'!?()-]*$/;
-        if (!allowedCharsRegex.test(about)) {
-            const errorMessage = "Special characters like @, #, $, %, etc., are not allowed.";
-            setError(errorMessage);
-            toast.error(errorMessage);
-            return;
-        }
-
         setError(null);
         setIsLoading(true);
 
