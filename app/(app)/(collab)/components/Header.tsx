@@ -3,19 +3,20 @@ import Link from "next/link"
 
 const Header = () => {
     return (
-        <div className="mt-0 space-y-4 px-2 sm:px-0 max-w-6xl w-full">
-            <div className="flex flex-row justify-between gap-3 w-full">
-                <span className="bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC] bg-clip-text text-transparent text-3xl font-semibold">
-                    Collab
-                </span>
-                <Link
-                    href="/collab/manage-collab"
-                    className="inline-flex w-[192px] h-[44px] items-center justify-center rounded-[12px] border border-transparent bg-[#31A7AC] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90 sm:w-auto"
-                >
-                    Manage Collab
-                </Link>
+        <div className="w-full bg-white border-b border-gray-100 sticky top-0 z-50">
+            <div className="max-w-[1200px] mx-auto px-4 py-4">
+                <div className="flex flex-row justify-between items-center gap-3 w-full">
+                    <span className="bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC] bg-clip-text text-transparent text-3xl font-bold">
+                        Collab
+                    </span>
+                    <Link
+                        href="/collab/manage-collab"
+                        className="inline-flex items-center justify-center rounded-xl bg-[#31A7AC] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#289398] shadow-sm"
+                    >
+                        Manage Collabs
+                    </Link>
+                </div>
             </div>
-            <SearchBar />
         </div>
     )
 }
