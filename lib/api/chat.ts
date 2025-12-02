@@ -70,7 +70,7 @@ export interface PaginationInfo {
  */
 export async function getConversations(): Promise<Conversation[]> {
   try {
-    const response = await axios.get('/api/chat/conversations');
+    const response = await axios.get('/chat/conversations');
     return response.data.data.conversations || [];
   } catch (error: any) {
     console.error('Error fetching conversations:', error);
@@ -83,7 +83,7 @@ export async function getConversations(): Promise<Conversation[]> {
  */
 export async function startConversation(participantId: string): Promise<any> {
   try {
-    const response = await axios.post('/api/chat/conversations', {
+    const response = await axios.post('/chat/conversations', {
       participantId,
     });
     return response.data.data;
@@ -103,7 +103,7 @@ export async function getConversationMessages(
 ): Promise<{ messages: Message[]; pagination: PaginationInfo }> {
   try {
     const response = await axios.get(
-      `/api/chat/conversations/${conversationId}/messages`,
+      `/chat/conversations/${conversationId}/messages`,
       {
         params: { page, limit },
       }
@@ -126,7 +126,7 @@ export async function sendConversationMessage(
 ): Promise<Message> {
   try {
     const response = await axios.post(
-      `/api/chat/conversations/${conversationId}/messages`,
+      `/chat/conversations/${conversationId}/messages`,
       {
         content,
         attachmentUrl,
@@ -147,7 +147,7 @@ export async function sendConversationMessage(
  */
 export async function getGroups(): Promise<Group[]> {
   try {
-    const response = await axios.get('/api/chat/groups');
+    const response = await axios.get('/chat/groups');
     return response.data.data.groups || [];
   } catch (error: any) {
     console.error('Error fetching groups:', error);
@@ -165,7 +165,7 @@ export async function getGroupMessages(
 ): Promise<{ messages: Message[]; pagination: PaginationInfo }> {
   try {
     const response = await axios.get(
-      `/api/chat/groups/${groupId}/messages`,
+      `/chat/groups/${groupId}/messages`,
       {
         params: { page, limit },
       }
@@ -188,7 +188,7 @@ export async function sendGroupMessage(
 ): Promise<Message> {
   try {
     const response = await axios.post(
-      `/api/chat/groups/${groupId}/messages`,
+      `/chat/groups/${groupId}/messages`,
       {
         content,
         attachmentUrl,
@@ -212,7 +212,7 @@ export async function createGroup(
   memberIds?: string[]
 ): Promise<any> {
   try {
-    const response = await axios.post('/api/chat/groups', {
+    const response = await axios.post('/chat/groups', {
       name,
       description,
       avatarUrls,
@@ -232,7 +232,7 @@ export async function createGroup(
  */
 export async function markMessageAsRead(messageId: string): Promise<void> {
   try {
-    await axios.patch(`/api/chat/messages/${messageId}/read`);
+    await axios.patch(`/chat/messages/${messageId}/read`);
   } catch (error: any) {
     console.error('Error marking message as read:', error);
     throw error;
@@ -247,7 +247,7 @@ export async function sendTypingIndicator(
   groupId?: string
 ): Promise<void> {
   try {
-    await axios.post('/api/chat/typing', {
+    await axios.post('/chat/typing', {
       conversationId,
       groupId,
     });
