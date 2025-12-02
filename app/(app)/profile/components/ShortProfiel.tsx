@@ -247,11 +247,11 @@ export default function ShortProfile({ profile, links, roles = [], recommendatio
                     <MapPin className="h-3.5 w-3.5 text-[#393939]" />
                     <span className="whitespace-nowrap">{locationDescriptor}</span>
                 </div>
-                <div className="flex items-center gap-2  bg-white px-4 py-2 text-[#34A353] ">
-                    <span className="h-2.5 w-2.5 rounded-full bg-[#34A353]" />
+                <div className="flex items-center gap-2  bg-white px-4 py-2 text-[#FA6E80] ">
+                    <span className="h-2.5 w-2.5 rounded-full bg-[#FA6E80]" />
                      <AvalableDilog
                         initialProfile={{ availability: "Available" }}
-                        triggerClassName="h-auto border-none bg-transparent p-0 text-[11px] font-[400] text-[#34A353] hover:bg-transparent"
+                        triggerClassName="h-auto border-none bg-transparent p-0 text-[11px] font-[400] text-[#FA6E80] hover:bg-transparent"
                     />
                 </div>
                 <CalendarDialog
@@ -294,7 +294,7 @@ export default function ShortProfile({ profile, links, roles = [], recommendatio
                         )}
                     </div>
                     
-                     {/* Work Identities Display - adapted to match design's text style if possible, or use pills */}
+                    {/* Work Identities Display - adapted to match design's text style if possible, or use pills */}
                     {profile?.work_identities && (
                          <div className="text-sm text-[#181818]">
                             {[

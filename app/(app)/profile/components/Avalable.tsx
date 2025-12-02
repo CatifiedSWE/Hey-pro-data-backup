@@ -114,7 +114,7 @@ export default function AvalableDilog({ initialProfile, triggerClassName, onUpda
             <DialogTrigger asChild>
                 <Button
                     variant="ghost"
-                    className={cn("flex items-center gap-2 text-[#31A7AC]", triggerClassName)}
+                    className={cn("flex items-center gap-2 text-[#FA6E80]", triggerClassName)}
                     disabled={isLoading}
                 >
                     {isLoading ? (
@@ -135,7 +135,7 @@ export default function AvalableDilog({ initialProfile, triggerClassName, onUpda
 
                 <div className="space-y-4 py-4">
                     <Select value={draftAvailability} onValueChange={setDraftAvailability} disabled={isSaving}>
-                        <SelectTrigger className="w-full rounded-full border-none bg-[#34A353] text-white h-12">
+                        <SelectTrigger className="w-full rounded-full border-none bg-[#FA6E80] text-white h-12">
                             <SelectValue placeholder="Select availability" />
                         </SelectTrigger>
                         <SelectContent className="rounded-2xl">
@@ -149,17 +149,17 @@ export default function AvalableDilog({ initialProfile, triggerClassName, onUpda
                     <DialogClose asChild>
                         <Button
                             type="button"
-                            className="h-[44px] w-[128px] rounded-[15px] border-[#31A7AC]"
+                            className="h-[44px] w-[128px] rounded-[15px] border-[#FA6E80]"
                             variant="outline"
                             disabled={isSaving}
                         >
-                            <span className="text-[#31A7AC]">Cancel</span>
+                            <span className="text-[#FA6E80]">Cancel</span>
                         </Button>
                     </DialogClose>
 
                     <Button
                         type="button"
-                        className="h-[44px] rounded-[15px] bg-[#31A7AC]"
+                        className="h-[44px] rounded-[15px] bg-[#FA6E80]"
                         onClick={handleSave}
                         disabled={isSaving}
                     >
