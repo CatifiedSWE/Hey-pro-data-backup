@@ -76,8 +76,8 @@ export async function GET(
     // Fetch creator info from user_profiles
     const { data: creator } = await supabase
       .from('user_profiles')
-      .select('id, name, profile_photo_url')
-      .eq('id', event.created_by)
+      .select('user_id, legal_first_name, legal_surname, alias_first_name, alias_surname, profile_photo_url')
+      .eq('user_id', event.created_by)
       .maybeSingle();
 
     // Fetch Google photo from auth.users if profile photo is not set
@@ -89,9 +89,21 @@ export async function GET(
       }
     }
 
-    // Enhance creator object with Google photo if available
+    // Construct full name from available fields
+    const constructFullName = (creator: any) => {
+      if (!creator) return 'Unknown';
+      
+      // Prefer alias name if available, otherwise use legal name
+      const firstName = creator.alias_first_name || creator.legal_first_name || '';
+      const surname = creator.alias_surname || creator.legal_surname || '';
+      
+      const fullName = `${firstName} ${surname}`.trim();
+      return fullName || 'Unknown';
+    };
+
+    // Enhance creator object with Google photo if available and constructed name
     const creatorWithFallback = creator ? {
-      ...creator,
+      name: constructFullName(creator),
       profile_photo_url: creator.profile_photo_url || googlePhotoUrl || null
     } : null;
 

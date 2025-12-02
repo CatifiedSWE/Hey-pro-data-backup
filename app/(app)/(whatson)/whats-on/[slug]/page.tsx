@@ -216,7 +216,7 @@ export default function WhatsOnPage() {
                                     alt={event.title}
                                     fill
                                     sizes="(min-width: 1024px) 384px, 100vw"
-                                    className="object-cover grayscale rounded-3xl"
+                                    className="object-cover rounded-3xl"
                                 />
                             </div>
                             <div className="mt-4 flex items-center justify-center gap-3">

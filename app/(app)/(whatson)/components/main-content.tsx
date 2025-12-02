@@ -21,6 +21,8 @@ interface TransformedEvent {
     heroImage: string;
     host: {
         name: string;
+        avatar: string;
+        organization: string;
     };
 }
 
