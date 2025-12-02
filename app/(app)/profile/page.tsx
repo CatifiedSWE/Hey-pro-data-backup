@@ -40,7 +40,6 @@ import { Button } from "@/components/ui/button";
 import ShortProfile from "./components/ShortProfiel";
 import Highlights from "./components/Highlights";
 import CreditsSection from "./components/CreditView";
-import RecommendationsComponent from "./components/recommendation";
 import ResumePortfolio from "./components/ResumePortfolio";
 import { highlightsData } from "@/data/profile";
 import SlateView from "./components/slate";
@@ -48,8 +47,9 @@ import AddNewSkill from "./components/add-new-skill";
 import { RoleDialog } from "./components/role";
 import { useProfile, ProfileData } from "@/contexts/ProfileContext";
 import { toast } from "sonner";
+import ProfileSkeleton from "./components/ProfileSkeleton";
 
-type SectionType = "about" | "skills" | "credits" | "recommendations"
+type SectionType = "about" | "skills" | "credits"
 
 // Extended profile type to include additional fields not in the base ProfileData
 interface ExtendedProfileData extends ProfileData {
@@ -73,7 +73,6 @@ interface ExtendedProfileData extends ProfileData {
   }>;
 }
 
-import ProfileSkeleton from "./components/ProfileSkeleton";
 
 export default function Profile() {
   // ALL HOOKS MUST BE CALLED AT THE TOP BEFORE ANY CONDITIONAL RETURNS
@@ -81,7 +80,8 @@ export default function Profile() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
-  const [sectionOrder, setSectionOrder] = useState<SectionType[]>(["about", "skills", "credits", "recommendations"])
+  // Updated section order to match design (no separate recommendations section)
+  const [sectionOrder, setSectionOrder] = useState<SectionType[]>(["about", "skills", "credits"])
   const [isReorderDialogOpen, setIsReorderDialogOpen] = useState(false)
   
   // Use the profile hook for real data
@@ -122,8 +122,8 @@ export default function Profile() {
     about: <AboutSection key="about" bio={profile?.bio || ''} />,
     skills: <SkillsSectionWrapper key="skills" skills={skills} onUpdate={fetchSkills} />,
     credits: <CreditsSection key="credits" />,
-    recommendations: <RecommendationsComponent key="recommendations" recommendations={recommendations} onUpdate={fetchRecommendations} />,
-  }), [profile?.bio, skills, fetchSkills, recommendations, fetchRecommendations]);
+    // Recommendations removed from main sections as per design
+  }), [profile?.bio, skills, fetchSkills]);
 
   // Non-hook data and functions
   const highlights = highlightsData
@@ -200,7 +200,14 @@ export default function Profile() {
   return (
     <section className="relative mx-auto flex w-full max-w-[1180px] flex-col items-center gap-8 px-3 xs:px-4 sm:px-6 lg:flex-row lg:items-start lg:justify-center lg:gap-12 pt-6 pb-20">
       <main className="flex w-full max-w-[600px] flex-col space-y-4">
-        <ShortProfile profile={profile} links={links} roles={roles} onPhotoUpload={handlePhotoUpload} onLinksUpdate={fetchLinks} />
+        <ShortProfile 
+            profile={profile} 
+            links={links} 
+            roles={roles} 
+            recommendations={recommendations}
+            onPhotoUpload={handlePhotoUpload} 
+            onLinksUpdate={fetchLinks} 
+        />
         <div className="w-full bg-slate-200 h-px sm:h-[1px] mb-5" />
 
         <div className="space-y-2 mx-auto w-full">
@@ -268,7 +275,7 @@ export default function Profile() {
                   <Button
                     variant="default"
                     size="icon"
-                    className="absolute left-1 sm:left-0 top-1/2 -translate-y-1/2 transform bg-[#FA6E80] rounded-full shadow-md z-10"
+                    className="absolute sm:flex hidden left-1 sm:left-0 top-1/2 -translate-y-1/2 transform bg-[#FA6E80] rounded-full shadow-md z-10"
                     onClick={() => scroll(-200)}
                   >
                     <ChevronLeft className="h-6 w-6" />
@@ -278,7 +285,7 @@ export default function Profile() {
                   <Button
                     variant="default"
                     size="icon"
-                    className="absolute right-1 sm:right-0 top-1/2 -translate-y-1/2 transform bg-[#FA6E80] rounded-full shadow-md z-10"
+                    className="absolute sm:flex hidden right-1 sm:right-0 top-1/2 -translate-y-1/2 transform bg-[#FA6E80] rounded-full shadow-md z-10"
                     onClick={() => scroll(200)}
                   >
                     <ChevronRight className="h-6 w-6" />
@@ -335,7 +342,7 @@ export default function Profile() {
                   </div>
                 </div>
                 <div className="mt-4">
-                  <div className="flex gap-4 overflow-x-auto pb-4 px-4">
+                  <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 px-4">
                     {highlights.map((highlight) => (
                       <div key={highlight.id} className="flex-shrink-0 h-[400px] w-[275px]">
                         <HighlightCard highlight={highlight} />
@@ -397,7 +404,6 @@ function SortableItem({ id }: { id: SectionType }) {
     about: "About",
     skills: "Skills",
     credits: "Credits",
-    recommendations: "Recommendations",
   }
 
   return (

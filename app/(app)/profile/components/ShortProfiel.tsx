@@ -5,10 +5,10 @@ import Image from "next/image"
 import { Calendar as CalendarIcon, Edit2, LinkIcon, MapPin, Upload } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { ProfileProgress } from "@/app/(app)/profile/components/profileProgress"
+import { ProfileProgress } from "./profileProgress"
 import { countries } from "@/lib/countries"
 import { toast } from "sonner"
-import { useProfile, type ProfileData, type LinkData, type RoleData } from "@/contexts/ProfileContext"
+import { useProfile, type ProfileData, type LinkData, type RoleData, type RecommendationData } from "@/contexts/ProfileContext"
 import { useAuth } from "@/contexts/AuthContext"
 
 import AvalableDilog from "./Avalable"
@@ -20,11 +20,12 @@ interface ShortProfileProps {
   profile: ProfileData | null;
   links: LinkData[];
   roles?: RoleData[];
+  recommendations?: RecommendationData[];
   onPhotoUpload: (file: File, type: 'profile' | 'banner') => Promise<{ success: boolean; message?: string; url?: string }>;
   onLinksUpdate?: () => void;
 }
 
-export default function ShortProfile({ profile, links, roles = [], onPhotoUpload, onLinksUpdate }: ShortProfileProps) {
+export default function ShortProfile({ profile, links, roles = [], recommendations = [], onPhotoUpload, onLinksUpdate }: ShortProfileProps) {
     const [coverImageHovered, setCoverImageHovered] = useState(false)
     const [uploadingBanner, setUploadingBanner] = useState(false)
     const [uploadingProfile, setUploadingProfile] = useState(false)
@@ -32,18 +33,19 @@ export default function ShortProfile({ profile, links, roles = [], onPhotoUpload
     const bannerInputRef = useRef<HTMLInputElement>(null)
     const profileInputRef = useRef<HTMLInputElement>(null)
     
-    // Get user from AuthContext for Google profile picture fallback
     const { user } = useAuth();
 
-    // Get display name - use alias if available, otherwise use regular name
     const displayName = profile?.alias_first_name && profile?.alias_surname
         ? `${profile.alias_first_name} ${profile.alias_surname}`
         : profile?.first_name && profile?.surname
             ? `${profile.first_name} ${profile.surname}`
             : 'User Profile';
 
-    const nationality = profile?.country || "Unknown";
+    const nationality = countries.find((country) => country.code === profile?.country_code)?.name ?? profile?.country ?? "Unknown"
     const locationDescriptor = [nationality, profile?.city?.trim()].filter(Boolean).join(" • ");
+    
+    const highlightedRoles = roles.slice(0, 6)
+    const extraRecommendations = Math.max(recommendations.length - 3, 0)
     
     const primaryLink = links[0]?.url ?? "";
     
@@ -71,13 +73,11 @@ export default function ShortProfile({ profile, links, roles = [], onPhotoUpload
         const file = e.target.files?.[0];
         if (!file) return;
 
-        // Validate file type
         if (!['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(file.type)) {
             toast.error('Please upload a valid image file (JPEG, PNG, WebP)');
             return;
         }
 
-        // Validate file size (2MB)
         if (file.size > 2 * 1024 * 1024) {
             toast.error('File size must be less than 2MB');
             return;
@@ -105,13 +105,11 @@ export default function ShortProfile({ profile, links, roles = [], onPhotoUpload
         const file = e.target.files?.[0];
         if (!file) return;
 
-        // Validate file type
         if (!['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(file.type)) {
             toast.error('Please upload a valid image file (JPEG, PNG, WebP)');
             return;
         }
 
-        // Validate file size (2MB)
         if (file.size > 2 * 1024 * 1024) {
             toast.error('File size must be less than 2MB');
             return;
@@ -199,6 +197,11 @@ export default function ShortProfile({ profile, links, roles = [], onPhotoUpload
                                     </span>
                                 </Button>
                             </label>
+                            {profile?.banner_url && (
+                                <Button variant="ghost" className="rounded-full border border-white text-white">
+                                    Remove
+                                </Button>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -213,7 +216,7 @@ export default function ShortProfile({ profile, links, roles = [], onPhotoUpload
                         imageUrl={profile?.profile_photo_url || user?.user_metadata?.avatar_url || '/image (2).png'} 
                         className="rounded-full" 
                     />
-                    <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                     <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
                         <Upload className="h-6 w-6 text-white" />
                     </div>
                     <input 
@@ -226,14 +229,30 @@ export default function ShortProfile({ profile, links, roles = [], onPhotoUpload
                 </div>
             </div>
 
-            <div className="absolute inset-x-0 top-[160px] max-w-[400px] left-[200px] hidden justify-center items-center font-[400] text-[11px] sm:flex ">
+            <div className="absolute right-4 top-[98px]  sm:top-[200px] flex items-center gap-3">
+                <ProfileEditor
+                    profile={profile}
+                    trigger={
+                        <Button
+                            className="h-[28px] w-[28px] mt-2 rounded-full bg-[#31A7AC] text-white shadow-[0_4px_16px_rgba(49,167,172,0.35)] hover:bg-[#27939f]"
+                            aria-label="Edit profile"
+                        >
+                            <Edit2 className="h-5 w-5" />
+                        </Button>
+                    }
+                />
+            </div>
+            <div className="absolute inset-x-0 top-[160px] max-w-[367.8px] left-[200px] hidden justify-center font-[400] text-[11px] sm:flex ">
                 <div className="flex items-center gap-2  px-4 py-2 text-[#393939] ">
                     <MapPin className="h-3.5 w-3.5 text-[#393939]" />
                     <span className="whitespace-nowrap">{locationDescriptor}</span>
                 </div>
                 <div className="flex items-center gap-2  bg-white px-4 py-2 text-[#34A353] ">
                     <span className="h-2.5 w-2.5 rounded-full bg-[#34A353]" />
-                    <span className="text-[11px] font-[400] text-[#34A353]">Available</span>
+                     <AvalableDilog
+                        initialProfile={{ availability: "Available" }}
+                        triggerClassName="h-auto border-none bg-transparent p-0 text-[11px] font-[400] text-[#34A353] hover:bg-transparent"
+                    />
                 </div>
                 <CalendarDialog
                     triggerClassName="flex h-[40px] items-center gap-2 rounded-full border-none bg-[#31A7AC] px-4 py-0 text-[11px] font-[400] text-white  hover:bg-[#27939f]"
@@ -244,75 +263,70 @@ export default function ShortProfile({ profile, links, roles = [], onPhotoUpload
                         </>
                     }
                 />
-                <ProfileEditor
-                    profile={profile}
-                    trigger={
-                        <Button
-                            className="h-[28px] w-[28px] ml-2 rounded-full bg-[#31A7AC] text-white shadow-[0_4px_16px_rgba(49,167,172,0.35)] hover:bg-[#27939f]"
-                            aria-label="Edit profile"
-                        >
-                            <Edit2 className="h-5 w-5" />
-                        </Button>
-                    }
-                />
             </div>
             <div className="flex sm:mt-10 -mt-10 flex-col gap-4 px-4 sm:px-[58px]">
                 <div className="space-y-2">
-                    {/* Work Identities Display */}
-                    {profile?.work_identities && (
-                        <div className="flex flex-wrap gap-2 items-center text-sm text-[#444444]">
-                            {profile.work_identities.freelance && (
-                                <span className="inline-flex items-center rounded-full bg-[#F0F0F0] px-3 py-1 text-sm font-medium text-[#444444]">
-                                    Freelance
-                                </span>
-                            )}
-                            {profile.work_identities.employee?.enabled && (
-                                <span className="inline-flex items-center rounded-full bg-[#F0F0F0] px-3 py-1 text-sm font-medium text-[#444444]">
-                                    {profile.work_identities.employee.designation || 'Employee'} 
-                                    {profile.work_identities.employee.company && ` at ${profile.work_identities.employee.company}`}
-                                </span>
-                            )}
-                            {profile.work_identities.businessOwner?.enabled && (
-                                <span className="inline-flex items-center rounded-full bg-[#F0F0F0] px-3 py-1 text-sm font-medium text-[#444444]">
-                                    {profile.work_identities.businessOwner.designation || 'Business Owner'}
-                                    {profile.work_identities.businessOwner.businessName && ` at ${profile.work_identities.businessOwner.businessName}`}
-                                </span>
-                            )}
-                        </div>
-                    )}
                     <div className="flex flex-wrap items-center gap-4">
                         <h1 className="text-[22px] font-semibold leading-[33px] text-black">{displayName}</h1>
-                    </div>
-                    {profile?.bio && (
-                        <p className="text-sm text-[#181818] line-clamp-2">
-                            {profile.bio}
-                        </p>
-                    )}
-                    
-                    {/* Roles Display */}
-                    {roles && roles.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mt-3">
-                            {roles.map((role) => (
-                                <span 
-                                    key={role.id} 
-                                    className="inline-flex items-center rounded-[10px] bg-[#FA6E80] px-3 py-1 text-sm font-medium text-white"
-                                >
-                                    {role.role_name}
+                        {recommendations.length > 0 && (
+                            <div className="flex items-center gap-3">
+                                <div className="flex -space-x-3">
+                                    {recommendations.slice(0, 3).map((recommendation, index) => (
+                                        <Image
+                                            key={`${recommendation.id}-${index}`}
+                                            src={recommendation.recommender_photo_url || '/image (2).png'}
+                                            alt={recommendation.recommender_name || "Recommender"}
+                                            width={32}
+                                            height={32}
+                                            className="h-8 w-8 rounded-full border-2 border-white object-cover"
+                                        />
+                                    ))}
+                                    {extraRecommendations > 0 && (
+                                        <span className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-white text-xs font-semibold text-[#444444]">
+                                            +{extraRecommendations}
+                                        </span>
+                                    )}
+                                </div>
+                                <span className="text-xs font-semibold text-[#FA6E80]">
+                                    +{recommendations.length} Referrals
                                 </span>
-                            ))}
+                            </div>
+                        )}
+                    </div>
+                    
+                     {/* Work Identities Display - adapted to match design's text style if possible, or use pills */}
+                    {profile?.work_identities && (
+                         <div className="text-sm text-[#181818]">
+                            {[
+                                profile.work_identities.freelance && "Freelance",
+                                profile.work_identities.employee?.enabled && `Employee at ${profile.work_identities.employee.company || 'Company'}`,
+                                profile.work_identities.businessOwner?.enabled && `Business Owner at ${profile.work_identities.businessOwner.businessName || 'Business'}`
+                            ].filter(Boolean).join(". ")}
                         </div>
                     )}
                 </div>
 
-                {profile?.day_rate && (
-                    <p className="text-[14px] leading-[21px] text-[#181818]">
-                        Day Rate: {profile.day_rate_currency || 'USD'} {profile.day_rate}
-                    </p>
+                <div className="flex flex-wrap gap-2">
+                    {highlightedRoles.map((role) => (
+                        <span
+                            key={role.id}
+                            className="flex items-center rounded-[29px] h-[19px] bg-[#FA6E80] px-4 py-1 text-[10px] font-[400] tracking-wide text-white"
+                        >
+                            {role.role_name}
+                        </span>
+                    ))}
+                </div>
+
+                {profile?.bio && (
+                     <p className="text-[14px] leading-[21px] text-[#181818] line-clamp-3">{profile.bio}</p>
                 )}
+               
+                {/* Hardcoded award text from design */}
+                <p className="text-[14px] leading-[21px] text-[#181818]">140+ Awards were received</p>
 
                 <LinksDialog
                     links={links}
-                    triggerClassName="h-auto justify-start p-0 text-[12px] font-medium text-[#31A7AC] hover:bg-transparent"
+                    triggerClassName="h-auto justify-start p-0 -ml-4 text-[12px] font-medium text-[#31A7AC] hover:bg-transparent"
                     triggerLabel={linkSummary}
                     onUpdate={onLinksUpdate}
                 />
