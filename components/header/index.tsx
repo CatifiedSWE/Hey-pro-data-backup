@@ -124,7 +124,7 @@ export default function Header() {
 
             {/* Search Bar - Collapsible */}
             <div className="hidden md:flex items-center">
-              <div className={`relative flex items-center transition-all duration-300 ease-in-out ${searchOpen ? 'w-[270px]' : 'w-[40px]'}`}>
+              <div className={`relative flex items-center transition-all duration-300 ease-in-out ${searchOpen ? 'w-[200px]' : 'w-[40px]'}`}>
                 <div
                   className={`absolute right-0 top-1/2 -translate-y-1/2 h-[34px] w-[34px] bg-[#FA6E80] hover:bg-[#f95569] text-white rounded-full flex items-center justify-center cursor-pointer z-20 ${searchOpen ? 'right-2' : 'right-1'}`}
                   onClick={() => setSearchOpen(!searchOpen)}
