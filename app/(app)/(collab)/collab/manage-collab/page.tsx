@@ -4,10 +4,9 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Plus, X, Loader2, Heart, Share2, MessageSquare } from "lucide-react";
 
-import { ManageCollabHeader } from "../../components/Header";
 import { Avatar } from "../../components/Avatar";
-import { Plus, X, Loader2 } from "lucide-react";
 import { getMyCollabs, createCollab, uploadCollabCover, type CollabPost } from "@/lib/api/collab";
 
 const inputBase = "w-full rounded-xl border border-[#E4E7EC] bg-white px-4 py-3.5 text-sm text-gray-900 placeholder:text-gray-500 focus:border-[#2FD3D8] focus:outline-none focus:ring-1 focus:ring-[#2FD3D8] transition-colors";
@@ -136,7 +135,7 @@ export default function ManageCollab() {
             }
 
             // Create collab
-            const newCollab = await createCollab({
+            await createCollab({
                 title: collabTitle,
                 summary: collabIdea,
                 tags: tags.length > 0 ? tags : undefined,
@@ -167,9 +166,11 @@ export default function ManageCollab() {
     return (
         <div className="min-h-screen bg-gray-50 pb-10">
             <div className="max-w-[1200px] mx-auto px-4">
-                <ManageCollabHeader />
+                 <div className="w-full mt-8 mb-8">
+                    <h1 className="text-3xl font-bold text-[#FA6E80]">Manage Collab</h1>
+                </div>
                 
-                <div className="space-y-8 mt-8">
+                <div className="space-y-8">
                     {/* Creation Form */}
                     <section className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
                         <form onSubmit={handleSubmit} className="flex flex-col lg:flex-row gap-8">
@@ -283,19 +284,19 @@ export default function ManageCollab() {
                             collabPosts.map((post) => (
                                 <div key={post.id} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
                                     <div className="flex flex-col lg:flex-row">
-                                        <div className="lg:w-[500px] h-[300px] relative bg-gray-100">
+                                        <div className="lg:w-[450px] h-[300px] relative bg-gray-100">
                                             <Image
                                                 src={post.cover_image_url || '/bg.jpg'}
                                                 alt={post.title}
                                                 fill
-                                                sizes="500px"
+                                                sizes="450px"
                                                 className="object-cover"
                                                 unoptimized
                                             />
                                         </div>
                                         
-                                        <div className="flex-1 p-8">
-                                            <div className="mb-4">
+                                        <div className="flex-1 p-8 flex flex-col">
+                                            <div className="mb-4 flex-grow">
                                                 <div className="flex items-center justify-between mb-4">
                                                     <p className="text-sm text-gray-500">Posted on {formatDate(post.created_at)}</p>
                                                     <Link 
@@ -305,7 +306,7 @@ export default function ManageCollab() {
                                                         Edit →
                                                     </Link>
                                                 </div>
-                                                <h3 className="text-xl font-semibold text-gray-900 mb-3">{post.title}</h3>
+                                                <h3 className="text-xl font-bold text-gray-900 mb-3">{post.title}</h3>
                                                 <p className="text-sm text-gray-600 leading-relaxed mb-4 line-clamp-3">{post.summary}</p>
                                             </div>
                                             
@@ -315,7 +316,7 @@ export default function ManageCollab() {
                                                 ))}
                                             </div>
                                             
-                                            <div className="flex items-center justify-between">
+                                            <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                                                 <div className="flex items-center gap-3">
                                                     {post.interestAvatars.length > 0 && (
                                                         <div className="flex items-center -space-x-2">
@@ -336,14 +337,15 @@ export default function ManageCollab() {
                                                     </span>
                                                 </div>
                                                 
-                                                <div className="flex items-center gap-2">
-                                                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                                                        post.status === 'open' 
-                                                            ? 'bg-green-100 text-green-700' 
-                                                            : 'bg-gray-100 text-gray-700'
-                                                    }`}>
-                                                        {post.status === 'open' ? 'Active' : 'Closed'}
-                                                    </span>
+                                                <div className="flex items-center gap-3">
+                                                     <div className="flex items-center gap-4 text-gray-400">
+                                                        <Heart className="h-5 w-5" />
+                                                        <Share2 className="h-5 w-5" />
+                                                        <MessageSquare className="h-5 w-5" />
+                                                    </div>
+                                                    <button className="rounded-full border border-[#2FD3D8] bg-white px-6 py-2 text-sm font-semibold text-[#2FD3D8]">
+                                                        I'm interested
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
