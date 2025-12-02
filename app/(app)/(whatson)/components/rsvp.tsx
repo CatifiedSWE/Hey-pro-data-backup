@@ -194,12 +194,11 @@ export function RSVP({ eventId, eventSchedule, maxSpotsPerPerson, isFullyBooked,
                                     {eventSchedule?.map((slot) => (
                                         <div 
                                             key={slot.id} 
-                                            className={`flex items-start gap-3 p-3 rounded-lg border-2 transition-all cursor-pointer hover:border-[#31A7AC]/50 ${
+                                            className={`flex items-start gap-3 p-3 rounded-lg border-2 transition-all ${
                                                 selectedDates.includes(slot.id) 
                                                     ? 'border-[#31A7AC] bg-[#31A7AC]/5' 
                                                     : 'border-gray-200 bg-white'
                                             }`}
-                                            onClick={() => handleDateToggle(slot.id)}
                                         >
                                             <Checkbox
                                                 id={`date-${slot.id}`}
