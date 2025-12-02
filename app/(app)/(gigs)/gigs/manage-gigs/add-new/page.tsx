@@ -20,6 +20,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils"
 import { Calendar, Calendar as CalendarIcon, ChevronLeft, ChevronRight, FileText, MapPin, Minus, Plus, UploadCloud, X, Zap } from "lucide-react"
 import Image from "next/image"
+import { toast } from "sonner"
 
 type GigFormValues = {
     role: string
@@ -252,10 +253,10 @@ export default function AddGigPage() {
             // await createGig(payload)
             
             // Show success message
-            alert(`Gig ${status === 'published' ? 'published' : 'saved to draft'} successfully!`)
+            toast.success(`Gig ${status === 'published' ? 'published' : 'saved to draft'} successfully!`)
         } catch (error) {
             console.error('Error submitting gig:', error)
-            alert('Failed to submit gig. Please try again.')
+            toast.error('Failed to submit gig. Please try again.')
         } finally {
             setIsSubmitting(false)
         }

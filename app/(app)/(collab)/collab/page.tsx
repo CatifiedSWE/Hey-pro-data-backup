@@ -9,6 +9,7 @@ import CollabComment from "@/components/collab/CollabComment";
 import { ShareModal } from "@/components/collab/ShareModal";
 import { getCollabs, expressInterest, removeInterest, saveCollab, unsaveCollab, createCollab, uploadCollabCover, type CollabPost } from "@/lib/api/collab";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 const TagPill = ({ label }: { label: string }) => (
     <span className="rounded-full border border-[#2FD3D8] px-4 py-1 text-xs font-medium text-[#2FD3D8] bg-[#2FD3D8]/5">{label}</span>
@@ -162,7 +163,7 @@ export default function Collab() {
             ));
         } catch (error) {
             console.error('Failed to toggle interest:', error);
-            alert(error instanceof Error ? error.message : 'Failed to update interest');
+            toast.error(error instanceof Error ? error.message : 'Failed to update interest');
         } finally {
             setInterestLoading(prev => ({ ...prev, [collabId]: false }));
         }
@@ -188,7 +189,7 @@ export default function Collab() {
             }
         } catch (error) {
             console.error('Failed to toggle save:', error);
-            alert(error instanceof Error ? error.message : 'Failed to update save');
+            toast.error(error instanceof Error ? error.message : 'Failed to update save');
         } finally {
             setSaveLoading(prev => ({ ...prev, [collabId]: false }));
         }
@@ -201,13 +202,13 @@ export default function Collab() {
         
         // Validate file size (5MB)
         if (file.size > 5 * 1024 * 1024) {
-            alert('File size must be less than 5MB');
+            toast.error('File size must be less than 5MB');
             return;
         }
 
         // Validate file type
         if (!['image/jpeg', 'image/jpg', 'image/png'].includes(file.type)) {
-            alert('Only JPG and PNG files are allowed');
+            toast.error('Only JPG and PNG files are allowed');
             return;
         }
 
@@ -225,7 +226,7 @@ export default function Collab() {
         const value = tagInput.trim();
         if (!value || tags.includes(value)) return;
         if (tags.length >= 10) {
-            alert('Maximum 10 tags allowed');
+            toast.error('Maximum 10 tags allowed');
             return;
         }
         setTags((prev) => [...prev, value]);
@@ -241,22 +242,22 @@ export default function Collab() {
         
         // Validation
         if (!collabTitle.trim()) {
-            alert('Please enter a collab title');
+            toast.error('Please enter a collab title');
             return;
         }
         
         if (collabTitle.length < 3 || collabTitle.length > 200) {
-            alert('Title must be between 3 and 200 characters');
+            toast.error('Title must be between 3 and 200 characters');
             return;
         }
 
         if (!collabIdea.trim()) {
-            alert('Please enter your collab idea');
+            toast.error('Please enter your collab idea');
             return;
         }
 
         if (collabIdea.length < 10 || collabIdea.length > 5000) {
-            alert('Summary must be between 10 and 5000 characters');
+            toast.error('Summary must be between 10 and 5000 characters');
             return;
         }
 
@@ -292,10 +293,10 @@ export default function Collab() {
             await fetchCollabs(1);
             
             setIsCreateDialogOpen(false);
-            alert('Collab created successfully!');
+            toast.success('Collab created successfully!');
         } catch (error) {
             console.error('Failed to create collab:', error);
-            alert(error instanceof Error ? error.message : 'Failed to create collab. Please try again.');
+            toast.error(error instanceof Error ? error.message : 'Failed to create collab. Please try again.');
         } finally {
             setSubmitting(false);
         }
