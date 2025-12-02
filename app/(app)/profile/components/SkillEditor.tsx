@@ -276,9 +276,9 @@ export default function SkillEditor({ initialSkills, trigger, onUpdate }: SkillE
         <>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>{trigger}</DialogTrigger>
-                <DialogContent className="w-[560px] max-h-[90vh] flex flex-col overflow-hidden rounded-[15px] border-0 p-0 shadow-[2px_3px_8px_rgba(0,0,0,0.09)]">
+                <DialogContent className="w-[560px] max-h-[85vh] flex flex-col overflow-hidden rounded-[15px] border-0 p-0 shadow-[2px_3px_8px_rgba(0,0,0,0.09)]">
                     <div className="flex flex-col h-full">
-                        <div className="flex-1 overflow-y-auto">
+                        <div className="flex-1 overflow-y-auto custom-scrollbar">
                             <div className="flex flex-col gap-[35px] bg-white p-[30px]">
                                 <div className="space-y-3">
                                     <div className="flex flex-wrap items-start justify-between gap-3">
@@ -304,7 +304,7 @@ export default function SkillEditor({ initialSkills, trigger, onUpdate }: SkillE
                                     </div>
                                 </div>
 
-                                <div className="space-y-8">
+                                <div className="space-y-8 pb-20">
                                     {skills.map((skill) => (
                                         <SkillFormCard
                                             key={skill.id}
@@ -321,7 +321,7 @@ export default function SkillEditor({ initialSkills, trigger, onUpdate }: SkillE
                                 </div>
                             </div>
                         </div>
-                        <div className="flex items-center justify-end gap-6 border-t border-[#C8C8C8] px-[30px] py-4 bg-white z-10">
+                        <div className="flex-none flex items-center justify-end gap-6 border-t border-[#C8C8C8] bg-white px-[30px] py-4 z-20 mt-auto">
                             <Button
                                 onClick={handleCancel}
                                 variant="outline"

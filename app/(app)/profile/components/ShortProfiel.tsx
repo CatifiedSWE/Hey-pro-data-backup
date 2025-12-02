@@ -151,6 +151,10 @@ export default function ShortProfile({ profile, links, roles = [], recommendatio
             window.removeEventListener("resize", updateFilterScrollState)
         }
     }, [])
+    
+    const isAvailable = profile?.availability === "Available";
+    const dotColor = isAvailable ? "bg-[#34A353]" : "bg-[#FA6E80]";
+    const statusTextColor = isAvailable ? "text-[#34A353]" : "text-[#FA6E80]";
 
     return (
         <section className="relative w-full border-b  border-[#DADADA] pb-6 ">
@@ -247,11 +251,12 @@ export default function ShortProfile({ profile, links, roles = [], recommendatio
                     <MapPin className="h-3.5 w-3.5 text-[#393939]" />
                     <span className="whitespace-nowrap">{locationDescriptor}</span>
                 </div>
-                <div className="flex items-center gap-2  bg-white px-4 py-2 text-[#FA6E80] ">
-                    <span className="h-2.5 w-2.5 rounded-full bg-[#FA6E80]" />
+                <div className={`flex items-center gap-2 bg-white px-4 py-2 ${statusTextColor}`}>
+                    <span className={`h-2.5 w-2.5 rounded-full ${dotColor}`} />
                      <AvalableDilog
-                        initialProfile={{ availability: "Available" }}
-                        triggerClassName="h-auto border-none bg-transparent p-0 text-[11px] font-[400] text-[#FA6E80] hover:bg-transparent"
+                        initialProfile={{ availability: profile?.availability || "Available" }}
+                        triggerClassName="h-auto border-none bg-transparent p-0 text-[11px] font-[400] hover:bg-transparent"
+                        onUpdate={onLinksUpdate}
                     />
                 </div>
                 <CalendarDialog

@@ -32,15 +32,20 @@ export default function AvalableDilog({ initialProfile, triggerClassName, onUpda
     const [isLoading, setIsLoading] = React.useState(false)
 
     useEffect(() => {
+        // If initialProfile changes (e.g. parent re-fetch), update local state
+        if (initialProfile.availability) {
+            setAvailability(initialProfile.availability)
+            setDraftAvailability(initialProfile.availability)
+        }
         fetchAvailability()
-    }, [])
+    }, [initialProfile.availability])
 
     const fetchAvailability = async () => {
         setIsLoading(true)
         try {
             const token = await getAccessToken()
             if (!token) {
-                toast.error('Not authenticated')
+                // toast.error('Not authenticated') // Suppress on mount to avoid spam if public
                 return
             }
 
@@ -109,12 +114,19 @@ export default function AvalableDilog({ initialProfile, triggerClassName, onUpda
         }
     }
 
+    const isAvailable = availability === "Available"
+    // Green for Available (#34A353), Red for Not Available (#FA6E80)
+    const statusColor = isAvailable ? "text-[#34A353]" : "text-[#FA6E80]"
+    const draftIsAvailable = draftAvailability === "Available"
+    const draftBgColor = draftIsAvailable ? "bg-[#34A353]" : "bg-[#FA6E80]"
+    const draftBorderColor = draftIsAvailable ? "border-[#34A353]" : "border-[#FA6E80]"
+
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
                 <Button
                     variant="ghost"
-                    className={cn("flex items-center gap-2 text-[#FA6E80]", triggerClassName)}
+                    className={cn("flex items-center gap-2", statusColor, triggerClassName)}
                     disabled={isLoading}
                 >
                     {isLoading ? (
@@ -135,7 +147,7 @@ export default function AvalableDilog({ initialProfile, triggerClassName, onUpda
 
                 <div className="space-y-4 py-4">
                     <Select value={draftAvailability} onValueChange={setDraftAvailability} disabled={isSaving}>
-                        <SelectTrigger className="w-full rounded-full border-none bg-[#FA6E80] text-white h-12">
+                        <SelectTrigger className={cn("w-full rounded-full border-none text-white h-12", draftBgColor)}>
                             <SelectValue placeholder="Select availability" />
                         </SelectTrigger>
                         <SelectContent className="rounded-2xl">
@@ -149,17 +161,17 @@ export default function AvalableDilog({ initialProfile, triggerClassName, onUpda
                     <DialogClose asChild>
                         <Button
                             type="button"
-                            className="h-[44px] w-[128px] rounded-[15px] border-[#FA6E80]"
+                            className={cn("h-[44px] w-[128px] rounded-[15px]", draftBorderColor)}
                             variant="outline"
                             disabled={isSaving}
                         >
-                            <span className="text-[#FA6E80]">Cancel</span>
+                            <span className={draftIsAvailable ? "text-[#34A353]" : "text-[#FA6E80]"}>Cancel</span>
                         </Button>
                     </DialogClose>
 
                     <Button
                         type="button"
-                        className="h-[44px] rounded-[15px] bg-[#FA6E80]"
+                        className={cn("h-[44px] rounded-[15px]", draftBgColor)}
                         onClick={handleSave}
                         disabled={isSaving}
                     >
