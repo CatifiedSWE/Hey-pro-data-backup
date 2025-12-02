@@ -83,19 +83,25 @@ export async function GET(
         const collaboratorUserIds = collabData.map((c: any) => c.user_id);
         const { data: collaboratorProfiles } = await supabase
           .from('user_profiles')
-          .select('user_id, first_name, surname, profile_photo_url')
+          .select('user_id, first_name, surname, alias_first_name, alias_surname, profile_photo_url')
           .in('user_id', collaboratorUserIds);
 
         collaborators = collabData.map((c: any) => {
           const profile = collaboratorProfiles?.find((p: any) => p.user_id === c.user_id);
-          const name = profile 
-            ? `${profile.first_name || ''} ${profile.surname || ''}`.trim() || 'Unknown'
-            : 'Unknown';
+          // Use alias name if available, otherwise use regular name
+          const firstName = profile?.alias_first_name || profile?.first_name || '';
+          const surname = profile?.alias_surname || profile?.surname || '';
+          const name = `${firstName} ${surname}`.trim() || 'Unknown';
+          
+          // Ensure profile photo URL is valid and not empty
+          const avatar = profile?.profile_photo_url && profile.profile_photo_url.trim() !== '' 
+            ? profile.profile_photo_url 
+            : '/placeholder-avatar.png';
           
           return {
             id: c.id,
             name,
-            avatar: profile?.profile_photo_url || '/placeholder-avatar.png',
+            avatar,
             role: c.role,
             department: c.department,
             added_at: c.added_at
