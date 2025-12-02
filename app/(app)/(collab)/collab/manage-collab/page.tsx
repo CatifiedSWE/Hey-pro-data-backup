@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { ManageCollabHeader } from "../../components/Header";
+import { Avatar } from "../../components/Avatar";
 import { Plus, X, Loader2 } from "lucide-react";
 import { getMyCollabs, createCollab, uploadCollabCover, type CollabPost } from "@/lib/api/collab";
 
@@ -291,7 +292,7 @@ export default function ManageCollab() {
                                         {post.interestAvatars.length > 0 && (
                                             <div className="flex items-center">
                                                 {post.interestAvatars.map((avatar, index) => (
-                                                    <Image
+                                                    <Avatar
                                                         key={`${avatar}-${index}`}
                                                         src={avatar}
                                                         alt="Interested member"
@@ -299,7 +300,6 @@ export default function ManageCollab() {
                                                         height={28}
                                                         className="rounded-full border-2 border-white object-cover shadow"
                                                         style={{ marginLeft: index === 0 ? 0 : -12 }}
-                                                        unoptimized
                                                     />
                                                 ))}
                                             </div>

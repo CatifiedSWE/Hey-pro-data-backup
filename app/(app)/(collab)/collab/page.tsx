@@ -4,6 +4,7 @@ import { Heart, MessageCircle, Share2, Loader2 } from "lucide-react";
 import React, { useEffect, useState, useRef, useCallback } from "react";
 
 import { Header } from "../components/Header";
+import { Avatar } from "../components/Avatar";
 import Comment from "@/components/comment/comment";
 import { getCollabs, expressInterest, removeInterest, type CollabPost } from "@/lib/api/collab";
 
@@ -161,13 +162,12 @@ export default function Collab() {
                             </div>
                             <div className="rounded-[32px] border border-white/10 p-6">
                                 <div className="flex items-center gap-3">
-                                    <Image
+                                    <Avatar
                                         src={post.author.avatar}
                                         alt={post.author.name}
                                         width={48}
                                         height={48}
                                         className="rounded-full border border-white/10"
-                                        unoptimized
                                     />
                                     <div>
                                         <p className="text-sm font-semibold text-black">{post.author.name}</p>
@@ -186,7 +186,7 @@ export default function Collab() {
                                         {post.interestAvatars.length > 0 && (
                                             <div className="flex items-center">
                                                 {post.interestAvatars.map((avatar, index) => (
-                                                    <Image
+                                                    <Avatar
                                                         key={`${avatar}-${index}`}
                                                         src={avatar}
                                                         alt="Interested member"
@@ -194,7 +194,6 @@ export default function Collab() {
                                                         height={25}
                                                         className="rounded-full object-cover"
                                                         style={{ marginLeft: index === 0 ? 0 : -10 }}
-                                                        unoptimized
                                                     />
                                                 ))}
                                             </div>

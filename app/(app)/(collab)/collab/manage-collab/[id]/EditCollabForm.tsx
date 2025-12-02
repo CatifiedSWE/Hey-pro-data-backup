@@ -12,6 +12,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
+import { Avatar } from "../../components/Avatar";
 import { updateCollab, deleteCollab, uploadCollabCover, closeCollab, type CollabDetail } from "@/lib/api/collab";
 
 const inputBase = "w-full rounded-[18px] border border-[#444444] bg-white/40 px-5 py-3 text-sm text-gray-900 placeholder:text-gray-500 focus:border-[#444444] focus:outline-none";
@@ -310,13 +311,12 @@ export function EditCollabForm({ collab }: EditCollabFormProps) {
                                     <TableRow key={c.id} className="w-full last:[&>td]:border-b-0">
                                         <TableCell className="w-2/3 border-b border-gray-200">
                                             <div className="flex items-center gap-3">
-                                                <Image
+                                                <Avatar
                                                     src={c.avatar}
                                                     alt={c.name}
                                                     width={40}
                                                     height={40}
                                                     className="rounded-full flex-shrink-0"
-                                                    unoptimized
                                                 />
                                                 <div className="min-w-0">
                                                     <span className="font-medium block truncate">{c.name}</span>
