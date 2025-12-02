@@ -3,12 +3,15 @@
 import * as React from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ProfileProvider } from "@/contexts/ProfileContext";
 
 const Providers = ({ children }: { children: React.ReactNode }) => {
   return (
     <AuthProvider>
-      {children}
-      <Toaster richColors />
+      <ProfileProvider>
+        {children}
+        <Toaster richColors />
+      </ProfileProvider>
     </AuthProvider>
   );
 };
