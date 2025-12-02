@@ -936,11 +936,22 @@ export default function AddGigPage() {
                             Discard
                         </button>
                         <div className="flex flex-1 justify-end gap-3">
-                            <Button type="button" variant="outline" className="rounded-[10px] border-[#2AA9A7] text-[#2AA9A7] h-[47px] w-[102px]">
-                                Publish
+                            <Button 
+                                type="button" 
+                                variant="outline" 
+                                className="rounded-[10px] border-[#2AA9A7] text-[#2AA9A7] h-[47px] w-[102px] hover:bg-[#2AA9A7] hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                onClick={() => handleSubmit('published')}
+                                disabled={isSubmitting}
+                            >
+                                {isSubmitting ? 'Publishing...' : 'Publish'}
                             </Button>
-                            <Button type="submit" className="rounded-[10px] bg-[#2AA9A7] px-6 text-white h-[47px] w-[102px]">
-                                Save to draft
+                            <Button 
+                                type="button" 
+                                className="rounded-[10px] bg-[#2AA9A7] px-6 text-white h-[47px] w-[102px] hover:bg-[#258d8b] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                onClick={() => handleSubmit('draft')}
+                                disabled={isSubmitting}
+                            >
+                                {isSubmitting ? 'Saving...' : 'Save to draft'}
                             </Button>
                         </div>
                     </div>
