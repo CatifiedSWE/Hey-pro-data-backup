@@ -152,7 +152,8 @@ export default function ShortProfile({ profile, links, roles = [], recommendatio
         }
     }, [])
     
-    const isAvailable = profile?.availability === "Available";
+    // Default to "Available" if undefined to match AvalableDialog logic
+    const isAvailable = (profile?.availability || "Available") === "Available";
     const dotColor = isAvailable ? "bg-[#34A353]" : "bg-[#FA6E80]";
     const statusTextColor = isAvailable ? "text-[#34A353]" : "text-[#FA6E80]";
 
