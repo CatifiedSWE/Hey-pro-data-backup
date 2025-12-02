@@ -276,9 +276,9 @@ export default function SkillEditor({ initialSkills, trigger, onUpdate }: SkillE
         <>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>{trigger}</DialogTrigger>
-                <DialogContent className="w-[560px] max-h-[80vh] flex flex-col overflow-hidden rounded-[15px] border-0 p-0 shadow-[2px_3px_8px_rgba(0,0,0,0.09)]">
-                    <div className="flex flex-col h-full">
-                        <div className="flex-1 overflow-y-auto custom-scrollbar">
+                <DialogContent className="w-[560px] max-h-[80vh] flex flex-col rounded-[15px] border-0 p-0 shadow-[2px_3px_8px_rgba(0,0,0,0.09)]">
+                    <div className="flex flex-col h-full max-h-[80vh]">
+                        <div className="flex-1 overflow-y-auto overflow-x-hidden">
                             <div className="flex flex-col gap-[35px] bg-white p-[30px]">
                                 <div className="space-y-3">
                                     <div className="flex flex-wrap items-start justify-between gap-3">
@@ -343,13 +343,13 @@ export default function SkillEditor({ initialSkills, trigger, onUpdate }: SkillE
 
             {/* Reorder Dialog */}
             <Dialog open={isReorderOpen} onOpenChange={setIsReorderOpen}>
-                <DialogContent className="max-w-md max-h-[80vh] overflow-hidden flex flex-col">
-                    <DialogHeader>
+                <DialogContent className="max-w-md max-h-[80vh] flex flex-col">
+                    <DialogHeader className="flex-none">
                         <DialogTitle className="text-2xl font-bold">
                             Reorder Skills
                         </DialogTitle>
                     </DialogHeader>
-                    <div className="flex-1 overflow-y-auto py-4">
+                    <div className="flex-1 overflow-y-auto overflow-x-hidden py-4">
                         <DndContext
                             sensors={sensors}
                             collisionDetection={closestCenter}
