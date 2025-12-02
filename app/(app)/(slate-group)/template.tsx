@@ -324,7 +324,7 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                                                 }}
                                             >
                                                 <span className="block bg-clip-text text-transparent bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC]">
-                                                    Send Invite
+                                                    Create Slate
                                                 </span>
                                             </Button>
                                         </div>
