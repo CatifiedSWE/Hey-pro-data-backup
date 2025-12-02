@@ -304,27 +304,25 @@ export default function SignUpPage() {
                 </div>
               </div>
 
-              {formData.password && (
-                <div className="space-y-1.5 md:space-y-2">
-                  <PasswordRule
-                    label="at least one uppercase"
-                    valid={passwordValidation.hasUppercase}
-                  />
-                  <PasswordRule
-                    label="at least one number"
-                    valid={passwordValidation.hasNumber}
-                  />
-                  <PasswordRule
-                    label="at least one special character"
-                    valid={passwordValidation.hasSpecialChar}
-                    color="green"
-                  />
-                  <PasswordRule
-                    label="minimum 8 characters"
-                    valid={formData.password.length >= 8}
-                  />
-                </div>
-              )}
+              <div className="text-xs md:text-sm mt-2">
+                <span className="text-gray-700">Password must contain a minimum of </span>
+                <span style={{ color: passwordValidation.hasMinLength ? '#1AAEB5' : '#EA4335' }} className="font-medium">
+                  8 characters
+                </span>
+                <span className="text-gray-700">, </span>
+                <span style={{ color: passwordValidation.hasUppercase ? '#1AAEB5' : '#EA4335' }} className="font-medium">
+                  1 upper case
+                </span>
+                <span className="text-gray-700">, </span>
+                <span style={{ color: passwordValidation.hasNumber ? '#1AAEB5' : '#EA4335' }} className="font-medium">
+                  1 number
+                </span>
+                <span className="text-gray-700"> and </span>
+                <span style={{ color: passwordValidation.hasSpecialChar ? '#1AAEB5' : '#EA4335' }} className="font-medium">
+                  1 special character
+                </span>
+                <span className="text-gray-700">.</span>
+              </div>
 
               <Button
                 type="submit"
