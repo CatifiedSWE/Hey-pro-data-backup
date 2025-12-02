@@ -98,7 +98,7 @@ export async function GET(request: NextRequest) {
         // Fetch creator info
         const { data: creator } = await supabase
           .from('user_profiles')
-          .select('legal_first_name, legal_surname, alias_first_name, alias_surname, profile_photo_url')
+          .select('first_name, surname, alias_first_name, alias_surname, profile_photo_url')
           .eq('user_id', event.created_by)
           .maybeSingle();
 
@@ -120,9 +120,9 @@ export async function GET(request: NextRequest) {
         const constructFullName = (creator: any) => {
           if (!creator) return 'Unknown';
           
-          // Prefer alias name if available, otherwise use legal name
-          const firstName = creator.alias_first_name || creator.legal_first_name || '';
-          const surname = creator.alias_surname || creator.legal_surname || '';
+          // Prefer alias name if available, otherwise use first name
+          const firstName = creator.alias_first_name || creator.first_name || '';
+          const surname = creator.alias_surname || creator.surname || '';
           
           const fullName = `${firstName} ${surname}`.trim();
           return fullName || 'Unknown';
