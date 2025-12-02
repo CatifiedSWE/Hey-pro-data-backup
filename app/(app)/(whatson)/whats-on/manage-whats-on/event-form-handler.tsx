@@ -3,7 +3,7 @@
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { whatsOnAPI } from '@/lib/api/whatson';
-import { EditWhatsOnForm } from '../../../components/EditWhatsOnForm';
+import { EditWhatsOnForm } from '../../components/EditWhatsOnForm';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import axios from '@/lib/axios';
