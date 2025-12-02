@@ -185,7 +185,8 @@ export default function ManageWhatsOnPage() {
             setLoadingRSVPs(true);
             setSelectedEventId(eventId);
             const response = await whatsOnAPI.getRSVPList(eventId);
-            setRsvpData(response.data || []);
+            // The API returns { success, data: { rsvps, summary, pagination } }
+            setRsvpData(response.data?.rsvps || []);
         } catch (err: any) {
             console.error('Failed to fetch RSVPs:', err);
             alert(err.response?.data?.error || 'Failed to load RSVPs');

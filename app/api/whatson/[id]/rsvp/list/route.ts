@@ -85,9 +85,21 @@ export async function GET(
         // Fetch attendee profile
         const { data: profile } = await supabase
           .from('user_profiles')
-          .select('id, name, email, profile_photo_url')
-          .eq('id', rsvp.user_id)
+          .select('user_id, legal_first_name, legal_surname, alias_first_name, alias_surname, email, profile_photo_url')
+          .eq('user_id', rsvp.user_id)
           .maybeSingle();
+
+        // Construct full name from available fields
+        const constructFullName = (profile: any) => {
+          if (!profile) return 'Unknown';
+          
+          // Prefer alias name if available, otherwise use legal name
+          const firstName = profile.alias_first_name || profile.legal_first_name || '';
+          const surname = profile.alias_surname || profile.legal_surname || '';
+          
+          const fullName = `${firstName} ${surname}`.trim();
+          return fullName || 'Unknown';
+        };
 
         // Fetch selected dates
         const { data: rsvpDates } = await supabase
@@ -106,7 +118,10 @@ export async function GET(
 
         return {
           ...rsvp,
-          attendee: profile || null,
+          user_profile: profile ? {
+            name: constructFullName(profile),
+            profile_photo_url: profile.profile_photo_url
+          } : null,
           selected_dates: rsvpDates || []
         };
       })

@@ -38,15 +38,9 @@ export default function ManageWhatsOnEditPage({ params }: ManageWhatsOnEditPageP
             // Fetch RSVP list
             try {
                 const rsvpResponse = await whatsOnAPI.getRSVPList(id);
-                const rsvps = rsvpResponse.data.map((rsvp: any) => ({
-                    id: rsvp.id,
-                    name: rsvp.user?.name || 'Unknown',
-                    ticketNo: rsvp.ticket_number,
-                    reference: rsvp.reference_number,
-                    chatEnabled: false,
-                    paid: rsvp.payment_status === 'paid'
-                }));
-                setRsvpEntries(rsvps);
+                // The API returns { success, data: { rsvps, summary, pagination } }
+                // Data is already in the correct format from API with user_profile
+                setRsvpEntries(rsvpResponse.data?.rsvps || []);
             } catch (rsvpErr) {
                 console.warn('Could not fetch RSVPs:', rsvpErr);
                 setRsvpEntries([]);
