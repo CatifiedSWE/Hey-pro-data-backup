@@ -82,6 +82,7 @@ export default function Header() {
   const [notificationOpen, setNotificationOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [chatOpen, setChatOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
   
   const { user, signOut } = useAuth()
   const { profile } = useProfile()
@@ -118,17 +119,24 @@ export default function Header() {
               <Logo />
             </Link>
 
-            {/* Search Bar - Hidden on mobile */}
-            <div className="hidden md:flex flex-1 max-w-md">
-              <div className="relative w-full">
+            {/* Search Bar - Collapsible */}
+            <div className="hidden md:flex items-center">
+              <div className={`relative flex items-center transition-all duration-300 ease-in-out ${searchOpen ? 'w-[270px]' : 'w-[40px]'}`}>
+                <div
+                  className={`absolute right-0 top-1/2 -translate-y-1/2 h-[34px] w-[34px] bg-[#FA6E80] hover:bg-[#f95569] text-white rounded-full flex items-center justify-center cursor-pointer z-20 ${searchOpen ? 'right-2' : 'right-1'}`}
+                  onClick={() => setSearchOpen(!searchOpen)}
+                >
+                  <Search className="h-[18px] w-[18px]" />
+                </div>
                 <Input
                   type="search"
                   placeholder="Search jobs, events..."
-                  className="w-full h-[48px] max-w-[270px] rounded-full pr-10 text-base bg-secondary/80 border-none focus-visible:ring-accent"
+                  className={`
+                    w-full h-[48px] rounded-full text-base bg-secondary/80 border-none focus-visible:ring-accent
+                    transition-all duration-300 ease-in-out
+                    ${searchOpen ? 'pl-4 pr-12 opacity-100' : 'pl-0 pr-0 opacity-0 pointer-events-none'}
+                  `}
                 />
-                <div className="absolute left-[230px] top-1/2 h-[34px] w-[34px] -translate-y-1/2 bg-[#FA6E80] hover:bg-[#f95569] text-white rounded-full flex items-center justify-center">
-                  <Search className="h-[18px] w-[18px]" />
-                </div>
               </div>
             </div>
 
