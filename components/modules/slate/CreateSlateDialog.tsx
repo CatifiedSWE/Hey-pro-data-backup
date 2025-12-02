@@ -202,7 +202,7 @@ export default function CreateSlateDialog({ open, onOpenChange }: CreateSlateDia
                                 <p className="text-lg font-light mb-4">Drag photos and videos here</p>
                                 <Button 
                                     onClick={() => fileInputRef.current?.click()}
-                                    className="bg-[#0095F6] hover:bg-[#1877F2] text-white font-semibold text-sm h-8 px-4 rounded-md"
+                                    className="bg-[#FA6E80] hover:bg-[#FA6E80]/90 text-white font-semibold text-sm h-8 px-4 rounded-md"
                                 >
                                     Select from computer
                                 </Button>
