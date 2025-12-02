@@ -31,7 +31,6 @@ export default function AvalableDilog({ initialProfile, triggerClassName, onUpda
     const [isSaving, setIsSaving] = React.useState(false)
     const [isLoading, setIsLoading] = React.useState(false)
 
-    // Fetch current availability from API when component mounts
     useEffect(() => {
         fetchAvailability()
     }, [])
@@ -72,11 +71,6 @@ export default function AvalableDilog({ initialProfile, triggerClassName, onUpda
         }
     }
 
-    const handleCancel = () => {
-        setDraftAvailability(availability)
-        setOpen(false)
-    }
-
     const handleSave = async () => {
         setIsSaving(true)
         try {
@@ -103,9 +97,7 @@ export default function AvalableDilog({ initialProfile, triggerClassName, onUpda
                 setAvailability(draftAvailability)
                 toast.success('Availability updated successfully!')
                 setOpen(false)
-                if (onUpdate) {
-                    onUpdate()
-                }
+                onUpdate?.()
             } else {
                 toast.error(data.error || 'Failed to update availability')
             }
@@ -122,7 +114,7 @@ export default function AvalableDilog({ initialProfile, triggerClassName, onUpda
             <DialogTrigger asChild>
                 <Button
                     variant="ghost"
-                    className={cn("flex items-center gap-2 border border-none text-[#31A7AC]", triggerClassName)}
+                    className={cn("flex items-center gap-2 text-[#31A7AC]", triggerClassName)}
                     disabled={isLoading}
                 >
                     {isLoading ? (
@@ -135,13 +127,15 @@ export default function AvalableDilog({ initialProfile, triggerClassName, onUpda
                     )}
                 </Button>
             </DialogTrigger>
+
             <DialogContent className="sm:max-w-md">
-                <DialogHeader className="mt-20">
+                <DialogHeader>
                     <DialogTitle>Availability</DialogTitle>
                 </DialogHeader>
-                <div className="space-y-2 h-40 -mt-30">
+
+                <div className="space-y-4 py-4">
                     <Select value={draftAvailability} onValueChange={setDraftAvailability} disabled={isSaving}>
-                        <SelectTrigger className="w-full rounded-full border-none bg-[#34A353] text-white">
+                        <SelectTrigger className="w-full rounded-full border-none bg-[#34A353] text-white h-12">
                             <SelectValue placeholder="Select availability" />
                         </SelectTrigger>
                         <SelectContent className="rounded-2xl">
@@ -151,20 +145,22 @@ export default function AvalableDilog({ initialProfile, triggerClassName, onUpda
                         </SelectContent>
                     </Select>
                 </div>
-                <DialogFooter className="flex flex-row justify-start items-start -mt-60">
+
+                <DialogFooter className="flex flex-row justify-end gap-3">
                     <DialogClose asChild>
-                        <Button 
-                            type="button" 
-                            className="h-[44px] w-[128px] rounded-[15px] border-[#31A7AC]" 
+                        <Button
+                            type="button"
+                            className="h-[44px] w-[128px] rounded-[15px] border-[#31A7AC]"
                             variant="outline"
                             disabled={isSaving}
                         >
                             <span className="text-[#31A7AC]">Cancel</span>
                         </Button>
                     </DialogClose>
-                    <Button 
-                        type="button" 
-                        className="h-[44px] rounded-[15px] bg-[#31A7AC]" 
+
+                    <Button
+                        type="button"
+                        className="h-[44px] rounded-[15px] bg-[#31A7AC]"
                         onClick={handleSave}
                         disabled={isSaving}
                     >
@@ -174,7 +170,7 @@ export default function AvalableDilog({ initialProfile, triggerClassName, onUpda
                                 Saving...
                             </>
                         ) : (
-                            'Save'
+                            "Save"
                         )}
                     </Button>
                 </DialogFooter>
