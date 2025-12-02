@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { cities } from '@/lib/cities';
 
 interface LocationAutocompleteProps {
   value: string;
@@ -13,9 +14,9 @@ interface LocationAutocompleteProps {
 
 /**
  * LocationAutocomplete Component
- * Efficient approach:
- * - Countries: Static list with search (instant, no API calls)
- * - Cities: GeoNames API (free, fast, reliable)
+ * Efficient approach with static data:
+ * - Countries: Static list with instant client-side search (no API calls)
+ * - Cities: Static list with instant client-side search (no API calls)
  */
 export default function LocationAutocomplete({
   value,
@@ -26,11 +27,9 @@ export default function LocationAutocomplete({
   disabled = false
 }: LocationAutocompleteProps) {
   const [suggestions, setSuggestions] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
 
   // Static country list (195 countries)
   const COUNTRIES = [
@@ -85,40 +84,21 @@ export default function LocationAutocomplete({
     setShowDropdown(filtered.length > 0);
   };
 
-  // Search cities using GeoNames API (free, no key for basic use)
-  const searchCities = async (query: string) => {
-    try {
-      setIsLoading(true);
-      
-      // Using GeoNames free API
-      const response = await fetch(
-        `http://api.geonames.org/searchJSON?q=${encodeURIComponent(query)}&maxRows=10&featureClass=P&username=demo`
-      );
-
-      if (!response.ok) throw new Error('API error');
-
-      const data = await response.json();
-      const cities = data.geonames?.map((city: any) => ({
-        name: city.name,
-        country: city.countryName
-      })) || [];
-
-      setSuggestions(cities);
-      setShowDropdown(cities.length > 0);
-    } catch (error) {
-      console.error('City search error:', error);
-      setSuggestions([]);
-    } finally {
-      setIsLoading(false);
-    }
+  // Search cities (instant, client-side from static data)
+  const searchCities = (query: string) => {
+    const lowerQuery = query.toLowerCase();
+    const filtered = cities.filter(city =>
+      city.name.toLowerCase().includes(lowerQuery) ||
+      city.country.toLowerCase().includes(lowerQuery)
+    ).slice(0, 10);
+    setSuggestions(filtered);
+    setShowDropdown(filtered.length > 0);
   };
 
   // Handle input change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     onChange(newValue);
-
-    if (debounceTimer.current) clearTimeout(debounceTimer.current);
 
     if (newValue.length < 2) {
       setSuggestions([]);
@@ -130,10 +110,8 @@ export default function LocationAutocomplete({
       // Instant search for countries
       searchCountries(newValue);
     } else {
-      // Debounced API call for cities
-      debounceTimer.current = setTimeout(() => {
-        searchCities(newValue);
-      }, 400);
+      // Instant search for cities
+      searchCities(newValue);
     }
   };
 
@@ -196,13 +174,6 @@ export default function LocationAutocomplete({
         autoComplete="off"
       />
 
-      {/* Loading spinner */}
-      {isLoading && (
-        <div className="absolute right-4 top-1/2 -translate-y-1/2">
-          <div className="w-5 h-5 border-2 border-[#FA6E80] border-t-transparent rounded-full animate-spin"></div>
-        </div>
-      )}
-
       {/* Dropdown */}
       {showDropdown && suggestions.length > 0 && !disabled && (
         <div className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
@@ -223,7 +194,7 @@ export default function LocationAutocomplete({
       )}
 
       {/* No results */}
-      {showDropdown && !isLoading && suggestions.length === 0 && value.length >= 2 && (
+      {showDropdown && suggestions.length === 0 && value.length >= 2 && (
         <div className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-200 rounded-xl shadow-lg p-4">
           <p className="text-gray-500 text-sm text-center">
             No {type === 'country' ? 'countries' : 'cities'} found
