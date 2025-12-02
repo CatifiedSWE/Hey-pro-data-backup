@@ -116,6 +116,24 @@ export async function GET(request: NextRequest) {
           }) || [];
         }
 
+        // Check if current user has expressed interest in their own collab
+        const { data: interestCheck } = await supabase
+          .from('collab_interests')
+          .select('id')
+          .eq('collab_id', collab.id)
+          .eq('user_id', user.id)
+          .single();
+        const userHasInterest = !!interestCheck;
+
+        // Check if current user has saved their own collab
+        const { data: saveCheck } = await supabase
+          .from('collab_saves')
+          .select('id')
+          .eq('collab_id', collab.id)
+          .eq('user_id', user.id)
+          .single();
+        const userHasSaved = !!saveCheck;
+
         return {
           id: collab.id,
           title: collab.title,
@@ -127,8 +145,10 @@ export async function GET(request: NextRequest) {
           interests: collab.interests?.[0]?.count || 0,
           collaborators: collab.collaborators?.[0]?.count || 0,
           interestAvatars,
-          created_at: collab.updated_at,
-          updated_at: collab.updated_at
+          created_at: collab.created_at,
+          updated_at: collab.updated_at,
+          userHasInterest,
+          userHasSaved
         };
       })
     );
