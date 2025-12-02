@@ -131,7 +131,7 @@ export default function SignUpPage() {
 
   const isPasswordValid = () => {
     return (
-      formData.password.length >= 8 &&
+      passwordValidation.hasMinLength &&
       passwordValidation.hasUppercase &&
       passwordValidation.hasNumber &&
       passwordValidation.hasSpecialChar
