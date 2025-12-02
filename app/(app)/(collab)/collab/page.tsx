@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { Heart, Loader2, Plus, X } from "lucide-react";
+import { Heart, Loader2, Plus, X, Search } from "lucide-react";
 import React, { useEffect, useState, useRef, useCallback } from "react";
 
 import { Header } from "../components/Header";
@@ -10,11 +10,11 @@ import { ShareModal } from "@/components/collab/ShareModal";
 import { getCollabs, expressInterest, removeInterest, saveCollab, unsaveCollab, createCollab, uploadCollabCover, type CollabPost } from "@/lib/api/collab";
 
 const TagPill = ({ label }: { label: string }) => (
-    <span className="rounded-[40px] h-[24px] flex justify-center items-center border border-[#2FD3D8] px-4 py-1 text-xs font-medium text-[#2FD3D8]">{label}</span>
+    <span className="rounded-full h-[28px] flex justify-center items-center border border-[#2FD3D8] px-4 py-1 text-xs font-medium text-[#2FD3D8] bg-[#2FD3D8]/5">{label}</span>
 );
 
 const CreateTagPill = ({ label, onRemove }: { label: string; onRemove: () => void }) => (
-    <span className="inline-flex items-center gap-2 rounded-[15px] border border-[#2FD3D8] px-4 py-1 text-xs font-medium text-[#2FD3D8]">
+    <span className="inline-flex items-center gap-2 rounded-full border border-[#2FD3D8] px-4 py-2 text-xs font-medium text-[#2FD3D8] bg-white">
         {label}
         <button type="button" onClick={onRemove} aria-label={`Remove ${label}`}>
             <X className="h-3 w-3" />
@@ -35,10 +35,10 @@ const InterestButton = ({ collabId, userHasInterest, onToggle, isLoading }: Inte
             <button
                 onClick={onToggle}
                 disabled={isLoading}
-                className="rounded-[33px] w-[129px] bg-[#2FD3D8] px-6 py-2 text-sm font-[600] text-black disabled:opacity-50 flex items-center justify-center gap-2"
+                className="rounded-full w-[140px] bg-[#2FD3D8] px-6 py-2.5 text-sm font-semibold text-white disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm hover:bg-[#26B8BD] transition-colors"
             >
                 {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-                {!isLoading && "Interested"}
+                {!isLoading && "Waitlisted"}
             </button>
         );
     }
@@ -46,7 +46,7 @@ const InterestButton = ({ collabId, userHasInterest, onToggle, isLoading }: Inte
         <button
             onClick={onToggle}
             disabled={isLoading}
-            className="rounded-[33px] w-[129px] border flex items-center justify-center border-[#2FD3D8] px-2 py-2 text-[14px] font-[600] text-[#2FD3D8] disabled:opacity-50 gap-2"
+            className="rounded-full w-[140px] border border-[#2FD3D8] bg-white px-6 py-2.5 text-sm font-semibold text-[#2FD3D8] disabled:opacity-50 flex items-center justify-center gap-2 hover:bg-[#2FD3D8]/5 transition-colors"
         >
             {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
             {!isLoading && "I'm interested"}
@@ -59,7 +59,7 @@ const formatDate = (dateString: string) => {
     return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
 };
 
-const inputBase = "w-full rounded-[15px] border border-[#2FD3D8]/40 bg-transparent px-5 py-3 text-sm text-black placeholder:text-black focus:border-[#2FD3D8] focus:outline-none";
+const inputBase = "w-full rounded-xl border border-[#E4E7EC] bg-white px-4 py-3.5 text-sm text-gray-900 placeholder:text-gray-500 focus:border-[#2FD3D8] focus:outline-none focus:ring-1 focus:ring-[#2FD3D8] transition-colors";
 
 export default function Collab() {
     const [collabPosts, setCollabPosts] = useState<CollabPost[]>([]);
@@ -71,6 +71,7 @@ export default function Collab() {
     const [savedCollabs, setSavedCollabs] = useState<Set<string>>(new Set());
     const observerRef = useRef<IntersectionObserver | null>(null);
     const loadMoreRef = useRef<HTMLDivElement>(null);
+    const [searchQuery, setSearchQuery] = useState("");
 
     // Creation form state
     const [submitting, setSubmitting] = useState(false);
@@ -87,7 +88,7 @@ export default function Collab() {
         
         setLoading(true);
         try {
-            const response = await getCollabs({ page: pageNum, limit: 20 });
+            const response = await getCollabs({ page: pageNum, limit: 20, search: searchQuery });
             
             if (pageNum === 1) {
                 setCollabPosts(response.collabs);
@@ -101,12 +102,12 @@ export default function Collab() {
         } finally {
             setLoading(false);
         }
-    }, [loading]);
+    }, [loading, searchQuery]);
 
     // Initial load
     useEffect(() => {
         fetchCollabs(1);
-    }, []);
+    }, [searchQuery]);
 
     // Infinite scroll
     useEffect(() => {
@@ -298,15 +299,32 @@ export default function Collab() {
     };
 
     return (
-        <div className="flex flex-col items-center min-h-screen w-full">
+        <div className="flex flex-col items-center min-h-screen w-full bg-gray-50">
             <Header />
 
-            <div className="mt-16 sm:max-w-[960px] max-w-[393px] w-full space-y-10 text-black bg-transparent pb-10">
+            <div className="mt-8 max-w-[1200px] w-full space-y-8 px-4 pb-10">
+                {/* Search Section */}
+                <section className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                    <div className="flex items-center gap-4 bg-gray-50 rounded-xl p-4 max-w-2xl mx-auto">
+                        <Search className="h-5 w-5 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Search collabs"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="flex-1 bg-transparent border-none outline-none text-sm text-gray-900 placeholder:text-gray-500"
+                        />
+                        <button className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#FA6E80] text-white hover:bg-[#f5576b] transition-colors">
+                            <Search className="h-4 w-4" />
+                        </button>
+                    </div>
+                </section>
+
                 {/* Creation Form */}
-                <section className="rounded-[36px] bg-white p-6 shadow-[0_25px_120px_rgba(0,0,0,0.06)]">
-                    <form onSubmit={handleCreateSubmit} className="flex sm:flex-row flex-col gap-6">
-                        <div className="rounded-[32px] p-2 text-center text-sm text-black/70">
-                            <div className="relative flex h-[197px] w-[326px] items-center justify-center overflow-hidden rounded-[24px] bg-[#D9D9D9]">
+                <section className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+                    <form onSubmit={handleCreateSubmit} className="flex flex-col lg:flex-row gap-8">
+                        <div className="flex-shrink-0">
+                            <div className="relative flex h-[280px] w-full lg:w-[400px] items-center justify-center overflow-hidden rounded-xl bg-gray-100 border-2 border-dashed border-gray-300 hover:border-[#2FD3D8] transition-colors group">
                                 <input
                                     type="file"
                                     accept="image/png,image/jpeg,image/jpg"
@@ -319,17 +337,21 @@ export default function Collab() {
                                         src={posterPreview}
                                         alt="Poster preview"
                                         fill
-                                        sizes="(max-width: 960px) 100vw, 340px"
-                                        className="object-cover"
+                                        sizes="400px"
+                                        className="object-cover rounded-xl"
                                         unoptimized
                                     />
                                 ) : (
-                                    <span>Upload poster / moodboard</span>
+                                    <div className="flex flex-col items-center gap-3 text-gray-500 group-hover:text-[#2FD3D8] transition-colors">
+                                        <Plus className="h-8 w-8" />
+                                        <span className="text-sm font-medium">Upload poster / moodboard</span>
+                                    </div>
                                 )}
                             </div>
-                            <p className="mt-4 text-xs text-black/60">16:9 recommended • PNG / JPG up to 5MB</p>
+                            <p className="mt-3 text-xs text-gray-500 text-center">16:9 recommended • PNG / JPG up to 5MB</p>
                         </div>
-                        <div className="space-y-4 text-black w-full">
+                        
+                        <div className="flex-1 space-y-6">
                             <input
                                 className={inputBase}
                                 placeholder="Collab title"
@@ -338,18 +360,20 @@ export default function Collab() {
                                 disabled={submitting}
                                 required
                             />
+                            
                             <textarea
-                                className={`${inputBase} min-h-[110px] rounded-3xl`}
+                                className={`${inputBase} min-h-[120px] resize-none`}
                                 placeholder="What's your collab idea?"
                                 value={collabIdea}
                                 onChange={(e) => setCollabIdea(e.target.value)}
                                 disabled={submitting}
                                 required
                             />
-                            <div className="space-y-2">
-                                <div className="flex gap-3 border rounded-2xl p-1 border-[#2FD3D8]">
+                            
+                            <div className="space-y-4">
+                                <div className="flex gap-3 p-2 border border-gray-200 rounded-xl bg-gray-50">
                                     <input
-                                        className="border-none focus:outline-none px-3.5 bg-transparent w-full"
+                                        className="flex-1 border-none bg-transparent text-sm text-gray-900 placeholder:text-gray-500 focus:outline-none px-2"
                                         placeholder="Add collab tags"
                                         value={tagInput}
                                         onChange={(e) => setTagInput(e.target.value)}
@@ -364,12 +388,13 @@ export default function Collab() {
                                     <button
                                         type="button"
                                         onClick={handleAddTag}
-                                        className="whitespace-nowrap rounded-[15px] h-[41px] px-4 py-3 text-sm font-[400] text-[#FA6E80]"
+                                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#FA6E80] text-white hover:bg-[#f5576b] transition-colors"
                                         disabled={submitting}
                                     >
-                                        <Plus className="h-6 w-6" />
+                                        <Plus className="h-4 w-4" />
                                     </button>
                                 </div>
+                                
                                 {tags.length > 0 && (
                                     <div className="flex flex-wrap gap-2">
                                         {tags.map((tag) => (
@@ -378,9 +403,10 @@ export default function Collab() {
                                     </div>
                                 )}
                             </div>
+                            
                             <button 
                                 type="submit" 
-                                className="w-full rounded-[15px] h-[41px] bg-[#FA6E80] py-3 text-sm font-semibold text-white shadow-lg hover:bg-[#f5576b] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                className="w-full rounded-xl h-12 bg-[#FA6E80] text-white font-semibold hover:bg-[#f5576b] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors shadow-sm"
                                 disabled={submitting}
                             >
                                 {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
@@ -391,84 +417,99 @@ export default function Collab() {
                 </section>
 
                 {/* Collab Posts Feed */}
-                <section className="space-y-8">
+                <section className="space-y-6">
                     {collabPosts.map((post) => (
-                        <article key={post.id} className="grid gap-6 md:grid-cols-[360px_auto] p-2">
-                            <div className="overflow-hidden rounded-[10px] w-full md:w-[360px] h-[220px] relative">
-                                <Image
-                                    src={post.cover_image_url || '/bg.jpg'}
-                                    alt={post.title}
-                                    fill
-                                    sizes="(max-width: 768px) 100vw, 360px"
-                                    className="object-cover"
-                                    unoptimized
-                                />
-                            </div>
-                            <div className="rounded-[32px] border border-white/10 p-6">
-                                <div className="flex items-center gap-3">
-                                    <Avatar
-                                        src={post.author.avatar}
-                                        alt={post.author.name}
-                                        width={48}
-                                        height={48}
-                                        className="rounded-full border border-white/10"
+                        <article key={post.id} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                            <div className="flex flex-col lg:flex-row">
+                                <div className="lg:w-[500px] h-[300px] relative bg-gray-100">
+                                    <Image
+                                        src={post.cover_image_url || '/bg.jpg'}
+                                        alt={post.title}
+                                        fill
+                                        sizes="500px"
+                                        className="object-cover"
+                                        unoptimized
                                     />
-                                    <div>
-                                        <p className="text-sm font-semibold text-black">{post.author.name}</p>
-                                        <p className="text-xs text-black/60">Posted on {formatDate(post.created_at)}</p>
-                                    </div>
                                 </div>
-                                <p className="text-[18px] font-[400] mt-3">{post.title}</p>
-                                <p className="mt-4 text-sm leading-relaxed text-black">{post.summary}</p>
-                                <div className="mt-4 flex flex-wrap gap-2">
-                                    {post.tags.map((tag) => (
-                                        <TagPill key={tag} label={tag} />
-                                    ))}
-                                </div>
-                                <div className="mt-6 flex sm:flex-wrap flex-row items-center gap-4 text-sm text-white/70">
-                                    <div className="flex items-center gap-2">
-                                        {post.interestAvatars.length > 0 && (
-                                            <div className="flex items-center">
-                                                {post.interestAvatars.map((avatar, index) => (
-                                                    <Avatar
-                                                        key={`${avatar}-${index}`}
-                                                        src={avatar}
-                                                        alt="Interested member"
-                                                        width={25}
-                                                        height={25}
-                                                        className="rounded-full object-cover"
-                                                        style={{ marginLeft: index === 0 ? 0 : -10 }}
-                                                    />
-                                                ))}
+                                
+                                <div className="flex-1 p-8">
+                                    <div className="flex items-start justify-between mb-4">
+                                        <div>
+                                            <div className="flex items-center gap-3 mb-2">
+                                                <Avatar
+                                                    src={post.author.avatar}
+                                                    alt={post.author.name}
+                                                    width={40}
+                                                    height={40}
+                                                    className="rounded-full"
+                                                />
+                                                <div>
+                                                    <p className="text-sm font-medium text-gray-900">{post.author.name}</p>
+                                                    <p className="text-xs text-gray-500">Posted on {formatDate(post.created_at)}</p>
+                                                </div>
                                             </div>
-                                        )}
-                                        <span className="text-xs hidden sm:flex text-black/70">{post.interests} interested</span>
+                                            <h3 className="text-xl font-semibold text-gray-900 mb-3">{post.title}</h3>
+                                        </div>
                                     </div>
-                                    <div className="ml-auto flex items-center gap-3">
-                                        <button 
-                                            onClick={() => handleSaveToggle(post.id)}
-                                            disabled={saveLoading[post.id]}
-                                            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FAFAFA] text-[#FA6E80] hover:bg-[#FA6E80]/10 transition-colors disabled:opacity-50"
-                                            title={savedCollabs.has(post.id) ? "Unsave" : "Save"}
-                                        >
-                                            {saveLoading[post.id] ? (
-                                                <Loader2 className="h-5 w-5 animate-spin" />
-                                            ) : (
-                                                <Heart className={`h-5 w-5 ${savedCollabs.has(post.id) ? 'fill-current' : ''}`} />
+                                    
+                                    <p className="text-sm text-gray-600 leading-relaxed mb-4 line-clamp-3">{post.summary}</p>
+                                    
+                                    <div className="flex flex-wrap gap-2 mb-6">
+                                        {post.tags.map((tag) => (
+                                            <TagPill key={tag} label={tag} />
+                                        ))}
+                                    </div>
+                                    
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            {post.interestAvatars.length > 0 && (
+                                                <div className="flex items-center -space-x-2">
+                                                    {post.interestAvatars.slice(0, 3).map((avatar, index) => (
+                                                        <Avatar
+                                                            key={`${avatar}-${index}`}
+                                                            src={avatar}
+                                                            alt="Interested member"
+                                                            width={28}
+                                                            height={28}
+                                                            className="rounded-full border-2 border-white"
+                                                        />
+                                                    ))}
+                                                </div>
                                             )}
-                                        </button>
-                                        <ShareModal
-                                            collabId={post.id}
-                                            collabTitle={post.title}
-                                            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FAFAFA] text-[#31A7AC] hover:bg-[#31A7AC]/10 transition-colors"
-                                        />
-                                        <CollabComment collabId={post.id} />
-                                        <InterestButton
-                                            collabId={post.id}
-                                            userHasInterest={post.userHasInterest || false}
-                                            onToggle={() => handleInterestToggle(post.id, post.userHasInterest || false)}
-                                            isLoading={interestLoading[post.id] || false}
-                                        />
+                                            <span className="text-sm font-medium text-gray-600">
+                                                <span className="text-[#2FD3D8] font-semibold">{post.interests}</span> interested
+                                            </span>
+                                        </div>
+                                        
+                                        <div className="flex items-center gap-3">
+                                            <button 
+                                                onClick={() => handleSaveToggle(post.id)}
+                                                disabled={saveLoading[post.id]}
+                                                className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-50 text-[#FA6E80] hover:bg-[#FA6E80]/10 transition-colors disabled:opacity-50 border border-gray-200"
+                                                title={savedCollabs.has(post.id) ? "Unsave" : "Save"}
+                                            >
+                                                {saveLoading[post.id] ? (
+                                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                                ) : (
+                                                    <Heart className={`h-4 w-4 ${savedCollabs.has(post.id) ? 'fill-current' : ''}`} />
+                                                )}
+                                            </button>
+                                            
+                                            <ShareModal
+                                                collabId={post.id}
+                                                collabTitle={post.title}
+                                                className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-50 text-[#31A7AC] hover:bg-[#31A7AC]/10 transition-colors border border-gray-200"
+                                            />
+                                            
+                                            <CollabComment collabId={post.id} />
+                                            
+                                            <InterestButton
+                                                collabId={post.id}
+                                                userHasInterest={post.userHasInterest || false}
+                                                onToggle={() => handleInterestToggle(post.id, post.userHasInterest || false)}
+                                                isLoading={interestLoading[post.id] || false}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -482,8 +523,11 @@ export default function Collab() {
                     )}
 
                     {!loading && collabPosts.length === 0 && (
-                        <div className="text-center py-8 text-black/60">
-                            No collabs found. Be the first to create one!
+                        <div className="text-center py-12 text-gray-500 bg-white rounded-2xl border border-gray-100">
+                            <div className="max-w-md mx-auto">
+                                <h3 className="text-lg font-medium text-gray-900 mb-2">No collabs found</h3>
+                                <p className="text-sm">Be the first to create a collaboration project!</p>
+                            </div>
                         </div>
                     )}
 
