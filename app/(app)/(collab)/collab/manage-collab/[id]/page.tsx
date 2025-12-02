@@ -36,7 +36,7 @@ export default function ManageCollabPage() {
 
     if (loading) {
         return (
-            <div className="space-y-10">
+            <div className="min-h-screen bg-gray-50">
                 <ManageCollabHeader />
                 <div className="flex justify-center py-20">
                     <Loader2 className="h-8 w-8 animate-spin text-[#2FD3D8]" />
@@ -50,9 +50,9 @@ export default function ManageCollabPage() {
     }
 
     return (
-        <div className="space-y-10">
+        <>
             <ManageCollabHeader />
             <EditCollabForm collab={collab} />
-        </div>
+        </>
     );
 }
