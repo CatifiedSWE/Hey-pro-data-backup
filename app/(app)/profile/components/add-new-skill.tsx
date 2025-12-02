@@ -180,9 +180,9 @@ export default function AddNewSkill({ trigger, onUpdate }: AddNewSkillProps) {
         <>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>{trigger}</DialogTrigger>
-                <DialogContent className="w-[560px] max-h-[80vh] flex flex-col overflow-hidden rounded-[15px] border-0 p-0 shadow-[2px_3px_8px_rgba(0,0,0,0.09)]">
-                    <div className="flex flex-col h-full">
-                        <div className="flex-1 overflow-y-auto custom-scrollbar">
+                <DialogContent className="w-[560px] max-h-[80vh] flex flex-col rounded-[15px] border-0 p-0 shadow-[2px_3px_8px_rgba(0,0,0,0.09)]">
+                    <div className="flex flex-col h-full max-h-[80vh]">
+                        <div className="flex-1 overflow-y-auto overflow-x-hidden">
                             <div className="flex flex-col gap-[35px] bg-white p-[30px]">
                                 <div className="space-y-3">
                                     <div className="flex flex-wrap items-start justify-between gap-3">
