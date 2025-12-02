@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import { toast } from 'sonner';
+import LocationAutocomplete from '@/components/LocationAutocomplete';
 
 /**
  * Profile Creation Form page - As per AUTH_FLOW_TYPESCRIPT_GUIDE.md
@@ -61,25 +62,6 @@ export default function FormPage() {
     
     checkAuthAndProfile();
   }, [router]);
-
-  // List of countries with priority to UAE and Middle East
-  const countries = [
-    'United Arab Emirates',
-    'Saudi Arabia',
-    'Qatar',
-    'Kuwait',
-    'Bahrain',
-    'Oman',
-    'Jordan',
-    'Lebanon',
-    'United States',
-    'United Kingdom',
-    'Canada',
-    'Australia',
-    'Germany',
-    'France',
-    'India'
-  ];
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -269,29 +251,19 @@ export default function FormPage() {
           <div>
             <h3 className="text-lg font-semibold text-black mb-3">Location</h3>
             <div className="space-y-4">
-              <select
+              <LocationAutocomplete
                 value={formData.country}
-                onChange={(e) => handleInputChange('country', e.target.value)}
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-[#FA6E80] text-black bg-white transition-colors appearance-none cursor-pointer"
-                style={{
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23000' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
-                  backgroundRepeat: 'no-repeat',
-                  backgroundPosition: 'right 1rem center'
-                }}
-              >
-                <option value="" disabled>Country</option>
-                {countries.map((country) => (
-                  <option key={country} value={country}>
-                    {country}
-                  </option>
-                ))}
-              </select>
+                onChange={(value) => handleInputChange('country', value)}
+                placeholder="Country"
+                type="country"
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-[#FA6E80] text-black placeholder-gray-400 transition-colors"
+              />
 
-              <input
-                type="text"
-                placeholder="City"
+              <LocationAutocomplete
                 value={formData.city}
-                onChange={(e) => handleInputChange('city', e.target.value)}
+                onChange={(value) => handleInputChange('city', value)}
+                placeholder="City"
+                type="city"
                 className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-[#FA6E80] text-black placeholder-gray-400 transition-colors"
               />
             </div>
