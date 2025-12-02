@@ -191,6 +191,112 @@ export default function Collab() {
         }
     };
 
+    // Creation form functions
+    const handlePosterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+        
+        // Validate file size (5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            alert('File size must be less than 5MB');
+            return;
+        }
+
+        // Validate file type
+        if (!['image/jpeg', 'image/jpg', 'image/png'].includes(file.type)) {
+            alert('Only JPG and PNG files are allowed');
+            return;
+        }
+
+        setPosterFile(file);
+        const reader = new FileReader();
+        reader.onload = (loadEvent) => {
+            if (typeof loadEvent.target?.result === "string") {
+                setPosterPreview(loadEvent.target.result);
+            }
+        };
+        reader.readAsDataURL(file);
+    };
+
+    const handleAddTag = () => {
+        const value = tagInput.trim();
+        if (!value || tags.includes(value)) return;
+        if (tags.length >= 10) {
+            alert('Maximum 10 tags allowed');
+            return;
+        }
+        setTags((prev) => [...prev, value]);
+        setTagInput("");
+    };
+
+    const handleRemoveTag = (value: string) => {
+        setTags((prev) => prev.filter((tag) => tag !== value));
+    };
+
+    const handleCreateSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        
+        // Validation
+        if (!collabTitle.trim()) {
+            alert('Please enter a collab title');
+            return;
+        }
+        
+        if (collabTitle.length < 3 || collabTitle.length > 200) {
+            alert('Title must be between 3 and 200 characters');
+            return;
+        }
+
+        if (!collabIdea.trim()) {
+            alert('Please enter your collab idea');
+            return;
+        }
+
+        if (collabIdea.length < 10 || collabIdea.length > 5000) {
+            alert('Summary must be between 10 and 5000 characters');
+            return;
+        }
+
+        setSubmitting(true);
+
+        try {
+            let coverImageUrl: string | undefined = undefined;
+
+            // Upload cover image if provided
+            if (posterFile) {
+                const uploadResult = await uploadCollabCover(posterFile);
+                coverImageUrl = uploadResult.url;
+            }
+
+            // Create collab
+            await createCollab({
+                title: collabTitle,
+                summary: collabIdea,
+                tags: tags.length > 0 ? tags : undefined,
+                cover_image_url: coverImageUrl,
+                status: 'open'
+            });
+
+            // Reset form
+            setCollabTitle("");
+            setCollabIdea("");
+            setTags([]);
+            setPosterPreview("");
+            setPosterFile(null);
+            setTagInput("");
+
+            // Refresh collabs list
+            await fetchCollabs(1);
+            
+            alert('Collab created successfully!');
+        } catch (error) {
+            console.error('Failed to create collab:', error);
+            alert(error instanceof Error ? error.message : 'Failed to create collab. Please try again.');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
     return (
         <div className="flex flex-col items-center min-h-screen w-full">
             <Header />
