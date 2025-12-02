@@ -102,6 +102,26 @@ export async function GET(request: NextRequest) {
           .eq('id', event.created_by)
           .maybeSingle();
 
+        // Fetch Google photo from auth.users if profile photo is not set
+        let googlePhotoUrl = null;
+        if (creator && (!creator.profile_photo_url || creator.profile_photo_url.trim() === '')) {
+          try {
+            const { data: authUser } = await supabase.auth.admin.getUserById(event.created_by);
+            if (authUser?.user?.user_metadata?.avatar_url) {
+              googlePhotoUrl = authUser.user.user_metadata.avatar_url;
+            }
+          } catch (error) {
+            // Silently fail if auth fetch fails
+            console.error('Failed to fetch Google photo for user:', event.created_by);
+          }
+        }
+
+        // Enhance creator object with Google photo if available
+        const creatorWithFallback = creator ? {
+          ...creator,
+          profile_photo_url: creator.profile_photo_url || googlePhotoUrl || null
+        } : null;
+
         // Count RSVPs
         const { count: rsvpCount } = await supabase
           .from('whatson_rsvps')
@@ -122,7 +142,7 @@ export async function GET(request: NextRequest) {
           ...event,
           schedule: schedule || [],
           tags: eventTags?.map(t => t.tag_name) || [],
-          creator: creator || null,
+          creator: creatorWithFallback,
           rsvp_count: rsvpCount || 0,
           spots_booked: spotsBooked,
           is_fully_booked: !event.is_unlimited_spots && spotsBooked >= (event.total_spots || 0)

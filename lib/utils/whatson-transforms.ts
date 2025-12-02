@@ -2,6 +2,27 @@
 import { format } from 'date-fns';
 import { WhatsOnEvent } from '@/lib/api/whatson';
 
+/**
+ * Get profile photo with fallback chain:
+ * 1. User uploaded photo (profile_photo_url)
+ * 2. Google photo (if available from auth metadata - not implemented yet in API)
+ * 3. Default photo
+ */
+function getProfilePhotoWithFallback(profilePhotoUrl: string | null | undefined, googlePhotoUrl?: string | null): string {
+  // Priority 1: User uploaded photo
+  if (profilePhotoUrl && profilePhotoUrl.trim() !== '') {
+    return profilePhotoUrl;
+  }
+  
+  // Priority 2: Google photo (if available)
+  if (googlePhotoUrl && googlePhotoUrl.trim() !== '') {
+    return googlePhotoUrl;
+  }
+  
+  // Priority 3: Default photo
+  return '/image (2).png';
+}
+
 export function transformEventForCard(event: WhatsOnEvent) {
   return {
     id: event.id,
@@ -17,7 +38,7 @@ export function transformEventForCard(event: WhatsOnEvent) {
     thumbnail: event.thumbnail_url || '/whats-on.png',
     host: {
       name: event.creator.name,
-      avatar: event.creator.profile_photo_url || '/image (2).png',
+      avatar: getProfilePhotoWithFallback(event.creator.profile_photo_url),
       organization: event.creator.name
     },
     rsvpCount: event.rsvp_count,
@@ -64,7 +85,7 @@ export function transformEventForDetail(event: WhatsOnEvent) {
     host: {
       name: event.creator.name,
       organization: event.creator.name,
-      avatar: event.creator.profile_photo_url || '/image (2).png'
+      avatar: getProfilePhotoWithFallback(event.creator.profile_photo_url)
     },
     schedule: event.schedule.map(slot => ({
       dateLabel: format(new Date(slot.event_date), 'EEE, MMM d yyyy'),

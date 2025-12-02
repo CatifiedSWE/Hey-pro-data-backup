@@ -11,16 +11,38 @@ export async function GET(
 ) {
   try {
     const supabase = createServerClient();
-    const eventId = params.id;
+    const eventIdentifier = params.id;
     const authHeader = request.headers.get('Authorization');
     const user = await validateAuthToken(authHeader);
 
-    // Fetch event
-    const { data: event, error: eventError } = await supabase
-      .from('whatson_events')
-      .select('*')
-      .eq('id', eventId)
-      .single();
+    // Try to fetch event by ID first, then by slug if not found
+    // Check if it looks like a UUID (contains dashes in UUID format)
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(eventIdentifier);
+    
+    let event = null;
+    let eventError = null;
+
+    if (isUUID) {
+      // Try by ID first
+      const result = await supabase
+        .from('whatson_events')
+        .select('*')
+        .eq('id', eventIdentifier)
+        .maybeSingle();
+      event = result.data;
+      eventError = result.error;
+    }
+    
+    // If not found by ID or not a UUID, try by slug
+    if (!event) {
+      const result = await supabase
+        .from('whatson_events')
+        .select('*')
+        .eq('slug', eventIdentifier)
+        .maybeSingle();
+      event = result.data;
+      eventError = result.error;
+    }
 
     if (eventError || !event) {
       return NextResponse.json(
@@ -50,12 +72,27 @@ export async function GET(
       .select('tag_name')
       .eq('event_id', event.id);
 
-    // Fetch creator info
+    // Fetch creator info from user_profiles
     const { data: creator } = await supabase
       .from('user_profiles')
       .select('id, name, profile_photo_url')
       .eq('id', event.created_by)
       .maybeSingle();
+
+    // Fetch Google photo from auth.users if profile photo is not set
+    let googlePhotoUrl = null;
+    if (creator && (!creator.profile_photo_url || creator.profile_photo_url.trim() === '')) {
+      const { data: authUser } = await supabase.auth.admin.getUserById(event.created_by);
+      if (authUser?.user?.user_metadata?.avatar_url) {
+        googlePhotoUrl = authUser.user.user_metadata.avatar_url;
+      }
+    }
+
+    // Enhance creator object with Google photo if available
+    const creatorWithFallback = creator ? {
+      ...creator,
+      profile_photo_url: creator.profile_photo_url || googlePhotoUrl || null
+    } : null;
 
     // Count RSVPs
     const { count: rsvpCount } = await supabase
@@ -91,7 +128,7 @@ export async function GET(
           ...event,
           schedule: schedule || [],
           tags: eventTags?.map(t => t.tag_name) || [],
-          creator: creator || null,
+          creator: creatorWithFallback,
           rsvp_count: rsvpCount || 0,
           spots_booked: spotsBooked,
           is_fully_booked: !event.is_unlimited_spots && spotsBooked >= (event.total_spots || 0),
