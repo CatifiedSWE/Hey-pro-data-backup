@@ -1,12 +1,13 @@
 "use client";
 import Image from "next/image";
-import { Heart, MessageCircle, Share2, Loader2 } from "lucide-react";
+import { Heart, Loader2 } from "lucide-react";
 import React, { useEffect, useState, useRef, useCallback } from "react";
 
 import { Header } from "../components/Header";
 import { Avatar } from "../components/Avatar";
-import Comment from "@/components/comment/comment";
-import { getCollabs, expressInterest, removeInterest, type CollabPost } from "@/lib/api/collab";
+import CollabComment from "@/components/collab/CollabComment";
+import { ShareModal } from "@/components/collab/ShareModal";
+import { getCollabs, expressInterest, removeInterest, saveCollab, unsaveCollab, type CollabPost } from "@/lib/api/collab";
 
 const TagPill = ({ label }: { label: string }) => (
     <span className="rounded-[40px] h-[24px] flex justify-center items-center border border-[#2FD3D8] px-4 py-1 text-xs font-medium text-[#2FD3D8]">{label}</span>
@@ -55,6 +56,8 @@ export default function Collab() {
     const [hasMore, setHasMore] = useState(true);
     const [loading, setLoading] = useState(false);
     const [interestLoading, setInterestLoading] = useState<{ [key: string]: boolean }>({});
+    const [saveLoading, setSaveLoading] = useState<{ [key: string]: boolean }>({});
+    const [savedCollabs, setSavedCollabs] = useState<Set<string>>(new Set());
     const observerRef = useRef<IntersectionObserver | null>(null);
     const loadMoreRef = useRef<HTMLDivElement>(null);
 
@@ -142,6 +145,32 @@ export default function Collab() {
         }
     };
 
+    // Handle save toggle
+    const handleSaveToggle = async (collabId: string) => {
+        setSaveLoading(prev => ({ ...prev, [collabId]: true }));
+        
+        try {
+            const isSaved = savedCollabs.has(collabId);
+            
+            if (isSaved) {
+                await unsaveCollab(collabId);
+                setSavedCollabs(prev => {
+                    const newSet = new Set(prev);
+                    newSet.delete(collabId);
+                    return newSet;
+                });
+            } else {
+                await saveCollab(collabId);
+                setSavedCollabs(prev => new Set(prev).add(collabId));
+            }
+        } catch (error) {
+            console.error('Failed to toggle save:', error);
+            alert(error instanceof Error ? error.message : 'Failed to update save');
+        } finally {
+            setSaveLoading(prev => ({ ...prev, [collabId]: false }));
+        }
+    };
+
     return (
         <div className="flex flex-col items-center h-screen overflow-y-auto">
             <Header />
@@ -150,13 +179,13 @@ export default function Collab() {
                 <section className="space-y-8">
                     {collabPosts.map((post) => (
                         <article key={post.id} className="grid gap-6 md:grid-cols-[360px_auto] p-2">
-                            <div className="overflow-hidden">
+                            <div className="overflow-hidden rounded-[10px] w-full md:w-[360px] h-[220px] relative">
                                 <Image
                                     src={post.cover_image_url || '/bg.jpg'}
                                     alt={post.title}
-                                    width={360}
-                                    height={220}
-                                    className="h-full w-full object-cover rounded-[10px]"
+                                    fill
+                                    sizes="(max-width: 768px) 100vw, 360px"
+                                    className="object-cover"
                                     unoptimized
                                 />
                             </div>
@@ -201,15 +230,24 @@ export default function Collab() {
                                         <span className="text-xs hidden sm:flex text-black/70">{post.interests} interested</span>
                                     </div>
                                     <div className="ml-auto flex items-center gap-3">
-                                        <button className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FAFAFA] text-[#FA6E80]">
-                                            <Heart className="h-5 w-5" />
+                                        <button 
+                                            onClick={() => handleSaveToggle(post.id)}
+                                            disabled={saveLoading[post.id]}
+                                            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FAFAFA] text-[#FA6E80] hover:bg-[#FA6E80]/10 transition-colors disabled:opacity-50"
+                                            title={savedCollabs.has(post.id) ? "Unsave" : "Save"}
+                                        >
+                                            {saveLoading[post.id] ? (
+                                                <Loader2 className="h-5 w-5 animate-spin" />
+                                            ) : (
+                                                <Heart className={`h-5 w-5 ${savedCollabs.has(post.id) ? 'fill-current' : ''}`} />
+                                            )}
                                         </button>
-                                        <button className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FAFAFA] text-[#31A7AC]">
-                                            <Share2 className="h-5 w-5" />
-                                        </button>
-                                        <button className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FAFAFA] text-black">
-                                            <Comment />
-                                        </button>
+                                        <ShareModal
+                                            collabId={post.id}
+                                            collabTitle={post.title}
+                                            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FAFAFA] text-[#31A7AC] hover:bg-[#31A7AC]/10 transition-colors"
+                                        />
+                                        <CollabComment collabId={post.id} />
                                         <InterestButton
                                             collabId={post.id}
                                             userHasInterest={post.userHasInterest || false}
