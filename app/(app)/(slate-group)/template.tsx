@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
-import { BookmarkIcon, HelpCircle, SettingsIcon, UserRound } from "lucide-react";
+import { BookmarkIcon, HelpCircle, SettingsIcon, UserRound, Plus } from "lucide-react";
 import { useProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useState } from "react";
