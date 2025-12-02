@@ -33,7 +33,7 @@ const protectedRoutes = [
   '/home',
   '/profile',
   '/dashboard',
-  '/explore',
+  '/crew',
   '/gigs',
   '/collab',
   '/whatson',

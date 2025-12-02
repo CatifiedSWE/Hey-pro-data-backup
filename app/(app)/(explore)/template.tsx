@@ -21,7 +21,7 @@ type FilterValue = { label: string; href: string };
 type FilterOption = { label: string; value: FilterValue[] };
 
 const makeValues = (arr: string[]): FilterValue[] =>
-    arr.map(label => ({ label, href: `/explore?role=${encodeURIComponent(label)}` })); 
+    arr.map(label => ({ label, href: `/crew?role=${encodeURIComponent(label)}` })); 
 
 const filterOptions: FilterOption[] = [
     {

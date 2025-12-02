@@ -108,7 +108,7 @@ export async function GET(request: NextRequest) {
             role: primaryRole,
             roleCount: roleCount,
             totalRoles: `${roleCount} Role${roleCount !== 1 ? 's' : ''}`,
-            profileUrl: `/explore/${profile.user_id}`
+            profileUrl: `/crew/${profile.user_id}`
           };
         } catch (innerError) {
           console.error(`Error processing profile ${profile.id}:`, innerError);
