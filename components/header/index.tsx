@@ -26,7 +26,6 @@ import {
   NavigationMenuList,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
-import Logo from "../logo"
 import { useAuth } from "@/contexts/AuthContext"
 import { useProfile } from "@/hooks/useProfile"
 
@@ -115,8 +114,12 @@ export default function Header() {
         <div className="container mx-auto px-4 max-w-[1080px]">
           <div className="flex h-18 items-center justify-between gap-8">
             {/* Logo */}
-            <Link href="/" className="w-[55.50847625732422px] h-[50px] flex items-center">
-              <Logo />
+            <Link href="/" className="flex items-center">
+              <img 
+                src="/logo/web-app-manifest-461x161.png" 
+                alt="HeyProData" 
+                className="h-[50px] w-auto object-contain"
+              />
             </Link>
 
             {/* Search Bar - Collapsible */}
