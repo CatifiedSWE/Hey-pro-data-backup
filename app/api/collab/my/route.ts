@@ -76,7 +76,9 @@ export async function GET(request: NextRequest) {
             .limit(3);
 
           interestAvatars = interestedProfiles?.map((profile: any) => 
-            profile.profile_photo_url || '/placeholder-avatar.png'
+            profile.profile_photo_url && profile.profile_photo_url.trim() !== '' 
+              ? profile.profile_photo_url 
+              : '/placeholder-avatar.png'
           ) || [];
         }
 
