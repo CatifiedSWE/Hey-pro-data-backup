@@ -119,11 +119,11 @@ export default function Profile() {
   // Memoize section components to prevent unnecessary re-creation and unmounting
   // MUST be before conditional returns to maintain hook call order
   const sectionComponents = useMemo(() => ({
-    about: <AboutSection key="about" bio={profile?.bio || ''} />,
+    about: <AboutSection key="about" bio={profile?.bio || ''} onUpdate={refetch} />,
     skills: <SkillsSectionWrapper key="skills" skills={skills} onUpdate={fetchSkills} />,
     credits: <CreditsSection key="credits" />,
     // Recommendations removed from main sections as per design
-  }), [profile?.bio, skills, fetchSkills]);
+  }), [profile?.bio, skills, fetchSkills, refetch]);
 
   // Non-hook data and functions
   const highlights = highlightsData
@@ -420,14 +420,21 @@ function SortableItem({ id }: { id: SectionType }) {
   )
 }
 
-function AboutSection({ bio }: { bio: string }) {
+function AboutSection({ bio, onUpdate }: { bio: string; onUpdate: () => void }) {
   return (
     <div className="w-full rounded-[20px] bg-[#FAFAFA] px-6 py-7 shadow-[0_1px_10px_rgba(0,0,0,0.1)] sm:px-10 sm:py-9">
       <div className="mb-6 flex items-center justify-between">
         <h2 className="text-[22px] font-semibold leading-[33px] text-[#000]">About</h2>
-        <Button size="icon" variant="ghost" className="rounded-full border border-[#31A7AC]/30 bg-white text-[#31A7AC]">
-          <Edit className="h-5 w-5" />
-        </Button>
+        <AboutSectionComponent 
+          title="About" 
+          about={bio}
+          onUpdate={onUpdate}
+          trigger={
+            <Button size="icon" variant="ghost" className="rounded-full border border-[#31A7AC]/30 bg-white text-[#31A7AC] hover:bg-white">
+              <Edit className="h-5 w-5" />
+            </Button>
+          }
+        />
       </div>
       <div className="space-y-4 text-sm leading-[21px] text-[#181818] sm:text-base">
         {bio}

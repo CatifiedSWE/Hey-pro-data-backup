@@ -15,7 +15,7 @@ import { toast } from "sonner"
 import { cn } from "@/lib/utils";
 import apiCalling from "@/lib/apiCalling";
 
-export default function AboutSectionComponent({ icon, title, about: initialAbout, className, onUpdate }: { icon?: React.ReactNode, title: string, about: string, className?: string, onUpdate?: () => void }) {
+export default function AboutSectionComponent({ icon, title, about: initialAbout, className, onUpdate, trigger }: { icon?: React.ReactNode, title: string, about: string, className?: string, onUpdate?: () => void, trigger?: React.ReactNode }) {
     const [isOpen, setIsOpen] = useState(false);
     const [about, setAbout] = useState(initialAbout || "This is the about section. It contains information about the user. It can be edited by clicking the edit button.");
     const [error, setError] = useState<string | null>(null);
@@ -64,15 +64,19 @@ export default function AboutSectionComponent({ icon, title, about: initialAbout
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <div
-                    className={cn(
-                        "flex flex-row gap-5 h-[44px] w-auto text-base font-medium rounded-[15px]  bg-transparent border px-9 justify-center items-center cursor-pointer hover:bg-muted/50 border-[#444444]",
-                        className
-                    )}
-                >
-                    {finalTitle}{ }
-                    {icon}
-                </div>
+                {trigger ? (
+                    trigger
+                ) : (
+                    <div
+                        className={cn(
+                            "flex flex-row gap-5 h-[44px] w-auto text-base font-medium rounded-[15px]  bg-transparent border px-9 justify-center items-center cursor-pointer hover:bg-muted/50 border-[#444444]",
+                            className
+                        )}
+                    >
+                        {finalTitle}{ }
+                        {icon}
+                    </div>
+                )}
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <form onSubmit={handleSubmit}>
