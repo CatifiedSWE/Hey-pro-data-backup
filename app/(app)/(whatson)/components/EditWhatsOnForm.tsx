@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { getAccessToken } from "@/lib/supabase/client";
 
 const DAY_LABELS = ["M", "T", "W", "T", "F", "S", "S"];
 const DEFAULT_START_TIME = "21:00";
@@ -158,19 +159,43 @@ const TimeField = ({ label, value, onChange }: TimeFieldProps) => {
 
 type EditWhatsOnFormProps = {
     event: WhatsOnEvent;
+    onChange?: (updatedEvent: any) => void;
 };
 
-export function EditWhatsOnForm({ event }: EditWhatsOnFormProps) {
-    const [title, setTitle] = React.useState(event.title);
-    const [venue, setVenue] = React.useState(event.location);
-    const [isOnline, setIsOnline] = React.useState(event.isOnline);
-    const [dateRange, setDateRange] = React.useState(event.rsvpBy);
-    const [schedule, setSchedule] = React.useState(event.schedule);
-    const [description, setDescription] = React.useState(event.description.join("\n\n"));
-    const [terms, setTerms] = React.useState(event.terms.join("\n\n"));
-    const [tags, setTags] = React.useState(event.tags);
+export function EditWhatsOnForm({ event, onChange }: EditWhatsOnFormProps) {
+    const [title, setTitle] = React.useState(event.title || "");
+    const [venue, setVenue] = React.useState(event.location || "");
+    const [isOnline, setIsOnline] = React.useState(event.isOnline || false);
+    const [isPaid, setIsPaid] = React.useState(event.isPaid || false);
+    const [priceAmount, setPriceAmount] = React.useState<number>(
+        typeof event.priceAmount === 'number' ? event.priceAmount : 0
+    );
+    const [priceCurrency, setPriceCurrency] = React.useState(
+        (event as any).priceCurrency || 'AED'
+    );
+    const [totalSpots, setTotalSpots] = React.useState<number>(
+        typeof (event as any).totalSpots === 'number' ? (event as any).totalSpots : 20
+    );
+    const [isUnlimitedSpots, setIsUnlimitedSpots] = React.useState(
+        (event as any).isUnlimitedSpots || false
+    );
+    const [maxSpotsPerPerson, setMaxSpotsPerPerson] = React.useState<number>(
+        typeof (event as any).maxSpotsPerPerson === 'number' ? (event as any).maxSpotsPerPerson : 1
+    );
+    const [dateRange, setDateRange] = React.useState(event.rsvpBy || "");
+    const [schedule, setSchedule] = React.useState(event.schedule || []);
+    const [description, setDescription] = React.useState(
+        Array.isArray(event.description) ? event.description.join("\n\n") : event.description || ""
+    );
+    const [terms, setTerms] = React.useState(
+        Array.isArray(event.terms) ? event.terms.join("\n\n") : (event as any).terms || ""
+    );
+    const [tags, setTags] = React.useState(event.tags || []);
     const [tagInput, setTagInput] = React.useState("");
-    const [posterPreview, setPosterPreview] = React.useState(event.heroImage);
+    const [posterPreview, setPosterPreview] = React.useState(event.heroImage || "");
+    const [status, setStatus] = React.useState<'draft' | 'published'>(
+        (event as any).status || 'draft'
+    );
     const [calendarMonth, setCalendarMonth] = React.useState(() => {
         const initial = event.schedule[0]?.dateLabel ? new Date(event.schedule[0].dateLabel) : new Date();
         return new Date(initial.getFullYear(), initial.getMonth(), 1);
@@ -193,10 +218,11 @@ export function EditWhatsOnForm({ event }: EditWhatsOnFormProps) {
     const monthLabel = format(calendarMonth, "MMM, yyyy");
     const timezoneOptions = ["IST", "GST", "UTC", "PST", "EST"];
 
-    const handlePosterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handlePosterChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (!file) return;
 
+        // Show preview immediately
         const reader = new FileReader();
         reader.onload = (loadEvent) => {
             if (typeof loadEvent.target?.result === "string") {
@@ -204,6 +230,30 @@ export function EditWhatsOnForm({ event }: EditWhatsOnFormProps) {
             }
         };
         reader.readAsDataURL(file);
+
+        // Upload to server in background
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('type', 'hero');
+
+            const response = await fetch('/api/upload/whatson-image', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Authorization': `Bearer ${await getAccessToken()}`
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setPosterPreview(data.data.url);
+                console.log('Image uploaded successfully:', data.data.url);
+            }
+        } catch (error) {
+            console.error('Failed to upload image:', error);
+            // Keep the preview but log the error
+        }
     };
 
     const goToMonth = (delta: number) => {
@@ -270,6 +320,31 @@ export function EditWhatsOnForm({ event }: EditWhatsOnFormProps) {
         container.addEventListener("scroll", updateScrollThumb);
         return () => container.removeEventListener("scroll", updateScrollThumb);
     }, [updateScrollThumb]);
+
+    // Notify parent of changes
+    React.useEffect(() => {
+        if (onChange) {
+            onChange({
+                title,
+                location: venue,
+                isOnline,
+                isPaid,
+                priceAmount,
+                priceCurrency,
+                totalSpots,
+                isUnlimitedSpots,
+                maxSpotsPerPerson,
+                rsvpBy: dateRange,
+                schedule,
+                description,
+                terms,
+                tags,
+                heroImage: posterPreview,
+                thumbnail: posterPreview,
+                status
+            });
+        }
+    }, [title, venue, isOnline, isPaid, priceAmount, priceCurrency, totalSpots, isUnlimitedSpots, maxSpotsPerPerson, dateRange, schedule, description, terms, tags, posterPreview, status, onChange]);
 
 
     const handleAddTag = () => {
@@ -480,7 +555,13 @@ export function EditWhatsOnForm({ event }: EditWhatsOnFormProps) {
                                 <div className="mt-2 flex w-full  sm:w-[188px] flex-col gap-4 rounded-lg lg:mt-6">
                                     <div className="flex items-center gap-2  px-3 py-2">
                                         <Label className="text-sm font-medium text-[#444444]">Max Spots Per Person</Label>
-                                        <Input type="number" min={1} defaultValue={1} disabled className="sm:max-w-[120px] w-[251px] h-[47px] border sm:text-center border-[#828282] rounded-[15px] bg-[#E8E8E8]" />
+                                        <Input 
+                                            type="number" 
+                                            min={1} 
+                                            value={maxSpotsPerPerson}
+                                            onChange={(e) => setMaxSpotsPerPerson(parseInt(e.target.value) || 1)}
+                                            className="sm:max-w-[120px] w-[251px] h-[47px] border sm:text-center border-[#828282] rounded-[15px] bg-white" 
+                                        />
                                     </div>
                                     <div>
                                         <div className="mb-2 flex items-center gap-2 h-[50px] font-[20px] rounded-2xl border border-gray-300 px-4">
@@ -489,28 +570,40 @@ export function EditWhatsOnForm({ event }: EditWhatsOnFormProps) {
                                             <Input
                                                 type="number"
                                                 min={1}
-                                                defaultValue={20}
+                                                value={totalSpots}
+                                                onChange={(e) => setTotalSpots(parseInt(e.target.value) || 20)}
+                                                disabled={isUnlimitedSpots}
                                                 className="w-full border-none bg-transparent px-4 shadow-none py-3 text-sm text-black focus:border-[#31A7AC] focus:outline-none"
                                             />
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <Checkbox className="h-5 w-5" />
+                                            <Checkbox 
+                                                className="h-5 w-5"
+                                                checked={isUnlimitedSpots}
+                                                onCheckedChange={(checked) => setIsUnlimitedSpots(checked === true)}
+                                            />
                                             <span className="text-[18px] font-[400] text-gray-700">Unlimited spots</span>
                                         </div>
                                     </div>
                                     <div>
                                         <div className="mb-2 flex items-center gap-2 h-[50px] font-[20px] rounded-2xl border border-gray-300 px-4">
-                                            <Label className="text-[20px] font-[600] text-gray-500">ADE</Label>
+                                            <Label className="text-[20px] font-[600] text-gray-500">{priceCurrency}</Label>
                                             <div className="bg-[#444444] w-px h-[40px] border" />
                                             <Input
                                                 type="number"
-                                                min={1}
-                                                defaultValue={20}
+                                                min={0}
+                                                value={priceAmount}
+                                                onChange={(e) => setPriceAmount(parseInt(e.target.value) || 0)}
+                                                disabled={!isPaid}
                                                 className="w-full border-none bg-transparent px-4 py-3 text-sm text-black focus:border-[#31A7AC] focus:outline-none"
                                             />
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <Checkbox className="h-5 w-5" />
+                                            <Checkbox 
+                                                className="h-5 w-5"
+                                                checked={!isPaid}
+                                                onCheckedChange={(checked) => setIsPaid(checked !== true)}
+                                            />
                                             <span className="text-[18px] font-[400] text-gray-700">Free Event</span>
                                         </div>
                                     </div>
@@ -628,6 +721,34 @@ export function EditWhatsOnForm({ event }: EditWhatsOnFormProps) {
                         </div>
                     </div>
 
+                </div>
+
+                <div className="flex items-center gap-6">
+                    <label className="text-[20px] font-[600] text-gray-600">Event Status:</label>
+                    <div className="flex gap-4">
+                        <button
+                            type="button"
+                            onClick={() => setStatus('draft')}
+                            className={`px-6 py-2 rounded-lg border transition ${
+                                status === 'draft'
+                                    ? 'bg-[#6A89BE] text-white border-[#6A89BE]'
+                                    : 'bg-white text-gray-700 border-gray-300 hover:border-[#6A89BE]'
+                            }`}
+                        >
+                            Draft
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setStatus('published')}
+                            className={`px-6 py-2 rounded-lg border transition ${
+                                status === 'published'
+                                    ? 'bg-[#31A7AC] text-white border-[#31A7AC]'
+                                    : 'bg-white text-gray-700 border-gray-300 hover:border-[#31A7AC]'
+                            }`}
+                        >
+                            Published
+                        </button>
+                    </div>
                 </div>
 
                 <div>

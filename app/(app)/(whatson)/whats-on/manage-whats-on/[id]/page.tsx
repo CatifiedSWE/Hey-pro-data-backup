@@ -1,46 +1,97 @@
+'use client';
 
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import React from "react";
-import { EditWhatsOnForm } from "../../../components/EditWhatsOnForm";
-import { getWhatsOnEventById } from "@/data/whatsOnEvents";
-import { Button } from "@/components/ui/button";
+import React, { useState, useEffect } from "react";
+import { EventFormHandler } from "../event-form-handler";
 import DataTable from "../../../components/data-table";
+import { whatsOnAPI } from "@/lib/api/whatson";
+import { transformEventForDetail } from "@/lib/utils/whatson-transforms";
+import axios from "@/lib/axios";
+
 type ManageWhatsOnEditPageProps = {
-    params: { id: string };
+    params: Promise<{ id: string }>;
 };
-const rsvpEntries = Array.from({ length: 6 }).map((_, index) => ({
-    id: `rsvp-${index + 1}`,
-    name: "Aarav Mehta",
-    ticketNo: `00${(index % 3) + 1}`,
-    reference: "#1234567890ABC",
-    chatEnabled: index % 2 === 0,
-    paid: index % 3 !== 1,
-}));
 
-export default async function ManageWhatsOnEditPage({ params }: ManageWhatsOnEditPageProps) {
+export default function ManageWhatsOnEditPage({ params }: ManageWhatsOnEditPageProps) {
+    const [eventId, setEventId] = React.useState<string | null>(null);
+    const [event, setEvent] = useState<any>(null);
+    const [rsvpEntries, setRsvpEntries] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    const { id } = await params;
-    const event = getWhatsOnEventById(id);
+    useEffect(() => {
+        params.then(({ id }) => {
+            setEventId(id);
+            fetchEventData(id);
+        });
+    }, [params]);
 
-    if (!event) {
-        notFound();
+    const fetchEventData = async (id: string) => {
+        try {
+            setLoading(true);
+            
+            // Fetch event details
+            const eventResponse = await whatsOnAPI.getEventById(id);
+            const eventData = transformEventForDetail(eventResponse.data);
+            setEvent(eventData);
+
+            // Fetch RSVP list
+            try {
+                const rsvpResponse = await whatsOnAPI.getRSVPList(id);
+                const rsvps = rsvpResponse.data.map((rsvp: any) => ({
+                    id: rsvp.id,
+                    name: rsvp.user?.name || 'Unknown',
+                    ticketNo: rsvp.ticket_number,
+                    reference: rsvp.reference_number,
+                    chatEnabled: false,
+                    paid: rsvp.payment_status === 'paid'
+                }));
+                setRsvpEntries(rsvps);
+            } catch (rsvpErr) {
+                console.warn('Could not fetch RSVPs:', rsvpErr);
+                setRsvpEntries([]);
+            }
+
+        } catch (err: any) {
+            console.error('Failed to fetch event:', err);
+            setError(err.response?.data?.error || 'Failed to load event');
+            notFound();
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#31A7AC] mx-auto"></div>
+                    <p className="mt-4 text-gray-600">Loading event...</p>
+                </div>
+            </div>
+        );
     }
 
+    if (error || !event) {
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <div className="text-center">
+                    <p className="text-red-600">{error || 'Event not found'}</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-8">
-            <div className=" flex flex-col sm:flex-row gap-y-2 sm:gap-0 sm:items-center sm:justify-between p-4 bg-white rounded-lg">
-                <span className="bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC] bg-clip-text text-transparent text-3xl font-semibold">Manage What&apos;s On</span>
-                <div className="flex gap-4">
-                    <Link href={'/whats-on/manage-whats-on'} className="rounded-lg border border-[#31A7AC] h-[44px] px-4 py-2 text-[#31A7AC] hover:bg-[#f0f0f0]"> Discard</Link>
-                    <Button className="rounded-lg border h-[44px] hover:bg-[#31A7AC] bg-[#31A7AC] px-4 py-2 text-sm font-semibold text-white">
-                        Save Event
-                    </Button>
-                </div>
-            </div>
-            <EditWhatsOnForm event={event} />
-            <DataTable rsvpEntries={rsvpEntries} />
+            <EventFormHandler 
+                mode="edit" 
+                eventId={eventId || undefined}
+                initialData={event}
+            />
+            {rsvpEntries.length > 0 && (
+                <DataTable rsvpEntries={rsvpEntries} />
+            )}
         </div>
     );
 }
