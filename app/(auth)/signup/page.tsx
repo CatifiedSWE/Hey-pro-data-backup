@@ -275,21 +275,33 @@ export default function SignUpPage() {
                   placeholder="Password"
                   value={formData.password}
                   onChange={handlePasswordChange}
-                  className="h-11 md:h-12 text-sm md:text-base border-gray-300 rounded-xl focus:border-[#FA6E80] focus:ring-[#FA6E80] pr-10"
+                  className="h-11 md:h-12 text-sm md:text-base border-gray-300 rounded-xl focus:border-[#FA6E80] focus:ring-[#FA6E80] pr-24"
                   required
                   disabled={loading}
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 top-1 pr-3 flex items-center text-gray-600"
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5" />
-                  ) : (
-                    <Eye className="h-5 w-5" />
-                  )}
-                </button>
+                <div className="absolute inset-y-0 right-0 top-1 pr-3 flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={generatePassword}
+                    className="text-gray-600 hover:text-gray-800 transition-colors"
+                    title="Generate secure password"
+                    disabled={loading}
+                  >
+                    <PasswordGeneratorIcon />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="text-gray-600 hover:text-gray-800 transition-colors"
+                    title={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-5 w-5" />
+                    ) : (
+                      <Eye className="h-5 w-5" />
+                    )}
+                  </button>
+                </div>
               </div>
 
               {formData.password && (
