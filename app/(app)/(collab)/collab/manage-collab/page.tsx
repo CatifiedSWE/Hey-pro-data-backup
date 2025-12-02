@@ -4,24 +4,13 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus, X, Loader2, Heart, Share2, MessageSquare } from "lucide-react";
+import { Loader2, Heart, Share2, MessageSquare } from "lucide-react";
 
 import { Avatar } from "../../components/Avatar";
-import { getMyCollabs, createCollab, uploadCollabCover, type CollabPost } from "@/lib/api/collab";
-
-const inputBase = "w-full rounded-xl border border-[#E4E7EC] bg-white px-4 py-3.5 text-sm text-gray-900 placeholder:text-gray-500 focus:border-[#2FD3D8] focus:outline-none focus:ring-1 focus:ring-[#2FD3D8] transition-colors";
+import { getMyCollabs, type CollabPost } from "@/lib/api/collab";
 
 const TagPill = ({ label }: { label: string }) => (
     <span className="rounded-full border border-[#2FD3D8] px-4 py-2 text-xs font-medium text-[#2FD3D8] bg-[#2FD3D8]/5">{label}</span>
-);
-
-const CreateTagPill = ({ label, onRemove }: { label: string; onRemove: () => void }) => (
-    <span className="inline-flex items-center gap-2 rounded-full border border-[#2FD3D8] px-4 py-2 text-xs font-medium text-[#2FD3D8] bg-white">
-        {label}
-        <button type="button" onClick={onRemove} aria-label={`Remove ${label}`}>
-            <X className="h-3 w-3" />
-        </button>
-    </span>
 );
 
 const formatDate = (dateString: string) => {
@@ -33,14 +22,6 @@ export default function ManageCollab() {
     const router = useRouter();
     const [collabPosts, setCollabPosts] = useState<CollabPost[]>([]);
     const [loading, setLoading] = useState(true);
-    const [submitting, setSubmitting] = useState(false);
-    
-    const [posterPreview, setPosterPreview] = useState<string>("");
-    const [posterFile, setPosterFile] = useState<File | null>(null);
-    const [collabTitle, setCollabTitle] = useState("");
-    const [collabIdea, setCollabIdea] = useState("");
-    const [tagInput, setTagInput] = useState("");
-    const [tags, setTags] = useState<string[]>([]);
 
     // Fetch user's collabs
     useEffect(() => {
@@ -58,111 +39,6 @@ export default function ManageCollab() {
         fetchMyCollabs();
     }, []);
 
-    const handlePosterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (!file) return;
-        
-        // Validate file size (5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            alert('File size must be less than 5MB');
-            return;
-        }
-
-        // Validate file type
-        if (!['image/jpeg', 'image/jpg', 'image/png'].includes(file.type)) {
-            alert('Only JPG and PNG files are allowed');
-            return;
-        }
-
-        setPosterFile(file);
-        const reader = new FileReader();
-        reader.onload = (loadEvent) => {
-            if (typeof loadEvent.target?.result === "string") {
-                setPosterPreview(loadEvent.target.result);
-            }
-        };
-        reader.readAsDataURL(file);
-    };
-
-    const handleAddTag = () => {
-        const value = tagInput.trim();
-        if (!value || tags.includes(value)) return;
-        if (tags.length >= 10) {
-            alert('Maximum 10 tags allowed');
-            return;
-        }
-        setTags((prev) => [...prev, value]);
-        setTagInput("");
-    };
-
-    const handleRemoveTag = (value: string) => {
-        setTags((prev) => prev.filter((tag) => tag !== value));
-    };
-
-    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        
-        // Validation
-        if (!collabTitle.trim()) {
-            alert('Please enter a collab title');
-            return;
-        }
-        
-        if (collabTitle.length < 3 || collabTitle.length > 200) {
-            alert('Title must be between 3 and 200 characters');
-            return;
-        }
-
-        if (!collabIdea.trim()) {
-            alert('Please enter your collab idea');
-            return;
-        }
-
-        if (collabIdea.length < 10 || collabIdea.length > 5000) {
-            alert('Summary must be between 10 and 5000 characters');
-            return;
-        }
-
-        setSubmitting(true);
-
-        try {
-            let coverImageUrl: string | undefined = undefined;
-
-            // Upload cover image if provided
-            if (posterFile) {
-                const uploadResult = await uploadCollabCover(posterFile);
-                coverImageUrl = uploadResult.url;
-            }
-
-            // Create collab
-            await createCollab({
-                title: collabTitle,
-                summary: collabIdea,
-                tags: tags.length > 0 ? tags : undefined,
-                cover_image_url: coverImageUrl,
-                status: 'open'
-            });
-
-            // Reset form
-            setCollabTitle("");
-            setCollabIdea("");
-            setTags([]);
-            setPosterPreview("");
-            setPosterFile(null);
-
-            // Refresh collabs list
-            const response = await getMyCollabs({ limit: 50 });
-            setCollabPosts(response.collabs);
-
-            alert('Collab created successfully!');
-        } catch (error) {
-            console.error('Failed to create collab:', error);
-            alert(error instanceof Error ? error.message : 'Failed to create collab. Please try again.');
-        } finally {
-            setSubmitting(false);
-        }
-    };
-
     return (
         <div className="min-h-screen bg-gray-50 pb-10">
             <div className="max-w-[1200px] mx-auto px-4">
@@ -171,102 +47,6 @@ export default function ManageCollab() {
                 </div>
                 
                 <div className="space-y-8">
-                    {/* Creation Form */}
-                    <section className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-                        <form onSubmit={handleSubmit} className="flex flex-col lg:flex-row gap-8">
-                            <div className="flex-shrink-0">
-                                <div className="relative flex h-[280px] w-full lg:w-[400px] items-center justify-center overflow-hidden rounded-xl bg-gray-100 border-2 border-dashed border-gray-300 hover:border-[#2FD3D8] transition-colors group">
-                                    <input
-                                        type="file"
-                                        accept="image/png,image/jpeg,image/jpg"
-                                        className="absolute inset-0 cursor-pointer opacity-0"
-                                        onChange={handlePosterChange}
-                                        disabled={submitting}
-                                    />
-                                    {posterPreview ? (
-                                        <Image
-                                            src={posterPreview}
-                                            alt="Poster preview"
-                                            fill
-                                            sizes="400px"
-                                            className="object-cover rounded-xl"
-                                            unoptimized
-                                        />
-                                    ) : (
-                                        <div className="flex flex-col items-center gap-3 text-gray-500 group-hover:text-[#2FD3D8] transition-colors">
-                                            <Plus className="h-8 w-8" />
-                                            <span className="text-sm font-medium">Upload poster / moodboard</span>
-                                        </div>
-                                    )}
-                                </div>
-                                <p className="mt-3 text-xs text-gray-500 text-center">16:9 recommended • PNG / JPG up to 5MB</p>
-                            </div>
-                            
-                            <div className="flex-1 space-y-6">
-                                <input
-                                    className={inputBase}
-                                    placeholder="Collab title"
-                                    value={collabTitle}
-                                    onChange={(e) => setCollabTitle(e.target.value)}
-                                    disabled={submitting}
-                                    required
-                                />
-                                
-                                <textarea
-                                    className={`${inputBase} min-h-[120px] resize-none`}
-                                    placeholder="What's your collab idea?"
-                                    value={collabIdea}
-                                    onChange={(e) => setCollabIdea(e.target.value)}
-                                    disabled={submitting}
-                                    required
-                                />
-                                
-                                <div className="space-y-4">
-                                    <div className="flex gap-3 p-2 border border-gray-200 rounded-xl bg-gray-50">
-                                        <input
-                                            className="flex-1 border-none bg-transparent text-sm text-gray-900 placeholder:text-gray-500 focus:outline-none px-2"
-                                            placeholder="Add collab tags"
-                                            value={tagInput}
-                                            onChange={(e) => setTagInput(e.target.value)}
-                                            onKeyDown={(event) => {
-                                                if (event.key === "Enter") {
-                                                    event.preventDefault();
-                                                    handleAddTag();
-                                                }
-                                            }}
-                                            disabled={submitting}
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={handleAddTag}
-                                            className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#FA6E80] text-white hover:bg-[#f5576b] transition-colors"
-                                            disabled={submitting}
-                                        >
-                                            <Plus className="h-4 w-4" />
-                                        </button>
-                                    </div>
-                                    
-                                    {tags.length > 0 && (
-                                        <div className="flex flex-wrap gap-2">
-                                            {tags.map((tag) => (
-                                                <CreateTagPill key={tag} label={tag} onRemove={() => handleRemoveTag(tag)} />
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                                
-                                <button 
-                                    type="submit" 
-                                    className="w-full rounded-xl h-12 bg-[#FA6E80] text-white font-semibold hover:bg-[#f5576b] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors shadow-sm"
-                                    disabled={submitting}
-                                >
-                                    {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
-                                    {submitting ? 'Posting...' : 'Post your collab'}
-                                </button>
-                            </div>
-                        </form>
-                    </section>
-
                     {/* User's Collabs */}
                     <section className="space-y-6">
                         {loading ? (
@@ -277,7 +57,10 @@ export default function ManageCollab() {
                             <div className="text-center py-12 text-gray-500 bg-white rounded-2xl border border-gray-100">
                                 <div className="max-w-md mx-auto">
                                     <h3 className="text-lg font-medium text-gray-900 mb-2">No collabs yet</h3>
-                                    <p className="text-sm">Create your first collaboration project above!</p>
+                                    <p className="text-sm">Create your first collaboration project from the Collab feed!</p>
+                                    <Link href="/collab" className="inline-block mt-4 text-[#2FD3D8] hover:underline">
+                                        Go to Collab Feed
+                                    </Link>
                                 </div>
                             </div>
                         ) : (
