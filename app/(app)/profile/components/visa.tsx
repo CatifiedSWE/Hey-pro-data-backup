@@ -214,9 +214,9 @@ export default function VisaSection({ onUpdate }: VisaSectionProps) {
                     VISA
                 </div>
             </DialogTrigger>
-            <DialogContent className="w-full max-w-[430px] h-[500px]  overflow-x-auto border-none bg-transparent p-0">
+            <DialogContent className="w-full overflow-x-auto border-none bg-transparent no-scrollbar p-0">
                 <form onSubmit={handleSubmit}>
-                    <div className="mx-auto flex h-full max-h-[613px] w-full max-w-[393px] flex-col rounded-t-[20px] bg-white px-5 pb-6 pt-[25px] shadow-[0_8px_18px_rgba(0,0,0,0.1)]">
+                    <div className="mx-auto flex h-full w-full flex-col bg-white px-5 pb-6 pt-[25px] shadow-[0_8px_18px_rgba(0,0,0,0.1)]">
                         <div className="mx-auto mb-6 h-[5px] w-[150px] rounded-full bg-[#868686]" />
                         <div className="flex flex-col gap-[25px]">
                             <div className="space-y-2">

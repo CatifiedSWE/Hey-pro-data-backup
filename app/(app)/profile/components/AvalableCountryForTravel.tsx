@@ -215,7 +215,7 @@ export default function AvalableCountryForTravel({ availableCountries: _ignore, 
                 <DialogTrigger asChild>
                     <div
                         onClick={handleOpenDialog}
-                        className="flex flex-row gap-5 h-[44px] w-auto text-base font-medium rounded-[15px]  bg-transparent border px-9 justify-center items-center cursor-pointer hover:bg-muted/50 border-[#444444] "
+                        className="flex flex-row gap-5 h-11 w-auto text-base font-medium rounded-[15px] bg-transparent border px-9 justify-center items-center cursor-pointer hover:bg-muted/50 border-grey "
                     >
                         Available to travel
                     </div>
@@ -321,7 +321,7 @@ export default function AvalableCountryForTravel({ availableCountries: _ignore, 
                                 type="button"
                                 onClick={handleCancel}
                                 variant="outline"
-                                className="h-11 flex-1 rounded-[16px] border border-[#31A7AC] text-base font-medium text-[#31A7AC]"
+                                className="h-11 flex-1 rounded-2xl border border-[#31A7AC] text-base font-medium text-[#31A7AC]"
                             >
                                 Cancel
                             </Button>
@@ -329,7 +329,7 @@ export default function AvalableCountryForTravel({ availableCountries: _ignore, 
                                 type="button"
                                 onClick={handleSave}
                                 disabled={saving}
-                                className="h-11 flex-1 rounded-[16px] bg-[#31A7AC] text-base font-medium text-white hover:bg-[#2b9497]"
+                                className="h-11 flex-1 rounded-2xl bg-[#31A7AC] text-base font-medium text-white hover:bg-[#2b9497]"
                             >
                                 {saving ? 'Saving...' : 'Save'}
                             </Button>
