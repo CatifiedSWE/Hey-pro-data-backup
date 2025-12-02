@@ -8,6 +8,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { getGroupMessages, sendGroupMessage, type Message } from "@/lib/api/chat";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 type paramsType = { id: string };
 
@@ -139,7 +140,7 @@ export default function MessageInbox({ params }: { params: paramsType }) {
             console.error('Error sending message:', err);
             // Remove optimistic message on error
             setMessages(prev => prev.filter(msg => msg.id !== optimisticMessage.id));
-            alert('Failed to send message. Please try again.');
+            toast.error('Failed to send message. Please try again.');
         } finally {
             setSending(false);
         }

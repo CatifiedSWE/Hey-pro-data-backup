@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/table"
 import { Avatar } from "../../../components/Avatar";
 import { updateCollab, uploadCollabCover, closeCollab, type CollabDetail } from "@/lib/api/collab";
+import { toast } from "sonner";
 
 const inputBase = "w-full rounded-xl border border-[#E4E7EC] bg-white px-4 py-3.5 text-sm text-gray-900 placeholder:text-gray-500 focus:border-[#2FD3D8] focus:outline-none focus:ring-1 focus:ring-[#2FD3D8] transition-colors";
 
@@ -50,13 +51,13 @@ export function EditCollabForm({ collab }: EditCollabFormProps) {
         
         // Validate file size (5MB)
         if (file.size > 5 * 1024 * 1024) {
-            alert('File size must be less than 5MB');
+            toast.error('File size must be less than 5MB');
             return;
         }
 
         // Validate file type
         if (!['image/jpeg', 'image/jpg', 'image/png'].includes(file.type)) {
-            alert('Only JPG and PNG files are allowed');
+            toast.error('Only JPG and PNG files are allowed');
             return;
         }
 
@@ -74,7 +75,7 @@ export function EditCollabForm({ collab }: EditCollabFormProps) {
         const value = tagInput.trim();
         if (!value || tags.includes(value)) return;
         if (tags.length >= 10) {
-            alert('Maximum 10 tags allowed');
+            toast.error('Maximum 10 tags allowed');
             return;
         }
         setTags((prev) => [...prev, value]);
@@ -90,22 +91,22 @@ export function EditCollabForm({ collab }: EditCollabFormProps) {
         
         // Validation
         if (!title.trim()) {
-            alert('Please enter a title');
+            toast.error('Please enter a title');
             return;
         }
         
         if (title.length < 3 || title.length > 200) {
-            alert('Title must be between 3 and 200 characters');
+            toast.error('Title must be between 3 and 200 characters');
             return;
         }
 
         if (!summary.trim()) {
-            alert('Please enter a summary');
+            toast.error('Please enter a summary');
             return;
         }
 
         if (summary.length < 10 || summary.length > 5000) {
-            alert('Summary must be between 10 and 5000 characters');
+            toast.error('Summary must be between 10 and 5000 characters');
             return;
         }
 
@@ -129,10 +130,11 @@ export function EditCollabForm({ collab }: EditCollabFormProps) {
             });
 
             setActionMessage("Changes saved successfully!");
+            toast.success("Changes saved successfully!");
             setTimeout(() => setActionMessage(null), 2500);
         } catch (error) {
             console.error('Failed to update collab:', error);
-            alert(error instanceof Error ? error.message : 'Failed to update collab. Please try again.');
+            toast.error(error instanceof Error ? error.message : 'Failed to update collab. Please try again.');
         } finally {
             setSubmitting(false);
         }
@@ -146,6 +148,7 @@ export function EditCollabForm({ collab }: EditCollabFormProps) {
         setTags(collab.tags);
         setTagInput("");
         setActionMessage("Form reset");
+        toast.info("Form reset");
         setTimeout(() => setActionMessage(null), 1500);
     };
 
@@ -157,11 +160,11 @@ export function EditCollabForm({ collab }: EditCollabFormProps) {
         setClosing(true);
         try {
             await closeCollab(collab.id);
-            alert('Collab closed successfully!');
+            toast.success('Collab closed successfully!');
             router.push('/collab/manage-collab');
         } catch (error) {
             console.error('Failed to close collab:', error);
-            alert(error instanceof Error ? error.message : 'Failed to close collab. Please try again.');
+            toast.error(error instanceof Error ? error.message : 'Failed to close collab. Please try again.');
             setClosing(false);
         }
     };

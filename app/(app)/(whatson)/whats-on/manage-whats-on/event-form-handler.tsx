@@ -7,6 +7,7 @@ import { EditWhatsOnForm } from '../../components/EditWhatsOnForm';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import axios from '@/lib/axios';
+import { toast } from "sonner";
 
 interface EventFormData {
   title: string;
@@ -158,18 +159,18 @@ export function EventFormHandler({ mode, eventId, initialData }: EventFormHandle
       let response;
       if (mode === 'create') {
         response = await whatsOnAPI.createEvent(apiData);
-        alert('Event created successfully!');
+        toast.success('Event created successfully!');
         router.push('/whats-on/manage-whats-on');
       } else if (mode === 'edit' && eventId) {
         response = await whatsOnAPI.updateEvent(eventId, apiData);
-        alert('Event updated successfully!');
+        toast.success('Event updated successfully!');
         router.push('/whats-on/manage-whats-on');
       }
     } catch (err: any) {
       console.error('Save failed:', err);
       const errorMessage = err.response?.data?.error || err.message || 'Failed to save event';
       setError(errorMessage);
-      alert(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

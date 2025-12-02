@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { whatsOnAPI } from "@/lib/api/whatson";
 import DataTable from "../../components/data-table";
+import { toast } from "sonner";
 
 const poppins = Poppins({
     subsets: ["latin"],
@@ -174,9 +175,10 @@ export default function ManageWhatsOnPage() {
         try {
             await whatsOnAPI.deleteEvent(eventId);
             setEvents(events.filter(e => e.id !== eventId));
+            toast.success('Event deleted successfully');
         } catch (err: any) {
             console.error('Failed to delete event:', err);
-            alert(err.response?.data?.error || 'Failed to delete event');
+            toast.error(err.response?.data?.error || 'Failed to delete event');
         }
     };
 
@@ -189,7 +191,7 @@ export default function ManageWhatsOnPage() {
             setRsvpData(response.data?.rsvps || []);
         } catch (err: any) {
             console.error('Failed to fetch RSVPs:', err);
-            alert(err.response?.data?.error || 'Failed to load RSVPs');
+            toast.error(err.response?.data?.error || 'Failed to load RSVPs');
             setSelectedEventId(null);
         } finally {
             setLoadingRSVPs(false);
@@ -208,9 +210,10 @@ export default function ManageWhatsOnPage() {
             link.click();
             link.remove();
             window.URL.revokeObjectURL(url);
+            toast.success('CSV export started');
         } catch (err: any) {
             console.error('Failed to export CSV:', err);
-            alert('Failed to export CSV');
+            toast.error('Failed to export CSV');
         }
     };
 
