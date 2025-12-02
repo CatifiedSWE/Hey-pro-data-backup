@@ -51,6 +51,7 @@ export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false);
   
   const [passwordValidation, setPasswordValidation] = useState<PasswordValidation>({
+    hasMinLength: false,
     hasUppercase: false,
     hasNumber: false,
     hasSpecialChar: false
