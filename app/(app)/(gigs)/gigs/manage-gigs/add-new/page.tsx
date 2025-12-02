@@ -830,27 +830,39 @@ export default function AddGigPage() {
                             </div>
                             <div className="rounded-[24px] p-4">
 
-                                <div className="mx-auto sm:mx-0 mb-5 flex w-full max-w-[425px] flex-row items-center justify-between gap-2 rounded-[10px] p-[10px] text-[#1D1D1F] bg-[#ffffff] min-h-[56px]">
-                                    <span className="text-[24px] font-[400] text-[#FA596E]">{format(currentMonth, "MMM, yyyy")}</span>
-                                    <div className="flex gap-2">
-                                        <Button type="button" variant="ghost" size="icon" className="h-10 rounded-full" onClick={() => setCurrentMonth((prev) => addMonths(prev, -1))}>
-                                            -
+                                <div className="mx-auto sm:mx-0 mb-4 flex w-full max-w-[320px] flex-row items-center justify-between gap-2 rounded-[10px] px-3 py-2 text-[#1D1D1F] bg-[#ffffff] min-h-[45px]">
+                                    <span className="text-[18px] font-[400] text-[#FA596E]">{format(currentMonth, "MMM, yyyy")}</span>
+                                    <div className="flex gap-1">
+                                        <Button 
+                                            type="button" 
+                                            variant="ghost" 
+                                            size="icon" 
+                                            className="h-8 w-8 rounded-full hover:bg-[#FFF5F7]" 
+                                            onClick={() => setCurrentMonth((prev) => addMonths(prev, -1))}
+                                        >
+                                            <ChevronLeft className="h-4 w-4 text-[#FA596E]" />
                                         </Button>
-                                        <Button type="button" variant="ghost" size="icon" className="h-10 rounded-full" onClick={() => setCurrentMonth((prev) => addMonths(prev, 1))}>
-                                            +
+                                        <Button 
+                                            type="button" 
+                                            variant="ghost" 
+                                            size="icon" 
+                                            className="h-8 w-8 rounded-full hover:bg-[#FFF5F7]" 
+                                            onClick={() => setCurrentMonth((prev) => addMonths(prev, 1))}
+                                        >
+                                            <ChevronRight className="h-4 w-4 text-[#FA596E]" />
                                         </Button>
                                     </div>
-                                    <CalendarIcon className="h-5 w-5 text-[#FF5470]" />
+                                    <CalendarIcon className="h-4 w-4 text-[#FF5470]" />
                                 </div>
 
 
-                                <div className="mx-auto sm:mx-0 grid w-full max-w-[425px] grid-cols-7 items-center gap-2 rounded-t-[10px] bg-[#ffffff] text-center text-[25px] font-[400] text-[#FF8FA5] min-h-[60px]">
+                                <div className="mx-auto sm:mx-0 grid w-full max-w-[320px] grid-cols-7 items-center gap-1 rounded-t-[10px] bg-[#ffffff] text-center text-[16px] font-[400] text-[#FF8FA5] min-h-[40px]">
                                     {["M", "T", "W", "T", "F", "S", "S"].map((day) => (
                                         <span key={day}>{day}</span>
                                     ))}
                                 </div>
-                                <ScrollArea className="mx-auto sm:mx-0 max-h-[333px] w-full max-w-[425px] rounded-b-[10px] bg-[#ffffff]">
-                                    <div className="grid grid-cols-7 gap-x-0 gap-y-2">
+                                <ScrollArea className="mx-auto sm:mx-0 max-h-[250px] w-full max-w-[320px] rounded-b-[10px] bg-[#ffffff]">
+                                    <div className="grid grid-cols-7 gap-x-0 gap-y-1">
                                         {calendarDays.map((day, index) => {
                                             const dayNumber = day.getDate()
                                             const isCurrentMonthDay = isSameMonth(day, currentMonth)
@@ -891,7 +903,7 @@ export default function AddGigPage() {
                                                     disabled={!isCurrentMonthDay}
                                                     onClick={() => toggleDate(day)}
                                                     className={cn(
-                                                        "flex h-[54px] w-full items-center justify-center text-[26px] font-[400] transition",
+                                                        "flex h-[40px] w-full items-center justify-center text-[18px] font-[400] transition",
                                                         shapeClass,
                                                         !isCurrentMonthDay && "text-[#D7E3E5]",
                                                         isCurrentMonthDay && !isSelected && "text-[#199490]",
