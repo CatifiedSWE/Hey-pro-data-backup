@@ -120,7 +120,7 @@ export default function Header() {
                 <img 
                   src="/logo/web-app-manifest-461x161.png" 
                   alt="HeyProData" 
-                  className="h-[70px] w-auto object-contain"
+                  className="h-[30px] w-auto object-contain"
                 />
               </Link>
 
