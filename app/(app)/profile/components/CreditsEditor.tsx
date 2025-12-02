@@ -140,7 +140,6 @@ export default function CreditsEditor({ trigger, mode = 'add', creditToEdit, onU
     const [endDateOpen, setEndDateOpen] = React.useState(false)
     const [startDate, setStartDate] = React.useState<Date | undefined>(undefined)
     const [endDate, setEndDate] = React.useState<Date | undefined>(undefined)
-    const [open, setOpen] = useState(false);
     const [accolades, setAccolades] = React.useState<Accolade[]>([]);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     const [saving, setSaving] = useState(false);
@@ -234,12 +233,7 @@ export default function CreditsEditor({ trigger, mode = 'add', creditToEdit, onU
         };
         reader.readAsDataURL(file);
     };
-    useEffect(() => {
-        setOpen(false);
-    }, [accoladeForm]);
-    const handelOpenChange = () => {
-        setOpen(!open);
-    };
+    
     const handleAddAward = () => {
         if (!accoladeForm.type || !accoladeForm.category) {
             toast.error("Please fill at least type and category");
@@ -701,13 +695,15 @@ export default function CreditsEditor({ trigger, mode = 'add', creditToEdit, onU
                                 {accolades.length > 0 && (
                                     accolades.map((award) => (
                                         <AccordionItem value={award.id} key={award.id} className="border border-[#E3E3E3] rounded-[18px] px-4">
-                                            <AccordionTrigger className="flex w-full items-center justify-between py-3 text-left gap-3" onClick={handelOpenChange}>
-                                                <div className="text-sm text-[#211536] flex flex-row gap-2.5 transition-opacity duration-200 data-[state=open]:opacity-0 data-[state=open]:pointer-events-none">
-                                                    {open && <span>{` ${award.type}` || "N/A"}</span>}
+                                            <AccordionTrigger className="flex w-full items-center justify-between py-3 text-left gap-3">
+                                                <div className="text-sm text-[#211536] flex flex-row gap-2.5">
+                                                    <span className="font-[600]">{award.type || "N/A"}</span>
+                                                    <span>-</span>
+                                                    <span>{award.category || "N/A"}</span>
                                                 </div>
                                             </AccordionTrigger>
                                             <AccordionContent className="pb-4 text-sm text-[#3A3A3A]">
-                                                <div className="text-sm text-[#444444] flex flex-row gap-2.5"><span className="font-[600]">Accolade Type </span> <span>{` ${award.type}` || "N/A"}</span></div>
+                                                <div className="text-sm text-[#444444] flex flex-row gap-2.5"><span className="font-[600]">Accolade Type </span> <span>{award.type || "N/A"}</span></div>
                                                 <div className="text-sm text-[#444444] flex flex-row gap-2.5 font-[600]">Accolade Category <span className="font-[400]">{award.category || "N/A"}</span></div>
                                                 <div className="text-sm text-[#444444] flex flex-row gap-2.5 font-[600] ">Accolade by <span className="font-[400]">{award.by || "Unknown presenter"}</span></div>
                                                 <div className="text-sm text-[#444444] flex flex-row gap-2.5 font-[600]">Year <span className="font-[400]">{award.year || "--"}</span></div>
