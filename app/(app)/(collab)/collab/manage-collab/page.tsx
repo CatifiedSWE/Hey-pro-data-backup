@@ -19,10 +19,42 @@ const formatDate = (dateString: string) => {
     return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
 };
 
+const InterestButton = ({ collabId, userHasInterest, onToggle, isLoading }: { 
+    collabId: string; 
+    userHasInterest: boolean; 
+    onToggle: () => void; 
+    isLoading: boolean;
+}) => {
+    if (userHasInterest) {
+        return (
+            <button
+                onClick={onToggle}
+                disabled={isLoading}
+                className="rounded-full min-w-[140px] bg-[#2FD3D8] px-6 py-2.5 text-sm font-semibold text-white disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm hover:bg-[#26B8BD] transition-colors"
+            >
+                {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+                {!isLoading && "Waitlisted"}
+            </button>
+        );
+    }
+    return (
+        <button
+            onClick={onToggle}
+            disabled={isLoading}
+            className="rounded-full min-w-[140px] border border-[#2FD3D8] bg-white px-6 py-2.5 text-sm font-semibold text-[#2FD3D8] disabled:opacity-50 flex items-center justify-center gap-2 hover:bg-[#2FD3D8]/5 transition-colors"
+        >
+            {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+            {!isLoading && "I'm interested"}
+        </button>
+    );
+};
+
 export default function ManageCollab() {
     const router = useRouter();
     const [collabPosts, setCollabPosts] = useState<CollabPost[]>([]);
     const [loading, setLoading] = useState(true);
+    const [interestLoading, setInterestLoading] = useState<{ [key: string]: boolean }>({});
+    const [saveLoading, setSaveLoading] = useState<{ [key: string]: boolean }>({});
 
     // Fetch user's collabs
     useEffect(() => {
@@ -39,6 +71,60 @@ export default function ManageCollab() {
 
         fetchMyCollabs();
     }, []);
+
+    // Handle interest toggle
+    const handleInterestToggle = async (collabId: string, currentState: boolean) => {
+        setInterestLoading(prev => ({ ...prev, [collabId]: true }));
+        
+        try {
+            if (currentState) {
+                await removeInterest(collabId);
+            } else {
+                await expressInterest(collabId);
+            }
+            
+            // Update local state
+            setCollabPosts(prev => prev.map(post => 
+                post.id === collabId 
+                    ? { 
+                        ...post, 
+                        userHasInterest: !currentState,
+                        interests: currentState ? post.interests - 1 : post.interests + 1
+                      }
+                    : post
+            ));
+        } catch (error) {
+            console.error('Failed to toggle interest:', error);
+            toast.error(error instanceof Error ? error.message : 'Failed to update interest');
+        } finally {
+            setInterestLoading(prev => ({ ...prev, [collabId]: false }));
+        }
+    };
+
+    // Handle save toggle
+    const handleSaveToggle = async (collabId: string, currentState: boolean) => {
+        setSaveLoading(prev => ({ ...prev, [collabId]: true }));
+        
+        try {
+            if (currentState) {
+                await unsaveCollab(collabId);
+            } else {
+                await saveCollab(collabId);
+            }
+            
+            // Update local state
+            setCollabPosts(prev => prev.map(post => 
+                post.id === collabId 
+                    ? { ...post, userHasSaved: !currentState }
+                    : post
+            ));
+        } catch (error) {
+            console.error('Failed to toggle save:', error);
+            toast.error(error instanceof Error ? error.message : 'Failed to update save');
+        } finally {
+            setSaveLoading(prev => ({ ...prev, [collabId]: false }));
+        }
+    };
 
     return (
         <div className="min-h-screen bg-gray-50 pb-10">
