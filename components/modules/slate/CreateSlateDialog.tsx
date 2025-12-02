@@ -204,7 +204,7 @@ export default function CreateSlateDialog({ open, onOpenChange }: CreateSlateDia
                                     onClick={() => fileInputRef.current?.click()}
                                     className="bg-[#FA6E80] hover:bg-[#FA6E80]/90 text-white font-semibold text-sm h-8 px-4 rounded-md"
                                 >
-                                    Select from computer
+                                    Select from device
                                 </Button>
                                 <input 
                                     type="file" 
