@@ -7,7 +7,8 @@ import { useRouter } from "next/navigation";
 import { Loader2, Heart, Share2, MessageSquare } from "lucide-react";
 
 import { Avatar } from "../../components/Avatar";
-import { getMyCollabs, type CollabPost } from "@/lib/api/collab";
+import { getMyCollabs, expressInterest, removeInterest, saveCollab, unsaveCollab, type CollabPost } from "@/lib/api/collab";
+import { toast } from "sonner";
 
 const TagPill = ({ label }: { label: string }) => (
     <span className="rounded-full border border-[#2FD3D8] px-4 py-2 text-xs font-medium text-[#2FD3D8] bg-[#2FD3D8]/5">{label}</span>
