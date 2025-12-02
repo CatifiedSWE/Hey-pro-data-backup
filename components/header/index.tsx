@@ -112,9 +112,9 @@ export default function Header() {
     <>
       <nav className="fixed top-0  h-[80px] z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 max-w-[1080px]">
-          <div className="flex h-18 items-center justify-between gap-8">
+          <div className="flex h-18 items-center justify-between gap-2">
             {/* Logo */}
-            <Link href="/" className="flex items-center">
+            <Link href="/" className="flex items-center shrink-0">
               <img 
                 src="/logo/web-app-manifest-461x161.png" 
                 alt="HeyProData" 
@@ -123,8 +123,8 @@ export default function Header() {
             </Link>
 
             {/* Search Bar - Collapsible */}
-            <div className="hidden md:flex items-center">
-              <div className={`relative flex items-center transition-all duration-300 ease-in-out ${searchOpen ? 'w-[200px]' : 'w-[40px]'}`}>
+            <div className="hidden md:flex items-center shrink-0">
+              <div className={`relative flex items-center transition-all duration-300 ease-in-out ${searchOpen ? 'w-[160px]' : 'w-[40px]'}`}>
                 <div
                   className={`absolute right-0 top-1/2 -translate-y-1/2 h-[34px] w-[34px] bg-[#FA6E80] hover:bg-[#f95569] text-white rounded-full flex items-center justify-center cursor-pointer z-20 ${searchOpen ? 'right-2' : 'right-1'}`}
                   onClick={() => setSearchOpen(!searchOpen)}
@@ -133,20 +133,20 @@ export default function Header() {
                 </div>
                 <Input
                   type="search"
-                  placeholder="Search jobs, events..."
+                  placeholder="Search..."
                   className={`
-                    w-full h-[48px] rounded-full text-base bg-secondary/80 border-none focus-visible:ring-accent
+                    w-full h-[48px] rounded-full text-sm bg-secondary/80 border-none focus-visible:ring-accent
                     transition-all duration-300 ease-in-out
-                    ${searchOpen ? 'pl-4 pr-12 opacity-100' : 'pl-0 pr-0 opacity-0 pointer-events-none'}
+                    ${searchOpen ? 'pl-3 pr-10 opacity-100' : 'pl-0 pr-0 opacity-0 pointer-events-none'}
                   `}
                 />
               </div>
             </div>
 
             {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center gap-1">
+            <div className="hidden lg:flex items-center gap-1 shrink-0">
               <NavigationMenu>
-                <NavigationMenuList className="flex-wrap">
+                <NavigationMenuList className="flex-wrap flex-nowrap">
                   <NavigationMenuItem>
                     <NavigationMenuLink
                         asChild
@@ -156,7 +156,7 @@ export default function Header() {
                     </NavigationMenuLink>
                   </NavigationMenuItem>
                   <NavigationMenuItem>
-                    <div>
+                    <div className="flex">
                       {navigationMenuItems.map((item) => (
                         <NavigationMenuLink
                           key={item.title}
@@ -185,7 +185,7 @@ export default function Header() {
 
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 shrink-0">
               <div
                 className="relative"
                 onMouseLeave={() => setChatOpen(false)}
