@@ -13,6 +13,15 @@ const TagPill = ({ label }: { label: string }) => (
     <span className="rounded-[40px] h-[24px] flex justify-center items-center border border-[#2FD3D8] px-4 py-1 text-xs font-medium text-[#2FD3D8]">{label}</span>
 );
 
+const CreateTagPill = ({ label, onRemove }: { label: string; onRemove: () => void }) => (
+    <span className="inline-flex items-center gap-2 rounded-[15px] border border-[#2FD3D8] px-4 py-1 text-xs font-medium text-[#2FD3D8]">
+        {label}
+        <button type="button" onClick={onRemove} aria-label={`Remove ${label}`}>
+            <X className="h-3 w-3" />
+        </button>
+    </span>
+);
+
 type InterestButtonProps = {
     collabId: string;
     userHasInterest: boolean;
