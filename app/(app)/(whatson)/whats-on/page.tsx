@@ -1,11 +1,13 @@
 "use client";
 import { Calendar, ChevronDown, ChevronLeft, ChevronRight, Filter, MapPin, Search } from "lucide-react";
 import Link from "next/link";
-import React, { JSX } from "react";
+import React, { JSX, useState, useEffect } from "react";
 import { format } from "date-fns";
-// import WhatsOnMainContent from "../components/main-content";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import EventListingPage from "../components/main-content";
+import { whatsOnAPI, WhatsOnFilters } from "@/lib/api/whatson";
+import { transformEventForCard } from "@/lib/utils/whatson-transforms";
+
 const initialFilterState = {
     price: "free",
     relevance: true,
@@ -50,6 +52,84 @@ const buildCalendarCells = (activeMonth: Date): CalendarCell[] => {
 export default function WhatsOnHeader() {
     const [isFilterOpen, setIsFilterOpen] = React.useState(false);
     const [filterForm, setFilterForm] = React.useState<typeof initialFilterState>(initialFilterState);
+    const [events, setEvents] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [searchKeyword, setSearchKeyword] = useState("");
+
+    // Fetch events on component mount
+    useEffect(() => {
+        fetchEvents();
+    }, []);
+
+    const fetchEvents = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+            
+            const filters: WhatsOnFilters = buildFiltersFromState();
+            const data = await whatsOnAPI.listEvents(filters);
+            
+            // Transform events for UI
+            const transformedEvents = data.data.events.map(transformEventForCard);
+            setEvents(transformedEvents);
+        } catch (err: any) {
+            console.error('Failed to load events:', err);
+            setError(err.response?.data?.error || 'Failed to load events');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const buildFiltersFromState = (): WhatsOnFilters => {
+        const filters: WhatsOnFilters = {
+            status: 'published',
+            limit: 50
+        };
+
+        // Add search keyword
+        if (searchKeyword.trim()) {
+            filters.keyword = searchKeyword.trim();
+        }
+
+        // Add price filter
+        if (filterForm.price === 'free') {
+            filters.isPaid = false;
+        } else if (filterForm.price === 'paid') {
+            filters.isPaid = true;
+        }
+
+        // Add location filter
+        if (filterForm.location) {
+            filters.location = filterForm.location;
+        }
+
+        // Add attendance mode filter
+        if (filterForm.attendance === 'online') {
+            filters.isOnline = true;
+        } else if (filterForm.attendance === 'in-person') {
+            filters.isOnline = false;
+        }
+
+        // Add date filters from selected calendar dates
+        if (filterForm.highlightedSingles.length > 0 || filterForm.highlightedRange.length > 0) {
+            const allDates = [...filterForm.highlightedSingles, ...filterForm.highlightedRange];
+            const sortedDates = allDates.sort((a, b) => a - b);
+            
+            if (sortedDates.length > 0) {
+                const year = calendarMonth.getFullYear();
+                const month = calendarMonth.getMonth();
+                
+                const fromDate = new Date(year, month, sortedDates[0]);
+                const toDate = new Date(year, month, sortedDates[sortedDates.length - 1]);
+                
+                filters.dateFrom = fromDate.toISOString().split('T')[0];
+                filters.dateTo = toDate.toISOString().split('T')[0];
+            }
+        }
+
+        return filters;
+    };
 
     const handleFilterChange = (field: keyof typeof initialFilterState, value: string | number | boolean | number[]) => {
         setFilterForm((prev) => ({ ...prev, [field]: value }));
@@ -57,7 +137,15 @@ export default function WhatsOnHeader() {
 
     const handleFilterSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        console.log("Applied filters:", filterForm);
+        fetchEvents();
+    };
+
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchKeyword(e.target.value);
+    };
+
+    const handleSearchSubmit = () => {
+        fetchEvents();
     };
 
     const [calendarMonth, setCalendarMonth] = React.useState(() => new Date(2025, 8, 1));
@@ -119,13 +207,18 @@ export default function WhatsOnHeader() {
                     </div>
                     <div className="flex flex-row border rounded-full px-1 py-2 justify-between items-center h-[48px] w-[240px] sm:w-[960px]">
                         <input
-                            placeholder="Search by name, role, or department..."
+                            placeholder="Search events..."
                             className=" px-2 border-none outline-none focus:ring-0 text-sm bg-transparent"
-                            onChange={(e) => console.log(e.target.value)}
+                            value={searchKeyword}
+                            onChange={handleSearchChange}
+                            onKeyPress={(e) => e.key === 'Enter' && handleSearchSubmit()}
                         />
-                        <span className="relative flex items-center justify-center border rounded-full h-[34px] w-[34px] bg-[#FA6E80]">
+                        <button 
+                            onClick={handleSearchSubmit}
+                            className="relative flex items-center justify-center border rounded-full h-[34px] w-[34px] bg-[#FA6E80] cursor-pointer hover:bg-[#e85f71] transition-colors"
+                        >
                             <Search className="h-5 w-5 text-white" />
-                        </span>
+                        </button>
                     </div>
                     <MobileFilter
                         filterForm={filterForm}
@@ -143,6 +236,15 @@ export default function WhatsOnHeader() {
 
 
                 </div>
+                
+                {error && (
+                    <div className="flex justify-center items-center mt-4">
+                        <div className="bg-red-50 text-red-600 px-4 py-2 rounded-lg text-sm">
+                            {error}
+                        </div>
+                    </div>
+                )}
+                
                 <div className=" flex flex-row mx-auto justify-center ">
                     {isFilterOpen && (
                         <div className="hidden w-full max-w-[280px] overflow-y-auto p-4 space-y-2 sm:block">
@@ -294,7 +396,11 @@ export default function WhatsOnHeader() {
                             </form>
                         </div>
                     )}
-                    <EventListingPage isFilterOpen={isFilterOpen} />
+                    <EventListingPage 
+                        isFilterOpen={isFilterOpen} 
+                        events={events} 
+                        loading={loading} 
+                    />
 
                 </div>
 

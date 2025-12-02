@@ -1,25 +1,76 @@
+"use client";
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { ArrowLeft, Calendar, ChevronLeft, Heart, Share2 } from "lucide-react";
-
-import { getWhatsOnEventBySlug, whatsOnEvents } from "@/data/whatsOnEvents";
+import { useParams } from "next/navigation";
+import { ArrowLeft, Calendar, Heart, Share2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { whatsOnAPI } from "@/lib/api/whatson";
+import { transformEventForDetail } from "@/lib/utils/whatson-transforms";
 import { RSVP } from "../../components/rsvp";
 
-type WhatsOnPageProps = {
-    params: Promise<{ slug: string }>;
-};
+export default function WhatsOnPage() {
+    const params = useParams();
+    const slug = params?.slug as string;
+    
+    const [event, setEvent] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-export async function generateStaticParams() {
-    return whatsOnEvents.map((event) => ({ slug: event.slug }));
-}
+    useEffect(() => {
+        if (slug) {
+            fetchEventDetails();
+        }
+    }, [slug]);
 
-export default async function WhatsOnPage({ params }: WhatsOnPageProps) {
-    const { slug } = await params;
-    const event = getWhatsOnEventBySlug(slug);
+    const fetchEventDetails = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+            
+            // Use slug as ID (you might need to adjust based on your API)
+            const response = await whatsOnAPI.getEventById(slug);
+            const transformedEvent = transformEventForDetail(response.data);
+            setEvent(transformedEvent);
+        } catch (err: any) {
+            console.error('Failed to load event:', err);
+            setError(err.response?.data?.error || 'Event not found');
+        } finally {
+            setLoading(false);
+        }
+    };
 
-    if (!event) {
-        notFound();
+    if (loading) {
+        return (
+            <section className="mx-auto flex w-full max-w-6xl flex-col gap-10 bg-white px-5 py-6">
+                <div className="animate-pulse space-y-6">
+                    <div className="h-8 bg-gray-200 rounded w-1/3" />
+                    <div className="h-64 bg-gray-200 rounded" />
+                    <div className="space-y-3">
+                        <div className="h-4 bg-gray-200 rounded" />
+                        <div className="h-4 bg-gray-200 rounded w-5/6" />
+                        <div className="h-4 bg-gray-200 rounded w-4/6" />
+                    </div>
+                </div>
+            </section>
+        );
+    }
+
+    if (error || !event) {
+        return (
+            <section className="mx-auto flex w-full max-w-6xl flex-col items-center justify-center gap-6 bg-white px-5 py-20">
+                <div className="text-center">
+                    <h2 className="text-2xl font-semibold text-gray-900 mb-2">Event Not Found</h2>
+                    <p className="text-gray-600 mb-6">{error || 'The event you\'re looking for doesn\'t exist.'}</p>
+                    <Link 
+                        href="/whats-on" 
+                        className="inline-flex items-center gap-2 bg-[#31A7AC] text-white px-6 py-3 rounded-full hover:bg-[#279497]"
+                    >
+                        <ArrowLeft className="h-4 w-4" />
+                        Back to Events
+                    </Link>
+                </div>
+            </section>
+        );
     }
 
     return (
@@ -107,7 +158,7 @@ export default async function WhatsOnPage({ params }: WhatsOnPageProps) {
 
                             <Calendar className="h-[30px] w-[30px] text-[#000000]" />
                             <div className="">
-                                {event.schedule.map((slot, index) => (
+                                {event.schedule.map((slot: any, index: number) => (
                                     <div key={`${slot.dateLabel}-${index}`} className="flex flex-col gap-1 text-sm text-[#000000] sm:flex-row sm:items-center sm:justify-between">
                                         <div className="flex items-center gap-2 font-[400] sm:text-[18px] text-[14px] text-[#000000]">
                                             <span>{slot.dateLabel}</span><p className="text-[#000000]">
@@ -131,14 +182,14 @@ export default async function WhatsOnPage({ params }: WhatsOnPageProps) {
                                 </div>
                             )}
                             <div className="space-y-3 text-sm leading-relaxed text-[#000000]">
-                                {event.description.map((paragraph, index) => (
+                                {event.description.map((paragraph: string, index: number) => (
                                     <p key={index}>{paragraph}</p>
                                 ))}
                             </div>
                             <div className="mt-6 sm:hidden block">
                                 <p className="text-[18px] font-[400] text-gray-900 w-full text-center">Discover with Tags</p>
                                 <div className="mt-3 flex flex-wrap gap-2">
-                                    {event.tags.map((tag) => (
+                                    {event.tags.map((tag: string) => (
                                         <span key={tag} className="rounded-[50px] h-[32px] justify-center items-center flex bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
                                             {tag}
                                         </span>
@@ -150,7 +201,7 @@ export default async function WhatsOnPage({ params }: WhatsOnPageProps) {
                         <section className="space-y-3 mb-5">
                             <h3 className="text-lg font-semibold text-[#000000]">T&amp;Cs</h3>
                             <ol className="list-decimal space-y-2 pl-6 text-sm text-[#000000]">
-                                {event.terms.map((term, index) => (
+                                {event.terms.map((term: string, index: number) => (
                                     <li key={index}>{term}</li>
                                 ))}
                             </ol>
@@ -179,7 +230,7 @@ export default async function WhatsOnPage({ params }: WhatsOnPageProps) {
                             <div className="mt-6">
                                 <p className="text-sm font-semibold text-gray-900">Discover with Tags</p>
                                 <div className="mt-3 flex flex-wrap gap-2">
-                                    {event.tags.map((tag) => (
+                                    {event.tags.map((tag: string) => (
                                         <span key={tag} className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
                                             {tag}
                                         </span>
@@ -205,7 +256,14 @@ export default async function WhatsOnPage({ params }: WhatsOnPageProps) {
                     </div>
                     <h4 className="text-lg font-semibold text-gray-900">{event.title}</h4>
                 </div>
-                <RSVP event={event.schedule} />
+                <RSVP 
+                    eventId={event.id} 
+                    eventSchedule={event.schedule}
+                    maxSpotsPerPerson={event.maxSpotsPerPerson}
+                    isFullyBooked={event.isFullyBooked}
+                    isPaid={event.isPaid}
+                    priceAmount={event.priceLabel}
+                />
             </footer>
         </section>
     );
