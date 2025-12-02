@@ -319,7 +319,7 @@ export default function ShortProfile({ profile, links, roles = [], recommendatio
                                 profile.work_identities.freelance && "Freelance",
                                 profile.work_identities.employee?.enabled && `Employee at ${profile.work_identities.employee.company || 'Company'}`,
                                 profile.work_identities.businessOwner?.enabled && `Business Owner at ${profile.work_identities.businessOwner.businessName || 'Business'}`
-                            ].filter(Boolean).join(". ")}
+                            ].filter(Boolean).join("• ")}
                         </div>
                     )}
                 </div>
