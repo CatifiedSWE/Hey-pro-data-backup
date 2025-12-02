@@ -41,9 +41,9 @@ export function transformEventForCard(event: WhatsOnEvent) {
     heroImage: event.hero_image_url || '/whats-on.png',
     thumbnail: event.thumbnail_url || '/whats-on.png',
     host: {
-      name: creatorName,
-      avatar: getProfilePhotoWithFallback(creatorAvatar),
-      organization: creatorName
+      name: event.creator?.name || 'Unknown',
+      avatar: event.creator?.profile_photo_url || '/image (2).png',
+      organization: event.creator?.name || 'Unknown'
     },
     rsvpCount: event.rsvp_count,
     isFullyBooked: event.is_fully_booked
@@ -91,9 +91,9 @@ export function transformEventForDetail(event: WhatsOnEvent) {
     dateRangeLabel: formatDateRange(event.schedule),
     rsvpBy: event.rsvp_deadline ? format(new Date(event.rsvp_deadline), 'EEE, MMM d yyyy') : 'TBA',
     host: {
-      name: creatorName,
-      organization: creatorName,
-      avatar: getProfilePhotoWithFallback(creatorAvatar)
+      name: event.creator?.name || 'Unknown',
+      organization: event.creator?.name || 'Unknown',
+      avatar: event.creator?.profile_photo_url || '/image (2).png'
     },
     schedule: event.schedule.map(slot => ({
       dateLabel: format(new Date(slot.event_date), 'EEE, MMM d yyyy'),
@@ -113,3 +113,4 @@ export function transformEventForDetail(event: WhatsOnEvent) {
     spotsBooked: event.spots_booked
   };
 }
+
