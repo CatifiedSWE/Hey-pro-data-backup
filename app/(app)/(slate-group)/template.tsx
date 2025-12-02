@@ -266,17 +266,28 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                                 <h2 className="text-lg">{profile.name}</h2>
                                 <p className="text-[12px] text-gray-600 mt-1">{profile.bio}</p>
                             <div className="flex items-center mt-3 w-full max-w-[160px]">
-                                {profile.referencesavatar.map((avatar, index) => (
-                                    <Image
-                                        key={index}
-                                        src={avatar}
-                                        alt={`Reference ${index + 1}`}
-                                        width={10}
-                                        height={10}
-                                        className={`w-[24px] h-[24px] rounded-full border-2 border-white ${index !== 0 ? '-ml-3' : ''} object-cover`}
-                                    />
-                                ))}
-                                <span className="text-sm text-[#FA6E80] ml-2">+{profile.totalref} Referrals</span>
+                                {loadingReferrals ? (
+                                    <>
+                                        <div className="w-[24px] h-[24px] bg-gray-200 rounded-full animate-pulse" />
+                                        <div className="w-[24px] h-[24px] bg-gray-200 rounded-full animate-pulse -ml-3" />
+                                        <div className="w-[24px] h-[24px] bg-gray-200 rounded-full animate-pulse -ml-3" />
+                                        <div className="h-4 w-20 bg-gray-200 rounded animate-pulse ml-2" />
+                                    </>
+                                ) : (
+                                    <>
+                                        {profile.referencesavatar.map((avatar, index) => (
+                                            <Image
+                                                key={index}
+                                                src={avatar}
+                                                alt={`Reference ${index + 1}`}
+                                                width={10}
+                                                height={10}
+                                                className={`w-[24px] h-[24px] rounded-full border-2 border-white ${index !== 0 ? '-ml-3' : ''} object-cover`}
+                                            />
+                                        ))}
+                                        <span className="text-sm text-[#FA6E80] ml-2">+{profile.totalref} Referrals</span>
+                                    </>
+                                )}
                             </div>
                             <div>
                                 <div className="flex flex-col space-y-2 mt-2">
