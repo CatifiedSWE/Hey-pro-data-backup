@@ -9,14 +9,14 @@ import { whatsOnAPI, WhatsOnFilters } from "@/lib/api/whatson";
 import { transformEventForCard } from "@/lib/utils/whatson-transforms";
 
 const initialFilterState = {
-    price: "free",
-    relevance: true,
+    price: "",
+    relevance: false,
     eventType: "",
     eventStatus: "",
-    location: "UAE, Dubai",
-    attendance: "online",
-    highlightedSingles: [1, 2, 4, 17],
-    highlightedRange: [13, 14, 15, 16],
+    location: "",
+    attendance: "",
+    highlightedSingles: [] as number[],
+    highlightedRange: [] as number[],
 };
 
 const DAY_LABELS = ["M", "T", "W", "T", "F", "S", "S"];
@@ -148,6 +148,19 @@ export default function WhatsOnHeader() {
         fetchEvents();
     };
 
+    // Count active filters
+    const getActiveFilterCount = () => {
+        let count = 0;
+        if (filterForm.price) count++;
+        if (filterForm.relevance) count++;
+        if (filterForm.eventType) count++;
+        if (filterForm.eventStatus) count++;
+        if (filterForm.location) count++;
+        if (filterForm.attendance) count++;
+        if (filterForm.highlightedSingles.length > 0 || filterForm.highlightedRange.length > 0) count++;
+        return count;
+    };
+
     const [calendarMonth, setCalendarMonth] = React.useState(() => new Date(2025, 8, 1));
     const calendarCells = React.useMemo(() => buildCalendarCells(calendarMonth), [calendarMonth]);
     const monthLabel = format(calendarMonth, "MMM, yyyy");
@@ -227,7 +240,7 @@ export default function WhatsOnHeader() {
                         onClick={() => setIsFilterOpen(!isFilterOpen)}
                     >
                         <button className={`text-sm font-medium whitespace-nowrap ${isFilterOpen ? 'text-white' : 'text-[#FA6E80]'}`}>
-                            {isFilterOpen ? 'Close Filter' : 'Filter (3)'}
+                            {isFilterOpen ? 'Close Filter' : `Filter ${getActiveFilterCount() > 0 ? `(${getActiveFilterCount()})` : ''}`}
                         </button>
                         <Filter className={`h-5 w-5 ${isFilterOpen ? 'text-white' : 'text-[#FA6E80]'}`} />
                     </div>
@@ -258,6 +271,7 @@ export default function WhatsOnHeader() {
                         handleFilterChange={handleFilterChange}
                         handleFilterSubmit={handleFilterSubmit}
                         resetForm={resetForm}
+                        getActiveFilterCount={getActiveFilterCount}
                     />
 
 
@@ -458,6 +472,7 @@ function MobileFilter({
     getHighlightClasses,
     toggleSingleDay,
     resetForm,
+    getActiveFilterCount,
 }: {
     isFilterOpen: boolean;
     filterForm: typeof initialFilterState;
@@ -470,16 +485,19 @@ function MobileFilter({
     getHighlightClasses: (day: number | null) => string;
     toggleSingleDay: (day: number) => void;
     resetForm: () => void;
+    getActiveFilterCount: () => number;
 }) {
     return (
         <>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <div
-                        className={`flex items-center sm:hidden  justify-center space-x-1 h-[48px] w-[111px] border rounded-full px-4 py-2 cursor-pointer transition-all  bg-[#ffffff]`}
+                        className={`flex items-center sm:hidden  justify-center space-x-1 h-[48px] w-[111px] border rounded-full px-4 py-2 cursor-pointer transition-all  bg-[#ffffff] border-[#FA6E80]`}
                     >
-                        <button className={`text-[10px] font-medium ${isFilterOpen ? 'text-white' : 'text-[#FA6E80]'}`}>Filter (<span>{"3"}</span>)</button>
-                        <Filter className={`h-5 w-5 ${isFilterOpen ? 'text-white' : 'text-[#FA6E80]'}`} />
+                        <button className={`text-[10px] font-medium text-[#FA6E80]`}>
+                            Filter {getActiveFilterCount() > 0 ? `(${getActiveFilterCount()})` : ''}
+                        </button>
+                        <Filter className={`h-5 w-5 text-[#FA6E80]`} />
                     </div>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-[273px] border-none" align="start">
