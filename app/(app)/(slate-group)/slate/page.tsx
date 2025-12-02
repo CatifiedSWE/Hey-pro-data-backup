@@ -1,6 +1,6 @@
 "use client";
 import { Separator } from "@/components/ui/separator";
-import { Ellipsis, Heart, MessageCircle, Send } from "lucide-react";
+import { Ellipsis, Heart, MessageCircle, Send, Bookmark } from "lucide-react";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase/client";
