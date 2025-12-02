@@ -80,7 +80,7 @@ export default function Highlights({ highlights: propHighlights }: HighlightsPro
                         variant="outline"
                         className="w-full h-11 rounded-[10px] border-[#31A7AC] text-black hover:bg-transparent"
                     >
-                        Edit Highlights
+                        Edit Heylights
                     </Button>
                     <div className="space-y-6">
                         {displayHighlights.map((highlight) => (
