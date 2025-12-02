@@ -253,33 +253,8 @@ export default function CreditsSection() {
                 </div>
             )}
 
-            <div className="mt-8 flex flex-col items-start justify-between">
-                <div className="flex flex-col sm:flex-row gap-5">
-                    <div className="relative h-[145px] sm:h-[145px] sm:w-[190px] w-full rounded-[5px] bg-[#ffffff] shadow-[4px_4px_6.4px_rgba(0,0,0,0.03)]">
-                        <div className="absolute left-3 top-3 flex items-center gap-[6px]">
-                            <span className="relative inline-flex h-[22px] w-[22px] items-center justify-center rounded-full border-[2px] border-[#25C9D0] bg-white" />
-                            <span className="relative inline-flex h-[22px] w-[22px] items-center justify-center rounded-full border-[2px] border-[#FF5168] bg-white" />
-                        </div>
-                        <p className="absolute inset-0 flex items-center justify-center px-4 text-center text-[20px] font-medium text-[#444444]">
-                            Too busy to take a pic..!
-                        </p>
-                    </div>
-                    <div>
-                        <h1 className="text-[14px] font-[600]">Role  |  Production type</h1>
-                        <p>Client</p>
-                        <p>Description</p>
-                        <p>.....</p>
-                        <p>.......</p>
-                        <p>.........</p>
-                        <div className="mt-auto flex items-center gap-3 text-xs text-[#000000]">
-                            <Calendar className="h-4 w-4" />
-                            <span>start_date - end_date</span>
-                        </div>
-                    </div>
-                </div>
+           
 
-                <Link href="#" className="text-[14px] font-semibold text-[#31A7AC]">See all credits</Link>
-            </div>
         </section>
     )
 }
