@@ -172,7 +172,7 @@ export default function Collab() {
     };
 
     return (
-        <div className="flex flex-col items-center h-screen overflow-y-auto">
+        <div className="flex flex-col items-center min-h-screen w-full">
             <Header />
 
             <div className="mt-16 sm:max-w-[960px] max-w-[393px] w-full space-y-10 text-black bg-transparent pb-10">
