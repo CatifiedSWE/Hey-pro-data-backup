@@ -48,6 +48,8 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
     const [referralsAvatars, setReferralsAvatars] = useState<string[]>([]);
     const [loadingReferrals, setLoadingReferrals] = useState(true);
 
+    // Create Slate Dialog State
+    const [isCreateSlateOpen, setIsCreateSlateOpen] = useState(false);
     // Fetch referrals data
     useEffect(() => {
         const fetchReferrals = async () => {
