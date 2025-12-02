@@ -21,6 +21,7 @@ import { useRouter } from "next/navigation";
 interface RSVPProps {
     eventId: string;
     eventSchedule: Array<{
+        id: string;
         dateLabel: string;
         timeRange: string;
         timezone: string;
@@ -40,6 +41,7 @@ export function RSVP({ eventId, eventSchedule, maxSpotsPerPerson, isFullyBooked,
     const [attendeeNames, setAttendeeNames] = useState<string[]>(['']);
     const [contactEmail, setContactEmail] = useState('');
     const [contactPhone, setContactPhone] = useState('');
+    const [selectedDates, setSelectedDates] = useState<string[]>([]);
     const [ticketInfo, setTicketInfo] = useState<any>(null);
     const [error, setError] = useState<string | null>(null);
 
@@ -61,6 +63,7 @@ export function RSVP({ eventId, eventSchedule, maxSpotsPerPerson, isFullyBooked,
         setAttendeeNames(['']);
         setContactEmail('');
         setContactPhone('');
+        setSelectedDates([]);
         setTicketInfo(null);
         setError(null);
     };
@@ -86,11 +89,26 @@ export function RSVP({ eventId, eventSchedule, maxSpotsPerPerson, isFullyBooked,
         setAttendeeNames(newNames);
     };
 
+    const handleDateToggle = (scheduleId: string) => {
+        setSelectedDates(prev => {
+            if (prev.includes(scheduleId)) {
+                return prev.filter(id => id !== scheduleId);
+            } else {
+                return [...prev, scheduleId];
+            }
+        });
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
 
         // Validation
+        if (selectedDates.length === 0) {
+            setError('Please select at least one date to attend');
+            return;
+        }
+
         if (!contactEmail) {
             setError('Contact email is required');
             return;
@@ -113,8 +131,9 @@ export function RSVP({ eventId, eventSchedule, maxSpotsPerPerson, isFullyBooked,
                 number_of_spots: numberOfSpots,
                 attendee_names: filledNames,
                 contact_email: contactEmail,
-                contact_phone: contactPhone
-            });
+                contact_phone: contactPhone,
+                schedule_ids: selectedDates
+            } as any);
 
             setTicketInfo(response.data);
         } catch (err: any) {
@@ -165,22 +184,48 @@ export function RSVP({ eventId, eventSchedule, maxSpotsPerPerson, isFullyBooked,
                         )}
 
                         <div className="grid gap-6 my-6">
-                            {/* Event Schedule */}
-                            <div className="space-y-2">
+                            {/* Event Schedule with Date Selection */}
+                            <div className="space-y-3">
                                 <div className="flex items-center gap-3 text-sm font-medium text-gray-700">
                                     <Calendar className="h-5 w-5 text-[#017A7C]" />
-                                    <span>Event Schedule</span>
+                                    <span>Select Date(s) to Attend *</span>
                                 </div>
-                                <div className="space-y-2 pl-8">
-                                    {eventSchedule?.map((slot, index) => (
-                                        <div key={`${slot.dateLabel}-${index}`} className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm text-gray-700 py-1">
-                                            <span className="font-medium text-gray-900">{slot.dateLabel}</span>
-                                            <span className="text-gray-600">
-                                                {slot.timeRange} · {slot.timezone}
-                                            </span>
+                                <div className="space-y-3 pl-8">
+                                    {eventSchedule?.map((slot) => (
+                                        <div 
+                                            key={slot.id} 
+                                            className={`flex items-start gap-3 p-3 rounded-lg border-2 transition-all cursor-pointer hover:border-[#31A7AC]/50 ${
+                                                selectedDates.includes(slot.id) 
+                                                    ? 'border-[#31A7AC] bg-[#31A7AC]/5' 
+                                                    : 'border-gray-200 bg-white'
+                                            }`}
+                                            onClick={() => handleDateToggle(slot.id)}
+                                        >
+                                            <Checkbox
+                                                id={`date-${slot.id}`}
+                                                checked={selectedDates.includes(slot.id)}
+                                                onCheckedChange={() => handleDateToggle(slot.id)}
+                                                className="mt-0.5"
+                                            />
+                                            <label 
+                                                htmlFor={`date-${slot.id}`}
+                                                className="flex-1 cursor-pointer"
+                                            >
+                                                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-sm">
+                                                    <span className="font-medium text-gray-900">{slot.dateLabel}</span>
+                                                    <span className="text-gray-600">
+                                                        {slot.timeRange} · {slot.timezone}
+                                                    </span>
+                                                </div>
+                                            </label>
                                         </div>
                                     ))}
                                 </div>
+                                {selectedDates.length > 0 && (
+                                    <div className="pl-8 text-sm text-[#31A7AC] font-medium">
+                                        {selectedDates.length} date{selectedDates.length > 1 ? 's' : ''} selected
+                                    </div>
+                                )}
                             </div>
 
                             <Separator />

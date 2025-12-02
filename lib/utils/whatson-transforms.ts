@@ -96,6 +96,7 @@ export function transformEventForDetail(event: WhatsOnEvent) {
       avatar: event.creator?.profile_photo_url || '/image (2).png'
     },
     schedule: event.schedule.map(slot => ({
+      id: (slot as any).id, // Preserve the schedule ID
       dateLabel: format(new Date(slot.event_date), 'EEE, MMM d yyyy'),
       timeRange: `${slot.start_time} - ${slot.end_time}`,
       timezone: slot.timezone

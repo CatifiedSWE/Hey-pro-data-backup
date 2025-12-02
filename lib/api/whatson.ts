@@ -81,6 +81,7 @@ export const whatsOnAPI = {
     attendee_names: string[];
     contact_email: string;
     contact_phone: string;
+    schedule_ids: string[];
   }) => {
     const response = await axios.post(`/whatson/${eventId}/rsvp`, data);
     return response.data;
