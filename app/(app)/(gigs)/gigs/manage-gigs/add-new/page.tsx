@@ -1124,19 +1124,10 @@ export default function AddGigPage() {
                                             )}
                                         </div>
                                     </div>
-                                    <p className="text-base font-[400]">
-                                        {requestQuote ? "Requesting quote" : `AED ${formValues.gigRate || "0"}`}
-                                    </p>
-                                    <p className="text-sm font-[400] text-[#1D1D1F]">
-                                        Qualifying criteria:
-                                        <span className="pl-1 font-normal text-[#6F6F6F]">
-                                            {formValues.qualifyingCriteria || "This is where the qualifying criteria value comes"}
-                                        </span>
-                                    </p>
-                                    {referenceLabel && (
+                                    {referenceFile && (
                                         <div className="flex items-center gap-2 text-sm text-[#1D1D1F]">
                                             <FileText className="h-4 w-4" />
-                                            <span>Reference included{referenceFile ? ` (${referenceFile.name})` : ""}</span>
+                                            <span>Reference: {referenceFile.name}</span>
                                         </div>
                                     )}
                                 </div>
