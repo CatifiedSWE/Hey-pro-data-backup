@@ -23,6 +23,7 @@ import Image from "next/image"
 import { toast } from "sonner"
 
 type GigFormValues = {
+    title: string
     role: string
     type: string
     department: string
@@ -36,6 +37,7 @@ type GigFormValues = {
 }
 
 const initialFormValues: GigFormValues = {
+    title: "",
     role: "",
     type: "",
     department: "",
