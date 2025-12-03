@@ -113,23 +113,26 @@ export default function Highlights({ highlights: propHighlights }: HighlightsPro
                 </Button>
                 
                 <div className="flex items-center gap-3">
-                    <h2 
-                        className="text-2xl font-bold uppercase tracking-widest"
-                        style={{
-                            background: 'linear-gradient(90deg, #FA6E80 0%, #6A89BE 41.52%, #85AAB7 62.27%, #31A7AC 103.79%)',
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent',
-                            backgroundClip: 'text',
-                            color: 'transparent'
-                        }}
-                    >
-                        HIGHLIGHTS
-                    </h2>
+                    {/* Rotated Image Container 
+                        Original image is 33w x 250h. 
+                        We rotate it -90deg so it becomes horizontal.
+                        Container needs to accommodate the rotated dimensions (250w x 33h).
+                    */}
+                    <div className="relative w-[250px] h-[33px] flex-shrink-0">
+                        <Image
+                            src="/heylights-vertical.png"
+                            alt="HIGHLIGHTS"
+                            width={33}
+                            height={250}
+                            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-90 object-contain"
+                            priority
+                        />
+                    </div>
+                    
                     <div 
                         className="h-[1px] flex-1 rounded-full"
                         style={{
-                            background: 'linear-gradient(90deg, #FA6E80 0%, #6A89BE 41.52%, #85AAB7 62.27%, #31A7AC 103.79%)',
-                            marginTop: '4px' // Slight optical adjustment to align with text center
+                            background: 'linear-gradient(90deg, #FA6E80 0%, #6A89BE 41.52%, #85AAB7 62.27%, #31A7AC 103.79%)'
                         }}
                     />
                 </div>
