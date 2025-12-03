@@ -7,7 +7,7 @@ import { createServerClient, validateAuthToken, successResponse, errorResponse }
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { commentId: string } }
+  { params }: { params: Promise<{ commentId: string }> }
 ) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -21,7 +21,7 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const commentId = params.commentId;
+    const { commentId } = await params;
     const { content } = body;
 
     // Validate content
