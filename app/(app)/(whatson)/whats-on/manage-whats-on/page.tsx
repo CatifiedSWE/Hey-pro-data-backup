@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { whatsOnAPI } from "@/lib/api/whatson";
 import DataTable from "../../components/data-table";
 import { toast } from "sonner";
+import { format } from "date-fns";
 
 const poppins = Poppins({
     subsets: ["latin"],
@@ -33,10 +34,13 @@ const ManageCard = ({
         setShowDeleteConfirm(false);
     };
 
+    // Mock avatars for attending users (since we don't have individual user data in the event object usually)
+    const attendingAvatars = [1, 2, 3]; 
+
     return (
-        <div className="flex flex-col md:flex-row items-start bg-[#F8F8F8] rounded-[15px] p-[15px] gap-[30px] w-full md:w-[960px] md:h-[303px] transition-shadow hover:shadow-md relative">
+        <div className="flex flex-col md:flex-row items-start bg-white rounded-[15px] p-[15px] gap-[30px] w-full transition-shadow hover:shadow-md relative border border-gray-100">
             <div className="relative shrink-0 w-full md:w-auto">
-                <div className="relative w-full h-[423px] md:w-[234px] md:h-[273px] rounded-[15.45px] overflow-hidden">
+                <div className="relative w-full h-[250px] md:w-[234px] md:h-[273px] rounded-[15.45px] overflow-hidden">
                     <Image
                         src={event.thumbnail_url || '/whats-on.png'}
                         alt={event.title}
@@ -45,32 +49,38 @@ const ManageCard = ({
                     />
                 </div>
             </div>
-            <div className="flex flex-col flex-1 w-full gap-[8px] md:h-[255px] relative">
-                {event.is_paid && (
-                    <div className="absolute right-0 top-0 z-10 flex h-[25px] w-[25px] items-center justify-center rounded-full bg-[#FCAF45] shadow-[0.9px_0.9px_8.2px_rgba(0,0,0,0.04)]">
-                        <DollarSign className="h-[14px] w-[14px] text-white" strokeWidth={3} />
+            <div className="flex flex-col flex-1 w-full gap-[8px] relative min-h-[273px]">
+                
+                {/* Top Row: Spots & Paid Status */}
+                <div className="flex justify-between items-start w-full">
+                    <div className="flex items-center gap-[9.4px] h-[27px]">
+                        <div className="w-[27px] h-[27px] flex items-center justify-center">
+                            <Ticket className="h-[20px] w-[20px] text-black" strokeWidth={1.5} />
+                        </div>
+                        <span className="text-[18px] leading-[27px] font-normal text-black font-poppins">
+                            {event.spots_booked || 0}/{event.is_unlimited_spots ? '∞' : event.total_spots} Spots
+                        </span>
                     </div>
-                )}
-                <div className="flex items-center gap-[9.4px] h-[27px]">
-                    <div className="w-[27px] h-[27px] flex items-center justify-center">
-                        <Ticket className="h-[20px] w-[20px] text-black" strokeWidth={1.5} />
-                    </div>
-                    <span className="text-[18px] leading-[27px] font-normal text-black font-poppins">
-                        {event.spots_booked || 0}/{event.is_unlimited_spots ? '∞' : event.total_spots} Spots
-                    </span>
+                    {event.is_paid && (
+                        <div className="flex h-[25px] w-[25px] items-center justify-center rounded-full bg-[#FCAF45] shadow-[0.9px_0.9px_8.2px_rgba(0,0,0,0.04)]">
+                            <DollarSign className="h-[14px] w-[14px] text-white" strokeWidth={3} />
+                        </div>
+                    )}
                 </div>
 
-                <h3 className="text-[20px] leading-[30px] font-[600] text-[#444444] font-poppins line-clamp-2 md:line-clamp-1 w-full md:pr-[40px]">
+                <h3 className="text-[20px] leading-[30px] font-[600] text-[#444444] font-poppins line-clamp-2 md:line-clamp-1 w-full md:pr-[40px] mt-1">
                     {event.title}
                 </h3>
 
                 <p className="text-[16px] leading-[24px] font-normal text-[#444444] font-poppins line-clamp-3 md:line-clamp-2">
                     {event.description || 'No description available'}
                 </p>
-                <div className="flex flex-col justify-center gap-[10px] py-1">
-                    {event.schedule?.slice(0, 2).map((slot: any, index: number) => (
+
+                {/* Dates List */}
+                <div className="flex flex-col justify-center gap-[10px] py-2 mt-1">
+                    {event.schedule?.slice(0, 3).map((slot: any, index: number) => (
                         <div key={`${slot.event_date}-${index}`} className="flex items-center gap-[10px]">
-                            <Calendar className="h-[26px] w-[26px] text-black" strokeWidth={2.2} />
+                            <Calendar className="h-[24px] w-[24px] text-black" strokeWidth={2} />
                             <span className="text-[14px] leading-[21px] font-normal text-black font-poppins">
                                 {new Date(slot.event_date).toLocaleDateString('en-US', { 
                                     weekday: 'short', 
@@ -81,32 +91,57 @@ const ManageCard = ({
                             </span>
                         </div>
                     ))}
+                    {event.schedule?.length > 3 && (
+                        <span className="text-sm text-gray-500 pl-9">+{event.schedule.length - 3} more dates</span>
+                    )}
                 </div>
 
-                <div className="mt-auto flex flex-col md:flex-row md:items-center justify-between w-full gap-4 md:gap-0">
-                    <div className="flex items-center gap-3">
-                        <button
-                            onClick={() => onViewRSVPs(event.id)}
-                            className="flex items-center gap-2 px-4 py-2 bg-[#31A7AC] text-white rounded-lg hover:bg-[#288a8e] transition-colors text-sm font-medium"
-                        >
-                            <Users className="h-4 w-4" />
-                            View RSVPs ({event.rsvp_count || 0})
-                        </button>
-                        <Link
-                            href={`/whats-on/manage-whats-on/${event.id}`}
-                            className="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium"
-                        >
-                            <Eye className="h-4 w-4" />
-                            Edit
-                        </Link>
-                        <button
-                            onClick={() => setShowDeleteConfirm(true)}
-                            className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm font-medium"
-                        >
-                            <Trash2 className="h-4 w-4" />
-                            Delete
-                        </button>
+                {/* Bottom Info: Attending & RSVP By */}
+                <div className="mt-auto flex flex-col md:flex-row md:items-end justify-between w-full gap-4 md:gap-0 pt-4">
+                    <div className="flex items-center gap-2">
+                        <div className="flex -space-x-3 overflow-hidden">
+                            {attendingAvatars.map((_, i) => (
+                                <div key={i} className="inline-block h-8 w-8 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center text-xs text-gray-500">
+                                    {/* Placeholder for avatar */}
+                                    <Users className="h-4 w-4" />
+                                </div>
+                            ))}
+                        </div>
+                        <span className="text-[14px] font-medium text-[#444444]">
+                            {event.rsvp_count || 0} Attending
+                        </span>
                     </div>
+                    
+                    <div className="text-right">
+                         <span className="text-[16px] font-medium text-[#444444]">
+                            RSVP by {event.rsvp_deadline ? format(new Date(event.rsvp_deadline), "EEE, MMM dd yyyy") : 'N/A'}
+                         </span>
+                    </div>
+                </div>
+
+                {/* Actions Row (Keeping functional buttons but styling them cleanly) */}
+                <div className="flex items-center gap-3 mt-4 pt-4 border-t border-gray-100">
+                    <button
+                        onClick={() => onViewRSVPs(event.id)}
+                        className="flex items-center gap-2 px-3 py-1.5 bg-[#31A7AC]/10 text-[#31A7AC] rounded-lg hover:bg-[#31A7AC]/20 transition-colors text-sm font-medium"
+                    >
+                        <Users className="h-4 w-4" />
+                        View RSVPs
+                    </button>
+                    <Link
+                        href={`/whats-on/manage-whats-on/${event.id}`}
+                        className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                    >
+                        <Eye className="h-4 w-4" />
+                        Edit
+                    </Link>
+                    <button
+                        onClick={() => setShowDeleteConfirm(true)}
+                        className="flex items-center gap-2 px-3 py-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-sm font-medium ml-auto"
+                    >
+                        <Trash2 className="h-4 w-4" />
+                        Delete
+                    </button>
                 </div>
             </div>
 
@@ -261,7 +296,7 @@ export default function ManageWhatsOnPage() {
                 </div>
             )}
 
-            <section className="flex flex-col gap-[10px] items-center md:items-start">
+            <section className="flex flex-col gap-[20px] items-center md:items-start">
                 {events.map((event) => (
                     <ManageCard 
                         key={event.id} 
