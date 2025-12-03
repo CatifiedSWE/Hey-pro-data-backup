@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Heart, MessageCircle, Send, MapPin, Calendar, Users, Bookmark } from "lucide-react";
@@ -90,6 +91,7 @@ interface SavedEvent {
 
 export default function SavedPage() {
     const { user } = useAuth();
+    const router = useRouter();
     const [savedSlates, setSavedSlates] = useState<SavedSlate[]>([]);
     const [savedCollabs, setSavedCollabs] = useState<SavedCollab[]>([]);
     const [savedWhatsOn, setSavedWhatsOn] = useState<SavedEvent[]>([]);
@@ -221,7 +223,12 @@ export default function SavedPage() {
                     ) : (
                         <div className="space-y-4">
                             {savedSlates.map((slate) => (
-                                <Card key={slate.id} className="border-gray-200 rounded-lg p-6 bg-white" data-testid="saved-slate-card">
+                                <Card 
+                                    key={slate.id} 
+                                    className="border-gray-200 rounded-lg p-6 bg-white cursor-pointer hover:shadow-md transition-shadow" 
+                                    data-testid="saved-slate-card"
+                                    onClick={() => router.push(`/slate/${slate.slug || slate.id}`)}
+                                >
                                     <div className="flex items-center justify-between mb-4">
                                         <div className="flex items-center">
                                             <Image
@@ -250,15 +257,24 @@ export default function SavedPage() {
                                         />
                                     )}
                                     <div className="flex gap-4 mb-3">
-                                        <button className="flex items-center gap-2 text-gray-700 hover:text-[#FA6E80]">
+                                        <button 
+                                            className="flex items-center gap-2 text-gray-700 hover:text-[#FA6E80]"
+                                            onClick={(e) => e.stopPropagation()}
+                                        >
                                             <Heart className={`h-6 w-6 ${slate.user_has_liked ? 'fill-[#FA6E80] text-[#FA6E80]' : ''}`} />
                                             <span className="text-sm">{slate.likes_count}</span>
                                         </button>
-                                        <button className="flex items-center gap-2 text-gray-700 hover:text-[#FA6E80]">
+                                        <button 
+                                            className="flex items-center gap-2 text-gray-700 hover:text-[#FA6E80]"
+                                            onClick={(e) => e.stopPropagation()}
+                                        >
                                             <MessageCircle className="h-6 w-6" />
                                             <span className="text-sm">{slate.comments_count}</span>
                                         </button>
-                                        <button className="flex items-center gap-2 text-gray-700 hover:text-[#FA6E80]">
+                                        <button 
+                                            className="flex items-center gap-2 text-gray-700 hover:text-[#FA6E80]"
+                                            onClick={(e) => e.stopPropagation()}
+                                        >
                                             <Send className="h-6 w-6" />
                                             <span className="text-sm">{slate.shares_count}</span>
                                         </button>
@@ -290,7 +306,12 @@ export default function SavedPage() {
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {savedCollabs.map((collab) => (
-                                <Card key={collab.id} className="border-gray-200 rounded-lg overflow-hidden bg-white" data-testid="saved-collab-card">
+                                <Card 
+                                    key={collab.id} 
+                                    className="border-gray-200 rounded-lg overflow-hidden bg-white cursor-pointer hover:shadow-md transition-shadow" 
+                                    data-testid="saved-collab-card"
+                                    onClick={() => router.push(`/collab/${collab.slug || collab.id}`)}
+                                >
                                     <div className="relative h-48">
                                         <Image
                                             src={collab.cover_image_url || "/slate.png"}
@@ -363,7 +384,12 @@ export default function SavedPage() {
                                 const priceDisplay = event.is_paid ? `${event.price_currency} ${event.price_amount}` : 'Free';
                                 
                                 return (
-                                    <Card key={event.id} className="border-gray-200 rounded-lg overflow-hidden bg-white" data-testid="saved-event-card">
+                                    <Card 
+                                        key={event.id} 
+                                        className="border-gray-200 rounded-lg overflow-hidden bg-white cursor-pointer hover:shadow-md transition-shadow" 
+                                        data-testid="saved-event-card"
+                                        onClick={() => router.push(`/whats-on/${event.slug}`)}
+                                    >
                                         <div className="flex flex-col md:flex-row">
                                             <div className="relative w-full md:w-64 h-48 md:h-auto">
                                                 <Image
