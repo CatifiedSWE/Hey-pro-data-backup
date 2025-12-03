@@ -1,16 +1,18 @@
 "use client";
+import { useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import HighlightsText from "./highlights-text";
 import { useProfile, type HighlightData } from "@/contexts/ProfileContext";
-import { useEffect } from "react";
+import { HighlightsSelector } from "./HighlightsSelector";
 
 interface HighlightItem {
     id: string;
     title: string;
     description: string;
     images: string;
+    type?: string;
 }
 
 interface HighlightsProps {
@@ -54,17 +56,52 @@ export function HighlightCard({
 }
 
 export default function Highlights({ highlights: propHighlights }: HighlightsProps) {
-    const { highlights: apiHighlights } = useProfile();
+    const { highlights: apiHighlights, fetchHighlights } = useProfile();
+    const [isSelectorOpen, setIsSelectorOpen] = useState(false);
     
-    // Use API highlights if available, otherwise fall back to prop highlights
+    // Transform highlight data based on source type
+    const transformHighlight = (highlight: any): HighlightItem | null => {
+        if (highlight.source_type === 'credit' && highlight.source_data) {
+            const credit = highlight.source_data;
+            return {
+                id: highlight.id,
+                title: credit.credit_title || 'Untitled Credit',
+                description: credit.description || '',
+                images: credit.image_url || '/placeholder.png',
+                type: 'credit'
+            };
+        } else if (highlight.source_type === 'slate_post' && highlight.source_data) {
+            const post = highlight.source_data;
+            const firstMedia = post.media?.[0];
+            return {
+                id: highlight.id,
+                title: 'Slate Post',
+                description: post.content || '',
+                images: firstMedia?.media_url || '/placeholder.png',
+                type: 'slate'
+            };
+        } else if (highlight.title && highlight.description) {
+            // Legacy format
+            return {
+                id: highlight.id,
+                title: highlight.title,
+                description: highlight.description,
+                images: highlight.image_url || '/placeholder.png',
+                type: 'legacy'
+            };
+        }
+        return null;
+    };
+
+    // Use API highlights with enriched source data if available
     const displayHighlights = apiHighlights.length > 0 
-        ? apiHighlights.map(h => ({
-            id: h.id,
-            title: h.title,
-            description: h.description,
-            images: h.image_url || '/placeholder.png'
-          }))
+        ? apiHighlights.map(h => transformHighlight(h)).filter((h): h is HighlightItem => h !== null)
         : propHighlights || [];
+
+    const handleSelectorSave = () => {
+        setIsSelectorOpen(false);
+        fetchHighlights();
+    };
 
     if (!displayHighlights?.length) {
         return null;
@@ -78,6 +115,7 @@ export default function Highlights({ highlights: propHighlights }: HighlightsPro
                     <Button
                         variant="outline"
                         className="w-full h-11 rounded-[10px] border-[#31A7AC] text-black hover:bg-transparent"
+                        onClick={() => setIsSelectorOpen(true)}
                     >
                         Edit Highlights
                     </Button>
@@ -105,8 +143,13 @@ export default function Highlights({ highlights: propHighlights }: HighlightsPro
 
             {/* Mobile View */}
 
-            
-          
+            {/* Highlights Selector Dialog */}
+            <HighlightsSelector 
+                open={isSelectorOpen}
+                onClose={() => setIsSelectorOpen(false)}
+                onSave={handleSelectorSave}
+                currentHighlights={apiHighlights}
+            />
         </section>
     );
 }

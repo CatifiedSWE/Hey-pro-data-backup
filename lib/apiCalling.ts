@@ -46,3 +46,4 @@ const apiCalling = async <T = unknown>({
 };
 
 export default apiCalling;
+export { apiCalling };
