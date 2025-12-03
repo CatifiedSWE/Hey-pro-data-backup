@@ -100,13 +100,19 @@ export function SendRecommendationDialog({ className }: { className?: string }) 
                                                     className="flex items-center justify-between rounded-[12px] bg-white px-4 py-3"
                                                 >
                                                     <div className="flex items-center gap-4">
-                                                        <Image
-                                                            src={user.avatar || "/default-avatar.png"}
-                                                            alt={user.name}
-                                                            width={49}
-                                                            height={49}
-                                                            className="h-[49px] w-[49px] rounded-full object-cover"
-                                                        />
+                                                        {user.avatar && user.avatar.trim() !== "" ? (
+                                                            <Image
+                                                                src={user.avatar}
+                                                                alt={user.name}
+                                                                width={49}
+                                                                height={49}
+                                                                className="h-[49px] w-[49px] rounded-full object-cover"
+                                                            />
+                                                        ) : (
+                                                            <div className="h-[49px] w-[49px] rounded-full bg-gray-200 flex items-center justify-center text-lg font-semibold text-gray-600">
+                                                                {user.name.charAt(0).toUpperCase()}
+                                                            </div>
+                                                        )}
                                                         <div className="flex flex-col gap-1">
                                                             <p className="text-base font-medium text-[#444444]">{user.name}</p>
                                                             <div className="flex items-center gap-2 text-sm text-[#444444]">
