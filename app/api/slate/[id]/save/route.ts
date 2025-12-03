@@ -7,7 +7,7 @@ import { createServerClient, validateAuthToken, successResponse, errorResponse }
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -20,7 +20,7 @@ export async function POST(
       );
     }
 
-    const postId = params.id;
+    const { id: postId } = await params;
     const supabase = createServerClient();
 
     // Check if post exists
@@ -83,7 +83,7 @@ export async function POST(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -96,7 +96,7 @@ export async function DELETE(
       );
     }
 
-    const postId = params.id;
+    const { id: postId } = await params;
     const supabase = createServerClient();
 
     // Delete save

@@ -3,11 +3,11 @@ import { createServerClient, validateAuthToken, successResponse, errorResponse }
 
 /**
  * POST /api/slate/[id]/share
- * Share/repost a slate post
+ * Share a slate post
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -20,7 +20,7 @@ export async function POST(
       );
     }
 
-    const postId = params.id;
+    const { id: postId } = await params;
     const supabase = createServerClient();
 
     // Check if post exists
@@ -43,7 +43,7 @@ export async function POST(
       );
     }
 
-    // Insert share (UNIQUE constraint will prevent duplicates)
+    // Insert share
     const { error: shareError } = await supabase
       .from('slate_shares')
       .insert({
@@ -52,13 +52,6 @@ export async function POST(
       });
 
     if (shareError) {
-      if (shareError.code === '23505') {
-        // Unique violation - already shared
-        return NextResponse.json(
-          errorResponse('Post already shared'),
-          { status: 400 }
-        );
-      }
       return NextResponse.json(
         errorResponse('Failed to share post', shareError.message),
         { status: 500 }
@@ -95,7 +88,7 @@ export async function POST(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -108,7 +101,7 @@ export async function DELETE(
       );
     }
 
-    const postId = params.id;
+    const { id: postId } = await params;
     const supabase = createServerClient();
 
     // Delete share
