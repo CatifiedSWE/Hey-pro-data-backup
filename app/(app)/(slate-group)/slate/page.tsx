@@ -183,7 +183,7 @@ export default function SlatePage() {
         } catch (error: any) {
             toast.error(error.message || 'Failed to share post');
         }
-    }, [])
+    }, []);
 
     if (loading) {
         return (
@@ -326,7 +326,6 @@ function SlateCard({ post, onLike, onSave, onShare }: SlateCardProps) {
         )}
 
         <div className="border-gray-300 rounded-lg p-4 md:p-7 bg-white">
-        <div className="border-gray-300 rounded-lg p-4 md:p-7 bg-white">
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center mb-4">
                     <Image
@@ -424,6 +423,7 @@ function SlateCard({ post, onLike, onSave, onShare }: SlateCardProps) {
             )}
             
             <Separator className="" />
+        </div>
         </div>
 
         {/* Comments Modal */}
