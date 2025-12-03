@@ -41,7 +41,7 @@ export async function GET(
     const { data: profile } = await supabase
       .from('user_profiles')
       .select('name, profile_photo_url')
-      .eq('id', gig.created_by)
+      .eq('user_id', gig.created_by)
       .maybeSingle();
 
     // Get gig dates
