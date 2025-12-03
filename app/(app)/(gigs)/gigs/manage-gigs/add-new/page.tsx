@@ -238,24 +238,93 @@ export default function AddGigPage() {
     const handleSubmit = async (status: 'draft' | 'published') => {
         setIsSubmitting(true)
         try {
-            const payload = {
-                crewCount,
-                ...formValues,
-                dates: selectedDates.map((key) => new Date(key)),
-                isTbc,
-                requestQuote,
-                referenceFileName: referenceFile?.name || null,
-                referenceFile,
-                expiryDate,
-                status,
+            // Validate required fields
+            if (!formValues.title?.trim()) {
+                toast.error('Please enter a title for the gig')
+                setIsSubmitting(false)
+                return
             }
-            console.log(`${status === 'published' ? 'Publishing' : 'Saving to draft'} gig payload:`, payload)
-            
-            // TODO: Add API call here to save/publish the gig
-            // await createGig(payload)
-            
-            // Show success message
-            toast.success(`Gig ${status === 'published' ? 'published' : 'saved to draft'} successfully!`)
+            if (!formValues.description?.trim()) {
+                toast.error('Please enter a description')
+                setIsSubmitting(false)
+                return
+            }
+
+            // Upload reference file if provided
+            let uploadedFileUrl = null
+            if (referenceFile) {
+                const fileFormData = new FormData()
+                fileFormData.append('file', referenceFile)
+                
+                const uploadResponse = await apiCalling({
+                    method: 'post',
+                    route: '/upload/gig-reference',
+                    data: fileFormData,
+                })
+                
+                if (uploadResponse.status && uploadResponse.data?.data?.url) {
+                    uploadedFileUrl = uploadResponse.data.data.url
+                } else {
+                    toast.error('Failed to upload reference file')
+                    setIsSubmitting(false)
+                    return
+                }
+            }
+
+            // Transform selected dates to dateWindows format
+            const dateWindows = buildMonthSummaries(selectedDates).map(summary => ({
+                label: summary.label,
+                range: summary.ranges
+            }))
+
+            // Parse locations (comma-separated string to array)
+            const locationsArray = formValues.location
+                ? formValues.location.split(',').map(loc => loc.trim()).filter(loc => loc.length > 0)
+                : []
+
+            // Prepare API payload
+            const apiPayload = {
+                title: formValues.title.trim(),
+                description: formValues.description.trim(),
+                qualifyingCriteria: formValues.qualifyingCriteria?.trim() || null,
+                amount: formValues.gigRate ? parseFloat(formValues.gigRate) : null,
+                currency: 'AED',
+                crewCount: crewCount,
+                role: formValues.role || null,
+                type: formValues.type || null,
+                department: formValues.department || null,
+                company: formValues.company || null,
+                isTbc: isTbc,
+                requestQuote: requestQuote,
+                expiryDate: expiryDate ? expiryDate.toISOString() : null,
+                supportingFileLabel: referenceFile?.name || null,
+                referenceUrl: uploadedFileUrl || formValues.referenceUrl || null,
+                status: status,
+                dateWindows: dateWindows,
+                locations: locationsArray,
+                references: uploadedFileUrl ? [{
+                    label: referenceFile?.name || 'Reference File',
+                    url: uploadedFileUrl,
+                    type: referenceFile?.type || 'file'
+                }] : []
+            }
+
+            // Call API to create gig
+            const response = await apiCalling({
+                method: 'post',
+                route: '/gigs',
+                data: apiPayload,
+            })
+
+            if (response.status && response.data?.success) {
+                toast.success(`Gig ${status === 'published' ? 'published' : 'saved to draft'} successfully!`)
+                // Reset form after successful submission
+                resetForm()
+                // Optionally redirect to gigs page
+                // window.location.href = '/gigs'
+            } else {
+                toast.error(response.message || 'Failed to create gig')
+            }
         } catch (error) {
             console.error('Error submitting gig:', error)
             toast.error('Failed to submit gig. Please try again.')
