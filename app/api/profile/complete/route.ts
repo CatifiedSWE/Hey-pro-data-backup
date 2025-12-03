@@ -215,6 +215,58 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    // ENRICH HIGHLIGHTS WITH SOURCE DATA
+    // This is critical for the UI to display credit/slate info without extra roundtrips
+    let enrichedHighlights = [];
+    const highlights = highlightsResult.data || [];
+    const credits = creditsResult.data || [];
+
+    // 1. Identify Slate Posts that need fetching
+    const slatePostIds = highlights
+      .filter(h => h.source_type === 'slate_post' && h.source_id)
+      .map(h => h.source_id);
+
+    let slatePosts = [];
+    if (slatePostIds.length > 0) {
+      const { data: fetchedPosts } = await supabase
+        .from('slate_posts')
+        .select(`
+          id,
+          content,
+          slug,
+          likes_count,
+          comments_count,
+          created_at,
+          media:slate_media(
+            id,
+            media_url,
+            media_type,
+            sort_order
+          )
+        `)
+        .in('id', slatePostIds);
+      slatePosts = fetchedPosts || [];
+    }
+
+    // 2. Enrich each highlight
+    enrichedHighlights = highlights.map(highlight => {
+      let sourceData = null;
+
+      if (highlight.source_type === 'credit' && highlight.source_id) {
+        // Find in already-fetched credits
+        sourceData = credits.find(c => c.id === highlight.source_id) || null;
+      } else if (highlight.source_type === 'slate_post' && highlight.source_id) {
+        // Find in newly-fetched slate posts
+        sourceData = slatePosts.find(p => p.id === highlight.source_id) || null;
+      }
+
+      return {
+        ...highlight,
+        source_data: sourceData
+      };
+    });
+
+
     // Check for critical errors (profile not found is acceptable)
     if (profileResult.error && profileResult.error.code !== 'PGRST116') {
       console.error('Profile fetch error:', profileResult.error);
@@ -245,7 +297,7 @@ export async function GET(request: NextRequest) {
       visa: visaResult.data || null,
       languages: languagesResult.data || [],
       travelCountries: travelCountriesResult.data || [],
-      highlights: highlightsResult.data || [],
+      highlights: enrichedHighlights, // Use the enriched version
       skills: skillsResult.data || [],
       credits: creditsResult.data || [],
       availability: availabilityResult.data || []
