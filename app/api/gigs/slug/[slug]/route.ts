@@ -9,11 +9,11 @@ import { transformCalendarMonths, formatBudgetLabel } from '@/lib/supabase/helpe
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     const supabase = createServerClient();
-    const slug = params.slug;
+    const { slug } = await params;
 
     // Fetch gig by slug
     const { data: gig, error: gigError } = await supabase
