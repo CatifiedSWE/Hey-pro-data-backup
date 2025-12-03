@@ -7,10 +7,11 @@ import { createServerClient, validateAuthToken, successResponse, errorResponse }
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const postId = params.id;
+    const { id } = await params;
+    const postId = id;
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 100);
@@ -157,7 +158,7 @@ export async function GET(
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -171,7 +172,8 @@ export async function POST(
     }
 
     const body = await request.json();
-    const postId = params.id;
+    const { id } = await params;
+    const postId = id;
     const { content, parent_comment_id } = body;
 
     // Validate content

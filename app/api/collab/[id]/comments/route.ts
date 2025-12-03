@@ -7,10 +7,11 @@ import { validateAuthToken, createServerClient, successResponse, errorResponse }
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const collabId = params.id;
+    const { id } = await params;
+    const collabId = id;
     const supabase = createServerClient();
 
     // Check if collab exists and is accessible
@@ -142,7 +143,7 @@ export async function GET(
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -155,7 +156,8 @@ export async function POST(
       );
     }
 
-    const collabId = params.id;
+    const { id } = await params;
+    const collabId = id;
     const body = await request.json();
     const { content, parent_id } = body;
 
