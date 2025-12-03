@@ -11,12 +11,7 @@ import {
 } from "@/components/ui/card";
 import apiCalling from "@/lib/apiCalling";
 import { toast } from "sonner";
-
-type CompactTimelineEntry = {
-    key: string;
-    monthLabel: string;
-    dayLabel: string;
-};
+import { CalendarDays } from "lucide-react";
 
 type Gig = {
     id: string;
@@ -44,13 +39,30 @@ type AvailabilityData = {
     applicantsAvailability: ApplicantAvailability[];
 };
 
-const buildTimelineEntries = (windows: Array<{ label: string; range: string }>): CompactTimelineEntry[] => {
-    const entries: CompactTimelineEntry[] = [];
+// Helper to build the calendar structure
+type DateColumn = {
+    fullKey: string; // "Sep 2025-12"
+    day: string; // "12"
+    dayName: string; // "F" (Friday) etc - For now assuming we simulate day names or calculate them
+    monthLabel: string; // "Sep 2025"
+};
+
+const buildCalendarStructure = (windows: Array<{ label: string; range: string }>) => {
+    const columns: DateColumn[] = [];
+    
+    // Mapping of windows to parsed dates
+    // Window label example: "Sep 2025"
+    
     windows.forEach((window) => {
+        const [month, year] = window.label.split(" ");
+        const monthIndex = new Date(`${month} 1, 2000`).getMonth(); // simplistic
+        const yearNum = parseInt(year);
+        
         const tokens = window.range
             .split(",")
             .map((token) => token.trim())
             .filter(Boolean);
+            
         tokens.forEach((token) => {
             if (token.includes("-")) {
                 const [startStr, endStr] = token.split("-");
@@ -58,20 +70,56 @@ const buildTimelineEntries = (windows: Array<{ label: string; range: string }>):
                 const end = Number(endStr);
                 if (!Number.isNaN(start) && !Number.isNaN(end) && end >= start) {
                     for (let day = start; day <= end; day++) {
-                        const key = `${window.label}-${day}`;
-                        entries.push({ key, monthLabel: window.label, dayLabel: day.toString() });
+                        const date = new Date(yearNum, monthIndex, day);
+                        const dayName = date.toLocaleDateString('en-US', { weekday: 'narrow' });
+                        const fullKey = `${window.label}-${day}`;
+                        columns.push({
+                            fullKey,
+                            day: day.toString(),
+                            dayName: dayName || 'D',
+                            monthLabel: window.label
+                        });
                     }
                 }
             } else {
                 const day = Number(token);
                 if (!Number.isNaN(day)) {
-                    const key = `${window.label}-${day}`;
-                    entries.push({ key, monthLabel: window.label, dayLabel: day.toString() });
+                    const date = new Date(yearNum, monthIndex, day);
+                    const dayName = date.toLocaleDateString('en-US', { weekday: 'narrow' });
+                    const fullKey = `${window.label}-${day}`;
+                    columns.push({
+                        fullKey,
+                        day: day.toString(),
+                        dayName: dayName || 'D',
+                        monthLabel: window.label
+                    });
                 }
             }
         });
     });
-    return entries.slice(0, 40);
+    
+    // Group by month label for the header
+    const months: { label: string; colspan: number }[] = [];
+    let currentMonth = "";
+    let count = 0;
+    
+    columns.forEach((col, index) => {
+        if (col.monthLabel !== currentMonth) {
+            if (currentMonth) {
+                months.push({ label: currentMonth, colspan: count });
+            }
+            currentMonth = col.monthLabel;
+            count = 1;
+        } else {
+            count++;
+        }
+        
+        if (index === columns.length - 1) {
+            months.push({ label: currentMonth, colspan: count });
+        }
+    });
+    
+    return { columns, months };
 };
 
 type AvailabilityTabProps = {
@@ -160,32 +208,31 @@ export function AvailabilityTab({ selectedGigIds }: AvailabilityTabProps) {
     return (
         <div className="space-y-8">
             {Object.entries(availabilityData).map(([gigId, { gig, availability }]) => {
-                const timeline = buildTimelineEntries(gig.dateWindows);
-                const monthBadges = Array.from(new Set(timeline.map((entry) => entry.monthLabel)));
+                const { columns, months } = buildCalendarStructure(gig.dateWindows);
                 const applicants = availability.applicantsAvailability || [];
 
                 return (
-                    <section key={gigId} className="space-y-4 bg-transparent">
+                    <section key={gigId} className="space-y-6 bg-transparent">
                         <header className="space-y-3 overflow-x-auto no-scrollbar">
-                            <p className="text-lg font-semibold text-gray-900">{gig.title}</p>
-                            <div className="flex flex-row gap-2">
+                            <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
+                                <p className="text-lg font-semibold text-gray-900">{gig.title}</p>
+                                <span className="flex items-center gap-1 justify-center text-[#000000]">
+                                    <CalendarDays className="h-4 w-4" />
+                                    {gig.dateWindows.map((window, index) => (
+                                        <span key={window.label} className="">
+                                            <span className="font-[500] text-[14px]">
+                                                <span className="text-[#FA6E80] text-[14px]">{window.label.split(" ")[1]}</span>
+                                                <span className="bg-[#FA6E80] text-white px-2 py-0.5 rounded-full text-[12px] ml-1"> {window.label.split(" ")[0]}</span>
+                                            </span>
+                                            <span className="mx-1">|</span>
+                                            {window.range}
+                                            {index < gig.dateWindows.length - 1 && <span className="mx-1">·</span>}
+                                        </span>
+                                    ))}
+                                </span>
                             </div>
-                            <div className="flex flex-row items-center gap-4 w-[950px] rounded-2xl border border-[#EFEFEF] bg-white px-4 py-3 text-sm text-gray-900">
-                                {gig.dateWindows.map((window) => {
-                                    const [month, year] = window.label.split(" ");
-                                    return (
-                                        <div key={`${gigId}-${window.label}`} className="flex items-center gap-3">
-                                            <span className="text-base font-semibold text-[#3B3B3B]">{year}</span>
-                                            <span className="rounded-full bg-[#FA6E80] px-4 py-1 text-sm font-medium text-white">{month}</span>
-                                            <span className="text-sm text-[#3B3B3B]">{window.range}</span>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                            <p className="text-sm text-gray-600">
-                                Showing availability for every requested day; days without data default to N/A.
-                            </p>
                         </header>
+
                         {applicants.length === 0 ? (
                             <Card className="bg-white">
                                 <CardHeader>
@@ -193,78 +240,78 @@ export function AvailabilityTab({ selectedGigIds }: AvailabilityTabProps) {
                                 </CardHeader>
                             </Card>
                         ) : (
-                            <div className="overflow-x-auto no-scrollbar">
-                                <table className="min-w-full border-separate border-spacing-x-[2px] border-spacing-y-[10px] text-sm">
+                            <div className="overflow-x-auto no-scrollbar bg-white rounded-[10px]">
+                                <table className="min-w-full border-separate border-spacing-0 text-sm">
                                     <thead>
-                                        <tr className="bg-gray-50 text-gray-600">
-                                            <th className="sticky left-0 bg-gray-50 px-1 py-2 text-left font-medium text-gray-700 flex flex-row justify-center items-center">
-                                                {monthBadges.map((label) => (
-                                                    <span
-                                                        key={label}
-                                                        className="px-1 py-1 text-[14px] font-[400] text-[#FA6E80]"
-                                                    >
-                                                        {label}
-                                                    </span>
-                                                ))}
+                                        <tr className="bg-[#FFF0F2]">
+                                            <th className="sticky left-0 z-20 w-[200px] border-b border-r bg-[#FFF0F2] p-0">
+                                                <div className="p-4 text-left font-medium text-[#FA6E80]">
+                                                    {months.map(m => m.label).join(' - ')}
+                                                </div>
                                             </th>
-                                            {timeline.map((entry) => (
-                                                <th
-                                                    key={entry.key}
-                                                    className="min-w-[32px] px-1 py-1 text-center text-xs font-semibold text-gray-500"
+                                            {columns.map((col, idx) => (
+                                                <th 
+                                                    key={idx} 
+                                                    className="min-w-[40px] border-b border-r border-[#FFE4E8] p-2 text-center last:border-r-0"
                                                 >
-                                                    <span className="block text-[9px] uppercase tracking-wider text-gray-400">
-                                                        {entry.monthLabel.split(" ")[0]}
-                                                    </span>
-                                                    <span className="text-sm text-gray-900">{entry.dayLabel}</span>
+                                                    <div className="flex flex-col items-center gap-1">
+                                                        <span className="text-xs text-[#FA6E80] font-medium">{col.dayName}</span>
+                                                        <span className="text-sm font-bold text-gray-700">{col.day}</span>
+                                                    </div>
                                                 </th>
                                             ))}
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-gray-100 bg-white">
-                                        {applicants.map((applicant) => (
-                                            <tr key={`${gigId}-availability-${applicant.applicantId}`}>
-                                                <td className="sticky left-0 flex w-[160px] items-center justify-center gap-2 bg-white px-4 py-2">
-                                                    <Image
-                                                        src={applicant.avatar || '/default-profile.png'}
-                                                        alt={applicant.name}
-                                                        width={32}
-                                                        height={32}
-                                                        className="h-8 w-8 rounded-full bg-gray-200"
-                                                    />
-                                                    <div>
-                                                        <p className="text-sm font-medium text-gray-900">{applicant.name}</p>
-                                                        {applicant.creditsStatus === 'added' ? (
-                                                            <p className="text-xs text-[#31A7AC]">Credits added</p>
+                                    <tbody>
+                                        {applicants.map((applicant, idx) => (
+                                            <tr key={applicant.applicantId} className="group hover:bg-gray-50">
+                                                <td className="sticky left-0 z-10 border-b border-r bg-white group-hover:bg-gray-50">
+                                                    <div className="flex items-center gap-3 p-4">
+                                                        {applicant.avatar ? (
+                                                            <Image
+                                                                src={applicant.avatar}
+                                                                alt={applicant.name}
+                                                                width={40}
+                                                                height={40}
+                                                                className="h-10 w-10 rounded-full object-cover"
+                                                            />
                                                         ) : (
-                                                            <p className="text-xs text-[#31A7AC]">Credits pending</p>
+                                                            <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
+                                                                {applicant.name.charAt(0)}
+                                                            </div>
                                                         )}
+                                                        <div className="flex flex-col">
+                                                            <span className="font-medium text-gray-900">{applicant.name}</span>
+                                                            {applicant.creditsStatus === 'added' ? (
+                                                                <span className="text-xs text-[#31A7AC]">Credits added</span>
+                                                            ) : (
+                                                                <span className="text-xs text-gray-400">N/A</span>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 </td>
-                                                {timeline.map((entry) => {
-                                                    const dayKey = `${entry.monthLabel}-${entry.dayLabel}`;
-                                                    const state = applicant.schedule[dayKey] || 'na';
-                                                    
-                                                    if (state === "na") {
-                                                        return (
-                                                            <td key={entry.key} className="border h-[41px] w-[38px] px-2 py-1 text-center text-xs text-gray-400">
-                                                                N/A
-                                                            </td>
-                                                        );
-                                                    }
-                                                    if (state === "hold") {
-                                                        return (
-                                                            <td key={entry.key} className="border h-[41px] w-[38px] bg-[#6A89BE] px-2 py-1 text-center">
-                                                                <span className="inline-flex h-5 w-5 items-center justify-center rounded-md text-xs font-semibold text-black">
-                                                                    C
-                                                                </span>
-                                                            </td>
-                                                        );
-                                                    }
+                                                {columns.map((col, cIdx) => {
+                                                    const state = applicant.schedule[col.fullKey] || 'na';
                                                     return (
-                                                        <td key={entry.key} className="border h-[41px] w-[38px] bg-[#FCAF45] px-2 py-1 text-center">
-                                                            <span className="inline-flex h-5 w-5 items-center justify-center text-xs font-semibold text-black">
-                                                                A
-                                                            </span>
+                                                        <td 
+                                                            key={cIdx} 
+                                                            className="border-b border-r border-gray-100 p-0 last:border-r-0"
+                                                        >
+                                                            {state === "na" && (
+                                                                <div className="h-[72px] w-full flex items-center justify-center">
+                                                                    <span className="text-xs text-gray-300">N/A</span>
+                                                                </div>
+                                                            )}
+                                                            {state === "hold" && (
+                                                                <div className="h-[72px] w-full bg-white flex items-center justify-center">
+                                                                    {/* Use blank or specific style */}
+                                                                </div>
+                                                            )}
+                                                            {state === "available" && (
+                                                                <div className="h-[72px] w-full bg-white flex items-center justify-center">
+                                                                    {/* Available cell content if needed */}
+                                                                </div>
+                                                            )}
                                                         </td>
                                                     );
                                                 })}

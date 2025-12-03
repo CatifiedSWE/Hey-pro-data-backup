@@ -140,18 +140,15 @@ export function ContactListTab({ selectedGigIds, actionIndicators }: ContactList
                                     <div className="flex items-center gap-4 text-sm text-[#444444]">
                                         <CalendarDays className="h-5 w-5 text-black" />
                                         <div className="flex flex-wrap gap-4">
-                                            {gig.dateWindows.map((window) => {
-                                                const [month, year] = window.label.split(" ");
-                                                return (
-                                                    <div key={window.label} className="flex items-center gap-3 px-3 py-1 text-sm text-[#444444]">
-                                                        <span className="text-sm font-semibold text-[#444444]">{year}</span>
-                                                        <span className="rounded-[31px] h-[27px] bg-[#FA6E80] px-4 py-0.5 text-sm font-semibold text-[#ffffff] items-center justify-center flex">
-                                                            {month}
-                                                        </span>
-                                                        <span className="text-sm text-[#444444]">{window.range}</span>
-                                                    </div>
-                                                );
-                                            })}
+                                            {gig.dateWindows.map((window) => (
+                                                <div key={window.label} className="flex items-center gap-2 px-3 py-1 text-sm text-[#444444]">
+                                                    <span className="text-sm font-semibold text-[#444444]">{window.label.split(" ")[1]}</span>
+                                                    <span className="rounded-[31px] h-[27px] bg-[#FA6E80] px-4 py-0.5 text-sm font-semibold text-[#ffffff] items-center justify-center flex">
+                                                        {window.label.split(" ")[0]}
+                                                    </span>
+                                                    <span className="text-sm text-[#444444]">{window.range}</span>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
                                 </div>
@@ -162,31 +159,33 @@ export function ContactListTab({ selectedGigIds, actionIndicators }: ContactList
                             ) : (
                                 <div className="space-y-4">
                                     {Object.entries(contactsByDepartment).map(([department, deptContacts]) => (
-                                        <div key={`${gigId}-${department}`} className="overflow-x-auto no-scrollbar bg-white">
+                                        <div key={`${gigId}-${department}`} className="overflow-x-auto no-scrollbar bg-white border border-[#DEDEDE] rounded-[10px]">
                                             <div className="min-w-[1057px]">
-                                                <div className="flex h-[55px] gap-px rounded-t-2xl px-0 bg-[#F8F8F8]">
-                                                    <div className="flex w-[160px] flex-col justify-center border border-[#DEDEDE] px-1">
+                                                {/* Department Header Row */}
+                                                <div className="flex h-[55px] border-b border-[#DEDEDE]">
+                                                    <div className="flex w-[160px] items-center border-r border-[#DEDEDE] px-4 bg-white">
                                                         <p className="text-base font-medium text-black">Department</p>
                                                     </div>
-                                                    <div className="flex w-[160px] flex-col justify-center border border-[#DEDEDE] px-1">
+                                                    <div className="flex w-[160px] items-center border-r border-[#DEDEDE] px-4 bg-white">
                                                         <p className="text-sm text-[#444444]">{department}</p>
                                                     </div>
-                                                    <div className="flex flex-1 flex-col justify-center border border-[#DEDEDE] px-1">
-                                                        <p className="text-sm text-[#444444]">{deptContacts.length} contact{deptContacts.length !== 1 ? 's' : ''}</p>
+                                                    <div className="flex flex-1 items-center px-4 bg-white">
+                                                        <p className="text-sm text-[#444444]">{gig.title}</p>
                                                     </div>
                                                 </div>
 
-                                                <div className="flex h-[55px] gap-px bg-white">
+                                                {/* Columns Header */}
+                                                <div className="flex h-[55px] border-b border-[#DEDEDE] bg-white">
                                                     {[
                                                         { label: "Role", width: 160 },
                                                         { label: "Company", width: 160 },
                                                         { label: "Name", width: 250 },
                                                         { label: "Phone", width: 170 },
                                                         { label: "Email ID", width: 313 },
-                                                    ].map((column) => (
+                                                    ].map((column, idx) => (
                                                         <div
                                                             key={`${department}-${column.label}`}
-                                                            className="flex flex-col justify-center border border-[#DEDEDE] px-1"
+                                                            className={`flex items-center px-4 ${idx < 4 ? 'border-r border-[#DEDEDE]' : ''}`}
                                                             style={{ width: column.width }}
                                                         >
                                                             <p className="text-base font-medium text-black">{column.label}</p>
@@ -194,30 +193,37 @@ export function ContactListTab({ selectedGigIds, actionIndicators }: ContactList
                                                     ))}
                                                 </div>
 
+                                                {/* Data Rows */}
                                                 {deptContacts.map((contact, index) => (
-                                                    <div key={`${department}-${contact.id}-${index}`} className="flex h-[41px] gap-px bg-white">
-                                                        <div className="flex w-[160px] flex-row justify-start border border-[#DEDEDE] px-1 text-[14px] text-[#444444]">
+                                                    <div key={`${department}-${contact.id}-${index}`} className="flex h-[60px] border-b border-[#DEDEDE] last:border-0 bg-white">
+                                                        <div className="flex w-[160px] items-center border-r border-[#DEDEDE] px-4 text-[14px] text-[#444444]">
                                                             {contact.role}
                                                         </div>
-                                                        <div className="flex w-[160px] flex-row justify-start border border-[#DEDEDE] px-1 text-sm text-[#444444]">
+                                                        <div className="flex w-[160px] items-center border-r border-[#DEDEDE] px-4 text-sm text-[#444444]">
                                                             {contact.company}
                                                         </div>
-                                                        <div className="flex w-[250px] items-center gap-3 border border-[#DEDEDE] px-1">
-                                                            <div className="h-10 w-10 overflow-hidden rounded-full bg-gray-200">
-                                                                <Image
-                                                                    src={contact.avatar || '/default-profile.png'}
-                                                                    alt={contact.name}
-                                                                    width={40}
-                                                                    height={40}
-                                                                    className="h-full w-full object-cover"
-                                                                />
+                                                        <div className="flex w-[250px] items-center gap-3 border-r border-[#DEDEDE] px-4">
+                                                            <div className="h-9 w-9 overflow-hidden rounded-full bg-gray-200 shrink-0">
+                                                                {contact.avatar ? (
+                                                                    <Image
+                                                                        src={contact.avatar}
+                                                                        alt={contact.name}
+                                                                        width={36}
+                                                                        height={36}
+                                                                        className="h-full w-full object-cover"
+                                                                    />
+                                                                ) : (
+                                                                    <div className="h-full w-full flex items-center justify-center text-xs">
+                                                                        {contact.name.charAt(0)}
+                                                                    </div>
+                                                                )}
                                                             </div>
-                                                            <p className="text-sm text-[#444444]">{contact.name}</p>
+                                                            <p className="text-sm text-[#444444] truncate">{contact.name}</p>
                                                         </div>
-                                                        <div className="flex w-[170px] flex-col justify-center border border-[#DEDEDE] px-5 text-sm text-[#444444]">
+                                                        <div className="flex w-[170px] items-center border-r border-[#DEDEDE] px-4 text-sm text-[#444444]">
                                                             {contact.phone}
                                                         </div>
-                                                        <div className="flex w-[313px] flex-col justify-center border border-[#DEDEDE] px-5 text-sm text-[#444444]">
+                                                        <div className="flex w-[313px] items-center px-4 text-sm text-[#444444]">
                                                             {contact.email}
                                                         </div>
                                                     </div>

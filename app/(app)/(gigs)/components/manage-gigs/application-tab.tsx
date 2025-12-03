@@ -165,9 +165,13 @@ export function ApplicationTab({ selectedGigIds, actionIndicators, onActionChang
     return (
         <div className="space-y-8 w-full sm:w-full mx-auto ">
             <div className="sm:px-4 mx-auto">
-                <div className="flex flex-wrap gap-3 mt-3 sm:w-full justify-between items-center sm:justify-start bg-white rounded-[10px]">
-                    <SeeAllReferralsDialog />
-                    <SendRecommendationDialog className="h-[30px]" />
+                <div className="flex flex-wrap gap-3 mt-3 sm:w-full justify-between items-center sm:justify-start bg-white rounded-[10px] p-4">
+                    <button className="text-[#FA6E80] font-medium text-sm hover:underline">
+                        See referrals
+                    </button>
+                    <Button className="bg-[#FA6E80] hover:bg-[#e55b6d] text-white rounded-lg px-6">
+                        Invite crew for this Gig
+                    </Button>
                 </div>
             </div>
             {Object.entries(selectedGigs).map(([gigId, { gig, applications }]) => (
@@ -181,7 +185,7 @@ export function ApplicationTab({ selectedGigIds, actionIndicators, onActionChang
                                     <span key={window.label} className="">
                                         <span className="font-[500] text-[14px]">
                                             <span>{window.label.split(" ")[1]}</span>
-                                            <span className="text-[#FA6E80] text-[14px]"> {window.label.split(" ")[0]}</span>
+                                            <span className="bg-[#FA6E80] text-white px-2 py-0.5 rounded-full text-[12px] ml-1"> {window.label.split(" ")[0]}</span>
                                         </span>
                                         <span className="mx-1">|</span>
                                         {window.range}
@@ -206,75 +210,106 @@ export function ApplicationTab({ selectedGigIds, actionIndicators, onActionChang
                                         <th className="border-1 border-[#DEDEDE] px-4 py-3 font-[500] text-[#000000]">Name</th>
                                         <th className="border-1 border-[#DEDEDE] px-4 py-3 font-[500] text-[#000000]">City</th>
                                         <th className="border-1 border-[#DEDEDE] px-4 py-3 font-[500] text-[#000000]">Skill Set</th>
-                                        <th className="border-1 border-[#DEDEDE] px-4 py-3 font-[500] text-[#000000]">Status</th>
-                                        <th className="border-1 border-[#DEDEDE] px-4 py-3 font-[500] text-[#000000]">Actions</th>
+                                        <th className="border-1 border-[#DEDEDE] px-4 py-3 font-[500] text-[#000000]">Credits</th>
+                                        <th className="border-1 border-[#DEDEDE] px-4 py-3 font-[500] text-[#000000]">Referrals</th>
+                                        <th className="border-1 border-[#DEDEDE] px-4 py-3 font-[500] text-[#000000] text-center">Chat</th>
+                                        <th className="border-1 border-[#DEDEDE] px-4 py-3 font-[500] text-[#000000] text-center">Release</th>
+                                        <th className="border-1 border-[#DEDEDE] px-4 py-3 font-[500] text-[#000000] text-center">Shortlist</th>
+                                        <th className="border-1 border-[#DEDEDE] px-4 py-3 font-[500] text-[#000000] text-center">Confirm</th>
                                     </tr>
                                 </thead>
                                 <tbody className="bg-transparent">
                                     {applications.map((app) => (
                                         <tr key={app.id} className="text-gray-800">
-                                            <td className="h-[41px] border border-[#DEDEDE] w-[205px] px-4 py-3">
+                                            <td className="h-[60px] border border-[#DEDEDE] w-[205px] px-4 py-2 bg-white">
                                                 <div className="flex items-center gap-3">
-                                                    {app.applicant.profilePhoto && (
+                                                    {app.applicant.profilePhoto ? (
                                                         <Image 
                                                             src={app.applicant.profilePhoto} 
                                                             alt={app.applicant.name} 
-                                                            width={30} 
-                                                            height={30} 
-                                                            className="rounded-full" 
+                                                            width={36} 
+                                                            height={36} 
+                                                            className="rounded-full object-cover h-9 w-9" 
                                                         />
+                                                    ) : (
+                                                        <div className="h-9 w-9 rounded-full bg-gray-200 flex items-center justify-center text-xs">
+                                                            {app.applicant.name.charAt(0)}
+                                                        </div>
                                                     )}
                                                     <div>
-                                                        <p className="font-[400] text-gray-900">{app.applicant.name}</p>
+                                                        <p className="font-[500] text-gray-900">{app.applicant.name}</p>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="h-[41px] border border-[#DEDEDE] w-[100px] px-4 py-3 text-[#27B4BC]">
+                                            <td className="h-[60px] border border-[#DEDEDE] w-[100px] px-4 py-2 text-[#27B4BC] bg-white">
                                                 {app.applicant.location}
                                             </td>
-                                            <td className="h-[41px] border border-[#DEDEDE] w-[204px] px-4 py-3">
-                                                {app.applicant.skills.slice(0, 2).map(s => s.name).join(' | ')}
-                                            </td>
-                                            <td className="h-[41px] border border-[#DEDEDE] w-[100px] px-4 py-3">
-                                                <span className={`px-2 py-1 rounded text-xs font-medium ${
-                                                    app.status === 'confirmed' ? 'bg-green-100 text-green-700' :
-                                                    app.status === 'shortlisted' ? 'bg-blue-100 text-blue-700' :
-                                                    app.status === 'released' ? 'bg-red-100 text-red-700' :
-                                                    'bg-gray-100 text-gray-700'
-                                                }`}>
-                                                    {app.status}
-                                                </span>
-                                            </td>
-                                            <td className="h-[41px] border border-[#DEDEDE] px-4 py-3">
-                                                <div className="flex gap-2">
-                                                    <Button
-                                                        size="sm"
-                                                        variant="outline"
-                                                        onClick={() => handleStatusChange(app.id, gigId, 'shortlisted')}
-                                                        disabled={app.status === 'shortlisted'}
-                                                        className="text-xs"
-                                                    >
-                                                        Shortlist
-                                                    </Button>
-                                                    <Button
-                                                        size="sm"
-                                                        variant="outline"
-                                                        onClick={() => handleStatusChange(app.id, gigId, 'confirmed')}
-                                                        disabled={app.status === 'confirmed'}
-                                                        className="text-xs"
-                                                    >
-                                                        Confirm
-                                                    </Button>
-                                                    <Button
-                                                        size="sm"
-                                                        variant="outline"
-                                                        onClick={() => handleStatusChange(app.id, gigId, 'released')}
-                                                        disabled={app.status === 'released'}
-                                                        className="text-xs"
-                                                    >
-                                                        Release
-                                                    </Button>
+                                            <td className="h-[60px] border border-[#DEDEDE] w-[204px] px-4 py-2 bg-white text-[#444444]">
+                                                <div className="flex flex-wrap gap-2">
+                                                    {app.applicant.skills.slice(0, 2).map((s, idx) => (
+                                                        <span key={idx} className="border-r border-gray-300 pr-2 last:border-0 last:pr-0">
+                                                            {s.name}
+                                                        </span>
+                                                    ))}
                                                 </div>
+                                            </td>
+                                            <td className="h-[60px] border border-[#DEDEDE] w-[100px] px-4 py-2 bg-white">
+                                                <button className="text-[#27B4BC] hover:underline text-sm">
+                                                    View credits
+                                                </button>
+                                            </td>
+                                            <td className="h-[60px] border border-[#DEDEDE] w-[120px] px-4 py-2 bg-white">
+                                                <div className="flex items-center gap-1">
+                                                    <div className="flex -space-x-2">
+                                                        <div className="h-6 w-6 rounded-full border-2 border-white bg-gray-200"></div>
+                                                        <div className="h-6 w-6 rounded-full border-2 border-white bg-gray-300"></div>
+                                                        <div className="h-6 w-6 rounded-full border-2 border-white bg-gray-400"></div>
+                                                    </div>
+                                                    <span className="bg-[#31A7AC] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center ml-1">
+                                                        15
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td className="h-[60px] border border-[#DEDEDE] w-[60px] px-4 py-2 text-center bg-white">
+                                                <button className="flex items-center justify-center w-full">
+                                                    <MessageCircleMore className="h-5 w-5 text-gray-500" />
+                                                </button>
+                                            </td>
+                                            <td className="h-[60px] border border-[#DEDEDE] w-[80px] px-4 py-2 text-center bg-white">
+                                                <button 
+                                                    onClick={() => handleStatusChange(app.id, gigId, 'released')}
+                                                    className={`h-8 w-8 flex items-center justify-center rounded border mx-auto transition-colors ${
+                                                        app.status === 'released' 
+                                                            ? 'bg-[#FA6E80] border-[#FA6E80] text-white' 
+                                                            : 'border-gray-200 text-[#FA6E80] hover:bg-gray-50'
+                                                    }`}
+                                                >
+                                                    <X className="h-4 w-4" />
+                                                </button>
+                                            </td>
+                                            <td className="h-[60px] border border-[#DEDEDE] w-[80px] px-4 py-2 text-center bg-white">
+                                                <button 
+                                                    onClick={() => handleStatusChange(app.id, gigId, 'shortlisted')}
+                                                    className={`h-8 w-8 flex items-center justify-center rounded border mx-auto transition-colors ${
+                                                        app.status === 'shortlisted' 
+                                                            ? 'bg-[#31A7AC] border-[#31A7AC] text-white' 
+                                                            : 'border-gray-200 text-[#31A7AC] hover:bg-gray-50'
+                                                    }`}
+                                                >
+                                                    <Plus className="h-4 w-4" />
+                                                </button>
+                                            </td>
+                                            <td className="h-[60px] border border-[#DEDEDE] w-[80px] px-4 py-2 text-center bg-white">
+                                                <button 
+                                                    onClick={() => handleStatusChange(app.id, gigId, 'confirmed')}
+                                                    className={`h-8 w-8 flex items-center justify-center rounded border mx-auto transition-colors ${
+                                                        app.status === 'confirmed' 
+                                                            ? 'bg-[#31A7AC] border-[#31A7AC] text-white' 
+                                                            : 'border-gray-200 text-[#31A7AC] hover:bg-gray-50'
+                                                    }`}
+                                                >
+                                                    <Check className="h-4 w-4" />
+                                                </button>
                                             </td>
                                         </tr>
                                     ))}
