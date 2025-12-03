@@ -51,13 +51,15 @@ export default function HelpPage() {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
-    const handleSendMessage = () => {
+    const handleSendMessage = async () => {
         if (!inputMessage.trim()) return;
 
+        const userQuestion = inputMessage;
+        
         // Add user message
         const userMessage: Message = {
             id: Date.now().toString(),
-            content: inputMessage,
+            content: userQuestion,
             sender: "user",
             timestamp: new Date()
         };
@@ -66,17 +68,53 @@ export default function HelpPage() {
         setInputMessage("");
         setIsTyping(true);
 
-        // Simulate bot response
-        setTimeout(() => {
+        try {
+            // Generate unique section ID for this chat session
+            const sectionId = generateSectionId();
+            
+            // Call n8n webhook
+            const response = await axios.get(
+                'https://n8n.srv882974.hstgr.cloud/webhook/3e37b379-3432-43ea-b3e3-abe9d5c2d18f',
+                {
+                    params: {
+                        question: userQuestion,
+                        section_id: sectionId
+                    }
+                }
+            );
+
+            // Extract response from n8n - expected format: [{ "output": "text" }]
+            let botResponseText = "I apologize, but I couldn't process your request. Please try again.";
+            
+            if (response.data && Array.isArray(response.data) && response.data.length > 0) {
+                botResponseText = response.data[0].output || botResponseText;
+            } else if (response.data && response.data.output) {
+                botResponseText = response.data.output;
+            }
+
             const botResponse: Message = {
                 id: (Date.now() + 1).toString(),
-                content: getBotResponse(inputMessage),
+                content: botResponseText,
                 sender: "bot",
                 timestamp: new Date()
             };
+            
             setMessages(prev => [...prev, botResponse]);
+        } catch (error) {
+            console.error('Error calling n8n webhook:', error);
+            
+            // Fallback error message
+            const errorMessage: Message = {
+                id: (Date.now() + 1).toString(),
+                content: "I'm sorry, I'm having trouble connecting to the help system right now. Please try again in a moment.",
+                sender: "bot",
+                timestamp: new Date()
+            };
+            
+            setMessages(prev => [...prev, errorMessage]);
+        } finally {
             setIsTyping(false);
-        }, 1000);
+        }
     };
 
     const getBotResponse = (userInput: string): string => {
