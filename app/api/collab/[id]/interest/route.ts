@@ -7,7 +7,7 @@ import { validateAuthToken, createServerClient, successResponse, errorResponse }
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -20,7 +20,7 @@ export async function POST(
       );
     }
 
-    const collabId = params.id;
+    const { id: collabId } = await params;
     const supabase = createServerClient();
 
     // Check if collab exists
@@ -111,7 +111,7 @@ export async function POST(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -124,7 +124,7 @@ export async function DELETE(
       );
     }
 
-    const collabId = params.id;
+    const { id: collabId } = await params;
     const supabase = createServerClient();
 
     // Delete interest
