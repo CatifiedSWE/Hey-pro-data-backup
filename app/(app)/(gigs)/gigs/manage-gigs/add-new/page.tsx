@@ -1097,6 +1097,17 @@ export default function AddGigPage() {
                                         <p className="text-xs text-[#8F8F8F]">Project owner</p>
                                     </div>
                                 </div>
+                                {formValues.title && (
+                                    <p className="mt-4 text-lg font-[600] text-[#1D1D1F]">
+                                        {formValues.title}
+                                    </p>
+                                )}
+                                {formValues.location && (
+                                    <div className="mt-3 flex items-center gap-2 text-sm text-[#6F6F6F]">
+                                        <MapPin className="h-4 w-4" />
+                                        <span>{formValues.location}</span>
+                                    </div>
+                                )}
                                 <p className="mt-3 text-sm text-[#6F6F6F]">
                                     {formValues.description || "Description of the GIG will be here ..."}
                                 </p>
