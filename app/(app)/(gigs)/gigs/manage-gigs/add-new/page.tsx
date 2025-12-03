@@ -876,22 +876,6 @@ export default function AddGigPage() {
                     </div>
 
                     <section className="mt-8 space-y-6">
-                        <Input
-                            placeholder="Enter GIG title"
-                            value={formValues.title}
-                            onChange={(event) => handleFieldChange("title", event.target.value)}
-                            className="h-[54px] rounded-2xl border-[#646464] bg-[#ffffff] text-[#515151]"
-                        />
-
-                        <Input
-                            placeholder="Enter location(s) - separate multiple with commas"
-                            value={formValues.location}
-                            onChange={(event) => handleFieldChange("location", event.target.value)}
-                            className="h-[54px] rounded-2xl border-[#646464] bg-[#ffffff] text-[#515151]"
-                        />
-
-
-
                         <div className="space-y-2">
                             <Textarea
                                 placeholder="I am looking for..."
