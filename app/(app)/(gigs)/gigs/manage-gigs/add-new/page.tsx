@@ -193,6 +193,7 @@ export default function AddGigPage() {
 
     const toggleDate = (day: Date) => {
         if (!isSameMonth(day, currentMonth)) return
+        if (isBefore(day, startOfToday())) return
         const dayKey = getDateKey(day)
         setSelectedDates((prev) =>
             prev.includes(dayKey)
