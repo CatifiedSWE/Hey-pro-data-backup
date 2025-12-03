@@ -101,6 +101,13 @@ const splitTimeRange = (range?: string): string[] => {
     return range.split("-").map((value) => value.trim());
 };
 
+// Helper to get today at midnight for comparison
+const getToday = () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return today;
+};
+
 type TimeFieldProps = {
     label: string;
     value: string;
@@ -257,6 +264,12 @@ export function EditWhatsOnForm({ event, onChange }: EditWhatsOnFormProps) {
     };
 
     const handleDayToggle = (day: number) => {
+        // Check if past date
+        const targetDate = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), day);
+        if (targetDate < getToday()) {
+            return;
+        }
+
         setSelectedDays((prev) => {
             const next = new Set(prev);
             if (next.has(day)) {
@@ -441,13 +454,22 @@ export function EditWhatsOnForm({ event, onChange }: EditWhatsOnFormProps) {
                                                         {calendarCells.map((cell, index) => {
                                                             const isCurrent = cell.type === "current";
                                                             const isSelected = isCurrent && selectedSet.has(cell.day);
+                                                            
+                                                            // Check if date is in past
+                                                            const cellDate = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), cell.day);
+                                                            const isPast = cellDate < getToday();
+
                                                             return (
                                                                 <button
                                                                     type="button"
                                                                     key={`${cell.type}-${cell.day}-${index}`}
-                                                                    onClick={() => isCurrent && handleDayToggle(cell.day)}
-                                                                    className={`h-8 w-8 flex items-center justify-center rounded-full text-sm ${isSelected ? 'bg-[#31A7AC] text-white' : 'text-gray-700 hover:bg-gray-100'} ${!isCurrent && 'invisible'}`}
-                                                                    disabled={!isCurrent}
+                                                                    onClick={() => isCurrent && !isPast && handleDayToggle(cell.day)}
+                                                                    className={`h-8 w-8 flex items-center justify-center rounded-full text-sm 
+                                                                        ${isSelected ? 'bg-[#31A7AC] text-white' : 'text-gray-700 hover:bg-gray-100'} 
+                                                                        ${!isCurrent && 'invisible'}
+                                                                        ${isPast && isCurrent ? 'text-gray-300 cursor-not-allowed hover:bg-transparent' : ''}
+                                                                    `}
+                                                                    disabled={!isCurrent || isPast}
                                                                 >
                                                                     {cell.day}
                                                                 </button>
@@ -504,6 +526,7 @@ export function EditWhatsOnForm({ event, onChange }: EditWhatsOnFormProps) {
                                             <Calendar
                                                 mode="single"
                                                 selected={dateRange ? new Date(dateRange) : undefined}
+                                                disabled={(date) => date < getToday()}
                                                 onSelect={(date) => {
                                                     if (date) {
                                                         setDateRange(format(date, "EEE, MMM dd yyyy"));
