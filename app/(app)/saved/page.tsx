@@ -10,6 +10,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import axios from "@/lib/axios";
 import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
+import { toast } from "sonner";
+import { likePost, unlikePost, unsavePost, sharePost } from "@/lib/api/slate";
+import CommentsModal from "@/components/modules/slate/CommentsModal";
 
 interface SavedSlate {
     id: string;
@@ -105,6 +108,19 @@ export default function SavedPage() {
         collabs: null as string | null,
         whatsOn: null as string | null
     });
+    const [commentsModal, setCommentsModal] = useState<{
+        open: boolean;
+        postId: string;
+        postAuthor: { name: string; avatar: string };
+        postContent: string;
+        commentsCount: number;
+    }>({
+        open: false,
+        postId: "",
+        postAuthor: { name: "", avatar: "" },
+        postContent: "",
+        commentsCount: 0,
+    });
 
     // Fetch saved slates
     useEffect(() => {
@@ -187,6 +203,76 @@ export default function SavedPage() {
         }
     };
 
+    // Handle like/unlike post
+    const handleLikeSlate = async (slateId: string, currentlyLiked: boolean) => {
+        try {
+            if (currentlyLiked) {
+                const result = await unlikePost(slateId);
+                setSavedSlates(prev => prev.map(slate => 
+                    slate.id === slateId 
+                        ? { ...slate, user_has_liked: false, likes_count: result.likes_count }
+                        : slate
+                ));
+            } else {
+                const result = await likePost(slateId);
+                setSavedSlates(prev => prev.map(slate => 
+                    slate.id === slateId 
+                        ? { ...slate, user_has_liked: true, likes_count: result.likes_count }
+                        : slate
+                ));
+            }
+        } catch (error: any) {
+            toast.error(error.message || 'Failed to update like');
+        }
+    };
+
+    // Handle open comments modal
+    const handleOpenComments = (slate: SavedSlate) => {
+        setCommentsModal({
+            open: true,
+            postId: slate.id,
+            postAuthor: slate.author,
+            postContent: slate.content,
+            commentsCount: slate.comments_count,
+        });
+    };
+
+    // Handle comment added
+    const handleCommentAdded = () => {
+        // Refresh the comments count for the post
+        setSavedSlates(prev => prev.map(slate => 
+            slate.id === commentsModal.postId 
+                ? { ...slate, comments_count: slate.comments_count + 1 }
+                : slate
+        ));
+    };
+
+    // Handle unsave slate
+    const handleUnsaveSlate = async (slateId: string) => {
+        try {
+            await unsavePost(slateId);
+            setSavedSlates(prev => prev.filter(slate => slate.id !== slateId));
+            toast.success('Post removed from saved');
+        } catch (error: any) {
+            toast.error(error.message || 'Failed to unsave post');
+        }
+    };
+
+    // Handle share post
+    const handleShareSlate = async (slateId: string) => {
+        try {
+            const result = await sharePost(slateId);
+            setSavedSlates(prev => prev.map(slate => 
+                slate.id === slateId 
+                    ? { ...slate, shares_count: result.shares_count }
+                    : slate
+            ));
+            toast.success('Post shared');
+        } catch (error: any) {
+            toast.error(error.message || 'Failed to share post');
+        }
+    };
+
     return (
         <div className="container mx-auto px-4 py-6 max-w-7xl">
             <div className="mb-6">
@@ -225,9 +311,8 @@ export default function SavedPage() {
                             {savedSlates.map((slate) => (
                                 <Card 
                                     key={slate.id} 
-                                    className="border-gray-200 rounded-lg p-6 bg-white cursor-pointer hover:shadow-md transition-shadow" 
+                                    className="border-gray-200 rounded-lg p-6 bg-white hover:shadow-md transition-shadow" 
                                     data-testid="saved-slate-card"
-                                    onClick={() => router.push(`/slate/${slate.slug || slate.id}`)}
                                 >
                                     <div className="flex items-center justify-between mb-4">
                                         <div className="flex items-center">
@@ -243,9 +328,14 @@ export default function SavedPage() {
                                                 <p className="text-sm text-gray-600">Saved {formatRelativeTime(slate.saved_at)}</p>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-2">
-                                            <Bookmark className="h-5 w-5 fill-[#FA6E80] text-[#FA6E80]" />
-                                        </div>
+                                        <button
+                                            onClick={() => handleUnsaveSlate(slate.id)}
+                                            className="flex items-center gap-2 text-[#FA6E80] hover:text-[#FA6E80]/80 transition-colors"
+                                            title="Remove from saved"
+                                            data-testid="unsave-button"
+                                        >
+                                            <Bookmark className="h-5 w-5 fill-[#FA6E80]" />
+                                        </button>
                                     </div>
                                     {slate.media && slate.media.length > 0 && (
                                         <Image
@@ -256,30 +346,33 @@ export default function SavedPage() {
                                             className="w-full h-auto rounded-lg mb-4 object-cover"
                                         />
                                     )}
-                                    <div className="flex gap-4 mb-3">
+                                    <p className="text-gray-700 text-sm whitespace-pre-line mb-3">{slate.content}</p>
+                                    <div className="flex gap-4">
                                         <button 
-                                            className="flex items-center gap-2 text-gray-700 hover:text-[#FA6E80]"
-                                            onClick={(e) => e.stopPropagation()}
+                                            className="flex items-center gap-2 text-gray-700 hover:text-[#FA6E80] transition-colors"
+                                            onClick={() => handleLikeSlate(slate.id, slate.user_has_liked)}
+                                            data-testid="like-button"
                                         >
                                             <Heart className={`h-6 w-6 ${slate.user_has_liked ? 'fill-[#FA6E80] text-[#FA6E80]' : ''}`} />
                                             <span className="text-sm">{slate.likes_count}</span>
                                         </button>
                                         <button 
-                                            className="flex items-center gap-2 text-gray-700 hover:text-[#FA6E80]"
-                                            onClick={(e) => e.stopPropagation()}
+                                            className="flex items-center gap-2 text-gray-700 hover:text-[#FA6E80] transition-colors"
+                                            onClick={() => handleOpenComments(slate)}
+                                            data-testid="comment-button"
                                         >
                                             <MessageCircle className="h-6 w-6" />
                                             <span className="text-sm">{slate.comments_count}</span>
                                         </button>
                                         <button 
-                                            className="flex items-center gap-2 text-gray-700 hover:text-[#FA6E80]"
-                                            onClick={(e) => e.stopPropagation()}
+                                            className="flex items-center gap-2 text-gray-700 hover:text-[#FA6E80] transition-colors"
+                                            onClick={() => handleShareSlate(slate.id)}
+                                            data-testid="share-button"
                                         >
                                             <Send className="h-6 w-6" />
                                             <span className="text-sm">{slate.shares_count}</span>
                                         </button>
                                     </div>
-                                    <p className="text-gray-700 text-sm whitespace-pre-line">{slate.content}</p>
                                 </Card>
                             ))}
                         </div>
@@ -432,6 +525,17 @@ export default function SavedPage() {
                     )}
                 </TabsContent>
             </Tabs>
+
+            {/* Comments Modal */}
+            <CommentsModal
+                open={commentsModal.open}
+                onOpenChange={(open) => setCommentsModal(prev => ({ ...prev, open }))}
+                postId={commentsModal.postId}
+                postAuthor={commentsModal.postAuthor}
+                postContent={commentsModal.postContent}
+                commentsCount={commentsModal.commentsCount}
+                onCommentAdded={handleCommentAdded}
+            />
         </div>
     );
 }
