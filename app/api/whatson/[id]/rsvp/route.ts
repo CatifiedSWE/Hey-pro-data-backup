@@ -7,7 +7,7 @@ import { createServerClient, validateAuthToken, successResponse, errorResponse }
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -22,7 +22,7 @@ export async function POST(
 
     const body = await request.json();
     const supabase = createServerClient();
-    const eventId = params.id;
+    const { id: eventId } = await params;
 
     // Fetch event details
     const { data: event, error: eventError } = await supabase
@@ -234,7 +234,7 @@ export async function POST(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -248,7 +248,7 @@ export async function DELETE(
     }
 
     const supabase = createServerClient();
-    const eventId = params.id;
+    const { id: eventId } = await params;
 
     // Find user's RSVP
     const { data: rsvp, error: fetchError } = await supabase
