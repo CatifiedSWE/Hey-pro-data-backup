@@ -424,7 +424,6 @@ function SlateCard({ post, onLike, onSave, onShare }: SlateCardProps) {
             
             <Separator className="" />
         </div>
-        </div>
 
         {/* Comments Modal */}
         <CommentsModal
