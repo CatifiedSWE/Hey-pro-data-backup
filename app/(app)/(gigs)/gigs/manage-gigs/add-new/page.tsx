@@ -987,45 +987,6 @@ export default function AddGigPage() {
                                 </Label>
                             </div>
                         </div>
-
-                        <div className="space-y-3">
-                            <Label className="text-sm font-medium text-[#1D1D1F]">
-                                Include reference (optional)
-                            </Label>
-                            <div className="space-y-3">
-                                <input
-                                    ref={fileInputRef}
-                                    type="file"
-                                    className="hidden"
-                                    onChange={handleFileChange}
-                                />
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    className="flex h-[54px] w-full items-center justify-center gap-2 rounded-2xl border-[#E4E7EC] text-[#1D1D1F]"
-                                    onClick={() => fileInputRef.current?.click()}
-                                >
-                                    <UploadCloud className="h-4 w-4" />
-                                    Upload file
-                                </Button>
-                                {referenceFile && (
-                                    <div className="flex items-center gap-3 rounded-2xl border border-[#646464] bg-[#ffffff] px-4 py-2 text-sm text-[#515151]">
-                                        <div className="flex-1">
-                                            <p className="font-[400]">{referenceFile.name}</p>
-                                            <p className="text-xs text-[#8F8F8F]">{(referenceFile.size / 1024).toFixed(1)} KB</p>
-                                        </div>
-                                        <button
-                                            type="button"
-                                            onClick={handleFileRemove}
-                                            className="text-[#FF5470] transition hover:opacity-80"
-                                            aria-label="Remove file"
-                                        >
-                                            <X className="h-4 w-4" />
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
                     </section>
 
                     <div className="mt-8 flex flex-col gap-3 border-t-[2px] border-[#F0F0F0] pt-6 md:flex-row md:items-center md:justify-between">
