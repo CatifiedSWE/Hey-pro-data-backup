@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { HighlightSelectCard } from "./HighlightSelectCard";
-import { apiCalling } from "@/lib/apiCalling";
+import apiCalling from "@/lib/apiCalling";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
@@ -59,21 +59,21 @@ export function HighlightsSelector({
   const fetchData = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('access_token');
-      
       // Fetch credits
-      const creditsResponse = await apiCalling.get('/api/profile/credits', {
-        headers: { Authorization: `Bearer ${token}` }
+      const creditsResponse = await apiCalling({
+        method: 'get',
+        route: '/profile/credits'
       });
-      if (creditsResponse.data.success) {
+      if (creditsResponse.status && creditsResponse.data?.data) {
         setCredits(creditsResponse.data.data || []);
       }
 
       // Fetch slate posts
-      const slateResponse = await apiCalling.get('/api/slate/my', {
-        headers: { Authorization: `Bearer ${token}` }
+      const slateResponse = await apiCalling({
+        method: 'get',
+        route: '/slate/my'
       });
-      if (slateResponse.data.success) {
+      if (slateResponse.status && slateResponse.data?.data) {
         setSlatePosts(slateResponse.data.data?.posts || []);
       }
     } catch (error: any) {
@@ -120,34 +120,32 @@ export function HighlightsSelector({
   const handleSave = async () => {
     setSaving(true);
     try {
-      const token = localStorage.getItem('access_token');
-      
       // Delete all existing highlights
       for (const highlight of currentHighlights) {
-        await apiCalling.delete(`/api/profile/highlights?id=${highlight.id}`, {
-          headers: { Authorization: `Bearer ${token}` }
+        await apiCalling({
+          method: 'delete',
+          route: `/profile/highlights?id=${highlight.id}`
         });
       }
 
       // Create new highlights from selected items
       for (const item of selectedItems) {
-        await apiCalling.post('/api/profile/highlights', 
-          {
+        await apiCalling({
+          method: 'post',
+          route: '/profile/highlights',
+          data: {
             source_type: item.source_type,
             source_id: item.source_id,
             sort_order: item.sort_order
-          },
-          {
-            headers: { Authorization: `Bearer ${token}` }
           }
-        );
+        });
       }
 
       toast.success('Highlights updated successfully');
       onSave();
     } catch (error: any) {
       console.error('Error saving highlights:', error);
-      toast.error(error.response?.data?.error || 'Failed to save highlights');
+      toast.error('Failed to save highlights');
     } finally {
       setSaving(false);
     }
