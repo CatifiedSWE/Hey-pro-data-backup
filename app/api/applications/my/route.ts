@@ -115,7 +115,7 @@ export async function GET(request: NextRequest) {
           coverLetter: app.cover_letter,
           portfolioLinks: app.portfolio_links,
           resumeUrl: app.resume_url,
-          appliedAt: app.created_at,
+          appliedAt: app.updated_at,
           updatedAt: app.updated_at,
           gig: {
             id: gig.id,
