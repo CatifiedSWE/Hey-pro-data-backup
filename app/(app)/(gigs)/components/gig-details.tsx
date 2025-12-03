@@ -10,6 +10,7 @@ import { type GigsDataType } from "@/data/gigs";
 import ApplyGigs from "./applygigs";
 import { Button } from "@/components/ui/button";
 import { SendRecommendationDialog } from "./recommend-gigs";
+import { useAuth } from "@/contexts/AuthContext";
 
 const WEEKDAY_LABELS = ["M", "T", "W", "T", "F", "S", "S"];
 
@@ -35,8 +36,12 @@ const buildMonthMatrix = (year: number, month: number) => {
 };
 
 export default function GigDetails(gig: GigsDataType[0]) {
+  const { user } = useAuth();
   const [calendarsPerTab, setCalendarsPerTab] = useState(3);
   const [activeGroupIndex, setActiveGroupIndex] = useState(0);
+  
+  // Check if current user is the gig creator
+  const isOwnGig = user?.id === gig.created_by;
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -124,7 +129,7 @@ export default function GigDetails(gig: GigsDataType[0]) {
 
         <div className="flex flex-wrap gap-3">
           <SendRecommendationDialog />
-          <ApplyGigs gig={gig} />
+          {!isOwnGig && <ApplyGigs gig={gig} />}
         </div>
       </div>
 
