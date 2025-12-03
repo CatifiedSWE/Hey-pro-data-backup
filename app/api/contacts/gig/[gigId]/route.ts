@@ -26,7 +26,7 @@ export async function GET(
     // Verify user is the gig creator
     const { data: gig, error: gigError } = await supabase
       .from('gigs')
-      .select('creator_user_id')
+      .select('created_by')
       .eq('id', gigId)
       .maybeSingle();
 
@@ -45,7 +45,7 @@ export async function GET(
       );
     }
 
-    if (gig.creator_user_id !== user.id) {
+    if (gig.created_by !== user.id) {
       return NextResponse.json(
         errorResponse('Only the gig creator can view contacts'),
         { status: 403 }
