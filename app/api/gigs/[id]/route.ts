@@ -191,7 +191,11 @@ export async function PATCH(
     if (body.expiryDate !== undefined) updateData.expiry_date = body.expiryDate;
     if (body.supportingFileLabel !== undefined) updateData.supporting_file_label = body.supportingFileLabel;
     if (body.referenceUrl !== undefined) updateData.reference_url = body.referenceUrl;
-    if (body.status !== undefined) updateData.status = body.status;
+    if (body.status !== undefined) {
+      // Map frontend status to database status
+      // Frontend sends 'published' but DB expects 'active'
+      updateData.status = body.status === 'published' ? 'active' : body.status;
+    }
 
     const { data: updatedGig, error: updateError } = await supabase
       .from('gigs')
