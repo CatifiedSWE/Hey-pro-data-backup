@@ -1,5 +1,3 @@
-/** @format */
-
 "use client";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -33,12 +31,12 @@ export function HighlightCard({
 
     return (
         <article className={`space-y-3 ${className}`}>
-            <div className="relative w-[275px] h-[263px] overflow-hidden rounded-[8px]">
+            <div className="relative w-full lg:w-[275px] h-[263px] overflow-hidden rounded-[8px]">
                 <Image
                     src={highlight.images}
                     alt={highlight.title}
                     fill
-                    sizes="275px"
+                    sizes="(max-width: 1024px) 100vw, 275px"
                     className="object-cover"
                 />
             </div>
@@ -73,14 +71,15 @@ export default function Highlights({ highlights: propHighlights }: HighlightsPro
     }
 
     return (
-        <section className="w-full hidden lg:block">
+        <section className="w-full">
+            {/* Desktop View */}
             <div className="hidden lg:flex gap-6">
                 <aside className="sticky top-24 self-start w-full max-w-[336px] space-y-6">
                     <Button
                         variant="outline"
                         className="w-full h-11 rounded-[10px] border-[#31A7AC] text-black hover:bg-transparent"
                     >
-                        Edit Heylights
+                        Edit Highlights
                     </Button>
                     <div className="space-y-6">
                         {displayHighlights.map((highlight) => (
@@ -104,7 +103,33 @@ export default function Highlights({ highlights: propHighlights }: HighlightsPro
                 </div>
             </div>
 
+            {/* Mobile View */}
+            <div className="flex flex-col gap-6 lg:hidden">
+                <Button
+                    variant="outline"
+                    className="w-full h-11 rounded-[10px] border-[#31A7AC] text-black hover:bg-transparent"
+                >
+                    Edit Highlights
+                </Button>
+                
+                <div className="flex items-center gap-4">
+                    <h2 className="text-2xl font-bold uppercase tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC]">
+                        Highlights
+                    </h2>
+                    <div 
+                        className="h-[1px] flex-1 rounded-full"
+                        style={{
+                            background: 'linear-gradient(90deg, #FA6E80 0%, #6A89BE 41.52%, #85AAB7 62.27%, #31A7AC 103.79%)'
+                        }}
+                    />
+                </div>
 
+                <div className="space-y-6">
+                    {displayHighlights.map((highlight) => (
+                        <HighlightCard key={highlight.id} highlight={highlight} />
+                    ))}
+                </div>
+            </div>
         </section>
     );
 }
