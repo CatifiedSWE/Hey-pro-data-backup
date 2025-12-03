@@ -247,7 +247,7 @@ export default function ApplyGigs({ gig }: ApplyGigsProps) {
                                         <p className="text-[9px] text-slate-500">Posted on {gig.postedOn}</p>
                                     </div>
                                 </div>
-                                <p className="text-[12px] font-[400] text-[#FF4B82]">Apply before {gig.applyBefore}</p>
+                                {formattedApplyBefore && <p className="text-[12px] font-[400] text-[#FF4B82]">Apply before {formattedApplyBefore}</p>}
                             </div>
                         </div>
                     </div>
@@ -255,7 +255,7 @@ export default function ApplyGigs({ gig }: ApplyGigsProps) {
                     <section className="mt-1 space-y-2 rounded-[32px] bg-white ">
 
                         <h2 className="text-[18px] font-[400] text-slate-900">{gig.title}</h2>
-                        <p className="text-[12px] font-[400] text-[#FF4B82]">Apply before {gig.applyBefore}</p>
+                        {formattedApplyBefore && <p className="text-[12px] font-[400] text-[#FF4B82]">Apply before {formattedApplyBefore}</p>}
 
                         <div className="flex flex-wrap items-center gap-1 text-[16px] text-slate-500">
                             <span className="font-[400] tracking-wide text-[#060606]">GIG Rate:</span>
