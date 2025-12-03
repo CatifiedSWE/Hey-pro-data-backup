@@ -7,10 +7,10 @@ import { validateAuthToken, createServerClient, successResponse, errorResponse }
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const collabId = params.id;
+    const { id: collabId } = await params;
     const authHeader = request.headers.get('Authorization');
     const user = await validateAuthToken(authHeader);
 
@@ -216,7 +216,7 @@ export async function GET(
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -229,7 +229,7 @@ export async function PATCH(
       );
     }
 
-    const collabId = params.id;
+    const { id: collabId } = await params;
     const body = await request.json();
     const { title, summary, tags, cover_image_url, status } = body;
 
@@ -360,7 +360,7 @@ export async function PATCH(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -373,7 +373,7 @@ export async function DELETE(
       );
     }
 
-    const collabId = params.id;
+    const { id: collabId } = await params;
     const supabase = createServerClient();
 
     // Verify ownership
