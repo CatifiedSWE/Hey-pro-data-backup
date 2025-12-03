@@ -12,7 +12,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { likePost, unlikePost, unsavePost, sharePost } from "@/lib/api/slate";
+import { unsaveCollab } from "@/lib/api/collab";
 import CommentsModal from "@/components/modules/slate/CommentsModal";
+import { supabase } from "@/lib/supabase/client";
 
 interface SavedSlate {
     id: string;
@@ -273,6 +275,42 @@ export default function SavedPage() {
         }
     };
 
+    // Handle unsave collab
+    const handleUnsaveCollab = async (collabId: string) => {
+        try {
+            await unsaveCollab(collabId);
+            setSavedCollabs(prev => prev.filter(collab => collab.id !== collabId));
+            toast.success('Collab removed from saved');
+        } catch (error: any) {
+            toast.error(error.message || 'Failed to unsave collab');
+        }
+    };
+
+    // Handle unsave event
+    const handleUnsaveEvent = async (eventId: string) => {
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) throw new Error('Authentication required');
+
+            const response = await fetch(`/api/whatson/${eventId}/save`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${session.access_token}`,
+                },
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Failed to unsave event');
+            }
+
+            setSavedWhatsOn(prev => prev.filter(event => event.id !== eventId));
+            toast.success('Event removed from saved');
+        } catch (error: any) {
+            toast.error(error.message || 'Failed to unsave event');
+        }
+    };
+
     return (
         <div className="container mx-auto px-4 py-6 max-w-7xl">
             <div className="mb-6">
@@ -401,9 +439,8 @@ export default function SavedPage() {
                             {savedCollabs.map((collab) => (
                                 <Card 
                                     key={collab.id} 
-                                    className="border-gray-200 rounded-lg overflow-hidden bg-white cursor-pointer hover:shadow-md transition-shadow" 
+                                    className="border-gray-200 rounded-lg overflow-hidden bg-white hover:shadow-md transition-shadow" 
                                     data-testid="saved-collab-card"
-                                    onClick={() => router.push(`/collab/${collab.slug || collab.id}`)}
                                 >
                                     <div className="relative h-48">
                                         <Image
@@ -412,9 +449,14 @@ export default function SavedPage() {
                                             fill
                                             className="object-cover"
                                         />
-                                        <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-full p-2">
+                                        <button
+                                            onClick={() => handleUnsaveCollab(collab.id)}
+                                            className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-full p-2 hover:bg-white transition-colors"
+                                            title="Remove from saved"
+                                            data-testid="unsave-collab-button"
+                                        >
                                             <Bookmark className="h-5 w-5 fill-[#FA6E80] text-[#FA6E80]" />
-                                        </div>
+                                        </button>
                                     </div>
                                     <div className="p-4">
                                         <h3 className="font-semibold text-lg mb-2">{collab.title}</h3>
@@ -479,9 +521,8 @@ export default function SavedPage() {
                                 return (
                                     <Card 
                                         key={event.id} 
-                                        className="border-gray-200 rounded-lg overflow-hidden bg-white cursor-pointer hover:shadow-md transition-shadow" 
+                                        className="border-gray-200 rounded-lg overflow-hidden bg-white hover:shadow-md transition-shadow" 
                                         data-testid="saved-event-card"
-                                        onClick={() => router.push(`/whats-on/${event.slug}`)}
                                     >
                                         <div className="flex flex-col md:flex-row">
                                             <div className="relative w-full md:w-64 h-48 md:h-auto">
@@ -495,7 +536,14 @@ export default function SavedPage() {
                                             <div className="flex-1 p-6">
                                                 <div className="flex items-start justify-between mb-2">
                                                     <h3 className="font-semibold text-xl">{event.title}</h3>
-                                                    <Bookmark className="h-5 w-5 fill-[#FA6E80] text-[#FA6E80] flex-shrink-0 ml-2" />
+                                                    <button
+                                                        onClick={() => handleUnsaveEvent(event.id)}
+                                                        className="text-[#FA6E80] hover:text-[#FA6E80]/80 transition-colors flex-shrink-0 ml-2"
+                                                        title="Remove from saved"
+                                                        data-testid="unsave-event-button"
+                                                    >
+                                                        <Bookmark className="h-5 w-5 fill-[#FA6E80]" />
+                                                    </button>
                                                 </div>
                                                 <p className="text-gray-600 text-sm mb-4 line-clamp-2">{event.description}</p>
                                                 <div className="space-y-2 mb-4">
