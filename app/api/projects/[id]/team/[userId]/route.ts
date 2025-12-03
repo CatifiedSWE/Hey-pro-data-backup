@@ -21,8 +21,7 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const { id: projectId } = await params;
-    const teamUserId = params.userId;
+    const { id: projectId, userId: teamUserId } = await params;
     const { role, department, permission } = body;
 
     // Validate permission if provided
