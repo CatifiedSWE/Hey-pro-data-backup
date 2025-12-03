@@ -7,10 +7,10 @@ import { createServerClient, validateAuthToken, successResponse, errorResponse }
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const postId = params.id;
+    const { id: postId } = await params;
     const supabase = createServerClient();
     const authHeader = request.headers.get('Authorization');
     const user = await validateAuthToken(authHeader);
@@ -132,7 +132,7 @@ export async function GET(
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -146,7 +146,7 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const postId = params.id;
+    const { id: postId } = await params;
     const { content, status } = body;
 
     const supabase = createServerClient();
@@ -250,7 +250,7 @@ export async function PATCH(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -263,7 +263,7 @@ export async function DELETE(
       );
     }
 
-    const postId = params.id;
+    const { id: postId } = await params;
     const supabase = createServerClient();
 
     // Verify post exists and user is owner
