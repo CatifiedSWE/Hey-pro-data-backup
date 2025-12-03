@@ -2,8 +2,8 @@ import type { ProjectCardType } from "@/types";
 
 const profileData = {
   name: "John Doe",
-  image: "/assets/profile-image.png",
-  banner: "/assets/profile-banner.png",
+  image: "/default-profile.png",
+  banner: "/default-banner.png",
   bio: "Passionate developer with a love for creating web applications.",
   age: 30,
   occupation: "Software Developer",
@@ -193,8 +193,8 @@ const projectCardData: ProjectCardType[] = [
   {
     id: 1,
     name: "Project One",
-    banner: "/assets/profile-banner.png",
-    image: "/assets/profile-image.png",
+    banner: "/default-banner.png",
+    image: "/default-profile.png",
     bio: "Behind-the-scenes documentary capturing the energy and creativity of Dubai Fashion Week 2024. We need a skilled team to document designers, models, and the fashion industry magic.",
     location: "New York, NY",
     skills: ["React", "Node.js", "GraphQL"],
@@ -202,8 +202,8 @@ const projectCardData: ProjectCardType[] = [
   {
     id: 2,
     name: "Project Two",
-    banner: "/assets/profile-banner.png",
-    image: "/assets/profile-image.png",
+    banner: "/default-banner.png",
+    image: "/default-profile.png",
     bio: "This is a brief description of Project Two.",
     location: "Los Angeles, CA",
     skills: ["Vue.js", "Firebase", "TypeScript"],
@@ -211,8 +211,8 @@ const projectCardData: ProjectCardType[] = [
   {
     id: 3,
     name: "Project Three",
-    banner: "/assets/profile-banner.png",
-    image: "/assets/profile-image.png",
+    banner: "/default-banner.png",
+    image: "/default-profile.png",
     bio: "This is a brief description of Project Three.",
     location: "Chicago, IL",
     skills: ["Angular", "Express", "MongoDB"],
