@@ -189,7 +189,7 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                 const transformedUsers = result.data.profiles.map((profile: any) => ({
                     id: profile.id,
                     name: profile.name,
-                    image: profile.image || '/image (1).png',
+                    image: profile.image || '/default-profile.png',
                     role: profile.role,
                     totlerole: profile.totalRoles,
                     proifleurl: profile.profileUrl

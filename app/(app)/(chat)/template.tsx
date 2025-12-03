@@ -172,7 +172,7 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                                                 <React.Fragment key={conv.id}>
                                                     <Link href={`/inbox/c/${conv.id}`} className="flex flex-row items-center p-[10px] gap-[19px] w-full h-[70px] rounded-[10px] hover:bg-gray-50 transition-colors cursor-pointer">
                                                         <Image
-                                                            src={conv.user.avatar || '/image (1).png'}
+                                                            src={conv.user.avatar || '/default-profile.png'}
                                                             alt={conv.user.name}
                                                             className="w-[48px] h-[48px] rounded-full object-cover bg-[#D9D9D9] shrink-0"
                                                             width={48}
@@ -235,7 +235,7 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                                                                     {avatarUrls.slice(0, 2).map((imgSrc, imgIdx) => (
                                                                         <Image
                                                                             key={imgIdx}
-                                                                            src={imgSrc || '/image (1).png'}
+                                                                            src={imgSrc || '/default-profile.png'}
                                                                             alt={group.name}
                                                                             className="w-[35px] h-[35px] rounded-full object-cover bg-[#D9D9D9] border-2 border-white"
                                                                             width={35}

@@ -230,7 +230,7 @@ export default function ShortProfile({ profile, links, roles = [], recommendatio
                 >
                     <ProfileProgress 
                         value={profile?.profile_completion_percentage || 0} 
-                        imageUrl={profile?.profile_photo_url || user?.user_metadata?.avatar_url || '/image (2).png'} 
+                        imageUrl={profile?.profile_photo_url || user?.user_metadata?.avatar_url || '/default-profile.png'} 
                         className="rounded-full" 
                     />
                      <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -292,7 +292,7 @@ export default function ShortProfile({ profile, links, roles = [], recommendatio
                                     {recommendations.slice(0, 3).map((recommendation, index) => (
                                         <Image
                                             key={`${recommendation.id}-${index}`}
-                                            src={recommendation.recommender_photo_url || '/image (2).png'}
+                                            src={recommendation.recommender_photo_url || '/default-profile.png'}
                                             alt={recommendation.recommender_name || "Recommender"}
                                             width={32}
                                             height={32}
