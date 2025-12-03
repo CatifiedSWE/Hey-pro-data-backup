@@ -272,7 +272,7 @@ export default function ManageWhatsOnPage() {
                 </span>
                 <Link
                     href="/whats-on/manage-whats-on/add-new"
-                    className="rounded-[10px] bg-[#31A7AC] px-6 py-2 text-white font-[600] h-[44px] items-center justify-center flex w-[180px] hover:bg-[#288a8e] transition-colors"
+                    className="inline-flex h-[44px] items-center justify-center rounded-[10px] bg-[#31A7AC] px-8 text-sm font-[600] text-white transition-colors hover:bg-[#288a8e]"
                 >
                     Create What&apos;s on
                 </Link>
