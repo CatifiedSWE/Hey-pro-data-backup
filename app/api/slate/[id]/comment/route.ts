@@ -37,9 +37,8 @@ export async function GET(
       );
     }
 
-    // Fetch comments without author join
-    const from = (page - 1) * limit;
-    const { data: comments, error, count } = await supabase
+    // Fetch all comments for this post (no pagination for threaded structure)
+    const { data: comments, error } = await supabase
       .from('slate_comments')
       .select(`
         id,
@@ -48,10 +47,9 @@ export async function GET(
         created_at,
         updated_at,
         user_id
-      `, { count: 'exact' })
+      `)
       .eq('post_id', postId)
-      .order('created_at', { ascending: false })
-      .range(from, from + limit - 1);
+      .order('created_at', { ascending: true });
 
     if (error) {
       return NextResponse.json(
@@ -60,61 +58,87 @@ export async function GET(
       );
     }
 
-    // Fetch user profiles for all comment authors
-    let userProfiles: Record<string, any> = {};
-    let googleAvatars: Record<string, string> = {};
-    
-    if (comments && comments.length > 0) {
-      const userIds = [...new Set(comments.map(c => c.user_id))];
-      
-      // Fetch user profiles
-      const { data: profiles } = await supabase
-        .from('user_profiles')
-        .select('user_id, alias_first_name, alias_surname, profile_photo_url')
-        .in('user_id', userIds);
-      
-      if (profiles) {
-        userProfiles = profiles.reduce((acc, profile) => {
-          acc[profile.user_id] = profile;
-          return acc;
-        }, {} as Record<string, any>);
-      }
+    // Get all unique user IDs
+    const userIds = [...new Set(comments?.map(c => c.user_id) || [])];
 
-      // Fetch Google auth avatars as fallback
-      const { data: authData } = await supabase.auth.admin.listUsers();
-      if (authData?.users) {
-        authData.users.forEach(authUser => {
-          if (userIds.includes(authUser.id) && (authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture)) {
-            googleAvatars[authUser.id] = authUser.user_metadata.avatar_url || authUser.user_metadata.picture;
-          }
-        });
-      }
+    // Fetch user profiles
+    const { data: profiles } = await supabase
+      .from('user_profiles')
+      .select('user_id, first_name, surname, alias_first_name, alias_surname, profile_photo_url')
+      .in('user_id', userIds);
+
+    // Fetch Google OAuth avatars
+    const { data: authUsersResponse } = await supabase.auth.admin.listUsers();
+    const googleAvatarMap = new Map<string, string>();
+    if (authUsersResponse?.users) {
+      authUsersResponse.users.forEach(authUser => {
+        if (authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture) {
+          googleAvatarMap.set(
+            authUser.id,
+            authUser.user_metadata.avatar_url || authUser.user_metadata.picture
+          );
+        }
+      });
     }
 
-    // Format response
-    const formattedComments = comments?.map(comment => ({
-      id: comment.id,
-      content: comment.content,
-      parent_comment_id: comment.parent_comment_id,
-      created_at: comment.created_at,
-      updated_at: comment.updated_at,
-      author: {
-        id: comment.user_id,
-        name: `${userProfiles[comment.user_id]?.alias_first_name || ''} ${userProfiles[comment.user_id]?.alias_surname || ''}`.trim(),
-        avatar: userProfiles[comment.user_id]?.profile_photo_url || googleAvatars[comment.user_id] || '',
-      },
-    })) || [];
+    // Create user map
+    const userMap = new Map();
+    profiles?.forEach(profile => {
+      const firstName = profile.alias_first_name || profile.first_name || '';
+      const surname = profile.alias_surname || profile.surname || '';
+      const name = `${firstName} ${surname}`.trim() || 'Unknown';
+      
+      let avatar = '/default-profile.png';
+      if (profile.profile_photo_url && profile.profile_photo_url.trim() !== '') {
+        avatar = profile.profile_photo_url;
+      } else if (googleAvatarMap.has(profile.user_id)) {
+        avatar = googleAvatarMap.get(profile.user_id)!;
+      }
+
+      userMap.set(profile.user_id, { name, avatar });
+    });
+
+    // Build threaded comment structure
+    const commentMap = new Map();
+    const rootComments: any[] = [];
+
+    // First pass: create all comment objects
+    comments?.forEach(comment => {
+      const user = userMap.get(comment.user_id) || { name: 'Unknown', avatar: '/default-profile.png' };
+      commentMap.set(comment.id, {
+        id: comment.id,
+        post_id: postId,
+        user_id: comment.user_id,
+        parent_comment_id: comment.parent_comment_id,
+        content: comment.content,
+        created_at: comment.created_at,
+        updated_at: comment.updated_at,
+        author: {
+          id: comment.user_id,
+          name: user.name,
+          avatar: user.avatar
+        },
+        replies: []
+      });
+    });
+
+    // Second pass: build the tree structure
+    commentMap.forEach(comment => {
+      if (comment.parent_comment_id) {
+        const parent = commentMap.get(comment.parent_comment_id);
+        if (parent) {
+          parent.replies.push(comment);
+        }
+      } else {
+        rootComments.push(comment);
+      }
+    });
 
     return NextResponse.json(
       successResponse(
         {
-          comments: formattedComments,
-          pagination: {
-            page,
-            limit,
-            total: count || 0,
-            hasMore: (count || 0) > from + limit,
-          },
+          comments: rootComments,
+          totalComments: comments?.length || 0
         },
         'Comments retrieved'
       ),

@@ -4,10 +4,12 @@ import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Heart, Send, MoreHorizontal } from "lucide-react";
+import { Loader2, Send, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
 import { getComments, addComment } from "@/lib/api/slate";
+import { supabase } from "@/lib/supabase/client";
+import { formatDistanceToNow } from "date-fns";
 
 interface Comment {
   id: string;
@@ -21,6 +23,7 @@ interface Comment {
     name: string;
     avatar: string;
   };
+  replies?: Comment[];
 }
 
 interface CommentsModalProps {
@@ -49,7 +52,19 @@ export default function CommentsModal({
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [newComment, setNewComment] = useState("");
-  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [replyTo, setReplyTo] = useState<{ id: string; name: string } | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  // Get current user ID
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setCurrentUserId(session.user.id);
+      }
+    };
+    getCurrentUser();
+  }, []);
 
   useEffect(() => {
     if (open) {
@@ -74,10 +89,13 @@ export default function CommentsModal({
 
     setSubmitting(true);
     try {
-      const comment = await addComment(postId, newComment, replyingTo || undefined);
-      setComments(prev => [...prev, comment]);
+      await addComment(postId, newComment.trim(), replyTo?.id);
+      
+      // Refresh comments to get updated threaded structure
+      await loadComments();
+      
       setNewComment("");
-      setReplyingTo(null);
+      setReplyTo(null);
       toast.success('Comment added');
       if (onCommentAdded) onCommentAdded();
     } catch (error: any) {
@@ -87,135 +105,185 @@ export default function CommentsModal({
     }
   };
 
+  const handleDeleteComment = async (commentId: string) => {
+    if (!confirm('Are you sure you want to delete this comment?')) return;
+
+    try {
+      // Call delete API when implemented
+      // await deleteComment(postId, commentId);
+      await loadComments();
+      toast.success('Comment deleted');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to delete comment');
+    }
+  };
+
+  const handleReply = (commentId: string, userName: string) => {
+    setReplyTo({ id: commentId, name: userName });
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] h-[80vh] flex flex-col p-0 gap-0">
-        <DialogHeader className="p-4 border-b">
-          <DialogTitle>Comments</DialogTitle>
-        </DialogHeader>
-
-        {/* Post Preview */}
-        <div className="px-4 py-3 border-b bg-gray-50">
-          <div className="flex items-start gap-3">
-            <Image
-              src={postAuthor.avatar || "/default-profile.png"}
-              alt={postAuthor.name}
-              width={40}
-              height={40}
-              className="rounded-full object-cover"
-            />
-            <div className="flex-1">
-              <p className="font-semibold text-sm">{postAuthor.name}</p>
-              <p className="text-sm text-gray-600 mt-1 line-clamp-2">{postContent}</p>
-            </div>
+      <DialogContent className="w-[586px] max-w-full border-0 bg-[#FAFAFA] p-0 sm:rounded-[20px]">
+        <div className="flex flex-col gap-6 p-5">
+          <div className="flex items-center justify-between border-b border-[#BABABA] pb-3">
+            <DialogTitle className="text-[20px] font-semibold text-black">
+              Comments ({comments.length})
+            </DialogTitle>
           </div>
-        </div>
 
-        {/* Comments List */}
-        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-          {loading ? (
-            <div className="flex justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
-            </div>
-          ) : comments.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <p>No comments yet. Be the first to comment!</p>
-            </div>
-          ) : (
-            comments.map((comment) => (
-              <CommentItem
-                key={comment.id}
-                comment={comment}
-                onReply={() => setReplyingTo(comment.id)}
+          {/* Comment Input */}
+          <div className="space-y-2">
+            {replyTo && (
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <span>Replying to <strong>@{replyTo.name}</strong></span>
+                <button
+                  onClick={() => setReplyTo(null)}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+            <div className="flex gap-2">
+              <textarea
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder={replyTo ? `Reply to ${replyTo.name}...` : "Add a comment..."}
+                className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2FD3D8] min-h-[80px] resize-none"
+                disabled={submitting}
               />
-            ))
-          )}
-        </div>
-
-        {/* Comment Input */}
-        <div className="p-4 border-t bg-white">
-          {replyingTo && (
-            <div className="mb-2 text-sm text-gray-600 flex items-center justify-between">
-              <span>Replying to comment</span>
-              <button
-                onClick={() => setReplyingTo(null)}
-                className="text-blue-500 hover:text-blue-600"
+              <Button
+                onClick={handleSubmitComment}
+                disabled={!newComment.trim() || submitting}
+                className="bg-[#2FD3D8] hover:bg-[#2FD3D8]/90 text-white self-end"
               >
-                Cancel
-              </button>
+                {submitting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
+              </Button>
             </div>
-          )}
-          <div className="flex gap-2">
-            <Textarea
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder="Add a comment..."
-              className="flex-1 resize-none min-h-[40px] max-h-[120px]"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSubmitComment();
-                }
-              }}
-            />
-            <Button
-              onClick={handleSubmitComment}
-              disabled={submitting || !newComment.trim()}
-              className="self-end"
-            >
-              {submitting ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Send className="h-4 w-4" />
-              )}
-            </Button>
           </div>
-          <p className="text-xs text-gray-500 mt-2">
-            Press Enter to post, Shift + Enter for new line
-          </p>
+
+          {/* Comments List */}
+          <div className="flex flex-col gap-6 overflow-y-auto max-h-[500px]">
+            {loading ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-[#2FD3D8]" />
+              </div>
+            ) : comments.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                No comments yet. Be the first to comment!
+              </div>
+            ) : (
+              <CommentTree 
+                comments={comments} 
+                onReply={handleReply}
+                onDelete={handleDeleteComment}
+                currentUserId={currentUserId}
+              />
+            )}
+          </div>
         </div>
       </DialogContent>
     </Dialog>
   );
 }
 
-interface CommentItemProps {
-  comment: Comment;
-  onReply: () => void;
+// Recursive CommentTree component for threaded comments
+function CommentTree({ 
+  comments, 
+  depth = 0, 
+  onReply, 
+  onDelete,
+  currentUserId 
+}: { 
+  comments: Comment[]; 
+  depth?: number; 
+  onReply: (id: string, name: string) => void;
+  onDelete: (id: string) => void;
+  currentUserId: string | null;
+}) {
+  return (
+    <div className="flex flex-col gap-6">
+      {comments.map((comment) => (
+        <div key={comment.id} className="flex flex-col gap-6">
+          <CommentItem 
+            comment={comment} 
+            depth={depth} 
+            onReply={onReply}
+            onDelete={onDelete}
+            currentUserId={currentUserId}
+          />
+          {comment.replies && comment.replies.length > 0 && (
+            <CommentTree 
+              comments={comment.replies} 
+              depth={depth + 1} 
+              onReply={onReply}
+              onDelete={onDelete}
+              currentUserId={currentUserId}
+            />
+          )}
+        </div>
+      ))}
+    </div>
+  );
 }
 
-function CommentItem({ comment, onReply }: CommentItemProps) {
-  const [liked, setLiked] = useState(false);
+// Individual comment item with depth-based indentation
+function CommentItem({ 
+  comment, 
+  depth = 0, 
+  onReply,
+  onDelete,
+  currentUserId
+}: { 
+  comment: Comment; 
+  depth?: number; 
+  onReply: (id: string, name: string) => void;
+  onDelete: (id: string) => void;
+  currentUserId: string | null;
+}) {
+  const timeAgo = formatDistanceToNow(new Date(comment.created_at), { addSuffix: true });
+  const indent = depth ? depth * 32 : 0;
+  const isOwner = currentUserId === comment.user_id;
 
   return (
-    <div className="flex gap-3">
+    <div className="flex gap-3" style={{ paddingLeft: indent }}>
       <Image
         src={comment.author.avatar || "/default-profile.png"}
         alt={comment.author.name}
-        width={32}
-        height={32}
-        className="rounded-full object-cover flex-shrink-0"
+        width={45}
+        height={45}
+        className="h-[45px] w-[45px] rounded-full object-cover"
+        unoptimized
       />
-      <div className="flex-1">
-        <div className="bg-gray-100 rounded-2xl px-4 py-2">
-          <p className="font-semibold text-sm">{comment.author.name}</p>
-          <p className="text-sm mt-1">{comment.content}</p>
+      <div className="flex flex-col gap-2 flex-1">
+        <div className="flex items-center gap-4 text-sm text-[#444444]">
+          <span className="font-medium">{comment.author.name}</span>
+          <span>{timeAgo}</span>
+          {isOwner && (
+            <button
+              onClick={() => onDelete(comment.id)}
+              className="ml-auto text-red-500 hover:text-red-700"
+              title="Delete comment"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          )}
         </div>
-        <div className="flex items-center gap-4 mt-1 px-4 text-xs text-gray-500">
-          <span>{new Date(comment.created_at).toLocaleDateString()}</span>
-          <button
-            onClick={() => setLiked(!liked)}
-            className={`font-semibold ${liked ? 'text-red-500' : ''}`}
-          >
-            Like
-          </button>
-          <button onClick={onReply} className="font-semibold">
-            Reply
-          </button>
-          <button>
-            <MoreHorizontal className="h-4 w-4" />
-          </button>
-        </div>
+        <p className="text-sm leading-[21px] text-black whitespace-pre-wrap">
+          {comment.content}
+        </p>
+        <button
+          type="button"
+          onClick={() => onReply(comment.id, comment.author.name)}
+          className="text-sm text-start font-semibold text-[#444444] transition hover:text-black w-fit"
+        >
+          Reply
+        </button>
       </div>
     </div>
   );
