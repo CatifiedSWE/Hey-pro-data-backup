@@ -141,6 +141,8 @@ export default function SkillEditor({ initialSkills, trigger, onUpdate }: SkillE
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isReorderOpen, setIsReorderOpen] = useState(false);
     const [tempSkills, setTempSkills] = useState<Skill[]>([]);
+    const [selectedSkillId, setSelectedSkillId] = useState<string>(initialSkills[0]?.id || '');
+    const [editingSkill, setEditingSkill] = useState<Skill | null>(null);
     const [experienceVisibility, setExperienceVisibility] = useState<Record<string, boolean>>({});
     const [saving, setSaving] = useState(false);
     const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
@@ -189,7 +191,18 @@ export default function SkillEditor({ initialSkills, trigger, onUpdate }: SkillE
             
             if (result.success) {
                 // Remove from local state
-                setSkills(skills.filter((skill) => skill.id !== id));
+                const updatedSkills = skills.filter((skill) => skill.id !== id);
+                setSkills(updatedSkills);
+                
+                // If the deleted skill was selected, select the first remaining skill
+                if (selectedSkillId === id && updatedSkills.length > 0) {
+                    setSelectedSkillId(updatedSkills[0].id);
+                    setEditingSkill(updatedSkills[0]);
+                } else if (updatedSkills.length === 0) {
+                    // If no skills left, close the dialog
+                    setIsDialogOpen(false);
+                }
+                
                 toast.success("Skill removed successfully!");
                 
                 // Refresh skills data
@@ -211,28 +224,33 @@ export default function SkillEditor({ initialSkills, trigger, onUpdate }: SkillE
     };
 
     const handleSkillChange = <K extends keyof Skill>(
-        id: string,
         field: K,
         value: Skill[K]
     ) => {
-        setSkills(
-            skills.map((skill) =>
-                skill.id === id ? { ...skill, [field]: value } : skill
-            )
-        );
+        if (editingSkill) {
+            setEditingSkill({ ...editingSkill, [field]: value });
+        }
     };
 
-    const toggleExperienceSection = (id: string) => {
+    const toggleExperienceSection = () => {
         setExperienceVisibility((prev) => ({
             ...prev,
-            [id]: !(prev[id] ?? true),
+            [selectedSkillId]: !(prev[selectedSkillId] ?? true),
         }));
     };
+
+    const handleSkillSelect = (skillId: string) => {
+        const skill = skills.find(s => s.id === skillId);
+        if (skill) {
+            setSelectedSkillId(skillId);
+            setEditingSkill({ ...skill });
+        }
+    };
+
     const handleSaveChanges = async () => {
-        // Validate that all skills have required fields
-        const invalidSkills = skills.filter(skill => !skill.department || !skill.role);
-        if (invalidSkills.length > 0) {
-            toast.error('Please fill in department and role for all skills');
+        // Validate that the editing skill has required fields
+        if (!editingSkill || !editingSkill.department || !editingSkill.role) {
+            toast.error('Please fill in department and role');
             return;
         }
 
@@ -241,40 +259,55 @@ export default function SkillEditor({ initialSkills, trigger, onUpdate }: SkillE
 
         setSaving(true);
         try {
-            // Update all modified skills
-            for (const skill of skills) {
-                const skillData = {
-                    skill_name: `${skill.department} - ${skill.role}`,
-                    description: skill.description || undefined,
-                    sort_order: skills.indexOf(skill),
-                };
-                
-                await updateSkill(skill.id, skillData);
-            }
+            // Update only the currently editing skill
+            const skillData = {
+                skill_name: `${editingSkill.department} - ${editingSkill.role}`,
+                description: editingSkill.description || undefined,
+            };
+            
+            await updateSkill(editingSkill.id, skillData);
+
+            // Update local state
+            setSkills(skills.map(skill => 
+                skill.id === editingSkill.id ? editingSkill : skill
+            ));
 
             // Refresh skills data
             await fetchSkills();
             
-            toast.success("Skills updated successfully!");
+            toast.success("Skill updated successfully!");
             setIsDialogOpen(false);
             onUpdate?.();
         } catch (error) {
             console.error('Skill update error:', error);
-            toast.error('Failed to update skills');
+            toast.error('Failed to update skill');
         } finally {
             setSaving(false);
         }
     };
 
     const handleCancel = () => {
-        // Reset skills to initial state if user cancels
+        // Reset to initial state
         setSkills(initialSkills.map(hydrateSkill));
+        setEditingSkill(null);
         setIsDialogOpen(false);
+    };
+
+    const handleDialogOpenChange = (open: boolean) => {
+        setIsDialogOpen(open);
+        if (open && skills.length > 0) {
+            // Initialize editing with the first skill or the previously selected one
+            const skillToEdit = skills.find(s => s.id === selectedSkillId) || skills[0];
+            setSelectedSkillId(skillToEdit.id);
+            setEditingSkill({ ...skillToEdit });
+        } else {
+            setEditingSkill(null);
+        }
     };
 
     return (
         <>
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <Dialog open={isDialogOpen} onOpenChange={handleDialogOpenChange}>
                 <DialogTrigger asChild>{trigger}</DialogTrigger>
                 <DialogContent className="w-[560px] max-h-[80vh] flex flex-col rounded-[15px] border-0 p-0 shadow-[2px_3px_8px_rgba(0,0,0,0.09)]">
                     <div className="flex flex-col h-full max-h-[80vh]">
@@ -284,10 +317,10 @@ export default function SkillEditor({ initialSkills, trigger, onUpdate }: SkillE
                                     <div className="flex flex-wrap items-start justify-between gap-3">
                                         <div>
                                             <h1 className="text-[22px] font-normal leading-[33px] text-black">
-                                                Edit Skills
+                                                Edit Skill
                                             </h1>
                                             <p className="mt-1 max-w-[484px] text-xs leading-[18px] text-[#181818]">
-                                                You can write about your years of experience, industry, or skills. People also talk about their achievements or previous job experiences.
+                                                Select a skill to edit. You can edit one skill at a time.
                                             </p>
                                         </div>
                                         <div className="flex gap-2">
@@ -299,25 +332,40 @@ export default function SkillEditor({ initialSkills, trigger, onUpdate }: SkillE
                                                 <Menu className="h-4 w-4" />
                                                 Reorder
                                             </Button>
-
                                         </div>
+                                    </div>
+
+                                    {/* Skill Selector */}
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-gray-700">Select Skill to Edit:</label>
+                                        <select
+                                            value={selectedSkillId}
+                                            onChange={(e) => handleSkillSelect(e.target.value)}
+                                            className="w-full rounded-[15px] border border-[#828282] px-5 py-3 text-sm text-black focus:border-[#31A7AC] focus:outline-none"
+                                        >
+                                            {skills.map((skill) => (
+                                                <option key={skill.id} value={skill.id}>
+                                                    {skill.department} . {skill.role}
+                                                </option>
+                                            ))}
+                                        </select>
                                     </div>
                                 </div>
 
                                 <div className="space-y-8 pb-20">
-                                    {skills.map((skill) => (
+                                    {editingSkill && (
                                         <SkillFormCard
-                                            key={skill.id}
-                                            skill={skill}
-                                            isExperienceOpen={experienceVisibility[skill.id] ?? true}
+                                            key={editingSkill.id}
+                                            skill={editingSkill}
+                                            isExperienceOpen={experienceVisibility[selectedSkillId] ?? true}
                                             experienceOptions={experienceOptions}
                                             primarySkillOptions={primarySkillOptions}
                                             specialtyOptions={specialtyOptions}
-                                            onFieldChange={(field, value) => handleSkillChange(skill.id, field, value)}
-                                            onToggleExperience={() => toggleExperienceSection(skill.id)}
-                                            onRemove={() => handleRemoveSkill(skill.id)}
+                                            onFieldChange={handleSkillChange}
+                                            onToggleExperience={toggleExperienceSection}
+                                            onRemove={() => handleRemoveSkill(editingSkill.id)}
                                         />
-                                    ))}
+                                    )}
                                 </div>
                             </div>
                         </div>
