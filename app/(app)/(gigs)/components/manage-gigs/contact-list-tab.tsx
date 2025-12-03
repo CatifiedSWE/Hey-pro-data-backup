@@ -1,4 +1,7 @@
+"use client";
+
 import Image from "next/image";
+import { useState, useEffect } from "react";
 
 import {
     Card,
@@ -7,9 +10,29 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { CalendarDays } from "lucide-react";
+import apiCalling from "@/lib/apiCalling";
+import { toast } from "sonner";
 
-import { gigsData } from "@/data/gigs";
-import { contactGroups, sampleApplicants } from "./sample-data";
+type Gig = {
+    id: string;
+    title: string;
+    dateWindows: Array<{
+        label: string;
+        range: string;
+    }>;
+};
+
+type Contact = {
+    id: string;
+    gig_id: string;
+    role: string;
+    company: string;
+    name: string;
+    phone: string;
+    email: string;
+    avatar: string | null;
+    department: string;
+};
 
 type ContactListTabProps = {
     selectedGigIds: string[];
@@ -17,9 +40,60 @@ type ContactListTabProps = {
 };
 
 export function ContactListTab({ selectedGigIds, actionIndicators }: ContactListTabProps) {
-    const selectedGigs = gigsData.filter((gig) => selectedGigIds.includes(gig.id));
+    const [contactsData, setContactsData] = useState<Record<string, { gig: Gig; contacts: Contact[] }>>({});
+    const [loading, setLoading] = useState(false);
 
-    if (!selectedGigs.length) {
+    useEffect(() => {
+        const fetchContacts = async () => {
+            if (selectedGigIds.length === 0) {
+                setContactsData({});
+                return;
+            }
+
+            try {
+                setLoading(true);
+                const results: Record<string, { gig: Gig; contacts: Contact[] }> = {};
+
+                await Promise.all(
+                    selectedGigIds.map(async (gigId) => {
+                        // Fetch gig details
+                        const gigResponse = await apiCalling({
+                            method: 'get',
+                            route: `/gigs/${gigId}`,
+                        });
+
+                        // Fetch contacts
+                        const contactsResponse = await apiCalling({
+                            method: 'get',
+                            route: `/contacts/gig/${gigId}`,
+                        });
+
+                        if (gigResponse.status && contactsResponse.status) {
+                            results[gigId] = {
+                                gig: {
+                                    id: gigResponse.data.data.id,
+                                    title: gigResponse.data.data.title,
+                                    dateWindows: gigResponse.data.data.dateWindows || [],
+                                },
+                                contacts: contactsResponse.data.data || [],
+                            };
+                        }
+                    })
+                );
+
+                setContactsData(results);
+            } catch (error) {
+                console.error('Error fetching contacts:', error);
+                toast.error('Failed to load contacts');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchContacts();
+    }, [selectedGigIds]);
+
+    if (selectedGigIds.length === 0) {
         return (
             <Card className="bg-transparent border-none">
                 <CardHeader>
@@ -32,24 +106,33 @@ export function ContactListTab({ selectedGigIds, actionIndicators }: ContactList
         );
     }
 
+    if (loading) {
+        return (
+            <Card className="bg-transparent border-none">
+                <CardHeader>
+                    <div className="flex justify-center py-10">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FA6E80]"></div>
+                    </div>
+                </CardHeader>
+            </Card>
+        );
+    }
+
     return (
         <div className="space-y-6 rounded-2xl bg-[#F8F8F8] p-3">
-            {selectedGigs.map((gig) => {
-                const shortlistedOrConfirmed = sampleApplicants.filter((person) => {
-                    const state = actionIndicators[`${gig.id}-${person.id}`];
-                    return Boolean(state?.shortlist || state?.confirm);
-                });
-                const selectedIds = new Set(shortlistedOrConfirmed.map((person) => person.id));
-
-                const filteredGroups = contactGroups
-                    .map((group) => ({
-                        ...group,
-                        entries: group.entries.filter((entry) => selectedIds.has(entry.person.id)),
-                    }))
-                    .filter((group) => group.entries.length > 0);
+            {Object.entries(contactsData).map(([gigId, { gig, contacts }]) => {
+                // Group contacts by department
+                const contactsByDepartment = contacts.reduce((acc, contact) => {
+                    const dept = contact.department || 'Other';
+                    if (!acc[dept]) {
+                        acc[dept] = [];
+                    }
+                    acc[dept].push(contact);
+                    return acc;
+                }, {} as Record<string, Contact[]>);
 
                 return (
-                    <section key={gig.id} className="space-y-4">
+                    <section key={gigId} className="space-y-4">
                         <div className="flex flex-col gap-3">
                             <div className="flex overflow-x-auto no-scrollbar flex-col gap-3 rounded-xl p-0">
                                 <div className="flex flex-row overflow-x-auto no-scrollbar gap-3 text-sm text-[#000000] items-center w-[1050px] sm:flex-row sm:items-center sm:justify-start">
@@ -60,7 +143,7 @@ export function ContactListTab({ selectedGigIds, actionIndicators }: ContactList
                                             {gig.dateWindows.map((window) => {
                                                 const [month, year] = window.label.split(" ");
                                                 return (
-                                                    <div key={window.label} className="flex items-center gap-3  px-3 py-1 text-sm text-[#444444]">
+                                                    <div key={window.label} className="flex items-center gap-3 px-3 py-1 text-sm text-[#444444]">
                                                         <span className="text-sm font-semibold text-[#444444]">{year}</span>
                                                         <span className="rounded-[31px] h-[27px] bg-[#FA6E80] px-4 py-0.5 text-sm font-semibold text-[#ffffff] items-center justify-center flex">
                                                             {month}
@@ -74,22 +157,22 @@ export function ContactListTab({ selectedGigIds, actionIndicators }: ContactList
                                 </div>
                             </div>
 
-                            {filteredGroups.length === 0 ? (
-                                <p className="px-2 text-sm text-gray-500">No shortlisted or confirmed applicants yet.</p>
+                            {contacts.length === 0 ? (
+                                <p className="px-2 text-sm text-gray-500">No contacts added yet for this gig.</p>
                             ) : (
                                 <div className="space-y-4">
-                                    {filteredGroups.map((group) => (
-                                        <div key={`${gig.id}-${group.id}`} className="overflow-x-auto no-scrollbar bg-white">
+                                    {Object.entries(contactsByDepartment).map(([department, deptContacts]) => (
+                                        <div key={`${gigId}-${department}`} className="overflow-x-auto no-scrollbar bg-white">
                                             <div className="min-w-[1057px]">
-                                                <div className="flex h-[55px] gap-px rounded-t-2xl px-0  bg-[#F8F8F8]">
+                                                <div className="flex h-[55px] gap-px rounded-t-2xl px-0 bg-[#F8F8F8]">
                                                     <div className="flex w-[160px] flex-col justify-center border border-[#DEDEDE] px-1">
                                                         <p className="text-base font-medium text-black">Department</p>
                                                     </div>
                                                     <div className="flex w-[160px] flex-col justify-center border border-[#DEDEDE] px-1">
-                                                        <p className="text-sm text-[#444444]">{group.department}</p>
+                                                        <p className="text-sm text-[#444444]">{department}</p>
                                                     </div>
                                                     <div className="flex flex-1 flex-col justify-center border border-[#DEDEDE] px-1">
-                                                        <p className="text-sm text-[#444444]">{group.summary}</p>
+                                                        <p className="text-sm text-[#444444]">{deptContacts.length} contact{deptContacts.length !== 1 ? 's' : ''}</p>
                                                     </div>
                                                 </div>
 
@@ -102,7 +185,7 @@ export function ContactListTab({ selectedGigIds, actionIndicators }: ContactList
                                                         { label: "Email ID", width: 313 },
                                                     ].map((column) => (
                                                         <div
-                                                            key={`${group.id}-${column.label}`}
+                                                            key={`${department}-${column.label}`}
                                                             className="flex flex-col justify-center border border-[#DEDEDE] px-1"
                                                             style={{ width: column.width }}
                                                         >
@@ -111,31 +194,31 @@ export function ContactListTab({ selectedGigIds, actionIndicators }: ContactList
                                                     ))}
                                                 </div>
 
-                                                {group.entries.map((entry, index) => (
-                                                    <div key={`${group.id}-${entry.person.id}-${index}`} className="flex h-[41px] gap-px bg-white">
+                                                {deptContacts.map((contact, index) => (
+                                                    <div key={`${department}-${contact.id}-${index}`} className="flex h-[41px] gap-px bg-white">
                                                         <div className="flex w-[160px] flex-row justify-start border border-[#DEDEDE] px-1 text-[14px] text-[#444444]">
-                                                            {entry.role}
+                                                            {contact.role}
                                                         </div>
                                                         <div className="flex w-[160px] flex-row justify-start border border-[#DEDEDE] px-1 text-sm text-[#444444]">
-                                                            {entry.company}
+                                                            {contact.company}
                                                         </div>
                                                         <div className="flex w-[250px] items-center gap-3 border border-[#DEDEDE] px-1">
                                                             <div className="h-10 w-10 overflow-hidden rounded-full bg-gray-200">
                                                                 <Image
-                                                                    src={entry.person.avatar}
-                                                                    alt={entry.person.name}
+                                                                    src={contact.avatar || '/default-profile.png'}
+                                                                    alt={contact.name}
                                                                     width={40}
                                                                     height={40}
                                                                     className="h-full w-full object-cover"
                                                                 />
                                                             </div>
-                                                            <p className="text-sm text-[#444444]">{entry.person.name}</p>
+                                                            <p className="text-sm text-[#444444]">{contact.name}</p>
                                                         </div>
                                                         <div className="flex w-[170px] flex-col justify-center border border-[#DEDEDE] px-5 text-sm text-[#444444]">
-                                                            {entry.person.phone}
+                                                            {contact.phone}
                                                         </div>
                                                         <div className="flex w-[313px] flex-col justify-center border border-[#DEDEDE] px-5 text-sm text-[#444444]">
-                                                            {entry.person.email}
+                                                            {contact.email}
                                                         </div>
                                                     </div>
                                                 ))}
