@@ -131,7 +131,7 @@ export async function GET(
           coverLetter: application.cover_letter,
           portfolioLinks: application.portfolio_links,
           resumeUrl: application.resume_url,
-          appliedAt: application.created_at,
+          appliedAt: application.updated_at,
           updatedAt: application.updated_at,
           applicant: {
             id: application.applicant_user_id,
