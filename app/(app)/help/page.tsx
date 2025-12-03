@@ -117,44 +117,6 @@ export default function HelpPage() {
         }
     };
 
-    const getBotResponse = (userInput: string): string => {
-        const input = userInput.toLowerCase();
-        
-        if (input.includes("profile") || input.includes("account")) {
-            return "To manage your profile, go to Settings from the header menu. You can update your personal information, change your password, or delete your account there.";
-        }
-        
-        if (input.includes("gig") || input.includes("job")) {
-            return "To post a gig, navigate to the Gigs section and click 'Post Gig'. To apply for gigs, browse available listings and click 'Apply'. You can track your applications in the Jobs section.";
-        }
-        
-        if (input.includes("collab") || input.includes("collaboration")) {
-            return "Collabs are collaborative opportunities. You can browse collabs, express interest, or create your own collaboration post. Click 'I'm interested' to show your interest in a project.";
-        }
-        
-        if (input.includes("event") || input.includes("what's on")) {
-            return "What's On is our events section. You can RSVP to industry events, create your own events, and manage attendees. Check out upcoming networking events and workshops!";
-        }
-        
-        if (input.includes("save") || input.includes("bookmark")) {
-            return "You can save slates, collabs, and events by clicking the bookmark icon. Access all your saved items from the Saved page in the menu.";
-        }
-        
-        if (input.includes("password") || input.includes("reset")) {
-            return "To reset your password, go to Settings > Password Reset. Enter your current password and your new password. Make sure it's at least 8 characters long.";
-        }
-        
-        if (input.includes("delete") || input.includes("remove account")) {
-            return "To delete your account, go to Settings > Account Deletion. This action is permanent and cannot be undone. All your data will be removed from our system.";
-        }
-
-        if (input.includes("slate")) {
-            return "Slate is our social feed where you can share updates, photos, and connect with the creative community. Like, comment, and share posts from fellow professionals!";
-        }
-        
-        return "I'm here to help! Could you please provide more details about what you need assistance with? You can ask about account settings, features, or any specific issue you're facing.";
-    };
-
     const handleKeyPress = (e: React.KeyboardEvent) => {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
