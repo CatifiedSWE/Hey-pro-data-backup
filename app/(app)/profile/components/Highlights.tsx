@@ -124,7 +124,11 @@ export default function Highlights({ highlights: propHighlights }: HighlightsPro
                             alt="HIGHLIGHTS"
                             width={33}
                             height={250}
-                            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-90 object-contain"
+                            className="absolute top-1/2 left-1/2"
+                            style={{ 
+                                transform: 'translate(-50%, -50%) rotate(-90deg)',
+                                objectFit: 'contain'
+                            }}
                             priority
                         />
                     </div>
