@@ -241,7 +241,13 @@ export default function ApplyGigs({ gig }: ApplyGigsProps) {
                             <p className="text-sm font-[400] uppercase tracking-wide text-[#27A4A7]">Your Application</p>
                             <div className="flex flex-row justify-between items-center w-full">
                                 <div className="mt-4 flex items-center gap-3">
-                                    <Image src={gig.postedBy.avatar} alt={gig.postedBy.name} width={24} height={24} className="rounded-full" />
+                                    {gig.postedBy.avatar && gig.postedBy.avatar.trim() !== "" ? (
+                                        <Image src={gig.postedBy.avatar} alt={gig.postedBy.name} width={24} height={24} className="rounded-full" />
+                                    ) : (
+                                        <div className="h-6 w-6 rounded-full bg-gray-200 flex items-center justify-center text-xs text-gray-500">
+                                            {gig.postedBy.name.charAt(0).toUpperCase()}
+                                        </div>
+                                    )}
                                     <div>
                                         <p className="text-[16px] font-[400] text-slate-900">{gig.postedBy.name}</p>
                                         <p className="text-[9px] text-slate-500">Posted on {gig.postedOn}</p>
