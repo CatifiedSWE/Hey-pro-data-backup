@@ -25,14 +25,14 @@ const { id } = await params;
 ### Availability API (1 file) ✅ COMPLETE
 - [x] `/app/app/api/availability/[id]/route.ts` ✅
 
-### Chat API (7 files) ❌ NEEDS FIXING
-- [ ] `/app/app/api/chat/conversations/[conversationId]/messages/route.ts` ❌
-- [ ] `/app/app/api/chat/conversations/[conversationId]/route.ts` ❌
-- [ ] `/app/app/api/chat/groups/[groupId]/members/[userId]/route.ts` ❌
-- [ ] `/app/app/api/chat/groups/[groupId]/members/route.ts` ❌
-- [ ] `/app/app/api/chat/groups/[groupId]/messages/route.ts` ❌
-- [ ] `/app/app/api/chat/groups/[groupId]/route.ts` ❌
-- [ ] `/app/app/api/chat/messages/[messageId]/read/route.ts` ❌
+### Chat API (7 files) ✅ ALL COMPLETE
+- [x] `/app/app/api/chat/conversations/[conversationId]/messages/route.ts` ✅
+- [x] `/app/app/api/chat/conversations/[conversationId]/route.ts` ✅
+- [x] `/app/app/api/chat/groups/[groupId]/members/[userId]/route.ts` ✅
+- [x] `/app/app/api/chat/groups/[groupId]/members/route.ts` ✅
+- [x] `/app/app/api/chat/groups/[groupId]/messages/route.ts` ✅
+- [x] `/app/app/api/chat/groups/[groupId]/route.ts` ✅
+- [x] `/app/app/api/chat/messages/[messageId]/read/route.ts` ✅
 
 ### Collab API (9 files) ✅ ALL COMPLETE
 - [x] `/app/app/api/collab/[id]/close/route.ts` ✅
