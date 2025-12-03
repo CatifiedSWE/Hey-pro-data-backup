@@ -9,7 +9,7 @@ import { checkProfileComplete } from '@/lib/supabase/helpers';
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = createServerClient();
@@ -23,7 +23,7 @@ export async function POST(
       );
     }
 
-    const gigId = params.id;
+    const { id: gigId } = await params;
     const body = await request.json();
 
     // Check profile completeness
