@@ -3,6 +3,8 @@
 import Image from "next/image";
 import { Checkbox } from "@/components/ui/checkbox";
 import { formatDistanceToNow } from "date-fns";
+import { CheckCircle2, Circle } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface HighlightSelectCardProps {
   type: 'credit' | 'slate_post';
@@ -20,47 +22,73 @@ export function HighlightSelectCard({
   disabled 
 }: HighlightSelectCardProps) {
   
+  // Common container classes
+  const containerClasses = cn(
+    "group relative flex gap-4 p-4 mb-3 rounded-xl border-2 transition-all duration-200 cursor-pointer hover:shadow-sm",
+    isSelected 
+      ? "border-[#FA6E80] bg-[#FA6E80]/5" 
+      : "border-transparent bg-gray-50 hover:bg-gray-100 hover:border-gray-200",
+    disabled && !isSelected && "opacity-50 cursor-not-allowed grayscale"
+  );
+
+  // Selection Indicator (Custom instead of standard Checkbox for better UI)
+  const SelectionIndicator = () => (
+    <div className="absolute top-4 right-4">
+      {isSelected ? (
+        <CheckCircle2 className="w-6 h-6 text-[#FA6E80] fill-white" />
+      ) : (
+        <Circle className="w-6 h-6 text-gray-300 group-hover:text-gray-400" />
+      )}
+    </div>
+  );
+
   if (type === 'credit') {
     return (
       <div 
-        className={`p-4 border rounded-lg mb-3 cursor-pointer transition-all ${
-          isSelected ? 'border-[#FA6E80] bg-pink-50' : 'border-gray-200 hover:border-gray-300'
-        } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+        className={containerClasses}
         onClick={!disabled ? onToggle : undefined}
       >
-        <div className="flex gap-4 items-start">
-          {item.image_url && (
-            <div className="relative w-20 h-20 flex-shrink-0 rounded overflow-hidden">
-              <Image 
-                src={item.image_url} 
-                alt={item.credit_title || 'Credit image'}
-                fill
-                className="object-cover"
-              />
+        {/* Image Section */}
+        <div className="relative w-20 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-gray-200 shadow-inner">
+          {item.image_url ? (
+            <Image 
+              src={item.image_url} 
+              alt={item.credit_title || 'Credit image'}
+              fill
+              className="object-cover transition-transform group-hover:scale-105"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs text-center p-1">
+              No Image
             </div>
           )}
-          <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-base truncate">{item.credit_title}</h3>
+        </div>
+
+        {/* Content Section */}
+        <div className="flex-1 min-w-0 pr-8"> {/* pr-8 to avoid overlap with selection indicator */}
+          <h3 className="font-bold text-base text-gray-900 truncate">{item.credit_title}</h3>
+          
+          <div className="flex flex-wrap gap-2 mt-1.5">
             {(item.production_type || item.role) && (
-              <p className="text-sm text-gray-600 mt-1">
+              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-200 text-gray-700">
                 {[item.production_type, item.role].filter(Boolean).join(' • ')}
-              </p>
+              </span>
             )}
             {item.release_year && (
-              <p className="text-xs text-gray-500 mt-1">{item.release_year}</p>
-            )}
-            {item.description && (
-              <p className="text-sm text-gray-500 mt-2 line-clamp-2">{item.description}</p>
+              <span className="inline-flex items-center text-xs text-gray-500 border border-gray-200 px-1.5 rounded">
+                {item.release_year}
+              </span>
             )}
           </div>
-          <div className="flex-shrink-0">
-            <Checkbox 
-              checked={isSelected} 
-              disabled={disabled}
-              onCheckedChange={onToggle}
-            />
-          </div>
+
+          {item.description && (
+            <p className="text-sm text-gray-500 mt-2 line-clamp-2 leading-relaxed">
+              {item.description}
+            </p>
+          )}
         </div>
+
+        <SelectionIndicator />
       </div>
     );
   }
@@ -74,45 +102,55 @@ export function HighlightSelectCard({
 
     return (
       <div 
-        className={`p-4 border rounded-lg mb-3 cursor-pointer transition-all ${
-          isSelected ? 'border-[#FA6E80] bg-pink-50' : 'border-gray-200 hover:border-gray-300'
-        } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+        className={containerClasses}
         onClick={!disabled ? onToggle : undefined}
       >
-        <div className="flex gap-4 items-start">
-          {firstMedia && (
-            <div className="relative w-20 h-20 flex-shrink-0 rounded overflow-hidden">
-              <Image 
-                src={firstMedia.media_url} 
-                alt="Slate post media"
-                fill
-                className="object-cover"
-              />
+        {/* Media Section */}
+        <div className="relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-gray-200 shadow-inner self-start">
+          {firstMedia ? (
+            <Image 
+              src={firstMedia.media_url} 
+              alt="Slate post media"
+              fill
+              className="object-cover transition-transform group-hover:scale-105"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+              Text Only
             </div>
           )}
-          <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-base">Slate Post</h3>
-            <p className="text-sm text-gray-500 mt-1">{timeAgo}</p>
-            {item.content && (
-              <p className="text-sm text-gray-700 mt-2 line-clamp-3">{item.content}</p>
-            )}
-            <div className="flex gap-4 mt-2 text-xs text-gray-500">
-              {item.likes_count > 0 && (
-                <span>❤️ {item.likes_count} likes</span>
-              )}
-              {item.comments_count > 0 && (
-                <span>💬 {item.comments_count} comments</span>
-              )}
-            </div>
+        </div>
+
+        {/* Content Section */}
+        <div className="flex-1 min-w-0 pr-8">
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="font-bold text-base text-gray-900">Slate Post</h3>
+            <span className="text-xs text-gray-400">• {timeAgo}</span>
           </div>
-          <div className="flex-shrink-0">
-            <Checkbox 
-              checked={isSelected} 
-              disabled={disabled}
-              onCheckedChange={onToggle}
-            />
+
+          {item.content && (
+            <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed mb-2">
+              {item.content}
+            </p>
+          )}
+          
+          <div className="flex gap-4 text-xs text-gray-500 font-medium">
+            {(item.likes_count > 0 || item.comments_count > 0) ? (
+              <>
+                <span className="flex items-center gap-1 hover:text-[#FA6E80]">
+                  ❤️ {item.likes_count}
+                </span>
+                <span className="flex items-center gap-1 hover:text-blue-500">
+                  💬 {item.comments_count}
+                </span>
+              </>
+            ) : (
+              <span className="text-gray-400 italic">No engagement yet</span>
+            )}
           </div>
         </div>
+
+        <SelectionIndicator />
       </div>
     );
   }

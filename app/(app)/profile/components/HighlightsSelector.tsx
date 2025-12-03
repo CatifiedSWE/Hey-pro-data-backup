@@ -1,14 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { HighlightSelectCard } from "./HighlightSelectCard";
 import apiCalling from "@/lib/apiCalling";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Clapperboard, LayoutGrid, Info, Sparkles } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface HighlightsSelectorProps {
   open: boolean;
@@ -153,110 +154,150 @@ export function HighlightsSelector({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[90vh]">
-        <DialogHeader>
-          <DialogTitle>Edit Highlights</DialogTitle>
-          <p className="text-sm text-gray-600">
-            Choose up to 3 items to showcase on your profile (from credits or slate posts)
-          </p>
-        </DialogHeader>
+      <DialogContent className="max-w-4xl h-[90vh] md:h-[85vh] flex flex-col p-0 gap-0 overflow-hidden bg-white">
+        <div className="flex flex-col h-full">
+            {/* Header */}
+            <div className="p-6 pb-4 border-b bg-white z-10">
+            <DialogHeader className="space-y-2">
+                <div className="flex items-center justify-between">
+                    <DialogTitle className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                        <Sparkles className="w-5 h-5 text-[#FA6E80]" />
+                        Edit Highlights
+                    </DialogTitle>
+                    <Badge variant="secondary" className="bg-gray-100 text-gray-600">
+                        {selectedItems.length}/3 Selected
+                    </Badge>
+                </div>
+                <DialogDescription className="text-base text-gray-500">
+                Showcase your best work. Choose up to 3 items from your credits or slate posts.
+                </DialogDescription>
+            </DialogHeader>
 
-        {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-[#FA6E80]" />
-          </div>
-        ) : (
-          <>
-            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'credits' | 'slate')}>
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="credits">
-                  Credits ({credits.length})
+            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'credits' | 'slate')} className="mt-6">
+                <TabsList className="grid w-full grid-cols-2 bg-gray-100 p-1 h-12">
+                <TabsTrigger 
+                    value="credits" 
+                    className="data-[state=active]:bg-white data-[state=active]:text-[#FA6E80] data-[state=active]:shadow-sm h-10 text-base font-medium transition-all"
+                >
+                    <Clapperboard className="w-4 h-4 mr-2" />
+                    Credits ({credits.length})
                 </TabsTrigger>
-                <TabsTrigger value="slate">
-                  Slate Posts ({slatePosts.length})
+                <TabsTrigger 
+                    value="slate" 
+                    className="data-[state=active]:bg-white data-[state=active]:text-[#FA6E80] data-[state=active]:shadow-sm h-10 text-base font-medium transition-all"
+                >
+                    <LayoutGrid className="w-4 h-4 mr-2" />
+                    Slate Posts ({slatePosts.length})
                 </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="credits">
-                <ScrollArea className="h-[400px] pr-4">
-                  {credits.length === 0 ? (
-                    <div className="text-center py-12 text-gray-500">
-                      <p>No credits found.</p>
-                      <p className="text-sm mt-2">Add credits to your profile to feature them as highlights.</p>
-                    </div>
-                  ) : (
-                    credits.map(credit => (
-                      <HighlightSelectCard
-                        key={credit.id}
-                        type="credit"
-                        item={credit}
-                        isSelected={isSelected('credit', credit.id)}
-                        onToggle={() => handleToggleSelect('credit', credit.id)}
-                        disabled={selectedItems.length >= 3 && !isSelected('credit', credit.id)}
-                      />
-                    ))
-                  )}
-                </ScrollArea>
-              </TabsContent>
-
-              <TabsContent value="slate">
-                <ScrollArea className="h-[400px] pr-4">
-                  {slatePosts.length === 0 ? (
-                    <div className="text-center py-12 text-gray-500">
-                      <p>No slate posts found.</p>
-                      <p className="text-sm mt-2">Create slate posts to feature them as highlights.</p>
-                    </div>
-                  ) : (
-                    slatePosts.map(post => (
-                      <HighlightSelectCard
-                        key={post.id}
-                        type="slate_post"
-                        item={post}
-                        isSelected={isSelected('slate_post', post.id)}
-                        onToggle={() => handleToggleSelect('slate_post', post.id)}
-                        disabled={selectedItems.length >= 3 && !isSelected('slate_post', post.id)}
-                      />
-                    ))
-                  )}
-                </ScrollArea>
-              </TabsContent>
+                </TabsList>
             </Tabs>
-
-            {/* Selected count indicator */}
-            <div className="flex items-center justify-between pt-2 border-t">
-              <span className="text-sm text-gray-600">
-                Selected: <span className="font-semibold">{selectedItems.length} / 3</span>
-              </span>
-              {selectedItems.length === 3 && (
-                <span className="text-xs text-amber-600">Maximum highlights reached</span>
-              )}
             </div>
-          </>
-        )}
 
-        <DialogFooter>
-          <Button 
-            variant="outline" 
-            onClick={onClose}
-            disabled={saving}
-          >
-            Cancel
-          </Button>
-          <Button 
-            onClick={handleSave}
-            disabled={saving || loading}
-            className="bg-[#FA6E80] hover:bg-[#FA596E]"
-          >
-            {saving ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Saving...
-              </>
-            ) : (
-              'Save Highlights'
-            )}
-          </Button>
-        </DialogFooter>
+            {/* Content Area */}
+            <div className="flex-1 overflow-hidden bg-gray-50/50 relative">
+                {loading ? (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+                    <Loader2 className="h-10 w-10 animate-spin text-[#FA6E80]" />
+                    <p className="text-sm text-gray-500 font-medium">Loading your content...</p>
+                </div>
+                ) : (
+                    <ScrollArea className="h-full w-full">
+                        <div className="p-6 max-w-3xl mx-auto">
+                            {activeTab === 'credits' && (
+                                <>
+                                    {credits.length === 0 ? (
+                                        <div className="flex flex-col items-center justify-center py-16 text-center px-4">
+                                            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                                <Clapperboard className="w-8 h-8 text-gray-400" />
+                                            </div>
+                                            <h3 className="text-lg font-semibold text-gray-900">No credits found</h3>
+                                            <p className="text-sm text-gray-500 mt-2 max-w-xs">
+                                                Add credits to your profile first to feature them as highlights.
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-2">
+                                            {credits.map(credit => (
+                                                <HighlightSelectCard
+                                                    key={credit.id}
+                                                    type="credit"
+                                                    item={credit}
+                                                    isSelected={isSelected('credit', credit.id)}
+                                                    onToggle={() => handleToggleSelect('credit', credit.id)}
+                                                    disabled={selectedItems.length >= 3 && !isSelected('credit', credit.id)}
+                                                />
+                                            ))}
+                                        </div>
+                                    )}
+                                </>
+                            )}
+
+                            {activeTab === 'slate' && (
+                                <>
+                                    {slatePosts.length === 0 ? (
+                                        <div className="flex flex-col items-center justify-center py-16 text-center px-4">
+                                            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                                <LayoutGrid className="w-8 h-8 text-gray-400" />
+                                            </div>
+                                            <h3 className="text-lg font-semibold text-gray-900">No slate posts found</h3>
+                                            <p className="text-sm text-gray-500 mt-2 max-w-xs">
+                                                Create posts on your Slate to feature them here.
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-2">
+                                            {slatePosts.map(post => (
+                                                <HighlightSelectCard
+                                                    key={post.id}
+                                                    type="slate_post"
+                                                    item={post}
+                                                    isSelected={isSelected('slate_post', post.id)}
+                                                    onToggle={() => handleToggleSelect('slate_post', post.id)}
+                                                    disabled={selectedItems.length >= 3 && !isSelected('slate_post', post.id)}
+                                                />
+                                            ))}
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    </ScrollArea>
+                )}
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 border-t bg-white flex flex-col sm:flex-row items-center justify-between gap-4 z-10">
+                <div className="hidden sm:flex items-center gap-2 text-sm text-gray-500">
+                    <Info className="w-4 h-4" />
+                    <span>Selected items will appear at the top of your profile</span>
+                </div>
+                
+                <div className="flex w-full sm:w-auto items-center gap-3">
+                    <Button 
+                        variant="outline" 
+                        onClick={onClose}
+                        disabled={saving}
+                        className="flex-1 sm:flex-none h-11 sm:h-10"
+                    >
+                        Cancel
+                    </Button>
+                    <Button 
+                        onClick={handleSave}
+                        disabled={saving || loading}
+                        className="flex-1 sm:flex-none bg-[#FA6E80] hover:bg-[#FA596E] text-white h-11 sm:h-10 min-w-[140px]"
+                    >
+                        {saving ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Saving...
+                            </>
+                        ) : (
+                            `Save Highlights (${selectedItems.length})`
+                        )}
+                    </Button>
+                </div>
+            </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
