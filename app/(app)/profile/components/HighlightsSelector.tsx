@@ -162,7 +162,7 @@ export function HighlightsSelector({
                 <div className="flex items-center justify-between">
                     <DialogTitle className="text-xl md:text-2xl font-bold text-gray-900 flex items-center gap-2">
                         <Sparkles className="w-5 h-5 text-[#FA6E80]" />
-                        Edit Highlights
+                        Edit Heylights
                     </DialogTitle>
                     <Badge variant="secondary" className="bg-gray-100 text-gray-600">
                         {selectedItems.length}/3 Selected
