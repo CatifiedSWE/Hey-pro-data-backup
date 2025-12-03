@@ -7,7 +7,7 @@ import { createServerClient, validateAuthToken, successResponse, errorResponse }
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -21,7 +21,7 @@ export async function GET(
     }
 
     const supabase = createServerClient();
-    const eventId = params.id;
+    const { id: eventId } = await params;
     const { searchParams } = new URL(request.url);
     
     // Pagination
