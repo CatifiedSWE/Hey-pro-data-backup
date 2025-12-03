@@ -15,7 +15,7 @@ export async function GET(
     const authHeader = request.headers.get('Authorization');
     const user = await validateAuthToken(authHeader);
 
-    // Fetch post with all details
+    // Fetch post without author join
     const { data: post, error } = await supabase
       .from('slate_posts')
       .select(`
@@ -29,12 +29,6 @@ export async function GET(
         created_at,
         updated_at,
         user_id,
-        author:user_id (
-          id,
-          alias_first_name,
-          alias_surname,
-          profile_photo_url
-        ),
         media:slate_media(
           id,
           media_url,
@@ -56,6 +50,17 @@ export async function GET(
         errorResponse('Failed to fetch post', error.message),
         { status: 500 }
       );
+    }
+
+    // Fetch user profile for post author
+    let userProfile: any = null;
+    if (post.user_id) {
+      const { data: profile } = await supabase
+        .from('user_profiles')
+        .select('user_id, alias_first_name, alias_surname, profile_photo_url')
+        .eq('user_id', post.user_id)
+        .single();
+      userProfile = profile;
     }
 
     // Check if user has liked/saved (if authenticated)
@@ -92,9 +97,9 @@ export async function GET(
       created_at: post.created_at,
       updated_at: post.updated_at,
       author: {
-        id: post.author?.id,
-        name: `${post.author?.alias_first_name || ''} ${post.author?.alias_surname || ''}`.trim(),
-        avatar: post.author?.profile_photo_url || '',
+        id: post.user_id,
+        name: `${userProfile?.alias_first_name || ''} ${userProfile?.alias_surname || ''}`.trim(),
+        avatar: userProfile?.profile_photo_url || '',
       },
       media: post.media?.sort((a, b) => a.sort_order - b.sort_order) || [],
       user_has_liked: userHasLiked,

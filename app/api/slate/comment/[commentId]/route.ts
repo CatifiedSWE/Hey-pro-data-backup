@@ -68,7 +68,7 @@ export async function PATCH(
       );
     }
 
-    // Update comment
+    // Update comment - fetch without author join
     const { data: updatedComment, error: updateError } = await supabase
       .from('slate_comments')
       .update({ content })
@@ -79,12 +79,7 @@ export async function PATCH(
         parent_comment_id,
         created_at,
         updated_at,
-        author:user_id (
-          id,
-          alias_first_name,
-          alias_surname,
-          profile_photo_url
-        )
+        user_id
       `)
       .single();
 
@@ -95,6 +90,17 @@ export async function PATCH(
       );
     }
 
+    // Fetch user profile for comment author
+    let userProfile: any = null;
+    if (updatedComment.user_id) {
+      const { data: profile } = await supabase
+        .from('user_profiles')
+        .select('user_id, alias_first_name, alias_surname, profile_photo_url')
+        .eq('user_id', updatedComment.user_id)
+        .single();
+      userProfile = profile;
+    }
+
     // Format response
     const formattedComment = {
       id: updatedComment.id,
@@ -103,9 +109,9 @@ export async function PATCH(
       created_at: updatedComment.created_at,
       updated_at: updatedComment.updated_at,
       author: {
-        id: updatedComment.author?.id,
-        name: `${updatedComment.author?.alias_first_name || ''} ${updatedComment.author?.alias_surname || ''}`.trim(),
-        avatar: updatedComment.author?.profile_photo_url || '',
+        id: updatedComment.user_id,
+        name: `${userProfile?.alias_first_name || ''} ${userProfile?.alias_surname || ''}`.trim(),
+        avatar: userProfile?.profile_photo_url || '',
       },
     };
 

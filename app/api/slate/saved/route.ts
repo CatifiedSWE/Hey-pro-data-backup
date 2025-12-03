@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
 
     const supabase = createServerClient();
 
-    // Fetch saved posts with post details
+    // Fetch saved posts without author join
     const from = (page - 1) * limit;
     const { data: savedPosts, error, count } = await supabase
       .from('slate_saved')
@@ -41,12 +41,6 @@ export async function GET(request: NextRequest) {
           created_at,
           updated_at,
           user_id,
-          author:user_id (
-            id,
-            alias_first_name,
-            alias_surname,
-            profile_photo_url
-          ),
           media:slate_media(
             id,
             media_url,
@@ -64,6 +58,25 @@ export async function GET(request: NextRequest) {
         errorResponse('Failed to fetch saved posts', error.message),
         { status: 500 }
       );
+    }
+
+    // Fetch user profiles for all post authors
+    let userProfiles: Record<string, any> = {};
+    if (savedPosts && savedPosts.length > 0) {
+      const userIds = [...new Set(savedPosts.map(sp => sp.post?.user_id).filter(Boolean))];
+      if (userIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from('user_profiles')
+          .select('user_id, alias_first_name, alias_surname, profile_photo_url')
+          .in('user_id', userIds);
+        
+        if (profiles) {
+          userProfiles = profiles.reduce((acc, profile) => {
+            acc[profile.user_id] = profile;
+            return acc;
+          }, {} as Record<string, any>);
+        }
+      }
     }
 
     // Get post IDs for likes check
@@ -94,9 +107,9 @@ export async function GET(request: NextRequest) {
         updated_at: savedPost.post.updated_at,
         saved_at: savedPost.created_at,
         author: {
-          id: savedPost.post.author?.id,
-          name: `${savedPost.post.author?.alias_first_name || ''} ${savedPost.post.author?.alias_surname || ''}`.trim(),
-          avatar: savedPost.post.author?.profile_photo_url || '',
+          id: savedPost.post.user_id,
+          name: `${userProfiles[savedPost.post.user_id]?.alias_first_name || ''} ${userProfiles[savedPost.post.user_id]?.alias_surname || ''}`.trim(),
+          avatar: userProfiles[savedPost.post.user_id]?.profile_photo_url || '',
         },
         media: savedPost.post.media?.sort((a, b) => a.sort_order - b.sort_order) || [],
         user_has_liked: userLikes.includes(savedPost.post.id),

@@ -37,19 +37,14 @@ export async function GET(
       );
     }
 
-    // Fetch likes with user profiles
+    // Fetch likes without user profile join
     const from = (page - 1) * limit;
     const { data: likes, error, count } = await supabase
       .from('slate_likes')
       .select(`
         id,
         created_at,
-        user:user_id (
-          id,
-          alias_first_name,
-          alias_surname,
-          profile_photo_url
-        )
+        user_id
       `, { count: 'exact' })
       .eq('post_id', postId)
       .order('created_at', { ascending: false })
@@ -62,14 +57,31 @@ export async function GET(
       );
     }
 
+    // Fetch user profiles for all users who liked
+    let userProfiles: Record<string, any> = {};
+    if (likes && likes.length > 0) {
+      const userIds = [...new Set(likes.map(l => l.user_id))];
+      const { data: profiles } = await supabase
+        .from('user_profiles')
+        .select('user_id, alias_first_name, alias_surname, profile_photo_url')
+        .in('user_id', userIds);
+      
+      if (profiles) {
+        userProfiles = profiles.reduce((acc, profile) => {
+          acc[profile.user_id] = profile;
+          return acc;
+        }, {} as Record<string, any>);
+      }
+    }
+
     // Format response
     const formattedLikes = likes?.map(like => ({
       id: like.id,
       created_at: like.created_at,
       user: {
-        id: like.user?.id,
-        name: `${like.user?.alias_first_name || ''} ${like.user?.alias_surname || ''}`.trim(),
-        avatar: like.user?.profile_photo_url || '',
+        id: like.user_id,
+        name: `${userProfiles[like.user_id]?.alias_first_name || ''} ${userProfiles[like.user_id]?.alias_surname || ''}`.trim(),
+        avatar: userProfiles[like.user_id]?.profile_photo_url || '',
       },
     })) || [];
 

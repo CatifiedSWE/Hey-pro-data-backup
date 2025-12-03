@@ -37,7 +37,7 @@ export async function GET(
       );
     }
 
-    // Fetch comments with author profile
+    // Fetch comments without author join
     const from = (page - 1) * limit;
     const { data: comments, error, count } = await supabase
       .from('slate_comments')
@@ -47,13 +47,7 @@ export async function GET(
         parent_comment_id,
         created_at,
         updated_at,
-        user_id,
-        author:user_id (
-          id,
-          alias_first_name,
-          alias_surname,
-          profile_photo_url
-        )
+        user_id
       `, { count: 'exact' })
       .eq('post_id', postId)
       .order('created_at', { ascending: false })
@@ -66,6 +60,23 @@ export async function GET(
       );
     }
 
+    // Fetch user profiles for all comment authors
+    let userProfiles: Record<string, any> = {};
+    if (comments && comments.length > 0) {
+      const userIds = [...new Set(comments.map(c => c.user_id))];
+      const { data: profiles } = await supabase
+        .from('user_profiles')
+        .select('user_id, alias_first_name, alias_surname, profile_photo_url')
+        .in('user_id', userIds);
+      
+      if (profiles) {
+        userProfiles = profiles.reduce((acc, profile) => {
+          acc[profile.user_id] = profile;
+          return acc;
+        }, {} as Record<string, any>);
+      }
+    }
+
     // Format response
     const formattedComments = comments?.map(comment => ({
       id: comment.id,
@@ -74,9 +85,9 @@ export async function GET(
       created_at: comment.created_at,
       updated_at: comment.updated_at,
       author: {
-        id: comment.author?.id,
-        name: `${comment.author?.alias_first_name || ''} ${comment.author?.alias_surname || ''}`.trim(),
-        avatar: comment.author?.profile_photo_url || '',
+        id: comment.user_id,
+        name: `${userProfiles[comment.user_id]?.alias_first_name || ''} ${userProfiles[comment.user_id]?.alias_surname || ''}`.trim(),
+        avatar: userProfiles[comment.user_id]?.profile_photo_url || '',
       },
     })) || [];
 
@@ -194,12 +205,7 @@ export async function POST(
         parent_comment_id,
         created_at,
         updated_at,
-        author:user_id (
-          id,
-          alias_first_name,
-          alias_surname,
-          profile_photo_url
-        )
+        user_id
       `)
       .single();
 
@@ -210,6 +216,17 @@ export async function POST(
       );
     }
 
+    // Fetch user profile for comment author
+    let userProfile: any = null;
+    if (comment.user_id) {
+      const { data: profile } = await supabase
+        .from('user_profiles')
+        .select('user_id, alias_first_name, alias_surname, profile_photo_url')
+        .eq('user_id', comment.user_id)
+        .single();
+      userProfile = profile;
+    }
+
     // Format response
     const formattedComment = {
       id: comment.id,
@@ -218,9 +235,9 @@ export async function POST(
       created_at: comment.created_at,
       updated_at: comment.updated_at,
       author: {
-        id: comment.author?.id,
-        name: `${comment.author?.alias_first_name || ''} ${comment.author?.alias_surname || ''}`.trim(),
-        avatar: comment.author?.profile_photo_url || '',
+        id: comment.user_id,
+        name: `${userProfile?.alias_first_name || ''} ${userProfile?.alias_surname || ''}`.trim(),
+        avatar: userProfile?.profile_photo_url || '',
       },
     };
 
