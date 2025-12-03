@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Send, Bot, User } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import ReactMarkdown from "react-markdown";
+import axios from "axios";
 
 interface Message {
     id: string;
@@ -13,6 +15,16 @@ interface Message {
     sender: "user" | "bot";
     timestamp: Date;
 }
+
+// Utility function to generate random 10-character alphanumeric section ID
+const generateSectionId = (): string => {
+    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    let sectionId = '';
+    for (let i = 0; i < 10; i++) {
+        sectionId += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return sectionId;
+};
 
 export default function HelpPage() {
     const [messages, setMessages] = useState<Message[]>([
