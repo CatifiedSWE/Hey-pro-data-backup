@@ -7,7 +7,7 @@ import { createServerClient, validateAuthToken, successResponse, errorResponse }
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -22,7 +22,7 @@ export async function PATCH(
 
     const supabase = createServerClient();
     const body = await request.json();
-    const { id: availabilityId } = await params;
+    const availabilityId = params.id;
     const { status } = body;
 
     // Validate status
