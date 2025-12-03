@@ -87,6 +87,13 @@ export default function ApplyGigs({ gig }: ApplyGigsProps) {
     // Hardcoded rate value for demo, but allow selection from profile credits
     const [formValues, setFormValues] = useState<ApplicantFormState>({ savedRate: "", customRate: "" })
 
+    const formattedApplyBefore = useMemo(() => {
+        if (!gig.applyBefore) return "";
+        const date = new Date(gig.applyBefore);
+        if (isNaN(date.getTime())) return gig.applyBefore;
+        return format(date, "dd MMM, yyyy");
+    }, [gig.applyBefore]);
+
     const availableCredits = useMemo(() => profileData.credits ?? [], [profileData.credits])
     const availableRates = useMemo(() => profileData.rate ?? [], [profileData.rate])
 
