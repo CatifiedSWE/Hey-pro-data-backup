@@ -14,9 +14,9 @@ export default function HighlightsText({ className = "" }) {
         <Image
           src="/heylights-vertical.png"
           alt="HEYLIGHTS"
-          width={33}
-          height={250}
-          className=" lg:origin-top-left lg:ml-10"
+          width={28}
+          height={200}
+          className=" lg:origin-top-left lg:ml-0"
           style={{ objectFit: "contain" }}
           priority
         />

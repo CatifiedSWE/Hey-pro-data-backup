@@ -126,7 +126,7 @@ export default function Highlights({ highlights: propHighlights }: HighlightsPro
                     </div>
                 </aside>
 
-                <div className="flex flex-col items-center" style={{ gap: '0px' }}>
+                <div className="flex flex-col items-center" style={{ gap: '15px' }}>
                     <HighlightsText />
                     <div
                         className="rounded-full"
