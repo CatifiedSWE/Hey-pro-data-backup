@@ -9,11 +9,11 @@ import { generateUniqueSlug, formatBudgetLabel } from '@/lib/supabase/helpers';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = createServerClient();
-    const gigId = params.id;
+    const { id: gigId } = await params;
 
     // Fetch gig
     const { data: gig, error: gigError } = await supabase
@@ -128,7 +128,7 @@ export async function GET(
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = createServerClient();
@@ -142,7 +142,7 @@ export async function PATCH(
       );
     }
 
-    const gigId = params.id;
+    const { id: gigId } = await params;
     const body = await request.json();
 
     // Verify user is gig creator
@@ -323,7 +323,7 @@ export async function PATCH(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = createServerClient();
@@ -337,7 +337,7 @@ export async function DELETE(
       );
     }
 
-    const gigId = params.id;
+    const { id: gigId } = await params;
 
     // Verify user is gig creator
     const { data: existingGig, error: fetchError } = await supabase

@@ -8,7 +8,7 @@ import { validateAuthToken, successResponse, errorResponse } from '@/lib/supabas
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = createServerClient();
@@ -22,7 +22,7 @@ export async function GET(
       );
     }
 
-    const gigId = params.id;
+    const { id: gigId } = await params;
     const { searchParams } = new URL(request.url);
     const statusFilter = searchParams.get('status'); // Filter by status: pending, shortlisted, confirmed, released
 
@@ -192,7 +192,7 @@ export async function GET(
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = createServerClient();
@@ -206,7 +206,7 @@ export async function PATCH(
       );
     }
 
-    const gigId = params.id;
+    const { id: gigId } = await params;
     const body = await request.json();
     const { applicationId, status: newStatus } = body;
 

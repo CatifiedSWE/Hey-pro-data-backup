@@ -7,7 +7,7 @@ import { createServerClient, validateAuthToken, successResponse, errorResponse }
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { gigId: string } }
+  { params }: { params: Promise<{ gigId: string }> }
 ) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -21,7 +21,7 @@ export async function GET(
     }
 
     const supabase = createServerClient();
-    const gigId = params.gigId;
+    const { gigId } = await params;
 
     // Verify user is the gig creator
     const { data: gig, error: gigError } = await supabase
