@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils"
 import { Calendar, Calendar as CalendarIcon, ChevronLeft, ChevronRight, FileText, MapPin, Minus, Plus, UploadCloud, X, Zap } from "lucide-react"
 import Image from "next/image"
 import { toast } from "sonner"
-import { apiCalling } from "@/lib/api"
+import apiCalling from "@/lib/apiCalling"
 
 type GigFormValues = {
     title: string
