@@ -242,8 +242,14 @@ export default function AddGigPage() {
         setIsSubmitting(true)
         try {
             // Validate required fields
-            if (!formValues.title?.trim()) {
-                toast.error('Please enter a title for the gig')
+            let titleToSubmit = formValues.title?.trim()
+            if (!titleToSubmit && formValues.description?.trim()) {
+                // Auto-generate title from description for Quick GIG
+                titleToSubmit = formValues.description.trim().split('\n')[0].substring(0, 50) + (formValues.description.length > 50 ? '...' : '')
+            }
+
+            if (!titleToSubmit) {
+                toast.error('Please enter a description')
                 setIsSubmitting(false)
                 return
             }
