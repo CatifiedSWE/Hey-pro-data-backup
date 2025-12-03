@@ -7,10 +7,10 @@ import { validateAuthToken, createServerClient, successResponse, errorResponse }
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const collabId = params.id;
+    const { id: collabId } = await params;
     const supabase = createServerClient();
 
     // Fetch collaborators
@@ -117,7 +117,7 @@ export async function GET(
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -130,7 +130,7 @@ export async function POST(
       );
     }
 
-    const collabId = params.id;
+    const { id: collabId } = await params;
     const body = await request.json();
     const { user_id, role, department } = body;
 
