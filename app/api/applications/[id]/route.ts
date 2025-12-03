@@ -36,7 +36,6 @@ export async function GET(
         cover_letter,
         portfolio_links,
         resume_url,
-        created_at,
         updated_at
       `)
       .eq('id', applicationId)
