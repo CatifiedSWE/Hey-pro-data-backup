@@ -100,6 +100,7 @@ export async function GET(
           isTbc: gig.is_tbc,
           requestQuote: gig.request_quote,
           expiryDate: gig.expiry_date,
+          applyBefore: gig.expiry_date,
           supportingFileLabel: gig.supporting_file_label,
           referenceUrl: gig.reference_url,
           status: gig.status,
