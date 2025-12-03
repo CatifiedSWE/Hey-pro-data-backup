@@ -37,11 +37,10 @@ export async function GET(request: NextRequest) {
         cover_letter,
         portfolio_links,
         resume_url,
-        created_at,
         updated_at
       `, { count: 'exact' })
       .eq('applicant_user_id', user.id)
-      .order('created_at', { ascending: false });
+      .order('updated_at', { ascending: false });
 
     // Apply status filter if provided
     if (statusFilter && ['pending', 'shortlisted', 'confirmed', 'released'].includes(statusFilter)) {
