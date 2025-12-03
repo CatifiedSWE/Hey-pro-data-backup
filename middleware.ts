@@ -53,11 +53,29 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Allow public routes without authentication check
+  const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
+  if (isPublicRoute) {
+    return NextResponse.next();
+  }
+
   let response = NextResponse.next({
     request: {
       headers: request.headers,
     },
   });
+
+  // Check if Supabase env variables are configured
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    // If no Supabase configured, redirect protected routes to login
+    const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
+    if (isProtectedRoute) {
+      const redirectUrl = new URL('/login', request.url);
+      redirectUrl.searchParams.set('redirect', pathname);
+      return NextResponse.redirect(redirectUrl);
+    }
+    return NextResponse.next();
+  }
 
   // Create Supabase client for middleware
   const supabase = createServerClient(
@@ -88,7 +106,6 @@ export async function middleware(request: NextRequest) {
   // Get the session from cookies - OAuth callback API route sets these properly
   const { data: { session } } = await supabase.auth.getSession();
   const isAuthenticated = !!session;
-  const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
   const isAuthRoute = authRoutes.some(route => pathname.startsWith(route));
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
 
