@@ -43,12 +43,19 @@ axiosInstance.interceptors.response.use(
 
         console.error("API Error:", {
           status: error.response.status,
+          statusText: error.response.statusText,
           message: finalMessage,
-          url: error.config?.url
+          url: error.config?.url,
+          method: error.config?.method,
+          data: error.response.data
         });
       } else if (error.request) {
         // The request was made but no response was received
-        console.error("Network Error - No response received:", error.message);
+        console.error("Network Error - No response received:", {
+          message: error.message,
+          url: error.config?.url,
+          method: error.config?.method
+        });
       } else {
         // Something happened in setting up the request
         console.error("Request Error (Config/Setup):", error.message);
