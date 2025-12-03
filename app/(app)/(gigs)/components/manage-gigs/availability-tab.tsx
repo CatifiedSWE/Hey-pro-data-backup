@@ -1,4 +1,7 @@
+"use client";
+
 import Image from "next/image";
+import { useState, useEffect } from "react";
 
 import {
     Card,
@@ -6,9 +9,8 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { gigsData } from "@/data/gigs";
-
-import { sampleApplicants, getAvailabilityState } from "./sample-data";
+import apiCalling from "@/lib/apiCalling";
+import { toast } from "sonner";
 
 type CompactTimelineEntry = {
     key: string;
@@ -16,7 +18,33 @@ type CompactTimelineEntry = {
     dayLabel: string;
 };
 
-const buildTimelineEntries = (windows: typeof gigsData[number]["dateWindows"]): CompactTimelineEntry[] => {
+type Gig = {
+    id: string;
+    title: string;
+    dateWindows: Array<{
+        label: string;
+        range: string;
+    }>;
+};
+
+type ApplicantAvailability = {
+    applicantId: string;
+    name: string;
+    avatar: string | null;
+    creditsStatus: 'added' | 'not_added';
+    applicationStatus: string;
+    schedule: { [key: string]: string };
+};
+
+type AvailabilityData = {
+    gigDates: Array<{
+        label: string;
+        range: string;
+    }>;
+    applicantsAvailability: ApplicantAvailability[];
+};
+
+const buildTimelineEntries = (windows: Array<{ label: string; range: string }>): CompactTimelineEntry[] => {
     const entries: CompactTimelineEntry[] = [];
     windows.forEach((window) => {
         const tokens = window.range
@@ -51,9 +79,60 @@ type AvailabilityTabProps = {
 };
 
 export function AvailabilityTab({ selectedGigIds }: AvailabilityTabProps) {
-    const selectedGigs = gigsData.filter((gig) => selectedGigIds.includes(gig.id));
+    const [availabilityData, setAvailabilityData] = useState<Record<string, { gig: Gig; availability: AvailabilityData }>>({});
+    const [loading, setLoading] = useState(false);
 
-    if (!selectedGigs.length) {
+    useEffect(() => {
+        const fetchAvailability = async () => {
+            if (selectedGigIds.length === 0) {
+                setAvailabilityData({});
+                return;
+            }
+
+            try {
+                setLoading(true);
+                const results: Record<string, { gig: Gig; availability: AvailabilityData }> = {};
+
+                await Promise.all(
+                    selectedGigIds.map(async (gigId) => {
+                        // Fetch gig details
+                        const gigResponse = await apiCalling({
+                            method: 'get',
+                            route: `/gigs/${gigId}`,
+                        });
+
+                        // Fetch availability
+                        const availabilityResponse = await apiCalling({
+                            method: 'get',
+                            route: `/gigs/${gigId}/availability`,
+                        });
+
+                        if (gigResponse.status && availabilityResponse.status) {
+                            results[gigId] = {
+                                gig: {
+                                    id: gigResponse.data.data.id,
+                                    title: gigResponse.data.data.title,
+                                    dateWindows: gigResponse.data.data.dateWindows || [],
+                                },
+                                availability: availabilityResponse.data.data,
+                            };
+                        }
+                    })
+                );
+
+                setAvailabilityData(results);
+            } catch (error) {
+                console.error('Error fetching availability:', error);
+                toast.error('Failed to load availability data');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchAvailability();
+    }, [selectedGigIds]);
+
+    if (selectedGigIds.length === 0) {
         return (
             <Card className="bg-transparent border-none">
                 <CardHeader>
@@ -66,14 +145,27 @@ export function AvailabilityTab({ selectedGigIds }: AvailabilityTabProps) {
         );
     }
 
+    if (loading) {
+        return (
+            <Card className="bg-transparent border-none">
+                <CardHeader>
+                    <div className="flex justify-center py-10">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FA6E80]"></div>
+                    </div>
+                </CardHeader>
+            </Card>
+        );
+    }
+
     return (
         <div className="space-y-8">
-            {selectedGigs.map((gig) => {
+            {Object.entries(availabilityData).map(([gigId, { gig, availability }]) => {
                 const timeline = buildTimelineEntries(gig.dateWindows);
-                // console.log(timeline);
                 const monthBadges = Array.from(new Set(timeline.map((entry) => entry.monthLabel)));
+                const applicants = availability.applicantsAvailability || [];
+
                 return (
-                    <section key={gig.id} className="space-y-4 bg-transparent">
+                    <section key={gigId} className="space-y-4 bg-transparent">
                         <header className="space-y-3 overflow-x-auto no-scrollbar">
                             <p className="text-lg font-semibold text-gray-900">{gig.title}</p>
                             <div className="flex flex-row gap-2">
@@ -82,7 +174,7 @@ export function AvailabilityTab({ selectedGigIds }: AvailabilityTabProps) {
                                 {gig.dateWindows.map((window) => {
                                     const [month, year] = window.label.split(" ");
                                     return (
-                                        <div key={`${gig.id}-${window.label}`} className="flex items-center gap-3">
+                                        <div key={`${gigId}-${window.label}`} className="flex items-center gap-3">
                                             <span className="text-base font-semibold text-[#3B3B3B]">{year}</span>
                                             <span className="rounded-full bg-[#FA6E80] px-4 py-1 text-sm font-medium text-white">{month}</span>
                                             <span className="text-sm text-[#3B3B3B]">{window.range}</span>
@@ -94,85 +186,94 @@ export function AvailabilityTab({ selectedGigIds }: AvailabilityTabProps) {
                                 Showing availability for every requested day; days without data default to N/A.
                             </p>
                         </header>
-                        <div className="overflow-x-auto no-scrollbar">
-                            <table className="min-w-full border-separate border-spacing-x-[2px] border-spacing-y-[10px] text-sm">
-                                <thead>
-                                    <tr className="bg-gray-50 text-gray-600">
-                                        <th className="sticky left-0 bg-gray-50 px-1 py-2 text-left font-medium text-gray-700 flex flex-row  justify-center items-center">
-                                            {monthBadges.map((label) => (
-                                                <span
-                                                    key={label}
-                                                    className=" px-1 py-1 text-[14px] font-[400] text-[#FA6E80] "
-                                                >
-                                                    {label}
-                                                </span>
-                                            ))}
-                                        </th>
-                                        {timeline.map((entry) => (
-                                            <th
-                                                key={entry.key}
-                                                className="min-w-[32px] px-1 py-1 text-center text-xs font-semibold text-gray-500"
-                                            >
-                                                <span className="block text-[9px] uppercase tracking-wider text-gray-400">
-                                                    {entry.monthLabel.split(" ")[0]}
-                                                </span>
-                                                <span className="text-sm text-gray-900">{entry.dayLabel}</span>
+                        {applicants.length === 0 ? (
+                            <Card className="bg-white">
+                                <CardHeader>
+                                    <CardDescription>No applicants with availability data yet for this gig.</CardDescription>
+                                </CardHeader>
+                            </Card>
+                        ) : (
+                            <div className="overflow-x-auto no-scrollbar">
+                                <table className="min-w-full border-separate border-spacing-x-[2px] border-spacing-y-[10px] text-sm">
+                                    <thead>
+                                        <tr className="bg-gray-50 text-gray-600">
+                                            <th className="sticky left-0 bg-gray-50 px-1 py-2 text-left font-medium text-gray-700 flex flex-row justify-center items-center">
+                                                {monthBadges.map((label) => (
+                                                    <span
+                                                        key={label}
+                                                        className="px-1 py-1 text-[14px] font-[400] text-[#FA6E80]"
+                                                    >
+                                                        {label}
+                                                    </span>
+                                                ))}
                                             </th>
-                                        ))}
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-100 bg-white">
-                                    {sampleApplicants.map((person) => (
-                                        <tr key={`${gig.id}-availability-${person.id}`}>
-                                            <td className="sticky left-0 flex w-[160px] items-center justify-center gap-2 bg-white px-4 py-2">
-                                                <Image
-                                                    src={person.avatar}
-                                                    alt={person.name}
-                                                    width={32}
-                                                    height={32}
-                                                    className="h-8 w-8 rounded-full bg-gray-200"
-                                                />
-                                                <div>
-                                                    <p className="text-sm font-medium text-gray-900">{person.name}</p>
-                                                    {person.credits ? (
-                                                        <p className="text-xs text-[#31A7AC]">Credits added</p>
-                                                    ) : (
-                                                        <p className="text-xs text-[#31A7AC]">Credits pending</p>
-                                                    )}
-                                                </div>
-                                            </td>
-                                            {timeline.map((entry) => {
-                                                const dayKey = `${entry.monthLabel}-${entry.dayLabel}`;
-                                                const state = getAvailabilityState(person.id, dayKey);
-                                                if (state === "na") {
+                                            {timeline.map((entry) => (
+                                                <th
+                                                    key={entry.key}
+                                                    className="min-w-[32px] px-1 py-1 text-center text-xs font-semibold text-gray-500"
+                                                >
+                                                    <span className="block text-[9px] uppercase tracking-wider text-gray-400">
+                                                        {entry.monthLabel.split(" ")[0]}
+                                                    </span>
+                                                    <span className="text-sm text-gray-900">{entry.dayLabel}</span>
+                                                </th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-100 bg-white">
+                                        {applicants.map((applicant) => (
+                                            <tr key={`${gigId}-availability-${applicant.applicantId}`}>
+                                                <td className="sticky left-0 flex w-[160px] items-center justify-center gap-2 bg-white px-4 py-2">
+                                                    <Image
+                                                        src={applicant.avatar || '/default-profile.png'}
+                                                        alt={applicant.name}
+                                                        width={32}
+                                                        height={32}
+                                                        className="h-8 w-8 rounded-full bg-gray-200"
+                                                    />
+                                                    <div>
+                                                        <p className="text-sm font-medium text-gray-900">{applicant.name}</p>
+                                                        {applicant.creditsStatus === 'added' ? (
+                                                            <p className="text-xs text-[#31A7AC]">Credits added</p>
+                                                        ) : (
+                                                            <p className="text-xs text-[#31A7AC]">Credits pending</p>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                {timeline.map((entry) => {
+                                                    const dayKey = `${entry.monthLabel}-${entry.dayLabel}`;
+                                                    const state = applicant.schedule[dayKey] || 'na';
+                                                    
+                                                    if (state === "na") {
+                                                        return (
+                                                            <td key={entry.key} className="border h-[41px] w-[38px] px-2 py-1 text-center text-xs text-gray-400">
+                                                                N/A
+                                                            </td>
+                                                        );
+                                                    }
+                                                    if (state === "hold") {
+                                                        return (
+                                                            <td key={entry.key} className="border h-[41px] w-[38px] bg-[#6A89BE] px-2 py-1 text-center">
+                                                                <span className="inline-flex h-5 w-5 items-center justify-center rounded-md text-xs font-semibold text-black">
+                                                                    C
+                                                                </span>
+                                                            </td>
+                                                        );
+                                                    }
                                                     return (
-                                                        <td key={entry.key} className="border h-[41px] w-[38px] px-2 py-1 text-center text-xs text-gray-400">
-                                                            N/A
-                                                        </td>
-                                                    );
-                                                }
-                                                if (state === "hold") {
-                                                    return (
-                                                        <td key={entry.key} className="border h-[41px] w-[38px] bg-[#6A89BE] px-2 py-1 text-center">
-                                                            <span className="inline-flex h-5 w-5 items-center justify-center rounded-md text-xs font-semibold text-black">
-                                                                C
+                                                        <td key={entry.key} className="border h-[41px] w-[38px] bg-[#FCAF45] px-2 py-1 text-center">
+                                                            <span className="inline-flex h-5 w-5 items-center justify-center text-xs font-semibold text-black">
+                                                                A
                                                             </span>
                                                         </td>
                                                     );
-                                                }
-                                                return (
-                                                    <td key={entry.key} className="border h-[41px] w-[38px] bg-[#FCAF45] px-2 py-1 text-center">
-                                                        <span className="inline-flex h-5 w-5 items-center justify-center text-xs font-semibold text-black">
-                                                            P1
-                                                        </span>
-                                                    </td>
-                                                );
-                                            })}
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+                                                })}
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
                     </section>
                 );
             })}
