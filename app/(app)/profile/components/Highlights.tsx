@@ -89,15 +89,15 @@ export default function Highlights({ highlights: propHighlights }: HighlightsPro
                     </div>
                 </aside>
 
-                <div className="flex flex-col items-center gap-4">
-                    <HighlightsText letterClassName="h-[26px] w-[26px] gap-0" />
+                <div className="flex flex-col items-center" style={{ gap: '0px' }}>
+                    <HighlightsText />
                     <div
-                        className="h-full w-px rounded-full"
+                        className="rounded-full"
                         style={{
-                            border: '1px solid transparent',
-                            backgroundImage: 'linear-gradient(white, white), linear-gradient(180deg, #31A7AC 0%, #85AAB7 41.52%, #6A89BE 62.27%, #FA6E80 103.79%)',
-                            backgroundOrigin: 'border-box',
-                            backgroundClip: 'padding-box, border-box'
+                            width: '1px',
+                            height: '1501px',
+                            background: 'linear-gradient(180deg, #FA6E80 0%, #6A89BE 41.52%, #85AAB7 62.27%, #31A7AC 103.79%)',
+                            opacity: 1
                         }}
                         aria-hidden
                     />
