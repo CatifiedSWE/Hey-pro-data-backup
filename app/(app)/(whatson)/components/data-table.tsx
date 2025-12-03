@@ -70,7 +70,7 @@ export default function DataTable({
                                 <TableRow key={entry.id}>
                                     <TableCell className="flex items-center gap-3">
                                         <Image 
-                                            src={entry.user_profile?.profile_photo_url || "/assets/whatson/host-avatar.svg"} 
+                                            src={entry.user_profile?.profile_photo_url || "/default-profile.png"} 
                                             alt={entry.user_profile?.name || 'User'} 
                                             width={32} 
                                             height={32} 

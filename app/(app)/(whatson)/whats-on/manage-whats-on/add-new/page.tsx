@@ -18,7 +18,7 @@ const emptyEvent = {
     host: {
         name: "",
         organization: "",
-        avatar: "/assets/whatson/host-avatar.svg",
+        avatar: "/default-profile.png",
     },
     schedule: [],
     description: [""],

@@ -123,7 +123,7 @@ function CommentItem({ comment, depth = 0 }: { comment: CommentThread; depth?: n
     return (
         <div className="flex gap-3" style={{ paddingLeft: indent }}>
             <Image
-                src={comment.avatar || "/assets/avatar-placeholder.png"}
+                src={comment.avatar || "/default-profile.png"}
                 alt={comment.name}
                 width={45}
                 height={45}

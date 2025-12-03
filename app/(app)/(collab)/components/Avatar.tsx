@@ -12,7 +12,7 @@ type AvatarProps = {
     style?: React.CSSProperties;
 };
 
-const PLACEHOLDER_AVATAR = "/assets/profile-image.png";
+const PLACEHOLDER_AVATAR = "/default-profile.png";
 
 export function Avatar({ src, alt, width, height, className = "", style }: AvatarProps) {
     const [imgSrc, setImgSrc] = useState<string>(src || PLACEHOLDER_AVATAR);
