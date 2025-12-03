@@ -141,7 +141,7 @@ export async function POST(
           id: application.id,
           gigId: application.gig_id,
           status: application.status,
-          appliedAt: application.created_at
+          appliedAt: application.updated_at
         },
         'Application submitted successfully'
       ),
