@@ -85,12 +85,12 @@ const { id } = await params;
 - [x] `/app/app/api/slate/[id]/share/route.ts` ✅
 - [x] `/app/app/api/slate/comment/[commentId]/route.ts` ✅
 
-### What's On API (5 files) ⚠️ PARTIAL (3/5 DONE)
+### What's On API (5 files) ✅ ALL COMPLETE
 - [x] `/app/app/api/whatson/[id]/route.ts` ✅
-- [ ] `/app/app/api/whatson/[id]/rsvp/export/route.ts` ❌
+- [x] `/app/app/api/whatson/[id]/rsvp/export/route.ts` ✅
 - [x] `/app/app/api/whatson/[id]/rsvp/list/route.ts` ✅
 - [x] `/app/app/api/whatson/[id]/rsvp/route.ts` ✅
-- [ ] `/app/app/api/whatson/[id]/save/route.ts` ❌
+- [x] `/app/app/api/whatson/[id]/save/route.ts` ✅
 
 ---
 
