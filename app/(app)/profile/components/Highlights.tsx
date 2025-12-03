@@ -107,19 +107,29 @@ export default function Highlights({ highlights: propHighlights }: HighlightsPro
             <div className="flex flex-col gap-6 lg:hidden">
                 <Button
                     variant="outline"
-                    className="w-full h-11 rounded-[10px] border-[#31A7AC] text-black hover:bg-transparent"
+                    className="w-full h-11 rounded-[10px] border-[#31A7AC] text-black hover:bg-transparent font-medium"
                 >
                     Edit Highlights
                 </Button>
                 
-                <div className="flex items-center gap-4">
-                    <h2 className="text-2xl font-bold uppercase tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC]">
-                        Highlights
+                <div className="flex items-center gap-3">
+                    <h2 
+                        className="text-2xl font-bold uppercase tracking-widest"
+                        style={{
+                            background: 'linear-gradient(90deg, #FA6E80 0%, #6A89BE 41.52%, #85AAB7 62.27%, #31A7AC 103.79%)',
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                            backgroundClip: 'text',
+                            color: 'transparent'
+                        }}
+                    >
+                        HIGHLIGHTS
                     </h2>
                     <div 
                         className="h-[1px] flex-1 rounded-full"
                         style={{
-                            background: 'linear-gradient(90deg, #FA6E80 0%, #6A89BE 41.52%, #85AAB7 62.27%, #31A7AC 103.79%)'
+                            background: 'linear-gradient(90deg, #FA6E80 0%, #6A89BE 41.52%, #85AAB7 62.27%, #31A7AC 103.79%)',
+                            marginTop: '4px' // Slight optical adjustment to align with text center
                         }}
                     />
                 </div>
