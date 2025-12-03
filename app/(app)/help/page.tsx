@@ -178,7 +178,27 @@ export default function HelpPage() {
                                                 : "bg-[#F8F8F8] text-gray-800"
                                         }`}
                                     >
-                                        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                                        {message.sender === "bot" ? (
+                                            <div className="text-sm prose prose-sm max-w-none prose-headings:my-2 prose-p:my-1 prose-strong:font-bold">
+                                                <ReactMarkdown
+                                                    components={{
+                                                        h1: ({node, ...props}) => <h1 className="text-lg font-bold mt-2 mb-1" {...props} />,
+                                                        h2: ({node, ...props}) => <h2 className="text-base font-bold mt-2 mb-1" {...props} />,
+                                                        h3: ({node, ...props}) => <h3 className="text-sm font-bold mt-2 mb-1" {...props} />,
+                                                        h4: ({node, ...props}) => <h4 className="text-sm font-semibold mt-1 mb-1" {...props} />,
+                                                        p: ({node, ...props}) => <p className="my-1" {...props} />,
+                                                        strong: ({node, ...props}) => <strong className="font-bold" {...props} />,
+                                                        ul: ({node, ...props}) => <ul className="list-disc list-inside my-1" {...props} />,
+                                                        ol: ({node, ...props}) => <ol className="list-decimal list-inside my-1" {...props} />,
+                                                        li: ({node, ...props}) => <li className="my-0.5" {...props} />,
+                                                    }}
+                                                >
+                                                    {message.content}
+                                                </ReactMarkdown>
+                                            </div>
+                                        ) : (
+                                            <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                                        )}
                                     </div>
                                     <span className="text-xs text-gray-500 mt-1">
                                         {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
