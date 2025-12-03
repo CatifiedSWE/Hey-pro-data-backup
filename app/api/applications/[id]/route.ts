@@ -9,7 +9,7 @@ import { formatBudgetLabel } from '@/lib/supabase/helpers';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = createServerClient();
@@ -23,7 +23,7 @@ export async function GET(
       );
     }
 
-    const applicationId = params.id;
+    const { id: applicationId } = await params;
 
     // Fetch application with gig details
     const { data: application, error: applicationError } = await supabase
