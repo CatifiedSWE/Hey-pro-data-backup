@@ -214,6 +214,13 @@ export async function POST(request: NextRequest) {
     // Generate unique slug
     const slug = await generateUniqueSlug(body.title);
 
+    // Map frontend status to database status
+    // Frontend sends 'published' but DB expects 'active'
+    let dbStatus = body.status || 'active';
+    if (dbStatus === 'published') {
+      dbStatus = 'active';
+    }
+
     // Insert gig
     const { data: gig, error: gigError } = await supabase
       .from('gigs')
@@ -234,7 +241,7 @@ export async function POST(request: NextRequest) {
         expiry_date: body.expiryDate || null,
         supporting_file_label: body.supportingFileLabel || null,
         reference_url: body.referenceUrl || null,
-        status: body.status || 'active',
+        status: dbStatus,
         created_by: user.id
       })
       .select()
