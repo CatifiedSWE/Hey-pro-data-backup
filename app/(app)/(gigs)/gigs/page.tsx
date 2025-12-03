@@ -154,7 +154,7 @@ export default function GigsPage() {
 
                                     <div className="flex w-full flex-wrap gap-4 sm:flex-col lg:w-[260px]">
                                         <div className="flex-col hidden sm:flex items-start gap-1 text-right lg:items-end">
-                                            <span className="text-xs font-[400]  tracking-wide text-[#FA6E80]">Apply before {formatDate(gig.applyBefore)}</span>
+                                            {gig.applyBefore && <span className="text-xs font-[400]  tracking-wide text-[#FA6E80]">Apply before {formatDate(gig.applyBefore)}</span>}
                                         </div>
                                         <div>
                                             <p className="text-[14px] font-[400] text-[#444444] hidden sm:flex gap-1.5">{gig.budgetLabel}</p>
