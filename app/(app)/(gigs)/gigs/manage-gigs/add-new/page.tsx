@@ -724,6 +724,7 @@ export default function AddGigPage() {
                     <div className="mt-8 flex flex-col gap-3 border-t border-[#F0F0F0] pt-6 md:flex-row md:items-center md:justify-between">
                         <button
                             type="button"
+                            onClick={() => setOscarAiSuggestion(false)}
                             className="flex items-center gap-2 text-sm font-[400] text-[#F8C028]"
                         >
                             <Zap className="h-4 w-4" /> Return to Quick GIG
@@ -1046,6 +1047,7 @@ export default function AddGigPage() {
                     <div className="mt-8 flex flex-col gap-3 border-t-[2px] border-[#F0F0F0] pt-6 md:flex-row md:items-center md:justify-between">
                         <button
                             type="button"
+                            onClick={() => router.back()}
                             className="flex items-center gap-2 text-sm font-[400] "
                         >
                             Discard
