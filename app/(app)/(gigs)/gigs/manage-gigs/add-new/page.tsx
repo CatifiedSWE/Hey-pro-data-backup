@@ -406,7 +406,7 @@ export default function AddGigPage() {
                         </div>
                         <button
                             type="button"
-                            onClick={resetForm}
+                            onClick={() => router.back()}
                             className="text-2xl leading-none text-[#CECFD2] transition hover:text-[#7B7B7B]"
                             aria-label="Close"
                         >
@@ -866,7 +866,7 @@ export default function AddGigPage() {
                         </div>
                         <button
                             type="button"
-                            onClick={resetForm}
+                            onClick={() => router.back()}
                             className="text-2xl leading-none text-[#CECFD2] transition hover:text-[#7B7B7B]"
                             aria-label="Close"
                         >
