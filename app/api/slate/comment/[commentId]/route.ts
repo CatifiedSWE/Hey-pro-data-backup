@@ -141,7 +141,7 @@ export async function PATCH(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { commentId: string } }
+  { params }: { params: Promise<{ commentId: string }> }
 ) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -154,7 +154,7 @@ export async function DELETE(
       );
     }
 
-    const commentId = params.commentId;
+    const { commentId } = await params;
     const supabase = createServerClient();
 
     // Verify comment exists and user is owner
