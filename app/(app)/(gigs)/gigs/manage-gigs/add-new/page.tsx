@@ -538,6 +538,9 @@ export default function AddGigPage() {
                                         {calendarDays.map((day, index) => {
                                             const dayNumber = day.getDate()
                                             const isCurrentMonthDay = isSameMonth(day, currentMonth)
+                                            const isPastDate = isBefore(day, startOfToday())
+                                            const isDisabled = !isCurrentMonthDay || isPastDate
+                                            
                                             const dayKey = getDateKey(day)
                                             const isSelected = isCurrentMonthDay && selectedDates.includes(dayKey)
                                             const columnIndex = index % 7
@@ -572,15 +575,14 @@ export default function AddGigPage() {
                                                 <button
                                                     key={day.toISOString()}
                                                     type="button"
-                                                    disabled={!isCurrentMonthDay}
+                                                    disabled={isDisabled}
                                                     onClick={() => toggleDate(day)}
                                                     className={cn(
                                                         "flex h-[40px] w-full items-center justify-center text-[18px] font-[400] transition",
                                                         shapeClass,
-                                                        !isCurrentMonthDay && "text-[#D7E3E5]",
-                                                        isCurrentMonthDay && !isSelected && "text-[#199490]",
-                                                        isSelected && "bg-[#1FB3B0] text-white",
-                                                        !isCurrentMonthDay && "cursor-default"
+                                                        isDisabled && "text-[#D7E3E5] cursor-not-allowed",
+                                                        !isDisabled && !isSelected && "text-[#199490] hover:bg-[#F0F0F0] rounded-full",
+                                                        isSelected && "bg-[#1FB3B0] text-white"
                                                     )}
                                                 >
                                                     {dayNumber}
@@ -932,6 +934,9 @@ export default function AddGigPage() {
                                         {calendarDays.map((day, index) => {
                                             const dayNumber = day.getDate()
                                             const isCurrentMonthDay = isSameMonth(day, currentMonth)
+                                            const isPastDate = isBefore(day, startOfToday())
+                                            const isDisabled = !isCurrentMonthDay || isPastDate
+                                            
                                             const dayKey = getDateKey(day)
                                             const isSelected = isCurrentMonthDay && selectedDates.includes(dayKey)
                                             const columnIndex = index % 7
@@ -966,15 +971,14 @@ export default function AddGigPage() {
                                                 <button
                                                     key={day.toISOString()}
                                                     type="button"
-                                                    disabled={!isCurrentMonthDay}
+                                                    disabled={isDisabled}
                                                     onClick={() => toggleDate(day)}
                                                     className={cn(
                                                         "flex h-[40px] w-full items-center justify-center text-[18px] font-[400] transition",
                                                         shapeClass,
-                                                        !isCurrentMonthDay && "text-[#D7E3E5]",
-                                                        isCurrentMonthDay && !isSelected && "text-[#199490]",
-                                                        isSelected && "bg-[#1FB3B0] text-white",
-                                                        !isCurrentMonthDay && "cursor-default"
+                                                        isDisabled && "text-[#D7E3E5] cursor-not-allowed",
+                                                        !isDisabled && !isSelected && "text-[#199490] hover:bg-[#F0F0F0] rounded-full",
+                                                        isSelected && "bg-[#1FB3B0] text-white"
                                                     )}
                                                 >
                                                     {dayNumber}
