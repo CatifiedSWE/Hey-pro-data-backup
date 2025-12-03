@@ -524,7 +524,6 @@ export default function AddGigPage() {
                                             <ChevronRight className="h-4 w-4 text-[#FA596E]" />
                                         </Button>
                                     </div>
-                                    <CalendarIcon className="h-4 w-4 text-[#FF5470]" />
                                 </div>
 
 
@@ -919,7 +918,6 @@ export default function AddGigPage() {
                                             <ChevronRight className="h-4 w-4 text-[#FA596E]" />
                                         </Button>
                                     </div>
-                                    <CalendarIcon className="h-4 w-4 text-[#FF5470]" />
                                 </div>
 
 
