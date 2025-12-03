@@ -286,7 +286,7 @@ export default function ManageWhatsOnPage() {
 
             {events.length === 0 && !loading && (
                 <div className="text-center py-12">
-                    <p className="text-gray-500 text-lg mb-4">You haven't created any events yet</p>
+                    <p className="text-gray-500 text-lg mb-4">You haven&apos;t created any events yet</p>
                     <Link
                         href="/whats-on/manage-whats-on/add-new"
                         className="inline-block bg-[#31A7AC] text-white px-6 py-3 rounded-full hover:bg-[#288a8e] transition-colors"
