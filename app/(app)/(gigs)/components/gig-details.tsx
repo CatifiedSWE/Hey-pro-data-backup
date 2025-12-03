@@ -96,7 +96,13 @@ export default function GigDetails(gig: GigsDataType[0]) {
 
       <div className="mt-6 flex flex-col gap-6">
         <div className="flex flex-wrap items-center gap-4">
-          <Image src={gig.postedBy.avatar} alt={gig.postedBy.name} width={24} height={24} className="rounded-full" />
+          {gig.postedBy.avatar && gig.postedBy.avatar.trim() !== "" ? (
+            <Image src={gig.postedBy.avatar} alt={gig.postedBy.name} width={24} height={24} className="rounded-full" />
+          ) : (
+            <div className="h-6 w-6 rounded-full bg-gray-200 flex items-center justify-center text-xs text-gray-500">
+              {gig.postedBy.name.charAt(0).toUpperCase()}
+            </div>
+          )}
           <div>
             <p className="text-[16px] font-[400] text-slate-900">{gig.postedBy.name}</p>
             <p className="text-[9px] text-[#444444]">Posted on {gig.postedOn}</p>
