@@ -151,7 +151,7 @@ const ManageCard = ({
                     <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
                         <h3 className="text-lg font-semibold mb-2">Delete Event</h3>
                         <p className="text-gray-600 mb-6">
-                            Are you sure you want to delete "{event.title}"? This action cannot be undone.
+                            Are you sure you want to delete &quot;{event.title}&quot;? This action cannot be undone.
                         </p>
                         <div className="flex gap-3 justify-end">
                             <button
