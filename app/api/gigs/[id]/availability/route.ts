@@ -123,7 +123,7 @@ export async function GET(
         const { data: profile } = await supabase
           .from('user_profiles')
           .select('name, profile_photo_url')
-          .eq('id', app.applicant_user_id)
+          .eq('user_id', app.applicant_user_id)
           .maybeSingle();
 
         // Get user credits to check status
