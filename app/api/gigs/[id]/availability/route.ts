@@ -8,7 +8,7 @@ import { validateAuthToken, successResponse, errorResponse } from '@/lib/supabas
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = createServerClient();
@@ -22,7 +22,7 @@ export async function GET(
       );
     }
 
-    const gigId = params.id;
+    const { id: gigId } = await params;
 
     // Verify user is gig creator
     const { data: gig, error: gigError } = await supabase
