@@ -153,7 +153,7 @@ export default function GigsPage() {
                                     <div className="hidden lg:block lg:w-px max-h-[271px] mr-4 lg:bg-slate-200" aria-hidden />
 
                                     <div className="flex w-full flex-wrap gap-4 sm:flex-col lg:w-[260px]">
-                                        <div className="flex-col hidden sm:flex items-start gap-1 text-right lg:items-end">
+                                        <div className="flex flex-col items-start gap-1 text-left sm:text-right lg:items-end">
                                             {gig.applyBefore && <span className="text-xs font-[400]  tracking-wide text-[#FA6E80]">Apply before {formatDate(gig.applyBefore)}</span>}
                                         </div>
                                         <div>
