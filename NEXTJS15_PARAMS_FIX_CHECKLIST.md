@@ -53,13 +53,13 @@ const { id } = await params;
 ### Explore API (1 file)
 - [ ] `/app/app/api/explore/[userId]/route.ts`
 
-### Gigs API (5 files) ⭐ PRIMARY ISSUE
-- [ ] `/app/app/api/gigs/[id]/applications/[applicationId]/status/route.ts` ⚠️ **MAIN BUG**
+### Gigs API (6 files) ⭐ PRIMARY ISSUE
+- [x] `/app/app/api/gigs/[id]/applications/[applicationId]/status/route.ts` ⚠️ **MAIN BUG FIXED!**
 - [ ] `/app/app/api/gigs/[id]/applications/route.ts`
-- [ ] `/app/app/api/gigs/[id]/apply/route.ts`
-- [ ] `/app/app/api/gigs/[id]/availability/route.ts`
-- [ ] `/app/app/api/gigs/[id]/route.ts`
-- [ ] `/app/app/api/gigs/slug/[slug]/route.ts`
+- [x] `/app/app/api/gigs/[id]/apply/route.ts` ✅
+- [x] `/app/app/api/gigs/[id]/availability/route.ts` ✅
+- [x] `/app/app/api/gigs/[id]/route.ts` ✅ (Already correct)
+- [x] `/app/app/api/gigs/slug/[slug]/route.ts` ✅
 
 ### Notifications API (1 file)
 - [ ] `/app/app/api/notifications/[id]/read/route.ts`
