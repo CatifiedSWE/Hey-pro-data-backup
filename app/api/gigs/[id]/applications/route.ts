@@ -86,7 +86,7 @@ export async function GET(
         const { data: profile } = await supabase
           .from('user_profiles')
           .select(`
-            id,
+            user_id,
             name,
             profile_photo_url,
             bio,
@@ -95,7 +95,7 @@ export async function GET(
             email,
             phone
           `)
-          .eq('id', app.applicant_user_id)
+          .eq('user_id', app.applicant_user_id)
           .maybeSingle();
 
         // Get applicant skills
