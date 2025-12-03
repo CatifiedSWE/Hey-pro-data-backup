@@ -8,7 +8,7 @@ import { calculateAndUpdateProfileCompletion } from '@/lib/profile-completion';
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -23,7 +23,7 @@ export async function PATCH(
 
     const supabase = createServerClient();
     const body = await request.json();
-    const { id: skillId } = await params;
+    const skillId = params.id;
     const { description, sort_order } = body;
 
     // Build update object with only provided fields
@@ -84,7 +84,7 @@ export async function PATCH(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -98,7 +98,7 @@ export async function DELETE(
     }
 
     const supabase = createServerClient();
-    const { id: skillId } = await params;
+    const skillId = params.id;
 
     // Delete skill
     const { data, error } = await supabase
