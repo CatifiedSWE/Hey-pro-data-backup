@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
         updated_at
       `, { count: 'exact' })
       .eq('status', 'active')
-      .gt('expiry_date', new Date().toISOString())
+      .or('expiry_date.gt.' + new Date().toISOString() + ',expiry_date.is.null')
       .order('created_at', { ascending: false });
     
     // Apply filters
