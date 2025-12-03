@@ -23,6 +23,7 @@ const publicRoutes = [
   '/forget-password',
   '/reset-password',
   '/form',
+  '/help',
 ];
 
 // Routes that authenticated users should be redirected away from
