@@ -62,8 +62,12 @@ export async function GET(
 
     // Fetch user profiles for all comment authors
     let userProfiles: Record<string, any> = {};
+    let googleAvatars: Record<string, string> = {};
+    
     if (comments && comments.length > 0) {
       const userIds = [...new Set(comments.map(c => c.user_id))];
+      
+      // Fetch user profiles
       const { data: profiles } = await supabase
         .from('user_profiles')
         .select('user_id, alias_first_name, alias_surname, profile_photo_url')
@@ -74,6 +78,16 @@ export async function GET(
           acc[profile.user_id] = profile;
           return acc;
         }, {} as Record<string, any>);
+      }
+
+      // Fetch Google auth avatars as fallback
+      const { data: authData } = await supabase.auth.admin.listUsers();
+      if (authData?.users) {
+        authData.users.forEach(authUser => {
+          if (userIds.includes(authUser.id) && (authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture)) {
+            googleAvatars[authUser.id] = authUser.user_metadata.avatar_url || authUser.user_metadata.picture;
+          }
+        });
       }
     }
 
@@ -87,7 +101,7 @@ export async function GET(
       author: {
         id: comment.user_id,
         name: `${userProfiles[comment.user_id]?.alias_first_name || ''} ${userProfiles[comment.user_id]?.alias_surname || ''}`.trim(),
-        avatar: userProfiles[comment.user_id]?.profile_photo_url || '',
+        avatar: userProfiles[comment.user_id]?.profile_photo_url || googleAvatars[comment.user_id] || '',
       },
     })) || [];
 
@@ -218,6 +232,8 @@ export async function POST(
 
     // Fetch user profile for comment author
     let userProfile: any = null;
+    let googleAvatar: string = '';
+    
     if (comment.user_id) {
       const { data: profile } = await supabase
         .from('user_profiles')
@@ -225,6 +241,12 @@ export async function POST(
         .eq('user_id', comment.user_id)
         .single();
       userProfile = profile;
+
+      // Fetch Google auth avatar as fallback
+      const { data: { user: authUser } } = await supabase.auth.admin.getUserById(comment.user_id);
+      if (authUser?.user_metadata?.avatar_url || authUser?.user_metadata?.picture) {
+        googleAvatar = authUser.user_metadata.avatar_url || authUser.user_metadata.picture;
+      }
     }
 
     // Format response
@@ -237,7 +259,7 @@ export async function POST(
       author: {
         id: comment.user_id,
         name: `${userProfile?.alias_first_name || ''} ${userProfile?.alias_surname || ''}`.trim(),
-        avatar: userProfile?.profile_photo_url || '',
+        avatar: userProfile?.profile_photo_url || googleAvatar || '',
       },
     };
 

@@ -92,6 +92,8 @@ export async function PATCH(
 
     // Fetch user profile for comment author
     let userProfile: any = null;
+    let googleAvatar: string = '';
+    
     if (updatedComment.user_id) {
       const { data: profile } = await supabase
         .from('user_profiles')
@@ -99,6 +101,12 @@ export async function PATCH(
         .eq('user_id', updatedComment.user_id)
         .single();
       userProfile = profile;
+
+      // Fetch Google auth avatar as fallback
+      const { data: { user: authUser } } = await supabase.auth.admin.getUserById(updatedComment.user_id);
+      if (authUser?.user_metadata?.avatar_url || authUser?.user_metadata?.picture) {
+        googleAvatar = authUser.user_metadata.avatar_url || authUser.user_metadata.picture;
+      }
     }
 
     // Format response
@@ -111,7 +119,7 @@ export async function PATCH(
       author: {
         id: updatedComment.user_id,
         name: `${userProfile?.alias_first_name || ''} ${userProfile?.alias_surname || ''}`.trim(),
-        avatar: userProfile?.profile_photo_url || '',
+        avatar: userProfile?.profile_photo_url || googleAvatar || '',
       },
     };
 

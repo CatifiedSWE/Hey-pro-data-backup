@@ -54,6 +54,8 @@ export async function GET(
 
     // Fetch user profile for post author
     let userProfile: any = null;
+    let googleAvatar: string = '';
+    
     if (post.user_id) {
       const { data: profile } = await supabase
         .from('user_profiles')
@@ -61,6 +63,12 @@ export async function GET(
         .eq('user_id', post.user_id)
         .single();
       userProfile = profile;
+
+      // Fetch Google auth avatar as fallback
+      const { data: { user: authUser } } = await supabase.auth.admin.getUserById(post.user_id);
+      if (authUser?.user_metadata?.avatar_url || authUser?.user_metadata?.picture) {
+        googleAvatar = authUser.user_metadata.avatar_url || authUser.user_metadata.picture;
+      }
     }
 
     // Check if user has liked/saved (if authenticated)
@@ -99,7 +107,7 @@ export async function GET(
       author: {
         id: post.user_id,
         name: `${userProfile?.alias_first_name || ''} ${userProfile?.alias_surname || ''}`.trim(),
-        avatar: userProfile?.profile_photo_url || '',
+        avatar: userProfile?.profile_photo_url || googleAvatar || '',
       },
       media: post.media?.sort((a, b) => a.sort_order - b.sort_order) || [],
       user_has_liked: userHasLiked,

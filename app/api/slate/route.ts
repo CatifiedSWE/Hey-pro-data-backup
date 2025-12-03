@@ -67,8 +67,12 @@ export async function GET(request: NextRequest) {
 
     // Fetch user profiles for all post authors
     let userProfiles: Record<string, any> = {};
+    let googleAvatars: Record<string, string> = {};
+    
     if (posts && posts.length > 0) {
       const userIds = [...new Set(posts.map(p => p.user_id))];
+      
+      // Fetch user profiles
       const { data: profiles } = await supabase
         .from('user_profiles')
         .select('user_id, alias_first_name, alias_surname, profile_photo_url')
@@ -79,6 +83,16 @@ export async function GET(request: NextRequest) {
           acc[profile.user_id] = profile;
           return acc;
         }, {} as Record<string, any>);
+      }
+
+      // Fetch Google auth avatars as fallback
+      const { data: authData } = await supabase.auth.admin.listUsers();
+      if (authData?.users) {
+        authData.users.forEach(authUser => {
+          if (userIds.includes(authUser.id) && (authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture)) {
+            googleAvatars[authUser.id] = authUser.user_metadata.avatar_url || authUser.user_metadata.picture;
+          }
+        });
       }
     }
 
@@ -118,7 +132,7 @@ export async function GET(request: NextRequest) {
       author: {
         id: post.user_id,
         name: `${userProfiles[post.user_id]?.alias_first_name || ''} ${userProfiles[post.user_id]?.alias_surname || ''}`.trim(),
-        avatar: userProfiles[post.user_id]?.profile_photo_url || '',
+        avatar: userProfiles[post.user_id]?.profile_photo_url || googleAvatars[post.user_id] || '',
       },
       media: post.media?.sort((a, b) => a.sort_order - b.sort_order) || [],
       user_has_liked: userLikes.includes(post.id),
