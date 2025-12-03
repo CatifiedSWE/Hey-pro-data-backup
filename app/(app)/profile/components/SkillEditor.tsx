@@ -127,9 +127,19 @@ interface SkillEditorProps {
     initialSkills: Skill[];
     trigger: React.ReactNode;
     onUpdate?: () => void;
+    initialSelectedSkillId?: string | null;
+    isOpen?: boolean;
+    onOpenChange?: (open: boolean) => void;
 }
 
-export default function SkillEditor({ initialSkills, trigger, onUpdate }: SkillEditorProps) {
+export default function SkillEditor({ 
+    initialSkills, 
+    trigger, 
+    onUpdate,
+    initialSelectedSkillId = null,
+    isOpen: controlledIsOpen,
+    onOpenChange: controlledOnOpenChange
+}: SkillEditorProps) {
     const hydrateSkill = (skill: Skill): Skill => ({
         ...skill,
         experience: skill.experience ?? { value: "intern", title: "Intern", description: "helped on set, shadowed role" },
@@ -138,7 +148,7 @@ export default function SkillEditor({ initialSkills, trigger, onUpdate }: SkillE
     });
 
     const [skills, setSkills] = useState<Skill[]>(initialSkills.map(hydrateSkill));
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [internalIsOpen, setInternalIsOpen] = useState(false);
     const [isReorderOpen, setIsReorderOpen] = useState(false);
     const [tempSkills, setTempSkills] = useState<Skill[]>([]);
     const [selectedSkillId, setSelectedSkillId] = useState<string>(initialSkills[0]?.id || '');
@@ -149,6 +159,10 @@ export default function SkillEditor({ initialSkills, trigger, onUpdate }: SkillE
     
     // Get profile methods
     const { updateSkill, deleteSkill, fetchSkills } = useProfile();
+
+    // Use controlled or internal state for dialog open
+    const isDialogOpen = controlledIsOpen !== undefined ? controlledIsOpen : internalIsOpen;
+    const setIsDialogOpen = controlledOnOpenChange || setInternalIsOpen;
 
     const sensors = useSensors(
         useSensor(PointerSensor),
@@ -296,8 +310,17 @@ export default function SkillEditor({ initialSkills, trigger, onUpdate }: SkillE
     const handleDialogOpenChange = (open: boolean) => {
         setIsDialogOpen(open);
         if (open && skills.length > 0) {
-            // Initialize editing with the first skill or the previously selected one
-            const skillToEdit = skills.find(s => s.id === selectedSkillId) || skills[0];
+            // If initialSelectedSkillId is provided, use it; otherwise use the first skill
+            let skillToEdit: Skill | undefined;
+            
+            if (initialSelectedSkillId) {
+                skillToEdit = skills.find(s => s.id === initialSelectedSkillId);
+            }
+            
+            if (!skillToEdit) {
+                skillToEdit = skills.find(s => s.id === selectedSkillId) || skills[0];
+            }
+            
             setSelectedSkillId(skillToEdit.id);
             setEditingSkill({ ...skillToEdit });
         } else {

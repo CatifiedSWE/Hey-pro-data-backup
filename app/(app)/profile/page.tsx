@@ -371,10 +371,36 @@ export default function Profile() {
   )
 }
 
-function SkillItem({ department, role, description, experience }: { department: string; role: string; description?: string; experience?: { value: string; title: string; description: string; } }) {
+function SkillItem({ 
+  id,
+  department, 
+  role, 
+  description, 
+  experience,
+  onEdit 
+}: { 
+  id: string;
+  department: string; 
+  role: string; 
+  description?: string; 
+  experience?: { value: string; title: string; description: string; };
+  onEdit?: () => void;
+}) {
   return (
-    <div className="space-y-2 ">
-      <h3 className="text-base font-[400] text-[#000] sm:text-lg">{department} <span className="text-5xl">.</span> {role}</h3>
+    <div className="space-y-2 group relative">
+      <div className="flex items-start justify-between gap-2">
+        <h3 className="text-base font-[400] text-[#000] sm:text-lg flex-1">{department} <span className="text-5xl">.</span> {role}</h3>
+        {onEdit && (
+          <Button
+            onClick={onEdit}
+            size="icon"
+            variant="ghost"
+            className="h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity text-[#31A7AC] hover:bg-[#E7FAFC]"
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
       {description && <p className="text-sm leading-relaxed text-[#444444]">{description}</p>}
       {experience && (
         <div className="space-y-2 ml-10 ">
@@ -485,6 +511,14 @@ function SkillsSectionWrapper({ skills, onUpdate }: { skills: any[]; onUpdate: (
 }
 
 function SkillsSection({ skills, onUpdate }: { skills: { id: string, department: string, role: string, description: string, experience?: { value: string; title: string; description: string; } }[]; onUpdate: () => void }) {
+  const [selectedSkillId, setSelectedSkillId] = useState<string | null>(null);
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
+
+  const handleEditSkill = (skillId: string) => {
+    setSelectedSkillId(skillId);
+    setIsEditorOpen(true);
+  };
+
   return (
     <div className="w-full rounded-[20px] bg-[#FAFAFA] px-6 py-7 shadow-[0_1px_10px_rgba(0,0,0,0.1)] sm:px-10 sm:py-9">
       <div className="mb-5 flex items-center justify-between">
@@ -501,6 +535,9 @@ function SkillsSection({ skills, onUpdate }: { skills: { id: string, department:
           <SkillEditor
             initialSkills={skills}
             onUpdate={onUpdate}
+            initialSelectedSkillId={selectedSkillId}
+            isOpen={isEditorOpen}
+            onOpenChange={setIsEditorOpen}
             trigger={
               <Button size="icon" variant="default" className="rounded-full border border-[#31A7AC]/30 bg-[#31A7AC] text-[#ffffff]">
                 <Edit className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -512,7 +549,15 @@ function SkillsSection({ skills, onUpdate }: { skills: { id: string, department:
       </div>
       <div className="space-y-4">
         {skills.map((skill, index) => (
-          <SkillItem key={skill.id || index} department={skill.department} role={skill.role} description={skill.description} experience={skill.experience} />
+          <SkillItem 
+            key={skill.id || index} 
+            id={skill.id}
+            department={skill.department} 
+            role={skill.role} 
+            description={skill.description} 
+            experience={skill.experience}
+            onEdit={() => handleEditSkill(skill.id)}
+          />
         ))}
       </div>
     </div>
