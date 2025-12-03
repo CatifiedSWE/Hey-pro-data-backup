@@ -1,98 +1,189 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Heart, MessageCircle, Send, MapPin, Calendar, Users, Bookmark } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import axios from "@/lib/axios";
+import { useAuth } from "@/contexts/AuthContext";
+import { format } from "date-fns";
+
+interface SavedSlate {
+    id: string;
+    content: string;
+    slug: string;
+    status: string;
+    likes_count: number;
+    comments_count: number;
+    shares_count: number;
+    created_at: string;
+    updated_at: string;
+    saved_at: string;
+    author: {
+        id: string;
+        name: string;
+        avatar: string;
+    };
+    media: Array<{
+        id: string;
+        media_url: string;
+        media_type: string;
+        sort_order: number;
+    }>;
+    user_has_liked: boolean;
+    user_has_saved: boolean;
+}
+
+interface SavedCollab {
+    id: string;
+    title: string;
+    slug: string;
+    summary: string;
+    cover_image_url: string;
+    status: string;
+    tags: string[];
+    interests: number;
+    created_at: string;
+    updated_at: string;
+    saved_at: string;
+    author: {
+        id: string;
+        name: string;
+        avatar: string;
+    };
+    user_has_saved: boolean;
+}
+
+interface SavedEvent {
+    id: string;
+    title: string;
+    slug: string;
+    description: string;
+    location: string;
+    is_online: boolean;
+    is_paid: boolean;
+    price_amount: number;
+    price_currency: string;
+    thumbnail_url: string;
+    hero_image_url: string;
+    status: string;
+    schedule: Array<{
+        event_date: string;
+        start_time: string;
+        end_time: string;
+        timezone: string;
+    }>;
+    tags: string[];
+    rsvp_count: number;
+    created_at: string;
+    updated_at: string;
+    saved_at: string;
+    creator: {
+        id: string;
+        name: string;
+        avatar: string;
+    };
+    user_has_saved: boolean;
+}
 
 export default function SavedPage() {
-    const [loading] = useState(false);
+    const { user } = useAuth();
+    const [savedSlates, setSavedSlates] = useState<SavedSlate[]>([]);
+    const [savedCollabs, setSavedCollabs] = useState<SavedCollab[]>([]);
+    const [savedWhatsOn, setSavedWhatsOn] = useState<SavedEvent[]>([]);
+    const [loading, setLoading] = useState({
+        slates: true,
+        collabs: true,
+        whatsOn: true
+    });
+    const [errors, setErrors] = useState({
+        slates: null as string | null,
+        collabs: null as string | null,
+        whatsOn: null as string | null
+    });
 
-    // Mock data for saved items
-    const savedSlates = [
-        {
-            id: "1",
-            profileAvatar: "/default-profile.png",
-            profileName: "Sarah Johnson",
-            role: "Director",
-            totalRoles: "12 Roles",
-            noLike: 245,
-            noComment: 38,
-            slateSrc: "/slate.png",
-            description: "Just wrapped up an amazing shoot in the desert. The lighting was perfect and the crew was incredible. Can't wait to share the final cut with you all!",
-            savedAt: "2 days ago"
-        },
-        {
-            id: "2",
-            profileAvatar: "/default-profile.png",
-            profileName: "Michael Chen",
-            role: "Cinematographer",
-            totalRoles: "8 Roles",
-            noLike: 189,
-            noComment: 24,
-            slateSrc: "/whats-on.png",
-            description: "New camera test with the latest cinema camera. The dynamic range is absolutely stunning!",
-            savedAt: "5 days ago"
-        }
-    ];
+    // Fetch saved slates
+    useEffect(() => {
+        const fetchSavedSlates = async () => {
+            if (!user) return;
+            
+            try {
+                setLoading(prev => ({ ...prev, slates: true }));
+                const response = await axios.get('/slate/saved');
+                setSavedSlates(response.data.data.posts || []);
+                setErrors(prev => ({ ...prev, slates: null }));
+            } catch (error: any) {
+                console.error('Error fetching saved slates:', error);
+                setErrors(prev => ({ ...prev, slates: error.response?.data?.error || 'Failed to load saved slates' }));
+            } finally {
+                setLoading(prev => ({ ...prev, slates: false }));
+            }
+        };
+        
+        fetchSavedSlates();
+    }, [user]);
 
-    const savedCollabs = [
-        {
-            id: "1",
-            title: "Looking for Cinematographer",
-            summary: "We're creating a short documentary about urban life and need a skilled cinematographer who can capture authentic moments.",
-            tags: ["Documentary", "Urban", "Cinema"],
-            coverImage: "/slate.png",
-            interests: 23,
-            author: {
-                name: "Emma Wilson",
-                avatar: "/default-profile.png"
-            },
-            savedAt: "1 week ago"
-        },
-        {
-            id: "2",
-            title: "Indie Film Production Team",
-            summary: "Building a team for an indie film project. Looking for passionate crew members who want to create something special.",
-            tags: ["Indie Film", "Production", "Team"],
-            coverImage: "/whats-on.png",
-            interests: 45,
-            author: {
-                name: "David Martinez",
-                avatar: "/default-profile.png"
-            },
-            savedAt: "2 weeks ago"
-        }
-    ];
+    // Fetch saved collabs
+    useEffect(() => {
+        const fetchSavedCollabs = async () => {
+            if (!user) return;
+            
+            try {
+                setLoading(prev => ({ ...prev, collabs: true }));
+                const response = await axios.get('/collab/saved');
+                setSavedCollabs(response.data.data.collabs || []);
+                setErrors(prev => ({ ...prev, collabs: null }));
+            } catch (error: any) {
+                console.error('Error fetching saved collabs:', error);
+                setErrors(prev => ({ ...prev, collabs: error.response?.data?.error || 'Failed to load saved collabs' }));
+            } finally {
+                setLoading(prev => ({ ...prev, collabs: false }));
+            }
+        };
+        
+        fetchSavedCollabs();
+    }, [user]);
 
-    const savedWhatsOn = [
-        {
-            id: "1",
-            title: "Film Industry Networking Night",
-            description: "Join us for an evening of networking with fellow filmmakers, producers, and creatives from across the industry.",
-            location: "Dubai Media City",
-            date: "March 15, 2025",
-            time: "7:00 PM - 10:00 PM",
-            image: "/slate.png",
-            attendees: 67,
-            price: "Free",
-            savedAt: "3 days ago"
-        },
-        {
-            id: "2",
-            title: "Camera Workshop: Mastering Lighting",
-            description: "Hands-on workshop covering advanced lighting techniques for cinematographers and DOPs.",
-            location: "Abu Dhabi Film Studio",
-            date: "March 22, 2025",
-            time: "2:00 PM - 6:00 PM",
-            image: "/whats-on.png",
-            attendees: 32,
-            price: "AED 250",
-            savedAt: "1 week ago"
+    // Fetch saved what's on events
+    useEffect(() => {
+        const fetchSavedWhatsOn = async () => {
+            if (!user) return;
+            
+            try {
+                setLoading(prev => ({ ...prev, whatsOn: true }));
+                const response = await axios.get('/whatson/saved');
+                setSavedWhatsOn(response.data.data.events || []);
+                setErrors(prev => ({ ...prev, whatsOn: null }));
+            } catch (error: any) {
+                console.error('Error fetching saved events:', error);
+                setErrors(prev => ({ ...prev, whatsOn: error.response?.data?.error || 'Failed to load saved events' }));
+            } finally {
+                setLoading(prev => ({ ...prev, whatsOn: false }));
+            }
+        };
+        
+        fetchSavedWhatsOn();
+    }, [user]);
+
+    // Format relative time
+    const formatRelativeTime = (dateString: string) => {
+        try {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+            
+            if (diffInSeconds < 60) return 'Just now';
+            if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+            if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+            if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} days ago`;
+            if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 604800)} weeks ago`;
+            return format(date, 'MMM d, yyyy');
+        } catch {
+            return 'Recently';
         }
-    ];
+    };
 
     return (
         <div className="container mx-auto px-4 py-6 max-w-7xl">
@@ -112,7 +203,12 @@ export default function SavedPage() {
 
                 {/* Slates Tab */}
                 <TabsContent value="slates" data-testid="slates-content">
-                    {loading ? (
+                    {errors.slates && (
+                        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                            <p className="text-red-600 text-sm">{errors.slates}</p>
+                        </div>
+                    )}
+                    {loading.slates ? (
                         <div className="space-y-4">
                             {[1, 2, 3].map((i) => <SlateSkeleton key={i} />)}
                         </div>
@@ -129,25 +225,24 @@ export default function SavedPage() {
                                     <div className="flex items-center justify-between mb-4">
                                         <div className="flex items-center">
                                             <Image
-                                                src={slate.profileAvatar}
-                                                alt={slate.profileName}
+                                                src={slate.author.avatar || "/default-profile.png"}
+                                                alt={slate.author.name}
                                                 width={44}
                                                 height={44}
                                                 className="w-11 h-11 rounded-full mr-4 object-cover"
                                             />
                                             <div>
-                                                <h3 className="font-semibold text-lg">{slate.profileName}</h3>
-                                                <p className="text-sm text-gray-600">{slate.role} + {slate.totalRoles}</p>
+                                                <h3 className="font-semibold text-lg">{slate.author.name || 'Anonymous'}</h3>
+                                                <p className="text-sm text-gray-600">Saved {formatRelativeTime(slate.saved_at)}</p>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <Bookmark className="h-5 w-5 fill-[#FA6E80] text-[#FA6E80]" />
-                                            <span className="text-xs text-gray-500">{slate.savedAt}</span>
                                         </div>
                                     </div>
-                                    {slate.slateSrc && (
+                                    {slate.media && slate.media.length > 0 && (
                                         <Image
-                                            src={slate.slateSrc}
+                                            src={slate.media[0].media_url}
                                             alt="Slate image"
                                             width={520}
                                             height={520}
@@ -156,18 +251,19 @@ export default function SavedPage() {
                                     )}
                                     <div className="flex gap-4 mb-3">
                                         <button className="flex items-center gap-2 text-gray-700 hover:text-[#FA6E80]">
-                                            <Heart className="h-6 w-6" />
-                                            <span className="text-sm">{slate.noLike}</span>
+                                            <Heart className={`h-6 w-6 ${slate.user_has_liked ? 'fill-[#FA6E80] text-[#FA6E80]' : ''}`} />
+                                            <span className="text-sm">{slate.likes_count}</span>
                                         </button>
                                         <button className="flex items-center gap-2 text-gray-700 hover:text-[#FA6E80]">
                                             <MessageCircle className="h-6 w-6" />
-                                            <span className="text-sm">{slate.noComment}</span>
+                                            <span className="text-sm">{slate.comments_count}</span>
                                         </button>
                                         <button className="flex items-center gap-2 text-gray-700 hover:text-[#FA6E80]">
                                             <Send className="h-6 w-6" />
+                                            <span className="text-sm">{slate.shares_count}</span>
                                         </button>
                                     </div>
-                                    <p className="text-gray-700 text-sm">{slate.description}</p>
+                                    <p className="text-gray-700 text-sm whitespace-pre-line">{slate.content}</p>
                                 </Card>
                             ))}
                         </div>
@@ -176,7 +272,12 @@ export default function SavedPage() {
 
                 {/* Collabs Tab */}
                 <TabsContent value="collabs" data-testid="collabs-content">
-                    {loading ? (
+                    {errors.collabs && (
+                        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                            <p className="text-red-600 text-sm">{errors.collabs}</p>
+                        </div>
+                    )}
+                    {loading.collabs ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {[1, 2, 3, 4].map((i) => <CollabSkeleton key={i} />)}
                         </div>
@@ -192,7 +293,7 @@ export default function SavedPage() {
                                 <Card key={collab.id} className="border-gray-200 rounded-lg overflow-hidden bg-white" data-testid="saved-collab-card">
                                     <div className="relative h-48">
                                         <Image
-                                            src={collab.coverImage}
+                                            src={collab.cover_image_url || "/slate.png"}
                                             alt={collab.title}
                                             fill
                                             className="object-cover"
@@ -215,20 +316,20 @@ export default function SavedPage() {
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-2">
                                                 <Image
-                                                    src={collab.author.avatar}
+                                                    src={collab.author.avatar || "/default-profile.png"}
                                                     alt={collab.author.name}
                                                     width={32}
                                                     height={32}
                                                     className="rounded-full object-cover"
                                                 />
-                                                <span className="text-sm text-gray-700">{collab.author.name}</span>
+                                                <span className="text-sm text-gray-700">{collab.author.name || 'Anonymous'}</span>
                                             </div>
                                             <div className="flex items-center gap-1 text-sm text-gray-600">
                                                 <Users className="h-4 w-4" />
                                                 <span>{collab.interests}</span>
                                             </div>
                                         </div>
-                                        <p className="text-xs text-gray-500 mt-3">Saved {collab.savedAt}</p>
+                                        <p className="text-xs text-gray-500 mt-3">Saved {formatRelativeTime(collab.saved_at)}</p>
                                     </div>
                                 </Card>
                             ))}
@@ -238,7 +339,12 @@ export default function SavedPage() {
 
                 {/* What's On Tab */}
                 <TabsContent value="whats-on" data-testid="whats-on-content">
-                    {loading ? (
+                    {errors.whatsOn && (
+                        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                            <p className="text-red-600 text-sm">{errors.whatsOn}</p>
+                        </div>
+                    )}
+                    {loading.whatsOn ? (
                         <div className="space-y-4">
                             {[1, 2, 3].map((i) => <EventSkeleton key={i} />)}
                         </div>
@@ -250,45 +356,52 @@ export default function SavedPage() {
                         />
                     ) : (
                         <div className="space-y-4">
-                            {savedWhatsOn.map((event) => (
-                                <Card key={event.id} className="border-gray-200 rounded-lg overflow-hidden bg-white" data-testid="saved-event-card">
-                                    <div className="flex flex-col md:flex-row">
-                                        <div className="relative w-full md:w-64 h-48 md:h-auto">
-                                            <Image
-                                                src={event.image}
-                                                alt={event.title}
-                                                fill
-                                                className="object-cover"
-                                            />
+                            {savedWhatsOn.map((event) => {
+                                const firstSchedule = event.schedule?.[0];
+                                const eventDate = firstSchedule ? format(new Date(firstSchedule.event_date), 'MMM d, yyyy') : 'Date TBA';
+                                const eventTime = firstSchedule ? `${firstSchedule.start_time} - ${firstSchedule.end_time}` : 'Time TBA';
+                                const priceDisplay = event.is_paid ? `${event.price_currency} ${event.price_amount}` : 'Free';
+                                
+                                return (
+                                    <Card key={event.id} className="border-gray-200 rounded-lg overflow-hidden bg-white" data-testid="saved-event-card">
+                                        <div className="flex flex-col md:flex-row">
+                                            <div className="relative w-full md:w-64 h-48 md:h-auto">
+                                                <Image
+                                                    src={event.thumbnail_url || event.hero_image_url || "/whats-on.png"}
+                                                    alt={event.title}
+                                                    fill
+                                                    className="object-cover"
+                                                />
+                                            </div>
+                                            <div className="flex-1 p-6">
+                                                <div className="flex items-start justify-between mb-2">
+                                                    <h3 className="font-semibold text-xl">{event.title}</h3>
+                                                    <Bookmark className="h-5 w-5 fill-[#FA6E80] text-[#FA6E80] flex-shrink-0 ml-2" />
+                                                </div>
+                                                <p className="text-gray-600 text-sm mb-4 line-clamp-2">{event.description}</p>
+                                                <div className="space-y-2 mb-4">
+                                                    <div className="flex items-center gap-2 text-sm text-gray-700">
+                                                        <Calendar className="h-4 w-4 text-[#6A89BE]" />
+                                                        <span>{eventDate} • {eventTime}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 text-sm text-gray-700">
+                                                        <MapPin className="h-4 w-4 text-[#6A89BE]" />
+                                                        <span>{event.is_online ? 'Online Event' : event.location}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 text-sm text-gray-700">
+                                                        <Users className="h-4 w-4 text-[#6A89BE]" />
+                                                        <span>{event.rsvp_count} attending</span>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-sm font-semibold text-[#FA6E80]">{priceDisplay}</span>
+                                                    <span className="text-xs text-gray-500">Saved {formatRelativeTime(event.saved_at)}</span>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div className="flex-1 p-6">
-                                            <div className="flex items-start justify-between mb-2">
-                                                <h3 className="font-semibold text-xl">{event.title}</h3>
-                                                <Bookmark className="h-5 w-5 fill-[#FA6E80] text-[#FA6E80] flex-shrink-0 ml-2" />
-                                            </div>
-                                            <p className="text-gray-600 text-sm mb-4">{event.description}</p>
-                                            <div className="space-y-2 mb-4">
-                                                <div className="flex items-center gap-2 text-sm text-gray-700">
-                                                    <Calendar className="h-4 w-4 text-[#6A89BE]" />
-                                                    <span>{event.date} • {event.time}</span>
-                                                </div>
-                                                <div className="flex items-center gap-2 text-sm text-gray-700">
-                                                    <MapPin className="h-4 w-4 text-[#6A89BE]" />
-                                                    <span>{event.location}</span>
-                                                </div>
-                                                <div className="flex items-center gap-2 text-sm text-gray-700">
-                                                    <Users className="h-4 w-4 text-[#6A89BE]" />
-                                                    <span>{event.attendees} attending</span>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-sm font-semibold text-[#FA6E80]">{event.price}</span>
-                                                <span className="text-xs text-gray-500">Saved {event.savedAt}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </Card>
-                            ))}
+                                    </Card>
+                                );
+                            })}
                         </div>
                     )}
                 </TabsContent>
