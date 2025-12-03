@@ -8,7 +8,7 @@ import { validateAuthToken, successResponse, errorResponse } from '@/lib/supabas
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string; applicationId: string } }
+  { params }: { params: Promise<{ id: string; applicationId: string }> }
 ) {
   try {
     const supabase = createServerClient();
@@ -22,8 +22,7 @@ export async function PATCH(
       );
     }
 
-    const gigId = params.id;
-    const applicationId = params.applicationId;
+    const { id: gigId, applicationId } = await params;
     const body = await request.json();
     const { status: newStatus } = body;
 
