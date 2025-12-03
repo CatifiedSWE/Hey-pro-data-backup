@@ -6,6 +6,7 @@ import Link from "next/link";
 import HighlightsText from "./highlights-text";
 import { useProfile, type HighlightData } from "@/contexts/ProfileContext";
 import { HighlightsSelector } from "./HighlightsSelector";
+import { Plus } from "lucide-react";
 
 interface HighlightItem {
     id: string;
@@ -33,21 +34,21 @@ export function HighlightCard({
 
     return (
         <article className={`space-y-3 ${className}`}>
-            <div className="relative w-full lg:w-[275px] h-[263px] overflow-hidden rounded-[8px]">
+            <div className="relative w-full lg:w-[275px] h-[263px] overflow-hidden rounded-[8px] bg-gray-100">
                 <Image
                     src={highlight.images}
                     alt={highlight.title}
                     fill
                     sizes="(max-width: 1024px) 100vw, 275px"
-                    className="object-cover"
+                    className="object-cover transition-transform duration-500 hover:scale-105"
                 />
             </div>
-            <h3 className="text-lg font-semibold">{highlight.title}</h3>
-            <p className="text-sm text-gray-600">
+            <h3 className="text-lg font-semibold text-gray-900">{highlight.title}</h3>
+            <p className="text-sm text-gray-600 leading-relaxed">
                 {truncated}
                 {hasMore && (
                     <>
-                        …<br /><Link href={'#'} className="ml-1 text-[#FA596E]">Read more</Link>
+                        …<br /><Link href={'#'} className="ml-1 text-[#FA596E] font-medium hover:underline">Read more</Link>
                     </>
                 )}
             </p>
@@ -103,10 +104,6 @@ export default function Highlights({ highlights: propHighlights }: HighlightsPro
         fetchHighlights();
     };
 
-    if (!displayHighlights?.length) {
-        return null;
-    }
-
     return (
         <section className="w-full">
             {/* Desktop View */}
@@ -114,15 +111,30 @@ export default function Highlights({ highlights: propHighlights }: HighlightsPro
                 <aside className="sticky top-24 self-start w-full max-w-[336px] space-y-6">
                     <Button
                         variant="outline"
-                        className="w-full h-11 rounded-[10px] border-[#31A7AC] text-black hover:bg-transparent"
+                        className="w-full h-11 rounded-[10px] border-[#31A7AC] text-black hover:bg-[#31A7AC]/5 transition-colors"
                         onClick={() => setIsSelectorOpen(true)}
                     >
                         Edit Highlights
                     </Button>
-                    <div className="space-y-6">
-                        {displayHighlights.map((highlight) => (
-                            <HighlightCard key={highlight.id} highlight={highlight} />
-                        ))}
+                    
+                    <div className="space-y-8">
+                        {displayHighlights.length > 0 ? (
+                            displayHighlights.map((highlight) => (
+                                <HighlightCard key={highlight.id} highlight={highlight} />
+                            ))
+                        ) : (
+                            <div className="p-6 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center text-center gap-3 text-gray-500">
+                                <p className="text-sm">No highlights selected yet</p>
+                                <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="text-[#FA6E80] hover:text-[#FA596E] hover:bg-pink-50"
+                                    onClick={() => setIsSelectorOpen(true)}
+                                >
+                                    <Plus className="w-4 h-4 mr-1" /> Add Highlights
+                                </Button>
+                            </div>
+                        )}
                     </div>
                 </aside>
 
@@ -142,6 +154,37 @@ export default function Highlights({ highlights: propHighlights }: HighlightsPro
             </div>
 
             {/* Mobile View */}
+            <div className="lg:hidden flex flex-col gap-6 pb-10">
+                <HighlightsText className="w-full" />
+                
+                <Button
+                    variant="outline"
+                    className="w-full h-11 rounded-[10px] border-[#31A7AC] text-black hover:bg-transparent"
+                    onClick={() => setIsSelectorOpen(true)}
+                >
+                    Edit Highlights
+                </Button>
+
+                <div className="space-y-8">
+                    {displayHighlights.length > 0 ? (
+                        displayHighlights.map((highlight) => (
+                            <HighlightCard key={highlight.id} highlight={highlight} className="w-full" />
+                        ))
+                    ) : (
+                         <div className="p-8 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center text-center gap-3 text-gray-500 bg-gray-50/50">
+                            <p className="text-sm font-medium">Showcase your best work</p>
+                            <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="text-[#FA6E80] hover:text-[#FA596E]"
+                                onClick={() => setIsSelectorOpen(true)}
+                            >
+                                <Plus className="w-4 h-4 mr-1" /> Add Highlights
+                            </Button>
+                        </div>
+                    )}
+                </div>
+            </div>
 
             {/* Highlights Selector Dialog */}
             <HighlightsSelector 
