@@ -58,11 +58,10 @@ export async function GET(
         cover_letter,
         portfolio_links,
         resume_url,
-        created_at,
         updated_at
       `)
       .eq('gig_id', gigId)
-      .order('created_at', { ascending: false });
+      .order('updated_at', { ascending: false });
 
     // Apply status filter if provided
     if (statusFilter && ['pending', 'shortlisted', 'confirmed', 'released'].includes(statusFilter)) {
