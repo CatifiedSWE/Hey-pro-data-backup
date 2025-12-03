@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Send, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
@@ -18,8 +17,12 @@ interface Comment {
   updated_at: string;
   user_id: string;
   parent_comment_id: string | null;
-  author: {
+  author?: {
     id: string;
+    name: string;
+    avatar: string;
+  };
+  user?: {
     name: string;
     avatar: string;
   };
@@ -54,6 +57,7 @@ export default function CommentsModal({
   const [newComment, setNewComment] = useState("");
   const [replyTo, setReplyTo] = useState<{ id: string; name: string } | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [totalComments, setTotalComments] = useState(0);
 
   // Get current user ID
   useEffect(() => {
@@ -67,7 +71,7 @@ export default function CommentsModal({
   }, []);
 
   useEffect(() => {
-    if (open) {
+    if (open && postId) {
       loadComments();
     }
   }, [open, postId]);
@@ -76,8 +80,21 @@ export default function CommentsModal({
     setLoading(true);
     try {
       const data = await getComments(postId);
+      console.log('Comments data:', data);
       setComments(data);
+      // Count total comments including replies
+      const countComments = (comments: Comment[]): number => {
+        let count = comments.length;
+        comments.forEach(comment => {
+          if (comment.replies && comment.replies.length > 0) {
+            count += countComments(comment.replies);
+          }
+        });
+        return count;
+      };
+      setTotalComments(countComments(data));
     } catch (error: any) {
+      console.error('Failed to load comments:', error);
       toast.error(error.message || 'Failed to load comments');
     } finally {
       setLoading(false);
@@ -128,7 +145,7 @@ export default function CommentsModal({
         <div className="flex flex-col gap-6 p-5">
           <div className="flex items-center justify-between border-b border-[#BABABA] pb-3">
             <DialogTitle className="text-[20px] font-semibold text-black">
-              Comments ({comments.length})
+              Comments ({totalComments})
             </DialogTitle>
           </div>
 
@@ -249,12 +266,15 @@ function CommentItem({
   const timeAgo = formatDistanceToNow(new Date(comment.created_at), { addSuffix: true });
   const indent = depth ? depth * 32 : 0;
   const isOwner = currentUserId === comment.user_id;
+  
+  // Support both 'user' and 'author' fields for compatibility
+  const userInfo = comment.user || comment.author || { name: 'Unknown', avatar: '/default-profile.png' };
 
   return (
     <div className="flex gap-3" style={{ paddingLeft: indent }}>
       <Image
-        src={comment.author.avatar || "/default-profile.png"}
-        alt={comment.author.name}
+        src={userInfo.avatar || "/default-profile.png"}
+        alt={userInfo.name}
         width={45}
         height={45}
         className="h-[45px] w-[45px] rounded-full object-cover"
@@ -262,7 +282,7 @@ function CommentItem({
       />
       <div className="flex flex-col gap-2 flex-1">
         <div className="flex items-center gap-4 text-sm text-[#444444]">
-          <span className="font-medium">{comment.author.name}</span>
+          <span className="font-medium">{userInfo.name}</span>
           <span>{timeAgo}</span>
           {isOwner && (
             <button
@@ -279,7 +299,7 @@ function CommentItem({
         </p>
         <button
           type="button"
-          onClick={() => onReply(comment.id, comment.author.name)}
+          onClick={() => onReply(comment.id, userInfo.name)}
           className="text-sm text-start font-semibold text-[#444444] transition hover:text-black w-fit"
         >
           Reply

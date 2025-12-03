@@ -113,8 +113,7 @@ export async function GET(
         content: comment.content,
         created_at: comment.created_at,
         updated_at: comment.updated_at,
-        author: {
-          id: comment.user_id,
+        user: {
           name: user.name,
           avatar: user.avatar
         },
