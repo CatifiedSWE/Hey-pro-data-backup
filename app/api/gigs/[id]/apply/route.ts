@@ -113,7 +113,7 @@ export async function POST(
     const { data: applicantProfile } = await supabase
       .from('user_profiles')
       .select('name')
-      .eq('id', user.id)
+      .eq('user_id', user.id)
       .maybeSingle();
 
     const applicantName = applicantProfile?.name || 'Someone';
