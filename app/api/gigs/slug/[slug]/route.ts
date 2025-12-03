@@ -104,6 +104,7 @@ export async function GET(
           supportingFileLabel: gig.supporting_file_label,
           referenceUrl: gig.reference_url,
           status: gig.status,
+          created_by: gig.created_by,
           postedOn: gig.created_at,
           postedBy: {
             name: profile 
