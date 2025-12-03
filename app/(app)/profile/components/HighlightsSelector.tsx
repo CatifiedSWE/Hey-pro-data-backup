@@ -157,10 +157,10 @@ export function HighlightsSelector({
       <DialogContent className="max-w-4xl h-[90vh] md:h-[85vh] flex flex-col p-0 gap-0 overflow-hidden bg-white">
         <div className="flex flex-col h-full">
             {/* Header */}
-            <div className="p-6 pb-4 border-b bg-white z-10">
+            <div className="p-4 md:p-6 pb-4 border-b bg-white z-10">
             <DialogHeader className="space-y-2">
                 <div className="flex items-center justify-between">
-                    <DialogTitle className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                    <DialogTitle className="text-xl md:text-2xl font-bold text-gray-900 flex items-center gap-2">
                         <Sparkles className="w-5 h-5 text-[#FA6E80]" />
                         Edit Highlights
                     </DialogTitle>
@@ -168,26 +168,31 @@ export function HighlightsSelector({
                         {selectedItems.length}/3 Selected
                     </Badge>
                 </div>
-                <DialogDescription className="text-base text-gray-500">
-                Showcase your best work. Choose up to 3 items from your credits or slate posts.
+                <DialogDescription className="text-sm md:text-base text-gray-500">
+                Showcase your best work. Choose up to 3 items.
                 </DialogDescription>
             </DialogHeader>
 
             <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'credits' | 'slate')} className="mt-6">
-                <TabsList className="grid w-full grid-cols-2 bg-gray-100 p-1 h-12">
+                {/* 
+                  Override default TabsList styles:
+                  - sm:w-[680px] (default) -> sm:w-full (override) to prevent overflow/fixed width
+                  - flex-col (default) -> grid grid-cols-2 to force equal width side-by-side
+                */}
+                <TabsList className="grid w-full sm:w-full grid-cols-2 bg-gray-100 p-1 h-12">
                 <TabsTrigger 
                     value="credits" 
-                    className="data-[state=active]:bg-white data-[state=active]:text-[#FA6E80] data-[state=active]:shadow-sm h-10 text-base font-medium transition-all"
+                    className="data-[state=active]:bg-white data-[state=active]:text-[#FA6E80] data-[state=active]:shadow-sm h-10 text-sm md:text-base font-medium transition-all"
                 >
                     <Clapperboard className="w-4 h-4 mr-2" />
-                    Credits ({credits.length})
+                    <span className="truncate">Credits ({credits.length})</span>
                 </TabsTrigger>
                 <TabsTrigger 
                     value="slate" 
-                    className="data-[state=active]:bg-white data-[state=active]:text-[#FA6E80] data-[state=active]:shadow-sm h-10 text-base font-medium transition-all"
+                    className="data-[state=active]:bg-white data-[state=active]:text-[#FA6E80] data-[state=active]:shadow-sm h-10 text-sm md:text-base font-medium transition-all"
                 >
                     <LayoutGrid className="w-4 h-4 mr-2" />
-                    Slate Posts ({slatePosts.length})
+                    <span className="truncate">Slate ({slatePosts.length})</span>
                 </TabsTrigger>
                 </TabsList>
             </Tabs>
@@ -202,7 +207,7 @@ export function HighlightsSelector({
                 </div>
                 ) : (
                     <ScrollArea className="h-full w-full">
-                        <div className="p-6 max-w-3xl mx-auto">
+                        <div className="p-4 md:p-6 max-w-3xl mx-auto">
                             {activeTab === 'credits' && (
                                 <>
                                     {credits.length === 0 ? (
