@@ -128,6 +128,7 @@ const buildMonthSummaries = (dateKeys: number[]) => {
 }
 
 export default function AddGigPage() {
+    const router = useRouter()
     const [crewCount, setCrewCount] = useState(1)
     const [formValues, setFormValues] = useState<GigFormValues>(initialFormValues)
     const [currentMonth, setCurrentMonth] = useState(new Date(2025, 8, 1))
