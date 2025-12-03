@@ -76,6 +76,13 @@ export default function GigDetails(gig: GigsDataType[0]) {
 
   const visibleMonths = monthGroups[activeGroupIndex] ?? [];
 
+  const formattedApplyBefore = useMemo(() => {
+    if (!gig.applyBefore) return "";
+    const date = new Date(gig.applyBefore);
+    if (isNaN(date.getTime())) return gig.applyBefore;
+    return format(date, "dd MMM, yyyy");
+  }, [gig.applyBefore]);
+
   return (
     <section className="w-full max-w-5xl p-8">
       <Link href="/gigs" className="inline-flex items-center gap-2 text-sm font-[400] text-slate-500 hover:text-slate-900">
@@ -89,7 +96,7 @@ export default function GigDetails(gig: GigsDataType[0]) {
             <p className="text-[16px] font-[400] text-slate-900">{gig.postedBy.name}</p>
             <p className="text-[9px] text-[#444444]">Posted on {gig.postedOn}</p>
           </div>
-          <div className="ml-auto text-sm font-[500] text-[#FA6E80]">Apply before {gig.applyBefore}</div>
+          {formattedApplyBefore && <div className="ml-auto text-sm font-[500] text-[#FA6E80]">Apply before {formattedApplyBefore}</div>}
         </div>
 
         <div className="space-y-3">
