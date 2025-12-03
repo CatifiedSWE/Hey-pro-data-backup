@@ -99,7 +99,7 @@ export default function Header() {
     ? `${profile.first_name} ${profile.surname}`
     : user?.user_metadata?.full_name || 'User'
 
-  const avatarUrl = profile?.profile_photo_url || user?.user_metadata?.avatar_url || '/image (2).png'
+  const avatarUrl = profile?.profile_photo_url || user?.user_metadata?.avatar_url || '/default-profile.png'
 
   const initials = displayName
     .split(' ')

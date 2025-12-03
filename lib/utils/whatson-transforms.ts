@@ -20,7 +20,7 @@ function getProfilePhotoWithFallback(profilePhotoUrl: string | null | undefined,
   }
   
   // Priority 3: Default photo
-  return '/image (2).png';
+  return '/default-profile.png';
 }
 
 export function transformEventForCard(event: WhatsOnEvent) {
@@ -42,7 +42,7 @@ export function transformEventForCard(event: WhatsOnEvent) {
     thumbnail: event.thumbnail_url || '/whats-on.png',
     host: {
       name: event.creator?.name || 'Unknown',
-      avatar: event.creator?.profile_photo_url || '/image (2).png',
+      avatar: event.creator?.profile_photo_url || '/default-profile.png',
       organization: event.creator?.name || 'Unknown'
     },
     rsvpCount: event.rsvp_count,

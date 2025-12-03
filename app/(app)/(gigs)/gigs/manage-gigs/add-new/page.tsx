@@ -390,7 +390,7 @@ export default function AddGigPage() {
     }
 
     const referenceLabel = referenceFile ? referenceFile.name : formValues.referenceUrl
-    const previewAvatarSrc = referencePreview || "/image (1).png"
+    const previewAvatarSrc = referencePreview || "/default-profile.png"
 
     useEffect(() => {
         return () => {

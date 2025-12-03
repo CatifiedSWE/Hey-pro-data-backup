@@ -8,7 +8,7 @@ export const sampleApplicants = [
         referrals: 15,
         phone: "+91 9876543210",
         email: "aaravmehta12@gmail.com",
-        avatar: "/image (1).png",
+        avatar: "/default-profile.png",
     },
     {
         id: "2",
@@ -19,7 +19,7 @@ export const sampleApplicants = [
         referrals: 12,
         phone: "+91 9876543210",
         email: "leilakhan22@gmail.com",
-        avatar: "/image (1).png",
+        avatar: "/default-profile.png",
     },
     {
         id: "3",
@@ -30,7 +30,7 @@ export const sampleApplicants = [
         referrals: 9,
         phone: "+91 9876543210",
         email: "noahelder@email.com",
-        avatar: "/image (1).png",
+        avatar: "/default-profile.png",
     },
 ];
 

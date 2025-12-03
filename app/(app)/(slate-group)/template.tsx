@@ -120,7 +120,7 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                     .map((ref: any) => ref.referrer.avatar);
                 
                 // Add fallback images if we have less than 3 avatars
-                const fallbackImages = ["/image (1).png", "/image (2).png", "/image (3).png"];
+                const fallbackImages = ["/default-profile.png", "/default-profile.png", "/default-profile.png"];
                 while (avatars.length < 3) {
                     avatars.push(fallbackImages[avatars.length]);
                 }
@@ -218,8 +218,8 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
             ? `${userProfile.first_name || userProfile.alias_first_name || ''} ${userProfile.surname || userProfile.alias_surname || ''}`.trim() || "User"
             : "Loading...",
         bio: userProfile?.bio || "No bio available",
-        backgroundImage: userProfile?.banner_url || "/bg.jpg",
-        avatarImage: userProfile?.profile_photo_url || user?.user_metadata?.avatar_url || "/image (1).png",
+        backgroundImage: userProfile?.banner_url || "/default-banner.png",
+        avatarImage: userProfile?.profile_photo_url || user?.user_metadata?.avatar_url || "/default-profile.png",
         referencesavatar: referralsAvatars,
         totalref: referralsCount,
         profileurl: "/profile",

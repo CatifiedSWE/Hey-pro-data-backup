@@ -27,7 +27,7 @@ export default function ProjectCard(props: ProjectCardType) {
       <div className="flex justify-center items-center -mt-[26px] relative z-10">
         <div className="relative h-[52px] w-[52px] rounded-full overflow-hidden bg-white shadow-sm flex-shrink-0 border-[2px] border-white">
           <Image
-            src={props.image || "/image (1).png"}
+            src={props.image || "/default-profile.png"}
             alt={props.name}
             fill
             sizes="52px"

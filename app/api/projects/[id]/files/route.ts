@@ -116,7 +116,7 @@ export async function GET(
               'Unknown',
         avatar: file.uploader?.raw_user_meta_data?.avatar_url || 
                 file.uploader?.raw_user_meta_data?.profile_photo_url || 
-                '/placeholder-avatar.png'
+                '/default-profile.png'
       }
     }));
 

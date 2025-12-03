@@ -98,7 +98,7 @@ export async function GET(
         const name = `${firstName} ${surname}`.trim() || 'Unknown';
         
         // Priority: uploaded profile photo -> Google metadata -> placeholder
-        let avatar = '/placeholder-avatar.png';
+        let avatar = '/default-profile.png';
         if (profile?.profile_photo_url && profile.profile_photo_url.trim() !== '') {
           avatar = profile.profile_photo_url;
         } else if (googleAvatarMap.has(interest.user_id)) {

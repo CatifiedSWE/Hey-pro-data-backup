@@ -14,7 +14,7 @@ export default function SavedPage() {
     const savedSlates = [
         {
             id: "1",
-            profileAvatar: "/image (1).png",
+            profileAvatar: "/default-profile.png",
             profileName: "Sarah Johnson",
             role: "Director",
             totalRoles: "12 Roles",
@@ -26,7 +26,7 @@ export default function SavedPage() {
         },
         {
             id: "2",
-            profileAvatar: "/image (2).png",
+            profileAvatar: "/default-profile.png",
             profileName: "Michael Chen",
             role: "Cinematographer",
             totalRoles: "8 Roles",
@@ -48,7 +48,7 @@ export default function SavedPage() {
             interests: 23,
             author: {
                 name: "Emma Wilson",
-                avatar: "/image (3).png"
+                avatar: "/default-profile.png"
             },
             savedAt: "1 week ago"
         },
@@ -61,7 +61,7 @@ export default function SavedPage() {
             interests: 45,
             author: {
                 name: "David Martinez",
-                avatar: "/image (4).png"
+                avatar: "/default-profile.png"
             },
             savedAt: "2 weeks ago"
         }

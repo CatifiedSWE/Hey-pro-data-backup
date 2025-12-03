@@ -19,7 +19,7 @@ export default function SlateView() {
     const slate: Slate[] = [
         {
             id: "1",
-            profileAvtar: "/image (1).png",
+            profileAvtar: "/default-profile.png",
             profileName: "Jone Dev",
             role: "Cinematographer",
             totlerole: "15 Roles",
@@ -30,7 +30,7 @@ export default function SlateView() {
         },
         {
             id: "2",
-            profileAvtar: "/image (2).png",
+            profileAvtar: "/default-profile.png",
             profileName: "Jone Dev",
             role: "Cinematographer",
             totlerole: "15 Roles",
@@ -41,7 +41,7 @@ export default function SlateView() {
         },
         {
             id: "3",
-            profileAvtar: "/image (3).png",
+            profileAvtar: "/default-profile.png",
             profileName: "Jone Dev",
             role: "Cinematographer",
             totlerole: "15 Roles",
@@ -52,7 +52,7 @@ export default function SlateView() {
         },
         {
             id: "4",
-            profileAvtar: "/slate.png",
+            profileAvtar: "/default-profile.png",
             profileName: "Jone Dev",
             role: "Cinematographer",
             totlerole: "15 Roles",

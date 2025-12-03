@@ -98,7 +98,7 @@ export default function CommentsModal({
         <div className="px-4 py-3 border-b bg-gray-50">
           <div className="flex items-start gap-3">
             <Image
-              src={postAuthor.avatar || "/image (1).png"}
+              src={postAuthor.avatar || "/default-profile.png"}
               alt={postAuthor.name}
               width={40}
               height={40}
@@ -190,7 +190,7 @@ function CommentItem({ comment, onReply }: CommentItemProps) {
   return (
     <div className="flex gap-3">
       <Image
-        src={comment.author.avatar || "/image (1).png"}
+        src={comment.author.avatar || "/default-profile.png"}
         alt={comment.author.name}
         width={32}
         height={32}

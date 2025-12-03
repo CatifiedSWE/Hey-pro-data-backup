@@ -70,7 +70,7 @@ export async function GET(
           : 'Unknown';
 
         // Priority: uploaded profile photo -> Google metadata -> placeholder
-        let userAvatar = '/placeholder-avatar.png';
+        let userAvatar = '/default-profile.png';
         if (userProfile?.profile_photo_url && userProfile.profile_photo_url.trim() !== '') {
           userAvatar = userProfile.profile_photo_url;
         } else if (googleAvatarMap.has(collab.user_id)) {

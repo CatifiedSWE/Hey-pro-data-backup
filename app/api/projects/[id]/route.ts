@@ -109,7 +109,7 @@ export async function GET(
               'Unknown',
         avatar: project.owner?.raw_user_meta_data?.avatar_url || 
                 project.owner?.raw_user_meta_data?.profile_photo_url || 
-                '/placeholder-avatar.png'
+                '/default-profile.png'
       },
       team: project.team?.map((member: any) => ({
         id: member.id,
@@ -125,7 +125,7 @@ export async function GET(
                 'Unknown',
           avatar: member.user?.raw_user_meta_data?.avatar_url || 
                   member.user?.raw_user_meta_data?.profile_photo_url || 
-                  '/placeholder-avatar.png'
+                  '/default-profile.png'
         }
       })) || [],
       files: project.files || [],

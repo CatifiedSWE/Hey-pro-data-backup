@@ -329,7 +329,7 @@ function SlateCard({ post, onLike, onSave, onShare }: SlateCardProps) {
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center mb-4">
                     <Image
-                        src={post.author.avatar || "/image (1).png"}
+                        src={post.author.avatar || "/default-profile.png"}
                         alt={post.author.name}
                         height={100}
                         width={100}

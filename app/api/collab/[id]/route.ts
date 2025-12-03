@@ -62,7 +62,7 @@ export async function GET(
     const authorName = `${firstName} ${surname}`.trim() || 'Unknown';
     
     // Priority: uploaded profile photo -> Google metadata -> placeholder
-    let authorAvatar = '/placeholder-avatar.png';
+    let authorAvatar = '/default-profile.png';
     if (authorProfile?.profile_photo_url && authorProfile.profile_photo_url.trim() !== '') {
       authorAvatar = authorProfile.profile_photo_url;
     } else if (googleAvatarMap.has(collab.user_id)) {
@@ -115,7 +115,7 @@ export async function GET(
                 const name = `${firstName} ${surname}`.trim() || 'Unknown';
                 
                 // Priority: uploaded profile photo -> Google metadata -> placeholder
-                let avatar = '/placeholder-avatar.png';
+                let avatar = '/default-profile.png';
                 if (profile?.profile_photo_url && profile.profile_photo_url.trim() !== '') {
                     avatar = profile.profile_photo_url;
                 } else if (googleAvatarMap.has(interest.user_id)) {
@@ -154,7 +154,7 @@ export async function GET(
                 const name = `${firstName} ${surname}`.trim() || 'Unknown';
                 
                 // Priority: uploaded profile photo -> Google metadata -> placeholder
-                let avatar = '/placeholder-avatar.png';
+                let avatar = '/default-profile.png';
                 if (profile?.profile_photo_url && profile.profile_photo_url.trim() !== '') {
                     avatar = profile.profile_photo_url;
                 } else if (googleAvatarMap.has(c.user_id)) {

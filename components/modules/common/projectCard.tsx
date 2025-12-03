@@ -11,7 +11,7 @@ export default function ProjectCard(props: ProjectCardType) {
       {/* Banner Image at top */}
       <div className="relative h-[80px] w-full flex-shrink-0">
         <Image
-          src={props.banner || "/bg.jpg"}
+          src={props.banner || "/default-banner.png"}
           alt={`Banner image for ${props.name}`}
           fill
           sizes="(max-width: 768px) 50vw, 33vw"
@@ -23,7 +23,7 @@ export default function ProjectCard(props: ProjectCardType) {
       <div className="flex justify-center items-center -mt-[30px] relative z-10">
         <div className="relative h-[60px] w-[60px] rounded-full overflow-hidden bg-gray-200 shadow-md flex-shrink-0 border-2 border-white">
           <Image
-            src={props.image || "/image (1).png"}
+            src={props.image || "/default-profile.png"}
             alt={props.name}
             fill
             sizes="60px"

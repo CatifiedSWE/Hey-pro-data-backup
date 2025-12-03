@@ -72,7 +72,7 @@ export async function GET(
       const surname = profile.alias_surname || profile.surname || '';
       const name = `${firstName} ${surname}`.trim() || 'Unknown';
       
-      let avatar = '/placeholder-avatar.png';
+      let avatar = '/default-profile.png';
       if (profile.profile_photo_url && profile.profile_photo_url.trim() !== '') {
         avatar = profile.profile_photo_url;
       } else if (googleAvatarMap.has(profile.user_id)) {
@@ -88,7 +88,7 @@ export async function GET(
 
     // First pass: create all comment objects
     comments?.forEach(comment => {
-      const user = userMap.get(comment.user_id) || { name: 'Unknown', avatar: '/placeholder-avatar.png' };
+      const user = userMap.get(comment.user_id) || { name: 'Unknown', avatar: '/default-profile.png' };
       commentMap.set(comment.id, {
         id: comment.id,
         collab_id: comment.collab_id,
@@ -250,7 +250,7 @@ export async function POST(
     const surname = profile?.alias_surname || profile?.surname || '';
     const userName = `${firstName} ${surname}`.trim() || 'Unknown';
     
-    let userAvatar = '/placeholder-avatar.png';
+    let userAvatar = '/default-profile.png';
     if (profile?.profile_photo_url && profile.profile_photo_url.trim() !== '') {
       userAvatar = profile.profile_photo_url;
     } else if (googleAvatarMap.has(user.id)) {

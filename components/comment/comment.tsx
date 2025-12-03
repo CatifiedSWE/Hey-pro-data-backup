@@ -22,7 +22,7 @@ type CommentThread = {
 const comments: CommentThread[] = [
     {
         id: 1,
-        avatar: "/image (1).png",
+        avatar: "/default-profile.png",
         name: "Aarav Mehta",
         commentTime: "2025-11-01T12:00:00Z",
         text: "Just watched this movie alone at midnight. Worst decision of my life.",
@@ -30,7 +30,7 @@ const comments: CommentThread[] = [
         replies: [
             {
                 id: 11,
-                avatar: "/image (2).png",
+                avatar: "/default-profile.png",
                 name: "Aarav Mehta",
                 commentTime: "2023-01-01T14:00:00Z",
                 text: " I did the same! Couldn't sleep for hours after that ending.",
@@ -38,7 +38,7 @@ const comments: CommentThread[] = [
                 replies: [
                     {
                         id: 111,
-                        avatar: "/image (3).png",
+                        avatar: "/default-profile.png",
                         name: "Anand Kumar",
                         commentTime: "2023-01-01T16:00:00Z",
                         text: " Just watched this movie alone at midnight. Worst decision of my life.",
@@ -48,7 +48,7 @@ const comments: CommentThread[] = [
             },
             {
                 id: 12,
-                avatar: "/image (3).png",
+                avatar: "/default-profile.png",
                 name: "Aarav Mehta",
                 commentTime: "2023-01-01T16:00:00Z",
                 text: " Just watched this movie alone at midnight. Worst decision of my life.",
@@ -58,7 +58,7 @@ const comments: CommentThread[] = [
     },
     {
         id: 2,
-        avatar: "/image (1).png",
+        avatar: "/default-profile.png",
         name: "Aarav Mehta",
         commentTime: "2023-01-02T09:00:00Z",
         text: "That scene in the basement still gives me chills. Who thought the sound design could be that terrifying?",
@@ -66,7 +66,7 @@ const comments: CommentThread[] = [
         replies: [
             {
                 id: 21,
-                avatar: "/image (1).png",
+                avatar: "/default-profile.png",
                 name: "Aarav Mehta",
                 commentTime: "2023-01-02T12:00:00Z",
                 text: " Exactly! The creaking floorboards felt so real, I thought someone was in my own house.",

@@ -16,8 +16,8 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
     location,
     description,
     skills = [],
-    coverSrc = "/image.png",
-    avatarSrc = "/image (1).png",
+    coverSrc = "/default-banner.png",
+    avatarSrc = "/default-profile.png",
 }) => {
     return (
         <article className="bg-white shadow-lg rounded-2xl overflow-hidden w-full">

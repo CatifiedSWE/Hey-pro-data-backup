@@ -89,7 +89,7 @@ export async function GET(request: NextRequest) {
               'Unknown',
         avatar: project.owner?.raw_user_meta_data?.avatar_url || 
                 project.owner?.raw_user_meta_data?.profile_photo_url || 
-                '/placeholder-avatar.png'
+                '/default-profile.png'
       },
       created_at: project.created_at,
       updated_at: project.updated_at

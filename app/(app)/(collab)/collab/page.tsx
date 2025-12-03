@@ -461,7 +461,7 @@ export default function Collab() {
                             <div className="flex flex-col lg:flex-row">
                                 <div className="lg:w-[450px] h-[300px] lg:h-auto relative bg-gray-100">
                                     <Image
-                                        src={post.cover_image_url || '/bg.jpg'}
+                                        src={post.cover_image_url || '/default-banner.png'}
                                         alt={post.title}
                                         fill
                                         sizes="(max-width: 1024px) 100vw, 450px"

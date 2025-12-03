@@ -129,7 +129,7 @@ function SavedPostCard({ post, onUnsave }: { post: SlatePost; onUnsave: (id: str
             <div className="p-4">
                 <div className="flex items-center gap-2 mb-3">
                     <Image
-                        src={post.author.avatar || "/image (1).png"}
+                        src={post.author.avatar || "/default-profile.png"}
                         alt={post.author.name}
                         width={32}
                         height={32}

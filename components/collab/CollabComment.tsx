@@ -233,7 +233,7 @@ function CommentItem({
     return (
         <div className="flex gap-3" style={{ paddingLeft: indent }}>
             <Image
-                src={comment.user.avatar || "/placeholder-avatar.png"}
+                src={comment.user.avatar || "/default-profile.png"}
                 alt={comment.user.name}
                 width={45}
                 height={45}

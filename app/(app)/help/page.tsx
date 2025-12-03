@@ -147,7 +147,7 @@ export default function HelpPage() {
                                         </>
                                     ) : (
                                         <>
-                                            <AvatarImage src="/image (1).png" />
+                                            <AvatarImage src="/default-profile.png" />
                                             <AvatarFallback className="bg-gray-200">
                                                 <User className="h-5 w-5 text-gray-600" />
                                             </AvatarFallback>

@@ -84,7 +84,7 @@ export async function GET(
               'Unknown',
         avatar: member.user?.raw_user_meta_data?.avatar_url || 
                 member.user?.raw_user_meta_data?.profile_photo_url || 
-                '/placeholder-avatar.png',
+                '/default-profile.png',
         email: member.user?.raw_user_meta_data?.email
       }
     }));
@@ -242,7 +242,7 @@ export async function POST(
               'Unknown',
         avatar: newMember.user?.raw_user_meta_data?.avatar_url || 
                 newMember.user?.raw_user_meta_data?.profile_photo_url || 
-                '/placeholder-avatar.png'
+                '/default-profile.png'
       }
     };
 

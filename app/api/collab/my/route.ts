@@ -111,7 +111,7 @@ export async function GET(request: NextRequest) {
             } else if (googleAvatarMap.has(profile.user_id)) {
               return googleAvatarMap.get(profile.user_id)!;
             } else {
-              return '/placeholder-avatar.png';
+              return '/default-profile.png';
             }
           }) || [];
         }

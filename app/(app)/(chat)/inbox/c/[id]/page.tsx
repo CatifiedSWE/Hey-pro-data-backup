@@ -181,7 +181,7 @@ export default function MessageInbox({ params }: { params: paramsType }) {
 
                     <div className="relative">
                         <Image
-                            src={otherUser?.avatar || "/image (1).png"}
+                            src={otherUser?.avatar || "/default-profile.png"}
                             alt={otherUser?.name || "User"}
                             width={45}
                             height={45}

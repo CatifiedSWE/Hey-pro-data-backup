@@ -148,7 +148,7 @@ export async function GET(request: NextRequest) {
             } else if (googleAvatarMap.has(profile.user_id)) {
               return googleAvatarMap.get(profile.user_id)!;
             } else {
-              return '/placeholder-avatar.png';
+              return '/default-profile.png';
             }
           }) || [];
         }
@@ -159,7 +159,7 @@ export async function GET(request: NextRequest) {
         const authorName = `${firstName} ${surname}`.trim() || 'Unknown';
         
         // Priority: uploaded profile photo -> Google metadata -> placeholder
-        let authorAvatar = '/placeholder-avatar.png';
+        let authorAvatar = '/default-profile.png';
         if (authorProfile?.profile_photo_url && authorProfile.profile_photo_url.trim() !== '') {
           authorAvatar = authorProfile.profile_photo_url;
         } else if (googleAvatarMap.has(collab.user_id)) {
