@@ -66,27 +66,43 @@ export function ApplicationTab({ selectedGigIds, actionIndicators, onActionChang
                 // Fetch applications for each selected gig
                 await Promise.all(
                     selectedGigIds.map(async (gigId) => {
-                        // Fetch gig details
-                        const gigResponse = await apiCalling({
-                            method: 'get',
-                            route: `/gigs/${gigId}`,
-                        });
+                        try {
+                            // Fetch gig details
+                            const gigResponse = await apiCalling({
+                                method: 'get',
+                                route: `/gigs/${gigId}`,
+                            });
 
-                        // Fetch applications
-                        const appsResponse = await apiCalling({
-                            method: 'get',
-                            route: `/gigs/${gigId}/applications`,
-                        });
+                            if (!gigResponse.status) {
+                                console.error(`Failed to fetch gig ${gigId}:`, gigResponse.message);
+                                toast.error(`Failed to fetch gig details: ${gigResponse.message}`);
+                                return;
+                            }
 
-                        if (gigResponse.status && appsResponse.status) {
-                            results[gigId] = {
-                                gig: {
-                                    id: gigResponse.data.data.id,
-                                    title: gigResponse.data.data.title,
-                                    dateWindows: gigResponse.data.data.dateWindows || [],
-                                },
-                                applications: appsResponse.data.data.applications || [],
-                            };
+                            // Fetch applications
+                            const appsResponse = await apiCalling({
+                                method: 'get',
+                                route: `/gigs/${gigId}/applications`,
+                            });
+
+                            if (!appsResponse.status) {
+                                console.error(`Failed to fetch applications for gig ${gigId}:`, appsResponse.message);
+                                // Don't show error toast for applications - might just be permission issue
+                                return;
+                            }
+
+                            if (gigResponse.data?.data && appsResponse.data?.data) {
+                                results[gigId] = {
+                                    gig: {
+                                        id: gigResponse.data.data.id,
+                                        title: gigResponse.data.data.title,
+                                        dateWindows: gigResponse.data.data.dateWindows || [],
+                                    },
+                                    applications: appsResponse.data.data.applications || [],
+                                };
+                            }
+                        } catch (error) {
+                            console.error(`Error fetching data for gig ${gigId}:`, error);
                         }
                     })
                 );
