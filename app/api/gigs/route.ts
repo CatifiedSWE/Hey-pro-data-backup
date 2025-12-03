@@ -91,7 +91,7 @@ export async function GET(request: NextRequest) {
         // Get creator profile
         const { data: profile } = await supabase
           .from('user_profiles')
-          .select('name, profile_photo_url')
+          .select('user_id, first_name, surname, alias_first_name, alias_surname, profile_photo_url')
           .eq('user_id', gig.created_by)
           .maybeSingle();
         
