@@ -104,49 +104,9 @@ export default function Highlights({ highlights: propHighlights }: HighlightsPro
             </div>
 
             {/* Mobile View */}
-            <div className="flex flex-col gap-6 lg:hidden">
-                <Button
-                    variant="outline"
-                    className="w-full h-11 rounded-[10px] border-[#31A7AC] text-black hover:bg-transparent font-medium"
-                >
-                    Edit Highlights
-                </Button>
-                
-                <div className="flex items-center gap-3">
-                    {/* Rotated Image Container 
-                        Original image is 33w x 250h. 
-                        We rotate it -90deg so it becomes horizontal.
-                        Container needs to accommodate the rotated dimensions (250w x 33h).
-                    */}
-                    <div className="relative w-[250px] h-[33px] flex-shrink-0">
-                        <Image
-                            src="/heylights-vertical.png"
-                            alt="HIGHLIGHTS"
-                            width={33}
-                            height={250}
-                            className="absolute top-1/2 left-1/2"
-                            style={{ 
-                                transform: 'translate(-50%, -50%) rotate(-90deg)',
-                                objectFit: 'contain'
-                            }}
-                            priority
-                        />
-                    </div>
-                    
-                    <div 
-                        className="h-[1px] flex-1 rounded-full"
-                        style={{
-                            background: 'linear-gradient(90deg, #FA6E80 0%, #6A89BE 41.52%, #85AAB7 62.27%, #31A7AC 103.79%)'
-                        }}
-                    />
-                </div>
 
-                <div className="space-y-6">
-                    {displayHighlights.map((highlight) => (
-                        <HighlightCard key={highlight.id} highlight={highlight} />
-                    ))}
-                </div>
-            </div>
+            
+          
         </section>
     );
 }
