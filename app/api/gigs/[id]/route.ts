@@ -95,7 +95,9 @@ export async function GET(
           status: gig.status,
           postedOn: gig.created_at,
           postedBy: {
-            name: profile?.name || 'Unknown',
+            name: profile 
+              ? `${profile.alias_first_name || profile.first_name || ''} ${profile.alias_surname || profile.surname || ''}`.trim() || 'Unknown'
+              : 'Unknown',
             avatar: profile?.profile_photo_url || null
           },
           dateWindows: (dates || []).map(d => ({
