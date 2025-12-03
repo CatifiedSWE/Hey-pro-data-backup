@@ -7,7 +7,7 @@ import { validateAuthToken, createServerClient, successResponse, errorResponse }
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string; linkId: string } }
+  { params }: { params: Promise<{ id: string; linkId: string }> }
 ) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -20,7 +20,7 @@ export async function DELETE(
       );
     }
 
-    const projectId = params.id;
+    const { id: projectId } = await params;
     const linkId = params.linkId;
 
     const supabase = createServerClient();

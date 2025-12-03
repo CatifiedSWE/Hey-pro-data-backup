@@ -5,7 +5,7 @@ import { createClient } from '@supabase/supabase-js';
 // PATCH /api/chat/messages/[messageId]/read - Mark message as read
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { messageId: string } }
+  { params }: { params: Promise<{ messageId: string }> }
 ) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -18,7 +18,7 @@ export async function PATCH(
       );
     }
 
-    const { messageId } = params;
+    const { messageId } = await params;
 
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,

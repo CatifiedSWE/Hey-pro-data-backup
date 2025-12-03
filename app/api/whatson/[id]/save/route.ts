@@ -7,7 +7,7 @@ import { validateAuthToken, createServerClient, successResponse, errorResponse }
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -20,7 +20,7 @@ export async function POST(
       );
     }
 
-    const eventId = params.id;
+    const { id: eventId } = await params;
     const supabase = createServerClient();
 
     // Check if event exists
@@ -104,7 +104,7 @@ export async function POST(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -117,7 +117,7 @@ export async function DELETE(
       );
     }
 
-    const eventId = params.id;
+    const { id: eventId } = await params;
     const supabase = createServerClient();
 
     // Delete save

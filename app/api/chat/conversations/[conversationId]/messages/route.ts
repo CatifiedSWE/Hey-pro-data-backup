@@ -5,7 +5,7 @@ import { createClient } from '@supabase/supabase-js';
 // GET /api/chat/conversations/[conversationId]/messages - Get messages for a conversation
 export async function GET(
   request: NextRequest,
-  { params }: { params: { conversationId: string } }
+  { params }: { params: Promise<{ conversationId: string }> }
 ) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -18,7 +18,7 @@ export async function GET(
       );
     }
 
-    const { conversationId } = params;
+    const { conversationId } = await params;
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '50');
@@ -93,7 +93,7 @@ export async function GET(
 // POST /api/chat/conversations/[conversationId]/messages - Send a message
 export async function POST(
   request: NextRequest,
-  { params }: { params: { conversationId: string } }
+  { params }: { params: Promise<{ conversationId: string }> }
 ) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -106,7 +106,7 @@ export async function POST(
       );
     }
 
-    const { conversationId } = params;
+    const { conversationId } = await params;
     const body = await request.json();
     const { content, attachmentUrl, attachmentType } = body;
 

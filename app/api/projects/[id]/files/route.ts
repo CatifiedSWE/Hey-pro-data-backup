@@ -7,10 +7,10 @@ import { validateAuthToken, createServerClient, successResponse, errorResponse }
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const projectId = params.id;
+    const { id: projectId } = await params;
     const authHeader = request.headers.get('Authorization');
     const user = await validateAuthToken(authHeader);
 

@@ -5,7 +5,7 @@ import { createClient } from '@supabase/supabase-js';
 // GET /api/chat/groups/[groupId]/members - Get group members
 export async function GET(
   request: NextRequest,
-  { params }: { params: { groupId: string } }
+  { params }: { params: Promise<{ groupId: string }> }
 ) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -18,7 +18,7 @@ export async function GET(
       );
     }
 
-    const { groupId } = params;
+    const { groupId } = await params;
 
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -94,7 +94,7 @@ export async function GET(
 // POST /api/chat/groups/[groupId]/members - Add members to group (admin only)
 export async function POST(
   request: NextRequest,
-  { params }: { params: { groupId: string } }
+  { params }: { params: Promise<{ groupId: string }> }
 ) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -107,7 +107,7 @@ export async function POST(
       );
     }
 
-    const { groupId } = params;
+    const { groupId } = await params;
     const body = await request.json();
     const { memberIds } = body;
 

@@ -7,7 +7,7 @@ import { validateAuthToken, createServerClient, successResponse, errorResponse }
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string; userId: string } }
+  { params }: { params: Promise<{ id: string; userId: string }> }
 ) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -21,7 +21,7 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const projectId = params.id;
+    const { id: projectId } = await params;
     const teamUserId = params.userId;
     const { role, department, permission } = body;
 
@@ -124,7 +124,7 @@ export async function PATCH(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string; userId: string } }
+  { params }: { params: Promise<{ id: string; userId: string }> }
 ) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -137,7 +137,7 @@ export async function DELETE(
       );
     }
 
-    const projectId = params.id;
+    const { id: projectId } = await params;
     const teamUserId = params.userId;
 
     const supabase = createServerClient();

@@ -5,7 +5,7 @@ import { createClient } from '@supabase/supabase-js';
 // GET /api/chat/conversations/[conversationId] - Get conversation details
 export async function GET(
   request: NextRequest,
-  { params }: { params: { conversationId: string } }
+  { params }: { params: Promise<{ conversationId: string }> }
 ) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -18,7 +18,7 @@ export async function GET(
       );
     }
 
-    const { conversationId } = params;
+    const { conversationId } = await params;
 
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,

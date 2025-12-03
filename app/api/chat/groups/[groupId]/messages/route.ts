@@ -5,7 +5,7 @@ import { createClient } from '@supabase/supabase-js';
 // GET /api/chat/groups/[groupId]/messages - Get group messages
 export async function GET(
   request: NextRequest,
-  { params }: { params: { groupId: string } }
+  { params }: { params: Promise<{ groupId: string }> }
 ) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -18,7 +18,7 @@ export async function GET(
       );
     }
 
-    const { groupId } = params;
+    const { groupId } = await params;
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '50');
@@ -87,7 +87,7 @@ export async function GET(
 // POST /api/chat/groups/[groupId]/messages - Send a group message
 export async function POST(
   request: NextRequest,
-  { params }: { params: { groupId: string } }
+  { params }: { params: Promise<{ groupId: string }> }
 ) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -100,7 +100,7 @@ export async function POST(
       );
     }
 
-    const { groupId } = params;
+    const { groupId } = await params;
     const body = await request.json();
     const { content, attachmentUrl, attachmentType } = body;
 

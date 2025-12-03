@@ -5,7 +5,7 @@ import { createClient } from '@supabase/supabase-js';
 // DELETE /api/chat/groups/[groupId]/members/[userId] - Remove member from group
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { groupId: string; userId: string } }
+  { params }: { params: Promise<{ groupId: string; userId: string }> }
 ) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -18,7 +18,7 @@ export async function DELETE(
       );
     }
 
-    const { groupId, userId } = params;
+    const { groupId, userId } = await params;
 
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
