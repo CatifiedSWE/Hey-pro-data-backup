@@ -293,7 +293,7 @@ export default function AddGigPage() {
 
             // Prepare API payload
             const apiPayload = {
-                title: formValues.title.trim(),
+                title: titleToSubmit,
                 description: formValues.description.trim(),
                 qualifyingCriteria: formValues.qualifyingCriteria?.trim() || null,
                 amount: formValues.gigRate ? parseFloat(formValues.gigRate) : null,
