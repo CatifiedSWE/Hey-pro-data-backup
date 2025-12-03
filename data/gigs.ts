@@ -55,6 +55,7 @@ export type GigEntry = {
     name: string;
     avatar: string;
   };
+  created_by?: string;
   description: string;
   qualifyingCriteria: string;
   budgetLabel: string;
