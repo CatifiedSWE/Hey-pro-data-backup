@@ -39,7 +39,13 @@ export default function ProjectDetails({ job }: ProjectDetailsProps) {
             <div className="overflow-auto h-screen  max-w-7xl mx-auto">
                 <div>
                     <div className="flex flex-row gap-4 items-center">
-                        <Image src={job.logo} height={100} width={100} alt="Company Logo" className=" h-12 w-12 rounded-full shadow" />
+                        {job.logo && job.logo.trim() !== "" ? (
+                            <Image src={job.logo} height={100} width={100} alt="Company Logo" className=" h-12 w-12 rounded-full shadow" />
+                        ) : (
+                            <div className="h-12 w-12 rounded-full shadow bg-gray-200 flex items-center justify-center">
+                                <Folder className="h-6 w-6 text-gray-500" />
+                            </div>
+                        )}
                         <h1 className="text-xl">{job.name}</h1>
                     </div>
                     <div>
