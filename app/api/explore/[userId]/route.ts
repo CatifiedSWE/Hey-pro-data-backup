@@ -8,11 +8,11 @@ import { createServerClient, successResponse, errorResponse } from '@/lib/supaba
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
     const supabase = createServerClient();
-    const userId = params.userId;
+    const { userId } = await params;
 
     // Fetch user profile
     const { data: profile, error: profileError } = await supabase
