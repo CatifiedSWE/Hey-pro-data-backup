@@ -16,7 +16,7 @@ export default function HighlightsText({ className = "" }) {
           alt="HEYLIGHTS"
           width={33}
           height={250}
-          className="lg:rotate-90 lg:origin-top-left lg:ml-10"
+          className=" lg:origin-top-left lg:ml-10"
           style={{ objectFit: "contain" }}
           priority
         />
