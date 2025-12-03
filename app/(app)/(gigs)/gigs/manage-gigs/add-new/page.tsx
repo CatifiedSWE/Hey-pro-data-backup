@@ -306,7 +306,7 @@ export default function AddGigPage() {
                 company: formValues.company || null,
                 isTbc: isTbc,
                 requestQuote: requestQuote,
-                expiryDate: expiryDate ? expiryDate.toISOString() : null,
+                expiryDate: expiryDate ? expiryDate.toISOString() : new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
                 supportingFileLabel: referenceFile?.name || null,
                 referenceUrl: uploadedFileUrl || formValues.referenceUrl || null,
                 status: status,
