@@ -97,8 +97,85 @@ export default function ApplyGigs({ gig }: ApplyGigsProps) {
         return format(date, "dd MMM, yyyy");
     }, [gig.applyBefore]);
 
-    const availableCredits = useMemo(() => profileData.credits ?? [], [profileData.credits])
-    const availableRates = useMemo(() => profileData.rate ?? [], [profileData.rate])
+    // Fetch user's actual credits and rates from API
+    const [availableCredits, setAvailableCredits] = useState<any[]>([])
+    const [availableRates, setAvailableRates] = useState<any[]>([])
+    const [isLoadingData, setIsLoadingData] = useState(true)
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const supabase = createClient()
+                const { data: { session } } = await supabase.auth.getSession()
+                
+                if (!session?.access_token) {
+                    toast.error('Please login to apply for gigs')
+                    return
+                }
+
+                // Fetch credits
+                const creditsResponse = await fetch('/api/profile/credits', {
+                    headers: {
+                        'Authorization': `Bearer ${session.access_token}`
+                    }
+                })
+                
+                if (creditsResponse.ok) {
+                    const creditsData = await creditsResponse.json()
+                    if (creditsData.success && creditsData.data) {
+                        setAvailableCredits(creditsData.data.map((credit: any) => ({
+                            id: credit.id,
+                            creditTitle: credit.credit_title,
+                            internationalCompany: credit.international_company || credit.local_company || '',
+                            startDate: credit.start_date,
+                            endDate: credit.end_date
+                        })))
+                    }
+                }
+
+                // Fetch skills (which may contain rates)
+                const skillsResponse = await fetch('/api/skills', {
+                    headers: {
+                        'Authorization': `Bearer ${session.access_token}`
+                    }
+                })
+                
+                if (skillsResponse.ok) {
+                    const skillsData = await skillsResponse.json()
+                    if (skillsData.success && skillsData.data) {
+                        // Transform skills into rate format if they have rate information
+                        const rates = skillsData.data
+                            .filter((skill: any) => skill.rate || skill.day_rate)
+                            .map((skill: any, index: number) => ({
+                                id: skill.id || `rate-${index}`,
+                                label: `${skill.skill_name} - ${skill.rate || skill.day_rate}`,
+                                value: (skill.rate || skill.day_rate)?.replace(/[^0-9]/g, '') || ''
+                            }))
+                        
+                        if (rates.length > 0) {
+                            setAvailableRates(rates)
+                        } else {
+                            // Fallback: create basic rate options
+                            setAvailableRates([
+                                { id: "rate-1", label: "$500 per day", value: "500" },
+                                { id: "rate-2", label: "$1000 per day", value: "1000" },
+                                { id: "rate-3", label: "$1500 per day", value: "1500" },
+                                { id: "rate-4", label: "$2000 per day", value: "2000" }
+                            ])
+                        }
+                    }
+                }
+
+            } catch (error) {
+                console.error('Error fetching user data:', error)
+                toast.error('Failed to load your profile data')
+            } finally {
+                setIsLoadingData(false)
+            }
+        }
+
+        fetchUserData()
+    }, [])
 
     const highlightedDateMeta = useMemo(() => {
         return gig.calendarMonths.flatMap((month) =>
