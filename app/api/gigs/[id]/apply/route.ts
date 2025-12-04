@@ -96,6 +96,9 @@ export async function POST(
         cover_letter: body.coverLetter || null,
         portfolio_links: body.portfolioLinks || null,
         resume_url: body.resumeUrl || null,
+        selected_credits: body.selectedCredits || [],
+        selected_rate: body.selectedRate || null,
+        availability_data: body.availabilityData || [],
         status: 'pending'
       })
       .select()
