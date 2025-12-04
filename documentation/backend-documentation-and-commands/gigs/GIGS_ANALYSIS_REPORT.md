@@ -239,32 +239,14 @@ return {
 
 ---
 
-### 3. **Application Status Update Route** (Needs Verification)
+### 3. **Application Status Update Route** ✅ **VERIFIED**
 
-**Issue:**
-The `PATCH /api/gigs/[id]/applications` endpoint exists but expects `applicationId` in request body. According to the documentation, there should be a dedicated route:
+**Status:** Both routes exist and work correctly:
 
-**Expected:**
-```
-PATCH /api/gigs/[id]/applications/[applicationId]/status
-```
+1. ✅ `PATCH /api/gigs/[id]/applications` - Bulk update (expects applicationId in body)
+2. ✅ `PATCH /api/gigs/[id]/applications/[applicationId]/status` - Dedicated route
 
-**Current:**
-```typescript
-// In /app/api/gigs/[id]/applications/route.ts - PATCH function
-// Expects: { applicationId, status } in body
-```
-
-**Action Required:**
-Verify if there's a separate route file:
-```bash
-ls -la /app/app/api/gigs/[id]/applications/[applicationId]/status/
-```
-
-**Found:**
-✅ `/app/api/gigs/[id]/applications/[applicationId]/status/route.ts` exists
-
-**Status:** ✅ Likely Complete (needs testing)
+Both patterns are valid and provide flexibility for frontend implementation.
 
 ---
 
