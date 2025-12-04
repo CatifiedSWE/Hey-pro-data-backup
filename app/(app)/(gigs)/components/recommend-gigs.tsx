@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { RecommendationUser, recommendationUsers } from "@/data/recommendUsers"
-import { MapPin, Search } from "lucide-react"
+import { MapPin, Search, UserPlus } from "lucide-react"
 import Image from "next/image"
 import { Checkbox } from "@/components/ui/checkbox"
 
