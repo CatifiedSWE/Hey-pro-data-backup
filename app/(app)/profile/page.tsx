@@ -39,7 +39,6 @@ import ShortProfile from "./components/ShortProfiel";
 import Highlights from "./components/Highlights";
 import CreditsSection from "./components/CreditView";
 import ResumePortfolio from "./components/ResumePortfolio";
-import { highlightsData } from "@/data/profile";
 import SlateView from "./components/slate";
 import AddNewSkill from "./components/add-new-skill";
 import { RoleDialog } from "./components/role";
@@ -124,8 +123,6 @@ export default function Profile() {
   }), [profile?.bio, skills, fetchSkills, refetch]);
 
   // Non-hook data and functions
-  const highlights = highlightsData
-
   const handlePhotoUpload = async (file: File, type: 'profile' | 'banner') => {
     const result = await uploadPhoto(file, type);
     if (!result.success) {
@@ -329,7 +326,7 @@ export default function Profile() {
               
               {/* Highlights Section - Shows on mobile, positioned above about/skills/credits */}
               <div className="lg:hidden mb-8">
-                <Highlights highlights={highlights} />
+                <Highlights />
               </div>
               
               <div className="my-8" />
@@ -347,7 +344,7 @@ export default function Profile() {
       </main>
       {/* Highlights Section - Shows on desktop as sidebar */}
       <div className="hidden lg:block w-full max-w-[336px]">
-        <Highlights highlights={highlights} />
+        <Highlights />
       </div>
     </section>
   )
