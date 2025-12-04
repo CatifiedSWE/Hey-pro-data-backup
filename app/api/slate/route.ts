@@ -68,6 +68,7 @@ export async function GET(request: NextRequest) {
     // Fetch user profiles for all post authors
     let userProfiles: Record<string, any> = {};
     let googleAvatars: Record<string, string> = {};
+    let authUsers: Record<string, any> = {};
     
     if (posts && posts.length > 0) {
       const userIds = [...new Set(posts.map(p => p.user_id))];
@@ -85,12 +86,15 @@ export async function GET(request: NextRequest) {
         }, {} as Record<string, any>);
       }
 
-      // Fetch Google auth avatars as fallback
+      // Fetch Google auth avatars and user data as fallback
       const { data: authData } = await supabase.auth.admin.listUsers();
       if (authData?.users) {
         authData.users.forEach(authUser => {
-          if (userIds.includes(authUser.id) && (authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture)) {
-            googleAvatars[authUser.id] = authUser.user_metadata.avatar_url || authUser.user_metadata.picture;
+          if (userIds.includes(authUser.id)) {
+            authUsers[authUser.id] = authUser;
+            if (authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture) {
+              googleAvatars[authUser.id] = authUser.user_metadata.avatar_url || authUser.user_metadata.picture;
+            }
           }
         });
       }
@@ -119,25 +123,41 @@ export async function GET(request: NextRequest) {
     }
 
     // Format response
-    const formattedPosts = posts?.map(post => ({
-      id: post.id,
-      content: post.content,
-      slug: post.slug,
-      status: post.status,
-      likes_count: post.likes_count,
-      comments_count: post.comments_count,
-      shares_count: post.shares_count,
-      created_at: post.created_at,
-      updated_at: post.updated_at,
-      author: {
-        id: post.user_id,
-        name: `${userProfiles[post.user_id]?.alias_first_name || ''} ${userProfiles[post.user_id]?.alias_surname || ''}`.trim(),
-        avatar: userProfiles[post.user_id]?.profile_photo_url || googleAvatars[post.user_id] || '',
-      },
-      media: post.media?.sort((a, b) => a.sort_order - b.sort_order) || [],
-      user_has_liked: userLikes.includes(post.id),
-      user_has_saved: userSaves.includes(post.id),
-    })) || [];
+    const formattedPosts = posts?.map(post => {
+      const profile = userProfiles[post.user_id];
+      const authUser = authUsers[post.user_id];
+      
+      // Construct name with fallbacks
+      let displayName = `${profile?.alias_first_name || ''} ${profile?.alias_surname || ''}`.trim();
+      
+      // If name is empty, try fallbacks
+      if (!displayName) {
+        displayName = authUser?.user_metadata?.full_name || 
+                     authUser?.user_metadata?.name || 
+                     authUser?.email?.split('@')[0] || 
+                     'Anonymous User';
+      }
+      
+      return {
+        id: post.id,
+        content: post.content,
+        slug: post.slug,
+        status: post.status,
+        likes_count: post.likes_count,
+        comments_count: post.comments_count,
+        shares_count: post.shares_count,
+        created_at: post.created_at,
+        updated_at: post.updated_at,
+        author: {
+          id: post.user_id,
+          name: displayName,
+          avatar: profile?.profile_photo_url || googleAvatars[post.user_id] || '',
+        },
+        media: post.media?.sort((a, b) => a.sort_order - b.sort_order) || [],
+        user_has_liked: userLikes.includes(post.id),
+        user_has_saved: userSaves.includes(post.id),
+      };
+    }) || [];
 
     return NextResponse.json(
       successResponse(
