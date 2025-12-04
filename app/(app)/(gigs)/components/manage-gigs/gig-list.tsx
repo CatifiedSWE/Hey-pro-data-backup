@@ -45,8 +45,8 @@ export function GigList({ selectedGigIds, onToggleGig }: GigListProps) {
                                 <div className="flex items-start gap-2 text-sm text-[#444444]">
                                     <CalendarDays className="h-4 w-4 text-gray-400 shrink-0" />
                                     <div className="space-y-1">
-                                        {gig.dateWindows.map((window) => (
-                                            <p key={`${gig.id}-${window.label}`} className="break-words">
+                                        {gig.dateWindows.map((window, windowIndex) => (
+                                            <p key={`${gig.id}-window-${windowIndex}`} className="break-words">
                                                 <span className="font-medium text-gray-900">{window.label}</span>
                                                 <span className="mx-2">|</span>
                                                 {window.range}
