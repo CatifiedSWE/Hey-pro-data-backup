@@ -141,53 +141,67 @@ export function SendRecommendationDialog({ className }: { className?: string }) 
                             </div>
 
                             <div className="space-y-4">
-                                <p className="text-sm font-medium text-black">Previously recommended</p>
+                                <p className="text-sm font-medium text-black">Crew members to recommend</p>
                                 <ScrollArea className="h-72 pr-2">
-                                    <div className="space-y-4">
-                                        {filteredUsers.map((user) => {
-                                            const isSelected = selectedUsers.some((existing) => existing.id === user.id)
+                                    {loading ? (
+                                        <div className="flex items-center justify-center h-full">
+                                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FA6E80]"></div>
+                                        </div>
+                                    ) : error ? (
+                                        <div className="flex items-center justify-center h-full">
+                                            <p className="text-sm text-red-500">{error}</p>
+                                        </div>
+                                    ) : filteredUsers.length === 0 ? (
+                                        <div className="flex items-center justify-center h-full">
+                                            <p className="text-sm text-gray-500">No users found</p>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-4">
+                                            {filteredUsers.map((user) => {
+                                                const isSelected = selectedUsers.some((existing) => existing.id === user.id)
 
-                                            return (
-                                                <div
-                                                    key={user.id}
-                                                    className="flex items-center justify-between rounded-[12px] bg-white px-4 py-3"
-                                                >
-                                                    <div className="flex items-center gap-4">
-                                                        {user.avatar && user.avatar.trim() !== "" ? (
-                                                            <Image
-                                                                src={user.avatar}
-                                                                alt={user.name}
-                                                                width={49}
-                                                                height={49}
-                                                                className="h-[49px] w-[49px] rounded-full object-cover"
-                                                            />
-                                                        ) : (
-                                                            <div className="h-[49px] w-[49px] rounded-full bg-gray-200 flex items-center justify-center text-lg font-semibold text-gray-600">
-                                                                {user.name.charAt(0).toUpperCase()}
-                                                            </div>
-                                                        )}
-                                                        <div className="flex flex-col gap-1">
-                                                            <p className="text-base font-medium text-[#444444]">{user.name}</p>
-                                                            <div className="flex items-center gap-2 text-sm text-[#444444]">
-                                                                <MapPin className="h-4 w-4" />
-                                                                <span>{user.location}</span>
+                                                return (
+                                                    <div
+                                                        key={user.id}
+                                                        className="flex items-center justify-between rounded-[12px] bg-white px-4 py-3"
+                                                    >
+                                                        <div className="flex items-center gap-4">
+                                                            {user.avatar && user.avatar.trim() !== "" ? (
+                                                                <Image
+                                                                    src={user.avatar}
+                                                                    alt={user.name}
+                                                                    width={49}
+                                                                    height={49}
+                                                                    className="h-[49px] w-[49px] rounded-full object-cover"
+                                                                />
+                                                            ) : (
+                                                                <div className="h-[49px] w-[49px] rounded-full bg-gray-200 flex items-center justify-center text-lg font-semibold text-gray-600">
+                                                                    {user.name.charAt(0).toUpperCase()}
+                                                                </div>
+                                                            )}
+                                                            <div className="flex flex-col gap-1">
+                                                                <p className="text-base font-medium text-[#444444]">{user.name}</p>
+                                                                <div className="flex items-center gap-2 text-sm text-[#444444]">
+                                                                    <MapPin className="h-4 w-4" />
+                                                                    <span>{user.location}</span>
+                                                                </div>
                                                             </div>
                                                         </div>
+                                                        <label htmlFor={`recommend-${user.id}`} className="relative inline-flex items-center justify-center">
+                                                            <Checkbox
+                                                                id={`recommend-${user.id}`}
+                                                                checked={isSelected}
+                                                                onCheckedChange={() => handleToggleUser(user)}
+                                                                aria-label={`Toggle recommendation for ${user.name}`}
+                                                                style={{ width: 24, height: 24 }}
+                                                                className="h-6 w-6 rounded-[4px] border border-[#444444] text-transparent transition data-[state=checked]:border-[#FCAF45] data-[state=checked]:bg-[#FCAF45] data-[state=checked]:text-white focus-visible:ring-0 focus-visible:ring-offset-0"
+                                                            />
+                                                        </label>
                                                     </div>
-                                                    <label htmlFor={`recommend-${user.id}`} className="relative inline-flex items-center justify-center">
-                                                        <Checkbox
-                                                            id={`recommend-${user.id}`}
-                                                            checked={isSelected}
-                                                            onCheckedChange={() => handleToggleUser(user)}
-                                                            aria-label={`Toggle recommendation for ${user.name}`}
-                                                            style={{ width: 24, height: 24 }}
-                                                            className="h-6 w-6 rounded-[4px] border border-[#444444] text-transparent transition data-[state=checked]:border-[#FCAF45] data-[state=checked]:bg-[#FCAF45] data-[state=checked]:text-white focus-visible:ring-0 focus-visible:ring-offset-0"
-                                                        />
-                                                    </label>
-                                                </div>
-                                            )
-                                        })}
-                                    </div>
+                                                )
+                                            })}
+                                        </div>
+                                    )}
                                 </ScrollArea>
                             </div>
                         </div>
