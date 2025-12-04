@@ -52,7 +52,7 @@ export default function HelpPage() {
     const [messages, setMessages] = useState<Message[]>([
         {
             id: "1",
-            content: "Hello! I'm the HeyProData Help Bot. How can I assist you today?",
+            content: "Hello! I'm the HeyProData AI Support. How can I assist you today?",
             sender: "bot",
             timestamp: new Date()
         }
@@ -144,19 +144,7 @@ export default function HelpPage() {
     };
 
     return (
-        <div className="flex flex-col gap-4 w-full h-[calc(100vh-5rem)] pb-2 px-0 md:px-4">
-            {/* Header Area - Compact */}
-            <div className="flex items-center justify-between shrink-0 px-1 mt-2">
-                <div>
-                    <h1 className="text-2xl font-bold bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC] bg-clip-text text-transparent inline-block">
-                        Help Center
-                    </h1>
-                    <p className="text-sm text-gray-500 hidden sm:inline-block ml-3">
-                        Support & Assistant
-                    </p>
-                </div>
-            </div>
-
+        <div className="flex flex-col gap-4 w-full h-[calc(100vh-4rem)] pb-2 px-0 md:px-4 pt-2">
             {/* Main Content */}
             <div className="flex-1 flex gap-4 h-full min-h-0 overflow-hidden">
                 {/* Main Chat Area */}
@@ -170,7 +158,7 @@ export default function HelpPage() {
                                 </AvatarFallback>
                             </Avatar>
                             <div>
-                                <h2 className="font-semibold text-gray-800 text-sm">AI Assistant</h2>
+                                <h2 className="font-semibold text-gray-800 text-sm">AI Support</h2>
                                 <p className="text-[10px] text-gray-500 flex items-center gap-1">
                                     <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
                                     Online
@@ -188,6 +176,15 @@ export default function HelpPage() {
                                     <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#FA6E80]/10 to-[#31A7AC]/10 flex items-center justify-center mb-4">
                                         <Bot className="h-8 w-8 text-[#6A89BE]" />
                                     </div>
+                                    
+                                    {/* Added Titles to Welcome Screen */}
+                                    <h1 className="text-2xl font-bold bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC] bg-clip-text text-transparent inline-block mb-1">
+                                        Help Center
+                                    </h1>
+                                    <p className="text-sm text-gray-500 font-medium mb-6">
+                                        Support & Assistant
+                                    </p>
+
                                     <h3 className="font-semibold text-gray-700 mb-1">How can we help?</h3>
                                     <p className="text-sm text-gray-400 max-w-xs">
                                         Ask about features, your account, or troubleshooting.
