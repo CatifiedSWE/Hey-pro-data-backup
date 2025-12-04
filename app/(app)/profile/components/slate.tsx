@@ -55,6 +55,7 @@ export default function SlateView() {
             }
 
             const token = session.access_token;
+            const user = session.user;
 
             // Fetch user profile first
             const profileResponse = await fetch('/api/profile', {
@@ -64,10 +65,29 @@ export default function SlateView() {
             const profileData = await profileResponse.json();
             
             if (profileData.success && profileData.data) {
+                // Build user name with proper fallbacks
+                const userName = profileData.data.name 
+                    || (profileData.data.first_name && profileData.data.surname 
+                        ? `${profileData.data.first_name} ${profileData.data.surname}`.trim()
+                        : profileData.data.first_name 
+                        || user?.user_metadata?.full_name 
+                        || user?.email?.split('@')[0]
+                        || 'User');
+
+                // Build avatar with proper priority fallbacks:
+                // 1. User uploaded photo (profile_photo_url)
+                // 2. Google OAuth photo (user_metadata.avatar_url or picture)
+                // 3. Default profile photo
+                const userAvatar = profileData.data.profile_photo_url 
+                    || profileData.data.profile_photo 
+                    || user?.user_metadata?.avatar_url 
+                    || user?.user_metadata?.picture 
+                    || '/default-profile.png';
+
                 setAuthor({
-                    id: profileData.data.id,
-                    name: profileData.data.name || 'User',
-                    avatar: profileData.data.profile_photo || '/default-profile.png',
+                    id: profileData.data.user_id || profileData.data.id,
+                    name: userName,
+                    avatar: userAvatar,
                     role: profileData.data.current_role
                 });
             }
