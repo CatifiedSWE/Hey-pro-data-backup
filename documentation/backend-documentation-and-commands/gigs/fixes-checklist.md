@@ -18,7 +18,7 @@ Files to fix (Gigs-related):
 - [x] `/app/app/(app)/(gigs)/components/applygigs.tsx` - Fixed WEEKDAY_LABELS .map() to use index for unique keys
 - [x] `/app/app/(app)/(gigs)/components/recommend-gigs.tsx` - Already correct (uses user.id as key)
 - [x] `/app/app/(app)/(gigs)/components/gig-details.tsx` - Fixed WEEKDAY_LABELS .map() to use index
-- [ ] `/app/app/(app)/(gigs)/components/manage-gigs/contact-list-tab.tsx` - Multiple .map() calls
+- [x] `/app/app/(app)/(gigs)/components/manage-gigs/contact-list-tab.tsx` - Fixed dateWindows .map() to use index
 - [ ] `/app/app/(app)/(gigs)/components/manage-gigs/see-all-referrals.tsx` - .map() in user list
 - [ ] `/app/app/(app)/(gigs)/components/manage-gigs/application-tab.tsx` - .map() in applicants
 - [ ] `/app/app/(app)/(gigs)/components/manage-gigs/gig-list.tsx` - .map() in gigsData
