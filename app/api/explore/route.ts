@@ -67,25 +67,9 @@ export async function GET(request: NextRequest) {
       query = query.or(`country.ilike.%${location}%,city.ilike.%${location}%`);
     }
 
-    // Apply availability filter
-    if (availability === 'available') {
-      query = query.eq('available_for_work', true);
-    } else if (availability === 'unavailable') {
-      query = query.eq('available_for_work', false);
-    }
-
-    // Apply experience level filter
-    if (experienceLevel) {
-      query = query.eq('experience_level', experienceLevel);
-    }
-
-    // Apply rate range filters
-    if (minRate) {
-      query = query.gte('day_rate', parseInt(minRate));
-    }
-    if (maxRate) {
-      query = query.lte('day_rate', parseInt(maxRate));
-    }
+    // Note: Availability, experience level, and rate filters are disabled
+    // due to missing columns in the current database schema
+    // These can be re-enabled when the columns are added to user_profiles table
 
     // Apply sorting
     const ascending = sortOrder === 'asc';
