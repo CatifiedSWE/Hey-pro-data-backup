@@ -115,6 +115,16 @@ export async function GET(request: NextRequest) {
           .select('id', { count: 'exact', head: true })
           .eq('gig_id', gig.id);
         
+        // Transform date windows to calendar months for frontend
+        const dateWindows = (dates || []).map(d => ({
+          label: d.month,
+          range: d.days
+        }));
+        
+        // Import transformCalendarMonths helper
+        const { transformCalendarMonths } = await import('@/lib/supabase/helpers');
+        const calendarMonths = transformCalendarMonths(dates || []);
+
         return {
           id: gig.id,
           slug: gig.slug,
@@ -140,10 +150,8 @@ export async function GET(request: NextRequest) {
               : 'Unknown',
             avatar: profile?.profile_photo_url || null
           },
-          dateWindows: (dates || []).map(d => ({
-            label: d.month,
-            range: d.days
-          })),
+          dateWindows,
+          calendarMonths,
           location: (locations || []).map(l => l.location_name).join(', '),
           applyBefore: gig.expiry_date,
           applicationCount: applicationCount || 0
