@@ -397,8 +397,8 @@ export default function AddGigPage() {
 
 
                                 <div className="mx-auto sm:mx-0 grid w-full max-w-[425px] grid-cols-7 items-center gap-2 rounded-t-[10px] bg-[#ffffff] text-center text-[25px] font-[400] text-[#FF8FA5] min-h-[60px]">
-                                    {["M", "T", "W", "T", "F", "S", "S"].map((day) => (
-                                        <span key={day}>{day}</span>
+                                    {["M", "T", "W", "T", "F", "S", "S"].map((day, dayIndex) => (
+                                        <span key={`weekday-${dayIndex}`}>{day}</span>
                                     ))}
                                 </div>
                                 <ScrollArea className="mx-auto sm:mx-0 max-h-[260px] w-full max-w-[425px] rounded-b-[10px] bg-[#ffffff]">
