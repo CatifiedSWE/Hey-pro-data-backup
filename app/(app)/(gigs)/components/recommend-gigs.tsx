@@ -32,20 +32,62 @@ type RecommendationUser = {
 export function SendRecommendationDialog({ className }: { className?: string }) {
     const [searchTerm, setSearchTerm] = useState("")
     const [selectedUsers, setSelectedUsers] = useState<RecommendationUser[]>([])
+    const [users, setUsers] = useState<RecommendationUser[]>([])
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState<string | null>(null)
+
+    // Fetch users from API
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                setLoading(true)
+                setError(null)
+                
+                const response = await apiCalling({
+                    method: 'get',
+                    route: '/explore',
+                })
+
+                if (response.status && response.data?.data?.profiles) {
+                    const profiles = response.data.data.profiles.map((profile: any) => ({
+                        id: profile.id,
+                        userId: profile.userId,
+                        avatar: profile.avatar,
+                        name: profile.name || profile.displayName,
+                        location: profile.location,
+                        roles: profile.roles || []
+                    }))
+                    setUsers(profiles)
+                } else {
+                    setError('Failed to load users')
+                    toast.error('Failed to load users')
+                }
+            } catch (err) {
+                console.error('Error fetching users:', err)
+                setError('Failed to load users')
+                toast.error('Failed to load users')
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        fetchUsers()
+    }, [])
 
     const filteredUsers = useMemo(() => {
         const query = searchTerm.trim().toLowerCase()
         if (!query) {
-            return recommendationUsers
+            return users
         }
 
-        return recommendationUsers.filter((user) => {
+        return users.filter((user) => {
             return (
                 user.name.toLowerCase().includes(query) ||
-                user.handle.toLowerCase().includes(query)
+                user.location.toLowerCase().includes(query) ||
+                user.roles.some(role => role.toLowerCase().includes(query))
             )
         })
-    }, [searchTerm])
+    }, [searchTerm, users])
 
     const handleToggleUser = (user: RecommendationUser) => {
         setSelectedUsers((prev) => {
