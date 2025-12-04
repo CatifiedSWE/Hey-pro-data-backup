@@ -271,40 +271,74 @@ export default function ApplyGigs({ gig }: ApplyGigsProps) {
         console.log("All highlighted dates marked as A", highlightedDateMeta.map(({ label }) => ({ date: label, status: "A" })))
     }
 
-    const handleSubmit = () => {
-        setIsSubmitting(true)
-        const entries = highlightedDateMeta
-            .filter(({ key }) => selectedStatuses[key])
-            .map(({ key, label }) => ({ date: label, status: selectedStatuses[key] as DayStatus }))
+    const handleSubmit = async () => {
+        try {
+            setIsSubmitting(true)
 
-        // some deled code
-        const formValues = buildDefaultFormState()
-        setTimeout(() => {
-            setApplicationFormSubmitted(true)
-        }, 1000)
-        setIsSubmitting(false)
+            // Get session token
+            const supabase = createClient()
+            const { data: { session } } = await supabase.auth.getSession()
+            
+            if (!session?.access_token) {
+                toast.error('Please login to apply for this gig')
+                setIsSubmitting(false)
+                return
+            }
 
+            // Prepare availability data
+            const entries = highlightedDateMeta
+                .filter(({ key }) => selectedStatuses[key])
+                .map(({ key, label }) => ({ date: label, status: selectedStatuses[key] as DayStatus }))
 
-
-        const payload = {
-            gigId: gig.id,
-            gigTitle: gig.title,
-            applicant: formValues,
-            availability: entries,
-            credits: selectedCreditDetails.map((credit) => ({
+            // Prepare credits data
+            const creditsData = selectedCreditDetails.map((credit) => ({
                 id: credit.id,
                 title: credit.creditTitle,
                 startDate: credit.startDate,
                 endDate: credit.endDate,
-            })),
-        }
+            }))
 
-        console.log("Gig application submission", payload)
-        setTimeout(() => {
+            // Determine selected rate (either saved or custom)
+            const selectedRate = formValues.customRate || formValues.savedRate
+
+            // Prepare application payload
+            const payload = {
+                coverLetter: '', // Can be added if there's a text field for it
+                portfolioLinks: [], // Can be added if needed
+                resumeUrl: null, // Can be added if needed
+                selectedCredits: creditsData,
+                selectedRate: selectedRate,
+                availabilityData: entries
+            }
+
+            console.log("Submitting gig application:", payload)
+
+            // Submit application to API
+            const response = await fetch(`/api/gigs/${gig.id}/apply`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${session.access_token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+
+            const result = await response.json()
+
+            if (response.ok && result.success) {
+                setApplicationFormSubmitted(true)
+                setShowSuccessDialog(true)
+                toast.success('Application submitted successfully!')
+            } else {
+                toast.error(result.error || 'Failed to submit application')
+                console.error('Application submission error:', result)
+            }
+        } catch (error) {
+            console.error('Error submitting application:', error)
+            toast.error('An error occurred while submitting your application')
+        } finally {
             setIsSubmitting(false)
-            setApplicationFormSubmitted(true)
-            setShowSuccessDialog(true)
-        }, 1200)
+        }
     }
 
     return (
