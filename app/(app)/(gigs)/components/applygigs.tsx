@@ -13,6 +13,8 @@ import { GigsDataType } from "@/data/gigs"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Separator } from "@/components/ui/separator"
 import { profileData } from "@/data/profile"
+import { DialogTitle } from "@/components/ui/dialog"
+import { VisuallyHidden } from "@/components/ui/visually-hidden"
 type ApplyGigsProps = {
     gig: GigsDataType[number]
 }
