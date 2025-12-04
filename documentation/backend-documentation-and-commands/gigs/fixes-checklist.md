@@ -22,9 +22,9 @@ Files to fix (Gigs-related):
 - [x] `/app/app/(app)/(gigs)/components/manage-gigs/see-all-referrals.tsx` - Already correct (uses user.id and proper keys)
 - [x] `/app/app/(app)/(gigs)/components/manage-gigs/application-tab.tsx` - Fixed dateWindows .map() to use index
 - [x] `/app/app/(app)/(gigs)/components/manage-gigs/gig-list.tsx` - Fixed dateWindows .map() to use index
-- [ ] `/app/app/(app)/(gigs)/gigs/page.tsx`
-- [ ] `/app/app/(app)/(gigs)/gigs/manage-gigs/add-new/page.tsx`
-- [ ] `/app/app/(app)/(gigs)/gigs/[slug]/page.tsx`
+- [x] `/app/app/(app)/(gigs)/gigs/page.tsx` - Fixed dateWindows .map() to use index
+- [x] `/app/app/(app)/(gigs)/gigs/manage-gigs/add-new/page.tsx` - Fixed weekday labels and monthDateSummaries .map() to use index
+- [x] `/app/app/(app)/(gigs)/gigs/[slug]/page.tsx` - Already correct (no issues)
 
 ### Phase 3: Fix Radix UI DialogContent Accessibility
 Files to fix:
