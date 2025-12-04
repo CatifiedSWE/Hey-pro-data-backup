@@ -184,6 +184,9 @@ export default function VisaSection({
                 </div>
             </DialogTrigger>
             <DialogContent className="w-full   overflow-x-auto border-none bg-transparent no-scrollbar p-0">
+                <VisuallyHidden>
+                    <DialogTitle>Passport and Visa details</DialogTitle>
+                </VisuallyHidden>
                 <form onSubmit={handleSubmit}>
                     <div className="mx-auto flex h-full w-full flex-col bg-white px-5 pb-6 pt-[25px] shadow-[0_8px_18px_rgba(0,0,0,0.1)]">
                         <div className="mx-auto mb-6 h-[5px] w-[150px] rounded-full bg-[#868686]" />
