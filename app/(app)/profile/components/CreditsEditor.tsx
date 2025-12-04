@@ -365,6 +365,9 @@ export default function CreditsEditor({ trigger, mode = 'add', creditToEdit, onU
             <DialogContent
                 className="w-full border border-[#EFEFEF] rounded-[15px] p-0 overflow-x-auto sm:max-w-[65rem] h-[80vh]"
             >
+                <VisuallyHidden>
+                    <DialogTitle>{mode === 'edit' ? 'Edit Credit' : 'Add New Credit'}</DialogTitle>
+                </VisuallyHidden>
                 <div className="px-[30px] pt-[30px] pb-6 flex flex-col gap-6">
                     <div className="flex flex-wrap items-start justify-between gap-4">
                         <div>
