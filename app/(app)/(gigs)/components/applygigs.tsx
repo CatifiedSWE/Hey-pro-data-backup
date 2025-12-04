@@ -24,7 +24,7 @@ import { VisuallyHidden } from "@/components/ui/visually-hidden"
 import { GigsDataType } from "@/data/gigs"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Separator } from "@/components/ui/separator"
-import { createClient } from "@/lib/supabase/client"
+import { supabase } from "@/lib/supabase/client"
 import { toast } from "sonner"
 type ApplyGigsProps = {
     gig: GigsDataType[number]
