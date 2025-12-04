@@ -162,6 +162,17 @@ export interface AvailabilityData {
 /**
  * Calculate profile completion percentage locally (optimistic update)
  * Mirrors the backend calculation logic for immediate UI feedback
+ * 
+ * REFORMED Weighted Scoring System (Total: 100%):
+ * - Basic Information (25%): first_name, surname, bio, country, city (5% each)
+ * - Profile Photos (10%): profile_photo_url (5%), banner_url (5%)
+ * - Contact Details (10%): email (5%), phone + country_code (5%)
+ * - Professional Role (10%): At least 1 role = 10%
+ * - Skills (10%): At least 1 skill = 10%
+ * - Social Link (10%): At least 1 link = 10%
+ * - Language (10%): At least 1 language = 10%
+ * - Availability (10%): Availability status set = 10%
+ * - Work History (5%): At least 1 credit = 5% (lowest priority)
  */
 const calculateLocalCompletion = (
   profileData: ProfileData | null,
@@ -175,42 +186,47 @@ const calculateLocalCompletion = (
 
   if (!profileData) return 0;
 
-  // Basic Information (25%): first_name, surname, bio, country, city (5% each)
+  // === BASIC INFORMATION (25%) ===
+  // 5% each for: first_name, surname, bio, country, city
   if (profileData.first_name && profileData.first_name.trim().length > 0) score += 5;
   if (profileData.surname && profileData.surname.trim().length > 0) score += 5;
   if (profileData.bio && profileData.bio.trim().length > 20) score += 5;
   if (profileData.country && profileData.country.trim().length > 0) score += 5;
   if (profileData.city && profileData.city.trim().length > 0) score += 5;
 
-  // Profile Photos (10%): profile_photo_url (5%), banner_url (5%)
+  // === PROFILE PHOTOS (10%) ===
+  // 5% for profile photo, 5% for banner
   if (profileData.profile_photo_url) score += 5;
   if (profileData.banner_url) score += 5;
 
-  // Contact Details (10%): email (5%), phone + country_code (5%)
+  // === CONTACT DETAILS (10%) ===
+  // 5% for email, 5% for phone with country code
   if (profileData.email && profileData.email.trim().length > 0) score += 5;
   if (profileData.phone && profileData.phone.trim().length > 0 && profileData.country_code) score += 5;
 
-  // Professional Roles (15%): At least 1 role (10%), 3+ roles (15%)
+  // === PROFESSIONAL ROLE (10%) ===
+  // At least 1 role = 10% (full points)
   if (rolesData.length >= 1) score += 10;
-  if (rolesData.length >= 3) score += 5;
 
-  // Skills (15%): At least 1 skill (5%), 3+ skills (10%), 5+ skills (15%)
-  if (skillsData.length >= 1) score += 5;
-  if (skillsData.length >= 3) score += 5;
-  if (skillsData.length >= 5) score += 5;
+  // === SKILLS (10%) ===
+  // At least 1 skill = 10% (full points)
+  if (skillsData.length >= 1) score += 10;
 
-  // Social Links (5%): At least 1 link (5%)
-  if (linksData.length >= 1) score += 5;
+  // === SOCIAL LINK (10%) ===
+  // At least 1 link = 10% (full points)
+  if (linksData.length >= 1) score += 10;
 
-  // Work History/Credits (10%): At least 1 credit (5%), 3+ credits (10%)
+  // === LANGUAGE (10%) ===
+  // At least 1 language = 10% (full points)
+  if (languagesData.length >= 1) score += 10;
+
+  // === AVAILABILITY (10%) ===
+  // Availability status set = 10% (full points)
+  if (profileData.availability !== null && profileData.availability !== undefined) score += 10;
+
+  // === WORK HISTORY/CREDITS (5%) ===
+  // At least 1 credit = 5% (lowest priority, full points)
   if (creditsData.length >= 1) score += 5;
-  if (creditsData.length >= 3) score += 5;
-
-  // Languages (5%): At least 1 language (5%)
-  if (languagesData.length >= 1) score += 5;
-
-  // Availability (5%): Availability status set (5%)
-  if (profileData.availability !== null && profileData.availability !== undefined) score += 5;
 
   return Math.min(score, 100);
 };
@@ -329,7 +345,7 @@ export const useProfile = () => {
         setProfile({
           ...updatedProfile,
           profile_completion_percentage: newCompletion,
-          is_profile_complete: newCompletion >= 80
+          is_profile_complete: newCompletion >= 100
         });
       }
       
@@ -386,7 +402,7 @@ export const useProfile = () => {
           setProfile({
             ...profile,
             profile_completion_percentage: newCompletion,
-            is_profile_complete: newCompletion >= 80
+            is_profile_complete: newCompletion >= 100
           });
         }
         
