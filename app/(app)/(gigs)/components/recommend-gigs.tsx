@@ -69,7 +69,7 @@ export function SendRecommendationDialog({ className }: { className?: string }) 
                 setLoading(true)
                 setError(null)
                 
-                const response = await apiCalling({
+                const response = await apiCalling<ExploreApiResponse>({
                     method: 'get',
                     route: '/explore',
                 })
@@ -77,7 +77,7 @@ export function SendRecommendationDialog({ className }: { className?: string }) 
                 // Check if response is successful and has profiles
                 if (response.status && response.data) {
                     // Handle the case where data might be nested differently
-                    const profilesData = response.data.data?.profiles || response.data.profiles
+                    const profilesData = (response.data as ExploreApiResponse).data?.profiles || (response.data as any).profiles
                     
                     if (profilesData && Array.isArray(profilesData)) {
                         const profiles = profilesData.map((profile: any) => ({
