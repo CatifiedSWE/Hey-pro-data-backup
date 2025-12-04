@@ -3,8 +3,25 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { addDays, endOfMonth, endOfWeek, format, getDate, isSameMonth, startOfMonth, startOfWeek } from "date-fns";
-import { ArrowLeft, Calendar, FileText, Link2, MapPin, Paperclip, UserPlus } from "lucide-react";
+import {
+  addDays,
+  endOfMonth,
+  endOfWeek,
+  format,
+  getDate,
+  isSameMonth,
+  startOfMonth,
+  startOfWeek,
+} from "date-fns";
+import {
+  ArrowLeft,
+  Calendar,
+  FileText,
+  Link2,
+  MapPin,
+  Paperclip,
+  UserPlus,
+} from "lucide-react";
 
 import { type GigsDataType } from "@/data/gigs";
 import ApplyGigs from "./applygigs";
@@ -78,30 +95,51 @@ export default function GigDetails(gig: GigsDataType[0]) {
 
   return (
     <section className="w-full max-w-5xl p-8">
-      <Link href="/gigs" className="inline-flex items-center gap-2 text-sm font-[400] text-slate-500 hover:text-slate-900">
+      <Link
+        href="/gigs"
+        className="inline-flex items-center gap-2 text-sm font-[400] text-slate-500 hover:text-slate-900"
+      >
         <ArrowLeft className="h-4 w-4" /> back to gig directory
       </Link>
 
       <div className="mt-6 flex flex-col gap-6">
         <div className="flex flex-wrap items-center gap-4">
-          <Image src={gig.postedBy.avatar} alt={gig.postedBy.name} width={24} height={24} className="rounded-full" />
+          <Image
+            src={gig.postedBy.avatar}
+            alt={gig.postedBy.name}
+            width={24}
+            height={24}
+            className="rounded-full"
+          />
           <div>
-            <p className="text-[16px] font-[400] text-slate-900">{gig.postedBy.name}</p>
-            <p className="text-[9px] text-[#444444]">Posted on {gig.postedOn}</p>
+            <p className="text-[16px] font-[400] text-slate-900">
+              {gig.postedBy.name}
+            </p>
+            <p className="text-[9px] text-[#444444]">
+              Posted on {gig.postedOn}
+            </p>
           </div>
-          <div className="ml-auto text-sm font-[500] text-[#FA6E80]">Apply before {gig.applyBefore}</div>
+          <div className="ml-auto text-sm font-[500] text-[#FA6E80]">
+            Apply before {gig.applyBefore}
+          </div>
         </div>
 
         <div className="space-y-3">
-
-          <span className="text-[18px] font-[400] text-[#000000]">{gig.title}</span>
+          <span className="text-[18px] font-[400] text-[#000000]">
+            {gig.title}
+          </span>
           <div className="flex flex-row gap-2 justify-start items-center">
-            <div className="text-sm uppercase tracking-wide text-slate-400">Gig Rate :</div>
-            <div className="text-[16px] font-[400] text-[#FA6E80]">AED {gig.budgetLabel}</div>
+            <div className="text-sm uppercase tracking-wide text-slate-400">
+              Gig Rate :
+            </div>
+            <div className="text-[16px] font-[400] text-[#FA6E80]">
+              AED {gig.budgetLabel}
+            </div>
           </div>
           <p className="text-[14.9px] text-[#444444]">{gig.description}</p>
           <p className="text-base text-slate-700">
-            <span className="font-[600]">Qualifying criteria:</span> {gig.qualifyingCriteria}
+            <span className="font-[600]">Qualifying criteria:</span>{" "}
+            {gig.qualifyingCriteria}
           </p>
         </div>
 
@@ -112,7 +150,6 @@ export default function GigDetails(gig: GigsDataType[0]) {
             </div>
             <p>{gig.location}</p>
           </div>
-
         </div>
 
         <div className="flex flex-wrap gap-3">
@@ -138,38 +175,62 @@ export default function GigDetails(gig: GigsDataType[0]) {
                 className="rounded-[22px] border border-[#F2F0ED] bg-white p-4 min-w-[280px]"
               >
                 <div className="mb-3 flex items-center justify-between text-base font-semibold text-[#FF4B82]">
-                  <span className="text-[16px] font-[400]">{format(monthDate, "MMM, yyyy")}</span>
+                  <span className="text-[16px] font-[400]">
+                    {format(monthDate, "MMM, yyyy")}
+                  </span>
                   <Calendar className="h-4 w-4 text-[#FF4B82]" />
                 </div>
                 <div className="grid grid-cols-7 gap-[6px] text-[11px] font-semibold text-[#FF4B82]">
                   {WEEKDAY_LABELS.map((label, labelIndex) => (
-                    <span key={`${gig.id}-${month.month}-weekday-${labelIndex}`} className="text-center font-[400] text-[16px]">
+                    <span
+                      key={`${gig.id}-${month.month}-weekday-${labelIndex}`}
+                      className="text-center font-[400] text-[16px]"
+                    >
                       {label}
                     </span>
                   ))}
                 </div>
                 <div className="mt-3 space-y-1">
                   {matrix.map((week, weekIndex) => (
-                    <div key={`week-${weekIndex}`} className="grid grid-cols-7 gap-[2px]">
+                    <div
+                      key={`week-${weekIndex}`}
+                      className="grid grid-cols-7 gap-[2px]"
+                    >
                       {week.map((day) => {
                         const dayNumber = getDate(day);
                         const currentMonth = isSameMonth(day, monthDate);
-                        const isHighlighted = currentMonth && highlighted.has(dayNumber);
-                        const prevHighlighted = currentMonth && highlighted.has(dayNumber - 1);
-                        const nextHighlighted = currentMonth && highlighted.has(dayNumber + 1);
-                        const baseColor = currentMonth ? "text-[#22A5A8]" : "text-slate-300";
+                        const isHighlighted =
+                          currentMonth && highlighted.has(dayNumber);
+                        const prevHighlighted =
+                          currentMonth && highlighted.has(dayNumber - 1);
+                        const nextHighlighted =
+                          currentMonth && highlighted.has(dayNumber + 1);
+                        const baseColor = currentMonth
+                          ? "text-[#22A5A8]"
+                          : "text-slate-300";
                         const highlightBgClass = isHighlighted
                           ? [
-                            "absolute inset-y-0 bg-[#22A5A8] h-[28.27px]",
-                            prevHighlighted ? "-left-1" : "left-0 rounded-l-[43px]",
-                            nextHighlighted ? "-right-1" : "right-0 rounded-r-[43px]",
-                          ].join(" ")
+                              "absolute inset-y-0 bg-[#22A5A8] h-[28.27px]",
+                              prevHighlighted
+                                ? "-left-1"
+                                : "left-0 rounded-l-[43px]",
+                              nextHighlighted
+                                ? "-right-1"
+                                : "right-0 rounded-r-[43px]",
+                            ].join(" ")
                           : "";
 
                         return (
-                          <div key={day.toISOString()} className="relative flex h-8 items-center justify-center overflow-visible">
-                            {isHighlighted && <span className={highlightBgClass} />}
-                            <span className={`relative z-10 text-sm ${isHighlighted ? "font-semibold text-white" : baseColor}`}>
+                          <div
+                            key={day.toISOString()}
+                            className="relative flex h-8 items-center justify-center overflow-visible"
+                          >
+                            {isHighlighted && (
+                              <span className={highlightBgClass} />
+                            )}
+                            <span
+                              className={`relative z-10 text-sm ${isHighlighted ? "font-semibold text-white" : baseColor}`}
+                            >
                               {currentMonth ? dayNumber : ""}
                             </span>
                           </div>
@@ -188,10 +249,11 @@ export default function GigDetails(gig: GigsDataType[0]) {
               const firstMonth = group[0];
               const lastMonth = group[group.length - 1];
               const ariaLabel = firstMonth
-                ? `Show calendars ${format(new Date(firstMonth.year, firstMonth.month, 1), "MMM yyyy")}${lastMonth && group.length > 1
-                  ? ` - ${format(new Date(lastMonth.year, lastMonth.month, 1), "MMM yyyy")}`
-                  : ""
-                }`
+                ? `Show calendars ${format(new Date(firstMonth.year, firstMonth.month, 1), "MMM yyyy")}${
+                    lastMonth && group.length > 1
+                      ? ` - ${format(new Date(lastMonth.year, lastMonth.month, 1), "MMM yyyy")}`
+                      : ""
+                  }`
                 : `Show calendar group ${index + 1}`;
               return (
                 <button
@@ -203,8 +265,11 @@ export default function GigDetails(gig: GigsDataType[0]) {
                   className="p-1"
                 >
                   <span
-                    className={`inline-block h-[20px] w-[20px] rounded-full transition-colors ${activeGroupIndex === index ? "bg-[#31A7AC] h-[22px] w-[22px]" : "bg-black"
-                      }`}
+                    className={`inline-block h-[20px] w-[20px] rounded-full transition-colors ${
+                      activeGroupIndex === index
+                        ? "bg-[#31A7AC] h-[22px] w-[22px]"
+                        : "bg-black"
+                    }`}
                   />
                 </button>
               );
@@ -225,7 +290,13 @@ export default function GigDetails(gig: GigsDataType[0]) {
               </div>
             );
             return reference.href ? (
-              <a key={`${reference.label}-${index}`} href={reference.href} className="block" target="_blank" rel="noreferrer">
+              <a
+                key={`${reference.label}-${index}`}
+                href={reference.href}
+                className="block"
+                target="_blank"
+                rel="noreferrer"
+              >
                 {content}
               </a>
             ) : (
