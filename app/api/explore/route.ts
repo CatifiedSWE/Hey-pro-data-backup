@@ -167,12 +167,9 @@ export async function GET(request: NextRequest) {
           dayRate: profile.day_rate,
           currency: profile.day_rate_currency || 'AED',
           roles: roles?.map(r => r.role_name) || [],
-          portfolioUrl: profile.portfolio_url,
-          imdbUrl: profile.imdb_url,
           experienceLevel: profile.experience_level,
           availableForWork: profile.available_for_work,
-          createdAt: profile.created_at,
-          visibleInExplore: profile.visible_in_explore
+          createdAt: profile.created_at
         };
       })
     );
