@@ -10,15 +10,15 @@ import {
     Bot, 
     User, 
     Sparkles, 
-    MessageSquare, 
-    HelpCircle, 
-    FileText, 
     Settings, 
     Briefcase,
     Users,
     Calendar,
     ChevronRight,
-    Search
+    HelpCircle,
+    Maximize2,
+    Minimize2,
+    X
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import axios from "axios";
@@ -67,13 +67,16 @@ export default function HelpPage() {
     const [inputMessage, setInputMessage] = useState("");
     const [isTyping, setIsTyping] = useState(false);
     const [activeTopic, setActiveTopic] = useState<string | null>(null);
-    const scrollAreaRef = useRef<HTMLDivElement>(null);
+    const [isFullScreen, setIsFullScreen] = useState(false);
+    
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
     // Auto-scroll to bottom when new messages arrive
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        if (messagesEndRef.current) {
+            messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+        }
     }, [messages, isTyping]);
 
     const handleSendMessage = async (text: string = inputMessage) => {
@@ -92,10 +95,9 @@ export default function HelpPage() {
         setMessages(prev => [...prev, userMessage]);
         setInputMessage("");
         setIsTyping(true);
-        setActiveTopic(null); // Reset active topic selection visual if any
+        setActiveTopic(null); 
 
         try {
-            // Generate unique section ID for this chat session
             const sectionId = generateSectionId();
             
             // Call n8n webhook
@@ -109,7 +111,6 @@ export default function HelpPage() {
                 }
             );
 
-            // Extract response from n8n
             let botResponseText = "I apologize, but I couldn't process your request. Please try again.";
             
             if (response.data && Array.isArray(response.data) && response.data.length > 0) {
@@ -142,51 +143,70 @@ export default function HelpPage() {
         }
     };
 
-    const handleKeyPress = (e: React.KeyboardEvent) => {
-        if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault();
-            handleSendMessage();
-        }
-    };
-
     const handleTopicClick = (topic: Topic) => {
         setActiveTopic(topic.label);
         handleSendMessage(topic.query);
         if (window.innerWidth < 1024) {
-            // On mobile, focus input after selection
             inputRef.current?.focus();
         }
     };
 
+    // Full screen toggle handler
+    const toggleFullScreen = () => {
+        setIsFullScreen(!isFullScreen);
+    };
+
     return (
-        <div className="container mx-auto px-4 py-6 max-w-7xl h-[calc(100vh-80px)] flex flex-col gap-6">
-            {/* Page Header */}
-            <div className="flex flex-col gap-2">
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC] bg-clip-text text-transparent w-fit">
-                    Help Center
-                </h1>
-                <p className="text-gray-500">
-                    Find answers, manage your account, and get support.
-                </p>
+        <div 
+            className={cn(
+                "flex flex-col gap-4 transition-all duration-300 ease-in-out",
+                isFullScreen 
+                    ? "fixed inset-0 z-[100] bg-white p-4 pt-16 md:p-6" 
+                    : "w-full h-[calc(100vh-8rem)] pb-2"
+            )}
+        >
+            {/* Header Area - Compact */}
+            <div className="flex items-center justify-between shrink-0 px-1">
+                <div>
+                    <h1 className="text-2xl font-bold bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC] bg-clip-text text-transparent inline-block">
+                        Help Center
+                    </h1>
+                    {!isFullScreen && (
+                        <p className="text-sm text-gray-500 hidden sm:inline-block ml-3">
+                            Support & Assistant
+                        </p>
+                    )}
+                </div>
+                
+                <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={toggleFullScreen}
+                    className="text-gray-500 hover:text-[#31A7AC] hover:bg-[#31A7AC]/10"
+                    title={isFullScreen ? "Exit Full Screen" : "Full Screen"}
+                >
+                    {isFullScreen ? <Minimize2 className="h-5 w-5" /> : <Maximize2 className="h-5 w-5" />}
+                </Button>
             </div>
 
-            <div className="flex-1 flex gap-6 h-full overflow-hidden">
+            {/* Main Content */}
+            <div className="flex-1 flex gap-4 h-full min-h-0 overflow-hidden">
                 {/* Sidebar - Hidden on mobile, visible on lg */}
-                <Card className="hidden lg:flex w-80 flex-col overflow-hidden border-gray-200 bg-white shadow-sm h-full">
-                    <div className="p-4 border-b border-gray-100 bg-gray-50/50">
-                        <h2 className="font-semibold text-gray-700 flex items-center gap-2">
+                <Card className="hidden lg:flex w-72 flex-col overflow-hidden border-gray-200 bg-white shadow-sm h-full">
+                    <div className="p-3 border-b border-gray-100 bg-gray-50/50">
+                        <h2 className="font-semibold text-gray-700 flex items-center gap-2 text-sm">
                             <Sparkles className="h-4 w-4 text-[#FA6E80]" />
-                            Common Topics
+                            Quick Topics
                         </h2>
                     </div>
                     <ScrollArea className="flex-1">
-                        <div className="p-3 space-y-1">
+                        <div className="p-2 space-y-1">
                             {TOPICS.map((topic) => (
                                 <button
                                     key={topic.label}
                                     onClick={() => handleTopicClick(topic)}
                                     className={cn(
-                                        "w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm transition-all duration-200 group",
+                                        "w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-all duration-200 group",
                                         activeTopic === topic.label 
                                             ? "bg-gray-100 text-gray-900 font-medium" 
                                             : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
@@ -194,68 +214,66 @@ export default function HelpPage() {
                                 >
                                     <div className="flex items-center gap-3">
                                         <div className={cn(
-                                            "p-2 rounded-md transition-colors",
+                                            "p-1.5 rounded-md transition-colors",
                                             activeTopic === topic.label ? "bg-white shadow-sm text-[#31A7AC]" : "bg-gray-100 text-gray-500 group-hover:text-[#31A7AC] group-hover:bg-white"
                                         )}>
-                                            <topic.icon className="h-4 w-4" />
+                                            <topic.icon className="h-3.5 w-3.5" />
                                         </div>
                                         <span>{topic.label}</span>
                                     </div>
                                     <ChevronRight className={cn(
-                                        "h-4 w-4 text-gray-400 transition-transform",
+                                        "h-3.5 w-3.5 text-gray-400 transition-transform",
                                         activeTopic === topic.label ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0"
                                     )} />
                                 </button>
                             ))}
                         </div>
                     </ScrollArea>
-                    <div className="p-4 border-t border-gray-100 bg-gray-50/50">
-                        <div className="rounded-xl bg-gradient-to-r from-[#FA6E80]/10 to-[#31A7AC]/10 p-4 border border-[#FA6E80]/20">
-                            <h3 className="text-sm font-semibold text-gray-800 mb-1">Still need help?</h3>
-                            <p className="text-xs text-gray-600 mb-3">
-                                Our support team is available 24/7 to assist you.
-                            </p>
-                            <Button 
-                                size="sm" 
-                                variant="outline" 
-                                className="w-full bg-white hover:bg-gray-50 border-gray-200 text-gray-700 text-xs h-8"
-                            >
-                                Contact Support
-                            </Button>
-                        </div>
-                    </div>
                 </Card>
 
                 {/* Main Chat Area */}
                 <Card className="flex-1 flex flex-col overflow-hidden border-gray-200 bg-white shadow-sm h-full" data-testid="help-chat-container">
-                    {/* Chat Header */}
-                    <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-white z-10">
+                    {/* Chat Header - Minimal */}
+                    <div className="p-3 border-b border-gray-100 flex items-center justify-between bg-white z-10 shrink-0">
                         <div className="flex items-center gap-3">
-                            <Avatar className="h-10 w-10 ring-2 ring-offset-2 ring-[#FA6E80]/20">
+                            <Avatar className="h-8 w-8 ring-2 ring-offset-1 ring-[#FA6E80]/20">
                                 <AvatarFallback className="bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC]">
-                                    <Bot className="h-5 w-5 text-white" />
+                                    <Bot className="h-4 w-4 text-white" />
                                 </AvatarFallback>
                             </Avatar>
                             <div>
-                                <h2 className="font-semibold text-gray-800">HeyProData Assistant</h2>
-                                <p className="text-xs text-gray-500 flex items-center gap-1.5">
-                                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                                    Online • AI Powered
+                                <h2 className="font-semibold text-gray-800 text-sm">AI Assistant</h2>
+                                <p className="text-[10px] text-gray-500 flex items-center gap-1">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                                    Online
                                 </p>
                             </div>
                         </div>
                     </div>
 
-                    {/* Messages Area */}
-                    <ScrollArea className="flex-1 p-4 bg-gray-50/30" ref={scrollAreaRef}>
-                        <div className="flex flex-col gap-6 max-w-3xl mx-auto py-4">
+                    {/* Messages Area - Scrollable */}
+                    <ScrollArea className="flex-1 p-0 bg-gray-50/30 h-full">
+                        <div className="flex flex-col gap-4 p-4 min-h-full">
+                            {/* Welcome State */}
+                            {messages.length === 1 && (
+                                <div className="flex flex-col items-center justify-center py-8 text-center text-gray-500 animate-fade-in">
+                                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#FA6E80]/10 to-[#31A7AC]/10 flex items-center justify-center mb-4">
+                                        <Bot className="h-8 w-8 text-[#6A89BE]" />
+                                    </div>
+                                    <h3 className="font-semibold text-gray-700 mb-1">How can we help?</h3>
+                                    <p className="text-sm text-gray-400 max-w-xs">
+                                        Ask about features, your account, or troubleshooting.
+                                    </p>
+                                </div>
+                            )}
+
                             {messages.map((message) => (
                                 <div
                                     key={message.id}
-                                    className={`flex gap-4 ${message.sender === "user" ? "flex-row-reverse" : "flex-row"}`}
+                                    className={`flex gap-3 ${message.sender === "user" ? "flex-row-reverse" : "flex-row"}`}
                                     data-testid={`message-${message.sender}`}
                                 >
-                                    <Avatar className={cn("h-8 w-8 flex-shrink-0 mt-1", message.sender === "user" ? "hidden" : "block")}>
+                                    <Avatar className={cn("h-8 w-8 flex-shrink-0 mt-0.5", message.sender === "user" ? "hidden" : "block")}>
                                         {message.sender === "bot" ? (
                                             <AvatarFallback className="bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC]">
                                                 <Bot className="h-4 w-4 text-white" />
@@ -268,7 +286,7 @@ export default function HelpPage() {
                                     <div className={`flex flex-col max-w-[85%] lg:max-w-[75%] ${message.sender === "user" ? "items-end" : "items-start"}`}>
                                         <div
                                             className={cn(
-                                                "px-5 py-3.5 shadow-sm",
+                                                "px-4 py-2.5 shadow-sm text-sm",
                                                 message.sender === "user"
                                                     ? "rounded-2xl rounded-tr-sm bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC] text-white"
                                                     : "rounded-2xl rounded-tl-sm bg-white border border-gray-100 text-gray-800"
@@ -278,12 +296,12 @@ export default function HelpPage() {
                                                 <div className="prose prose-sm max-w-none prose-headings:text-gray-800 prose-p:text-gray-700 prose-a:text-[#31A7AC] prose-strong:text-gray-900">
                                                     <ReactMarkdown
                                                         components={{
-                                                            h1: ({node, ...props}) => <h1 className="text-lg font-bold mt-2 mb-1" {...props} />,
-                                                            h2: ({node, ...props}) => <h2 className="text-base font-bold mt-2 mb-1" {...props} />,
+                                                            h1: ({node, ...props}) => <h1 className="text-base font-bold mt-1 mb-1" {...props} />,
+                                                            h2: ({node, ...props}) => <h2 className="text-sm font-bold mt-1 mb-1" {...props} />,
                                                             ul: ({node, ...props}) => <ul className="list-disc list-inside my-1 pl-1" {...props} />,
                                                             ol: ({node, ...props}) => <ol className="list-decimal list-inside my-1 pl-1" {...props} />,
                                                             li: ({node, ...props}) => <li className="my-0.5" {...props} />,
-                                                            p: ({node, ...props}) => <p className="my-1 leading-relaxed" {...props} />,
+                                                            p: ({node, ...props}) => <p className="my-0.5 leading-relaxed" {...props} />,
                                                             a: ({node, ...props}) => <a className="text-[#31A7AC] hover:underline font-medium" {...props} />
                                                         }}
                                                     >
@@ -291,44 +309,25 @@ export default function HelpPage() {
                                                     </ReactMarkdown>
                                                 </div>
                                             ) : (
-                                                <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                                                <p className="leading-relaxed whitespace-pre-wrap">{message.content}</p>
                                             )}
                                         </div>
-                                        <span className="text-[10px] text-gray-400 mt-1.5 px-1">
+                                        <span className="text-[10px] text-gray-400 mt-1 px-1">
                                             {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                         </span>
                                     </div>
                                 </div>
                             ))}
 
-                            {/* Quick Actions / Topics Suggestions - Only show when conversation hasn't started much (1 msg) */}
-                            {messages.length <= 1 && (
-                                <div className="ml-12 mr-auto max-w-[75%] animate-fade-in">
-                                    <p className="text-xs text-gray-500 mb-3 ml-1">Suggested topics:</p>
-                                    <div className="flex flex-wrap gap-2">
-                                        {TOPICS.map((topic) => (
-                                            <button
-                                                key={topic.label}
-                                                onClick={() => handleTopicClick(topic)}
-                                                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-full shadow-sm hover:border-[#6A89BE] hover:text-[#6A89BE] transition-colors text-sm text-gray-600"
-                                            >
-                                                <topic.icon className="h-3.5 w-3.5" />
-                                                {topic.label}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
                             {isTyping && (
-                                <div className="flex gap-4" data-testid="typing-indicator">
-                                    <Avatar className="h-8 w-8 flex-shrink-0 mt-1">
+                                <div className="flex gap-3" data-testid="typing-indicator">
+                                    <Avatar className="h-8 w-8 flex-shrink-0">
                                         <AvatarFallback className="bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC]">
                                             <Bot className="h-4 w-4 text-white" />
                                         </AvatarFallback>
                                     </Avatar>
-                                    <div className="rounded-2xl rounded-tl-sm bg-white border border-gray-100 px-5 py-4 shadow-sm">
-                                        <div className="flex gap-1.5">
+                                    <div className="rounded-2xl rounded-tl-sm bg-white border border-gray-100 px-4 py-3 shadow-sm">
+                                        <div className="flex gap-1">
                                             <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
                                             <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
                                             <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
@@ -336,26 +335,26 @@ export default function HelpPage() {
                                     </div>
                                 </div>
                             )}
-                            <div ref={messagesEndRef} />
+                            <div ref={messagesEndRef} className="h-1" />
                         </div>
                     </ScrollArea>
 
                     {/* Input Area */}
-                    <div className="p-4 bg-white border-t border-gray-100" data-testid="chat-input-area">
+                    <div className="p-3 bg-white border-t border-gray-100 shrink-0" data-testid="chat-input-area">
                         <div className="max-w-3xl mx-auto relative">
                              <form 
                                 onSubmit={(e) => {
                                     e.preventDefault();
                                     handleSendMessage();
                                 }}
-                                className="relative flex items-center"
+                                className="relative flex items-center gap-2"
                             >
                                 <Input
                                     ref={inputRef}
                                     value={inputMessage}
                                     onChange={(e) => setInputMessage(e.target.value)}
                                     placeholder="Ask a question..."
-                                    className="pr-14 py-6 rounded-full border-gray-200 bg-gray-50 hover:bg-white focus:bg-white focus:border-[#6A89BE] focus:ring-[#6A89BE]/20 shadow-sm transition-all text-base"
+                                    className="flex-1 py-5 rounded-full border-gray-200 bg-gray-50 hover:bg-white focus:bg-white focus:border-[#6A89BE] focus:ring-[#6A89BE]/20 shadow-sm transition-all text-sm"
                                     data-testid="message-input"
                                 />
                                 <Button
@@ -363,19 +362,16 @@ export default function HelpPage() {
                                     disabled={!inputMessage.trim() || isTyping}
                                     size="icon"
                                     className={cn(
-                                        "absolute right-2 h-9 w-9 rounded-full transition-all duration-200",
+                                        "h-10 w-10 rounded-full transition-all duration-200 shrink-0",
                                         inputMessage.trim() 
-                                            ? "bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC] hover:opacity-90 hover:scale-105 shadow-md" 
-                                            : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                                            ? "bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC] hover:opacity-90 shadow-md" 
+                                            : "bg-gray-100 text-gray-300 cursor-not-allowed"
                                     )}
                                     data-testid="send-message-button"
                                 >
                                     <Send className="h-4 w-4 text-white" />
                                 </Button>
                             </form>
-                            <p className="text-center text-[10px] text-gray-400 mt-2">
-                                AI can make mistakes. Please verify important information.
-                            </p>
                         </div>
                     </div>
                 </Card>
