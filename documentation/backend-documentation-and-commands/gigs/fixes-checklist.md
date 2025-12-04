@@ -29,7 +29,7 @@ Files to fix (Gigs-related):
 ### Phase 3: Fix Radix UI DialogContent Accessibility
 Files to fix:
 - [x] `/app/app/(app)/(gigs)/components/applygigs.tsx` - Added VisuallyHidden DialogTitle
-- [ ] `/app/app/(app)/(gigs)/components/recommend-gigs.tsx` - DialogContent needs DialogTitle
+- [x] `/app/app/(app)/(gigs)/components/recommend-gigs.tsx` - Already has DialogTitle (line 63)
 - [ ] `/app/app/(app)/(gigs)/components/manage-gigs/see-all-referrals.tsx` - DialogContent needs DialogTitle
 
 ### Phase 4: Finalization
