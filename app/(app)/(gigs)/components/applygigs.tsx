@@ -534,18 +534,30 @@ export default function ApplyGigs({ gig }: ApplyGigsProps) {
                                         type="button"
                                         variant="outline"
                                         className="h-12 justify-between rounded-2xl border-slate-200 text-sm font-medium text-slate-700"
+                                        disabled={isLoadingData}
                                     >
                                         <span>
-                                            {selectedCreditIds.length > 0
+                                            {isLoadingData ? "Loading credits..." :
+                                             selectedCreditIds.length > 0
                                                 ? `${selectedCreditIds.length} credit${selectedCreditIds.length > 1 ? "s" : ""} selected`
-                                                : "Choose credits for this gig"}
+                                                : availableCredits.length === 0 ? "No credits found" : "Choose credits for this gig"}
                                         </span>
                                         <span className="text-[14px] text-slate-400">View all</span>
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent className=" max-h-72 overflow-y-auto rounded-2xl border border-slate-100 bg-white p-0" align="start">
                                     <DropdownMenuGroup>
-                                        {availableCredits.map((credit) => {
+                                        {isLoadingData ? (
+                                            <div className="px-4 py-3 text-sm text-slate-500 text-center">
+                                                <Loader2 className="inline-block h-4 w-4 animate-spin mr-2" />
+                                                Loading credits...
+                                            </div>
+                                        ) : availableCredits.length === 0 ? (
+                                            <div className="px-4 py-3 text-sm text-slate-500 text-center">
+                                                No credits found. Add credits to your profile first.
+                                            </div>
+                                        ) : (
+                                            availableCredits.map((credit) => {
                                             return (
                                                 <DropdownMenuItem
                                                     key={credit.id}
