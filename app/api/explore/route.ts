@@ -50,13 +50,10 @@ export async function GET(request: NextRequest) {
         city,
         day_rate,
         day_rate_currency,
-        portfolio_url,
-        imdb_url,
         experience_level,
         available_for_work,
         created_at,
-        updated_at,
-        visible_in_explore
+        updated_at
       `, { count: 'exact' });
 
     // Exclude current user from explore results
