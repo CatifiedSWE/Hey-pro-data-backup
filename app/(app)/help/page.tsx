@@ -15,10 +15,8 @@ import {
     Users,
     Calendar,
     ChevronRight,
-    HelpCircle,
     Maximize2,
-    Minimize2,
-    X
+    Minimize2
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import axios from "axios";
@@ -251,12 +249,12 @@ export default function HelpPage() {
                         </div>
                     </div>
 
-                    {/* Messages Area - Scrollable */}
-                    <ScrollArea className="flex-1 p-0 bg-gray-50/30 h-full">
+                    {/* Messages Area - Native Scroll for reliability */}
+                    <div className="flex-1 overflow-y-auto bg-gray-50/30 p-0">
                         <div className="flex flex-col gap-4 p-4 min-h-full">
                             {/* Welcome State */}
                             {messages.length === 1 && (
-                                <div className="flex flex-col items-center justify-center py-8 text-center text-gray-500 animate-fade-in">
+                                <div className="flex flex-col items-center justify-center py-8 text-center text-gray-500 animate-fade-in mt-10">
                                     <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#FA6E80]/10 to-[#31A7AC]/10 flex items-center justify-center mb-4">
                                         <Bot className="h-8 w-8 text-[#6A89BE]" />
                                     </div>
@@ -337,7 +335,7 @@ export default function HelpPage() {
                             )}
                             <div ref={messagesEndRef} className="h-1" />
                         </div>
-                    </ScrollArea>
+                    </div>
 
                     {/* Input Area */}
                     <div className="p-3 bg-white border-t border-gray-100 shrink-0" data-testid="chat-input-area">
