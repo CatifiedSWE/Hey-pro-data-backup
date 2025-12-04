@@ -153,6 +153,9 @@ export default function AddNewSkill({ trigger }: AddNewSkillProps) {
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>{trigger}</DialogTrigger>
                 <DialogContent className="w-[560px] sm:h-[874px] h-[500px] overflow-x-auto rounded-[15px] border-0 p-0 shadow-[2px_3px_8px_rgba(0,0,0,0.09)]">
+                    <VisuallyHidden>
+                        <DialogTitle>Add Skills</DialogTitle>
+                    </VisuallyHidden>
                     <div className="flex  flex-col">
                         <div className="flex-1 overflow-y-auto">
                             <div className="flex flex-col gap-[35px] bg-white p-[30px]">
