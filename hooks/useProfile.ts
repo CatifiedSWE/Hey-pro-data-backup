@@ -1087,6 +1087,48 @@ export const useProfile = () => {
     fetchCompleteProfile();
   }, []); // FIXED: Empty dependency array since fetchCompleteProfile is stable
 
+  // Auto-recalculate profile completion for existing users
+  // This ensures old users get the new calculation on profile load
+  useEffect(() => {
+    if (!profile || loading) return;
+    
+    // Calculate what the completion SHOULD be with new logic
+    const calculatedCompletion = calculateLocalCompletion(
+      profile,
+      roles,
+      links,
+      skills,
+      credits,
+      languages
+    );
+    
+    // If stored completion differs from calculated, update it in the background
+    const storedCompletion = profile.profile_completion_percentage || 0;
+    const difference = Math.abs(calculatedCompletion - storedCompletion);
+    
+    // Only recalculate if there's a significant difference (>1% to avoid rounding issues)
+    if (difference > 1) {
+      console.log(`[Profile Completion] Auto-recalculating for user (stored: ${storedCompletion}%, calculated: ${calculatedCompletion}%)`);
+      
+      // Update in background without blocking UI
+      apiCalling({
+        method: 'post',
+        route: '/profile/recalculate-completion'
+      }).then((response) => {
+        if (response.status && response.data?.data) {
+          // Update local state with new completion
+          setProfile(prev => prev ? {
+            ...prev,
+            profile_completion_percentage: response.data.data.completionPercentage,
+            is_profile_complete: response.data.data.isComplete
+          } : null);
+        }
+      }).catch((err) => {
+        console.error('[Profile Completion] Failed to recalculate:', err);
+      });
+    }
+  }, [profile, roles, links, skills, credits, languages, loading]);
+
   return {
     // Profile data
     profile,
