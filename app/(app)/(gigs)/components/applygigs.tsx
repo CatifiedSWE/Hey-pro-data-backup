@@ -631,20 +631,21 @@ export default function ApplyGigs({ gig }: ApplyGigsProps) {
                                                 </div>
                                             ) : (
                                                 availableRates.map((rate) => (
-                                                <DropdownMenuItem
-                                                    key={rate.id}
-                                                    className="flex items-start gap-3 px-4 py-3 cursor-pointer"
-                                                    onSelect={(event) => {
-                                                        event.preventDefault()
-                                                        handleSelectRateFromCredit(rate.value ?? "")
-                                                    }}
-                                                >
-                                                    <div>
-                                                        <p className="text-sm font-[600] text-[#444444]">{rate.label}</p>
-                                                        <p className="text-[12px] font-normal text-[#444444]">Rate: ADE {rate.value ?? "N/A"}</p>
-                                                    </div>
-                                                </DropdownMenuItem>
-                                            ))}
+                                                    <DropdownMenuItem
+                                                        key={rate.id}
+                                                        className="flex items-start gap-3 px-4 py-3 cursor-pointer"
+                                                        onSelect={(event) => {
+                                                            event.preventDefault()
+                                                            handleSelectRateFromCredit(rate.value ?? "")
+                                                        }}
+                                                    >
+                                                        <div>
+                                                            <p className="text-sm font-[600] text-[#444444]">{rate.label}</p>
+                                                            <p className="text-[12px] font-normal text-[#444444]">Rate: ADE {rate.value ?? "N/A"}</p>
+                                                        </div>
+                                                    </DropdownMenuItem>
+                                                ))
+                                            )}
                                         </DropdownMenuGroup>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
