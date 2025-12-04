@@ -140,8 +140,8 @@ export function ContactListTab({ selectedGigIds, actionIndicators }: ContactList
                                     <div className="flex items-center gap-4 text-sm text-[#444444]">
                                         <CalendarDays className="h-5 w-5 text-black" />
                                         <div className="flex flex-wrap gap-4">
-                                            {gig.dateWindows.map((window) => (
-                                                <div key={window.label} className="flex items-center gap-2 px-3 py-1 text-sm text-[#444444]">
+                                            {gig.dateWindows.map((window, index) => (
+                                                <div key={`${gigId}-window-${index}`} className="flex items-center gap-2 px-3 py-1 text-sm text-[#444444]">
                                                     <span className="text-sm font-semibold text-[#444444]">{window.label.split(" ")[1]}</span>
                                                     <span className="rounded-[31px] h-[27px] bg-[#FA6E80] px-4 py-0.5 text-sm font-semibold text-[#ffffff] items-center justify-center flex">
                                                         {window.label.split(" ")[0]}
