@@ -29,6 +29,32 @@ type RecommendationUser = {
     roles: string[]
 }
 
+type ExploreProfile = {
+    id: string
+    userId: string
+    name: string
+    displayName: string
+    avatar: string | null
+    location: string
+    roles: string[]
+}
+
+type ExploreApiResponse = {
+    success: boolean
+    message: string
+    data: {
+        profiles: ExploreProfile[]
+        pagination: {
+            currentPage: number
+            totalPages: number
+            totalProfiles: number
+            limit: number
+            hasNextPage: boolean
+            hasPrevPage: boolean
+        }
+    }
+}
+
 export function SendRecommendationDialog({ className }: { className?: string }) {
     const [searchTerm, setSearchTerm] = useState("")
     const [selectedUsers, setSelectedUsers] = useState<RecommendationUser[]>([])
