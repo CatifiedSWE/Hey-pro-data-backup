@@ -205,7 +205,7 @@ All security policies have been implemented:
 
 ---
 
-### 2. **Missing calendarMonths in Some Responses** (Minor Issue)
+### 2. **Minor Enhancement: calendarMonths in Listing Response** (Optional)
 
 **Issue:**
 The `GET /api/gigs` endpoint (listing page) does not return `calendarMonths` array, while the detail pages do.
