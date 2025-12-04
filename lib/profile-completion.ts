@@ -10,19 +10,20 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.
  * @param userId - User ID to calculate completion for
  * @returns Object with completionPercentage (0-100) and isComplete (boolean)
  * 
- * Weighted Scoring System (Total: 100%):
+ * REFORMED Weighted Scoring System (Total: 100%):
  * - Basic Information (25%): first_name, surname, bio, country, city (5% each)
  * - Profile Photos (10%): profile_photo_url (5%), banner_url (5%)
  * - Contact Details (10%): email (5%), phone + country_code (5%)
- * - Professional Roles (15%): At least 1 role (10%), 3+ roles (15%)
- * - Skills (15%): At least 1 skill (5%), 3+ skills (10%), 5+ skills (15%)
- * - Social Links (5%): At least 1 link (5%)
- * - Work History (10%): At least 1 credit (5%), 3+ credits (10%)
- * - Languages (5%): At least 1 language (5%)
- * - Availability (5%): Availability status set (5%)
+ * - Professional Role (10%): At least 1 role = 10%
+ * - Skills (10%): At least 1 skill = 10%
+ * - Social Link (10%): At least 1 link = 10%
+ * - Language (10%): At least 1 language = 10%
+ * - Availability (10%): Availability status set = 10%
+ * - Work History (5%): At least 1 credit = 5% (lowest priority)
  * 
  * Completion Threshold:
- * - Profile Complete: >= 80% completion
+ * - Profile Complete: >= 100% completion (all required fields filled)
+ * - Users can reach 100% with minimum requirements (1 role, 1 skill, 1 link, 1 language, 1 credit)
  */
 export async function calculateProfileCompletion(userId: string): Promise<{
   completionPercentage: number;
@@ -101,37 +102,33 @@ export async function calculateProfileCompletion(userId: string): Promise<{
     if (profile?.email && profile.email.trim().length > 0) score += 5;
     if (profile?.phone && profile.phone.trim().length > 0 && profile?.country_code) score += 5;
 
-    // === PROFESSIONAL ROLES (15%) ===
-    // At least 1 role = 10%, 3+ roles = 15%
+    // === PROFESSIONAL ROLE (10%) ===
+    // At least 1 role = 10% (full points)
     if (rolesCount >= 1) score += 10;
-    if (rolesCount >= 3) score += 5; // Additional 5% for 3+ roles
 
-    // === SKILLS (15%) ===
-    // At least 1 skill = 5%, 3+ skills = 10%, 5+ skills = 15%
-    if (skillsCount >= 1) score += 5;
-    if (skillsCount >= 3) score += 5; // Additional 5% for 3+ skills
-    if (skillsCount >= 5) score += 5; // Additional 5% for 5+ skills
+    // === SKILLS (10%) ===
+    // At least 1 skill = 10% (full points)
+    if (skillsCount >= 1) score += 10;
 
-    // === SOCIAL LINKS (5%) ===
-    // At least 1 link = 5%
-    if (linksCount >= 1) score += 5;
+    // === SOCIAL LINK (10%) ===
+    // At least 1 link = 10% (full points)
+    if (linksCount >= 1) score += 10;
 
-    // === WORK HISTORY/CREDITS (10%) ===
-    // At least 1 credit = 5%, 3+ credits = 10%
+    // === LANGUAGE (10%) ===
+    // At least 1 language = 10% (full points)
+    if (languagesCount >= 1) score += 10;
+
+    // === AVAILABILITY (10%) ===
+    // Availability status set = 10% (full points)
+    if (profile?.availability && profile.availability !== null) score += 10;
+
+    // === WORK HISTORY/CREDITS (5%) ===
+    // At least 1 credit = 5% (lowest priority, full points)
     if (creditsCount >= 1) score += 5;
-    if (creditsCount >= 3) score += 5; // Additional 5% for 3+ credits
-
-    // === LANGUAGES (5%) ===
-    // At least 1 language = 5%
-    if (languagesCount >= 1) score += 5;
-
-    // === AVAILABILITY (5%) ===
-    // Availability status set = 5%
-    if (profile?.availability && profile.availability !== null) score += 5;
 
     // Ensure score doesn't exceed 100
     const completionPercentage = Math.min(score, 100);
-    const isComplete = completionPercentage >= 80;
+    const isComplete = completionPercentage >= 100; // Changed from 80% to 100%
 
     return {
       completionPercentage,
