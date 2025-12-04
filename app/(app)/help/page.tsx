@@ -144,20 +144,20 @@ export default function HelpPage() {
     };
 
     return (
-        <div className="flex flex-col w-full h-screen max-h-screen pb-2 px-2 md:px-4 pt-2">
+        <div className="flex flex-col w-full h-screen max-h-screen pb-1 md:pb-2 px-1 md:px-4 pt-1 md:pt-2">
             {/* Main Chat Area */}
             <Card className="flex-1 flex flex-col overflow-hidden border-gray-200 bg-white shadow-sm rounded-xl min-h-0" data-testid="help-chat-container">
                     {/* Chat Header - Minimal */}
-                    <div className="p-3 border-b border-gray-100 flex items-center justify-between bg-white z-10 shrink-0">
-                        <div className="flex items-center gap-3">
-                            <Avatar className="h-8 w-8 ring-2 ring-offset-1 ring-[#FA6E80]/20">
+                    <div className="p-2 md:p-3 border-b border-gray-100 flex items-center justify-between bg-white z-10 shrink-0">
+                        <div className="flex items-center gap-2 md:gap-3">
+                            <Avatar className="h-7 w-7 md:h-8 md:w-8 ring-2 ring-offset-1 ring-[#FA6E80]/20">
                                 <AvatarFallback className="bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC]">
-                                    <Bot className="h-4 w-4 text-white" />
+                                    <Bot className="h-3.5 w-3.5 md:h-4 md:w-4 text-white" />
                                 </AvatarFallback>
                             </Avatar>
                             <div>
-                                <h2 className="font-semibold text-gray-800 text-sm">AI Support</h2>
-                                <p className="text-[10px] text-gray-500 flex items-center gap-1">
+                                <h2 className="font-semibold text-gray-800 text-xs md:text-sm">AI Support</h2>
+                                <p className="text-[9px] md:text-[10px] text-gray-500 flex items-center gap-1">
                                     <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
                                     Online
                                 </p>
@@ -167,24 +167,24 @@ export default function HelpPage() {
 
                     {/* Messages Area - Native Scroll for reliability */}
                     <div className="flex-1 overflow-y-auto bg-gray-50/30 p-0 relative min-h-0">
-                        <div className="flex flex-col gap-4 p-4 max-w-4xl mx-auto w-full">
+                        <div className="flex flex-col gap-3 md:gap-4 p-2 md:p-4 max-w-4xl mx-auto w-full">
                             {/* Welcome State */}
                             {messages.length === 1 && (
-                                <div className="flex flex-col items-center justify-center py-4 md:py-8 text-center text-gray-500 animate-fade-in">
-                                    <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-gradient-to-br from-[#FA6E80]/10 to-[#31A7AC]/10 flex items-center justify-center mb-3">
-                                        <Bot className="h-6 w-6 md:h-8 md:w-8 text-[#6A89BE]" />
+                                <div className="flex flex-col items-center justify-center py-2 md:py-8 text-center text-gray-500 animate-fade-in">
+                                    <div className="w-10 h-10 md:w-16 md:h-16 rounded-full bg-gradient-to-br from-[#FA6E80]/10 to-[#31A7AC]/10 flex items-center justify-center mb-2 md:mb-4">
+                                        <Bot className="h-5 w-5 md:h-8 md:w-8 text-[#6A89BE]" />
                                     </div>
                                     
                                     {/* Added Titles to Welcome Screen */}
-                                    <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC] bg-clip-text text-transparent inline-block mb-1">
+                                    <h1 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC] bg-clip-text text-transparent inline-block mb-0.5 md:mb-1">
                                         Help Center
                                     </h1>
-                                    <p className="text-xs md:text-sm text-gray-500 font-medium mb-4">
+                                    <p className="text-[11px] md:text-sm text-gray-500 font-medium mb-2 md:mb-4">
                                         Support & Assistant
                                     </p>
 
-                                    <h3 className="font-semibold text-gray-700 mb-1 text-sm md:text-base">How can we help?</h3>
-                                    <p className="text-xs md:text-sm text-gray-400 max-w-xs px-4">
+                                    <h3 className="font-semibold text-gray-700 mb-0.5 md:mb-1 text-xs md:text-base">How can we help?</h3>
+                                    <p className="text-[11px] md:text-sm text-gray-400 max-w-xs px-4">
                                         Ask about features, your account, or troubleshooting.
                                     </p>
                                 </div>
@@ -263,25 +263,26 @@ export default function HelpPage() {
                     </div>
 
                     {/* Input Area - Fixed at bottom */}
-                    <div className="p-2.5 md:p-3 bg-white border-t border-gray-100 flex-shrink-0" data-testid="chat-input-area">
+                    <div className="p-2 md:p-3 bg-white border-t border-gray-100 flex-shrink-0" data-testid="chat-input-area">
                         <div className="max-w-3xl mx-auto relative">
                              {/* Suggested Topics - Chips above input */}
                              {/* Improved Layout: Mobile scrolling, Desktop wrap & centered */}
-                            <div className="flex gap-2 overflow-x-auto pb-2.5 px-2 md:px-0 md:flex-wrap md:justify-center md:overflow-visible no-scrollbar">
+                            <div className="flex gap-1.5 md:gap-2 overflow-x-auto pb-2 md:pb-2.5 px-1 md:px-0 md:flex-wrap md:justify-center md:overflow-visible no-scrollbar">
                                 {TOPICS.map((topic) => (
                                     <button
                                         key={topic.label}
                                         onClick={() => handleTopicClick(topic)}
                                         className={cn(
-                                            "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all border flex-shrink-0",
+                                            "flex items-center gap-1 md:gap-1.5 px-2 md:px-3 py-1 md:py-1.5 rounded-full text-[10px] md:text-xs font-medium transition-all border flex-shrink-0",
                                             activeTopic === topic.label
                                                 ? "bg-[#6A89BE]/10 border-[#6A89BE] text-[#6A89BE]"
                                                 : "bg-white hover:bg-gray-50 border-gray-200 text-gray-600 hover:border-[#6A89BE] hover:text-[#6A89BE]",
                                             "whitespace-nowrap shadow-sm"
                                         )}
                                     >
-                                        <topic.icon className="h-3.5 w-3.5" />
-                                        {topic.label}
+                                        <topic.icon className="h-3 w-3 md:h-3.5 md:w-3.5" />
+                                        <span className="hidden sm:inline">{topic.label}</span>
+                                        <span className="sm:hidden">{topic.label.split(' ')[0]}</span>
                                     </button>
                                 ))}
                             </div>
@@ -298,7 +299,7 @@ export default function HelpPage() {
                                     value={inputMessage}
                                     onChange={(e) => setInputMessage(e.target.value)}
                                     placeholder="Ask a question..."
-                                    className="flex-1 py-5 rounded-full border-gray-200 bg-gray-50 hover:bg-white focus:bg-white focus:border-[#6A89BE] focus:ring-[#6A89BE]/20 shadow-sm transition-all text-sm"
+                                    className="flex-1 py-3 md:py-5 rounded-full border-gray-200 bg-gray-50 hover:bg-white focus:bg-white focus:border-[#6A89BE] focus:ring-[#6A89BE]/20 shadow-sm transition-all text-xs md:text-sm"
                                     data-testid="message-input"
                                 />
                                 <Button
@@ -306,14 +307,14 @@ export default function HelpPage() {
                                     disabled={!inputMessage.trim() || isTyping}
                                     size="icon"
                                     className={cn(
-                                        "h-10 w-10 rounded-full transition-all duration-200 shrink-0 ml-2",
+                                        "h-8 w-8 md:h-10 md:w-10 rounded-full transition-all duration-200 shrink-0 ml-1.5 md:ml-2",
                                         inputMessage.trim() 
                                             ? "bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC] hover:opacity-90 shadow-md" 
                                             : "bg-gray-100 text-gray-300 cursor-not-allowed"
                                     )}
                                     data-testid="send-message-button"
                                 >
-                                    <Send className="h-4 w-4 text-white" />
+                                    <Send className="h-3.5 w-3.5 md:h-4 md:w-4 text-white" />
                                 </Button>
                             </form>
                         </div>
