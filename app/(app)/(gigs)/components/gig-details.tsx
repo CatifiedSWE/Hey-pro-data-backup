@@ -142,13 +142,14 @@ export default function GigDetails(gig: GigsDataType[0]) {
         </div>
       </div>
 
-      <div className="mt-8 space-y-4">
-        <div className="flex items-center gap-2 text-lg font-[400] text-slate-900">
-          <Calendar className="h-5 w-5 text-[#FA6E80]" />
-          Gigs Date
-        </div>
-        <div className="flex flex-row flex-wrap gap-4">
-          {visibleMonths.map((month, index) => {
+      {gig.calendarMonths && gig.calendarMonths.length > 0 && (
+        <div className="mt-8 space-y-4">
+          <div className="flex items-center gap-2 text-lg font-[400] text-slate-900">
+            <Calendar className="h-5 w-5 text-[#FA6E80]" />
+            Gigs Date
+          </div>
+          <div className="flex flex-row flex-wrap gap-4">
+            {visibleMonths.map((month, index) => {
             const monthDate = new Date(month.year, month.month, 1);
             const matrix = buildMonthMatrix(month.year, month.month);
             const highlighted = new Set(month.highlightedDays || []);
