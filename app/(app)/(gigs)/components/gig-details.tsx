@@ -142,8 +142,8 @@ export default function GigDetails(gig: GigsDataType[0]) {
                   <Calendar className="h-4 w-4 text-[#FF4B82]" />
                 </div>
                 <div className="grid grid-cols-7 gap-[6px] text-[11px] font-semibold text-[#FF4B82]">
-                  {WEEKDAY_LABELS.map((label) => (
-                    <span key={`${gig.id}-${month.month}-${label}`} className="text-center font-[400] text-[16px]">
+                  {WEEKDAY_LABELS.map((label, labelIndex) => (
+                    <span key={`${gig.id}-${month.month}-weekday-${labelIndex}`} className="text-center font-[400] text-[16px]">
                       {label}
                     </span>
                   ))}
