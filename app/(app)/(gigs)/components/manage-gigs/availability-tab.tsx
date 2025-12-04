@@ -251,7 +251,7 @@ export function AvailabilityTab({ selectedGigIds }: AvailabilityTabProps) {
                                             </th>
                                             {columns.map((col, idx) => (
                                                 <th 
-                                                    key={idx} 
+                                                    key={`${gigId}-col-${col.fullKey}`} 
                                                     className="min-w-[40px] border-b border-r border-[#FFE4E8] p-2 text-center last:border-r-0"
                                                 >
                                                     <div className="flex flex-col items-center gap-1">
