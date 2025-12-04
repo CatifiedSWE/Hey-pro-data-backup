@@ -607,18 +607,30 @@ export default function ApplyGigs({ gig }: ApplyGigsProps) {
                                             type="button"
                                             variant="outline"
                                             className="h-12 justify-between rounded-2xl border-slate-200 text-sm font-medium text-slate-700"
+                                            disabled={isLoadingData}
                                         >
                                             <span>
-                                                {formValues.savedRate
+                                                {isLoadingData ? "Loading rates..." :
+                                                 formValues.savedRate
                                                     ? `Rate selected: ADE ${formValues.savedRate}`
-                                                    : "Choose rate from profile credits"}
+                                                    : availableRates.length === 0 ? "No rates found" : "Choose rate from profile"}
                                             </span>
                                             <span className="text-[14px] text-slate-400">View all</span>
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent className="w-[360px] max-h-72 overflow-y-auto rounded-2xl border border-slate-100 bg-white p-0" align="start">
                                         <DropdownMenuGroup>
-                                            {availableRates.map((rate) => (
+                                            {isLoadingData ? (
+                                                <div className="px-4 py-3 text-sm text-slate-500 text-center">
+                                                    <Loader2 className="inline-block h-4 w-4 animate-spin mr-2" />
+                                                    Loading rates...
+                                                </div>
+                                            ) : availableRates.length === 0 ? (
+                                                <div className="px-4 py-3 text-sm text-slate-500 text-center">
+                                                    No rates found. You can enter a custom rate below.
+                                                </div>
+                                            ) : (
+                                                availableRates.map((rate) => (
                                                 <DropdownMenuItem
                                                     key={rate.id}
                                                     className="flex items-start gap-3 px-4 py-3 cursor-pointer"
