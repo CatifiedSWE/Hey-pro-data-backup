@@ -250,7 +250,7 @@ Both patterns are valid and provide flexibility for frontend implementation.
 
 ---
 
-### 4. **Sample Data in Components** (Low Priority)
+### 4. **Sample Data in Components** (Polish Item)
 
 **Issue:**
 Some frontend components reference sample/mock data files:
