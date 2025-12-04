@@ -133,7 +133,9 @@ export async function GET(
           updatedAt: app.updated_at,
           applicant: {
             id: app.applicant_user_id,
-            name: profile?.name || 'Unknown',
+            name: profile 
+              ? `${profile.alias_first_name || profile.first_name || ''} ${profile.alias_surname || profile.surname || ''}`.trim() || 'Unknown'
+              : 'Unknown',
             profilePhoto: profile?.profile_photo_url || null,
             bio: profile?.bio || null,
             location: profile?.city && profile?.country 
