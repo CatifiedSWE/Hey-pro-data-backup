@@ -233,7 +233,8 @@ export default function GigDetails(gig: GigsDataType[0]) {
             })}
           </div>
         )}
-      </div>
+        </div>
+      )}
 
       <div className="mt-10 space-y-4">
         <h2 className="text-lg font-[400] text-slate-900">References</h2>
