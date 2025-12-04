@@ -79,10 +79,10 @@ export function AvailabilityTab({ selectedGigIds }: AvailabilityTabProps) {
                             <div className="flex flex-row gap-2">
                             </div>
                             <div className="flex flex-row items-center gap-4 w-[950px] rounded-2xl border border-[#EFEFEF] bg-white px-4 py-3 text-sm text-gray-900">
-                                {gig.dateWindows.map((window) => {
+                                {gig.dateWindows.map((window, windowIndex) => {
                                     const [month, year] = window.label.split(" ");
                                     return (
-                                        <div key={`${gig.id}-${window.label}`} className="flex items-center gap-3">
+                                        <div key={`${gig.id}-window-${windowIndex}`} className="flex items-center gap-3">
                                             <span className="text-base font-semibold text-[#3B3B3B]">{year}</span>
                                             <span className="rounded-full bg-[#FA6E80] px-4 py-1 text-sm font-medium text-white">{month}</span>
                                             <span className="text-sm text-[#3B3B3B]">{window.range}</span>
