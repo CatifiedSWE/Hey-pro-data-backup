@@ -64,6 +64,9 @@ export default function GigDetails(gig: GigsDataType[0]) {
 
   const monthGroups = useMemo(() => {
     const groups: Array<typeof gig.calendarMonths> = [];
+    if (!gig.calendarMonths || gig.calendarMonths.length === 0) {
+      return groups;
+    }
     const chunkSize = Math.max(calendarsPerTab, 1);
     for (let index = 0; index < gig.calendarMonths.length; index += chunkSize) {
       groups.push(gig.calendarMonths.slice(index, index + chunkSize));
