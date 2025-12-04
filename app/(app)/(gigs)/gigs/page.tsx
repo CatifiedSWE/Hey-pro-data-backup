@@ -76,8 +76,8 @@ export default function GigsPage() {
                                                 <Calendar className="h-4 w-4" />
                                             </div>
                                             <div className=" text-sm font-[400] text-[#444444]">
-                                                {gig.dateWindows.map((window) => (
-                                                    <p key={`${gig.id}-${window.label}`}>
+                                                {gig.dateWindows.map((window, windowIndex) => (
+                                                    <p key={`${gig.id}-window-${windowIndex}`}>
                                                         <span className="font-[400] text-[14.19px] text-[#444444]">{window.label}</span>
                                                         <span className="text-[#444444] font-[400] text-sm"> | {window.range}</span>
                                                     </p>
