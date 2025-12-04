@@ -12,8 +12,6 @@ import {
     Briefcase,
     Users,
     Calendar,
-    Maximize2,
-    Minimize2,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import axios from "axios";
@@ -62,7 +60,6 @@ export default function HelpPage() {
     const [inputMessage, setInputMessage] = useState("");
     const [isTyping, setIsTyping] = useState(false);
     const [activeTopic, setActiveTopic] = useState<string | null>(null);
-    const [isFullScreen, setIsFullScreen] = useState(false);
     
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -146,51 +143,24 @@ export default function HelpPage() {
         }
     };
 
-    // Full screen toggle handler
-    const toggleFullScreen = () => {
-        setIsFullScreen(!isFullScreen);
-    };
-
     return (
-        <div 
-            className={cn(
-                "flex flex-col gap-4 transition-all duration-300 ease-in-out mx-auto",
-                isFullScreen 
-                    ? "fixed inset-0 z-[100] bg-white p-4 pt-16 md:p-6 w-full max-w-none" 
-                    : "w-full h-[calc(100vh-8rem)] pb-2 max-w-5xl"
-            )}
-        >
+        <div className="flex flex-col gap-4 w-full h-[calc(100vh-5rem)] pb-2 px-0 md:px-4">
             {/* Header Area - Compact */}
-            <div className={cn(
-                "flex items-center justify-between shrink-0 px-1",
-                 !isFullScreen && "md:px-0"
-            )}>
+            <div className="flex items-center justify-between shrink-0 px-1 mt-2">
                 <div>
                     <h1 className="text-2xl font-bold bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC] bg-clip-text text-transparent inline-block">
                         Help Center
                     </h1>
-                    {!isFullScreen && (
-                        <p className="text-sm text-gray-500 hidden sm:inline-block ml-3">
-                            Support & Assistant
-                        </p>
-                    )}
+                    <p className="text-sm text-gray-500 hidden sm:inline-block ml-3">
+                        Support & Assistant
+                    </p>
                 </div>
-                
-                <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={toggleFullScreen}
-                    className="text-gray-500 hover:text-[#31A7AC] hover:bg-[#31A7AC]/10"
-                    title={isFullScreen ? "Exit Full Screen" : "Full Screen"}
-                >
-                    {isFullScreen ? <Minimize2 className="h-5 w-5" /> : <Maximize2 className="h-5 w-5" />}
-                </Button>
             </div>
 
             {/* Main Content */}
             <div className="flex-1 flex gap-4 h-full min-h-0 overflow-hidden">
                 {/* Main Chat Area */}
-                <Card className="flex-1 flex flex-col overflow-hidden border-gray-200 bg-white shadow-sm h-full" data-testid="help-chat-container">
+                <Card className="flex-1 flex flex-col overflow-hidden border-gray-200 bg-white shadow-sm h-full rounded-xl" data-testid="help-chat-container">
                     {/* Chat Header - Minimal */}
                     <div className="p-3 border-b border-gray-100 flex items-center justify-between bg-white z-10 shrink-0">
                         <div className="flex items-center gap-3">
