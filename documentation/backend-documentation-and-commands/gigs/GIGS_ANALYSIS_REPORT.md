@@ -395,15 +395,13 @@ All production blockers have been resolved:
    - Ensure all components fetch from API
    - **Files:** `application-tab.tsx`, `availability-tab.tsx`, `contact-list-tab.tsx`
 
-### Low Priority (Nice to Have)
-
-6. **Add Comprehensive Error Handling**
+3. **Add Comprehensive Error Handling** (Enhancement)
    - Add more specific error messages
    - Improve validation messages
 
-7. **Optimize Database Queries**
-   - Review N+1 query patterns
-   - Consider using single join queries
+4. **Optimize Database Queries** (Performance)
+   - Review N+1 query patterns in listing endpoint
+   - Consider batch queries for related data
 
 ---
 
