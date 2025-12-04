@@ -181,6 +181,9 @@ export default function ApplyGigs({ gig }: ApplyGigsProps) {
                 </Button>
             </SheetTrigger>
             <SheetContent side="bottom" className="h-[100vh] max-h-[100vh] overflow-y-auto border-none px-0">
+                <VisuallyHidden>
+                    <DialogTitle>Apply for Gig</DialogTitle>
+                </VisuallyHidden>
                 <div className="mx-auto w-full sm:max-w-[921px] px-6 py-8">
                     <div className="flex items-start justify-between gap-1">
                         <div className="w-full">
