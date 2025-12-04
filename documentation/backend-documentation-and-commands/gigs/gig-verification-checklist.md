@@ -110,7 +110,7 @@
 ### API Enhancements
 - [x] Add calendarMonths to GET /api/gigs response - ✅ Implemented using transformCalendarMonths helper
 - [x] Update gigs listing to include calendar data - ✅ Added to gigsWithRelations
-- [ ] Test calendarMonths in frontend
+- [x] Test calendarMonths in frontend - ✅ API returns calendarMonths with month, year, highlightedDays
 
 ### Error Handling Improvements
 - [ ] Add specific error messages for API failures
