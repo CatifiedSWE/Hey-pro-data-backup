@@ -529,8 +529,8 @@ export default function AddGigPage() {
 
 
                                 <div className="mx-auto sm:mx-0 grid w-full max-w-[320px] grid-cols-7 items-center gap-1 rounded-t-[10px] bg-[#ffffff] text-center text-[16px] font-[400] text-[#FF8FA5] min-h-[40px]">
-                                    {["M", "T", "W", "T", "F", "S", "S"].map((day) => (
-                                        <span key={day}>{day}</span>
+                                    {["M", "T", "W", "T", "F", "S", "S"].map((day, index) => (
+                                        <span key={`weekday-${index}`}>{day}</span>
                                     ))}
                                 </div>
                                 <ScrollArea className="mx-auto sm:mx-0 max-h-[250px] w-full max-w-[320px] rounded-b-[10px] bg-[#ffffff]">
@@ -925,8 +925,8 @@ export default function AddGigPage() {
 
 
                                 <div className="mx-auto sm:mx-0 grid w-full max-w-[320px] grid-cols-7 items-center gap-1 rounded-t-[10px] bg-[#ffffff] text-center text-[16px] font-[400] text-[#FF8FA5] min-h-[40px]">
-                                    {["M", "T", "W", "T", "F", "S", "S"].map((day) => (
-                                        <span key={day}>{day}</span>
+                                    {["M", "T", "W", "T", "F", "S", "S"].map((day, index) => (
+                                        <span key={`weekday-${index}`}>{day}</span>
                                     ))}
                                 </div>
                                 <ScrollArea className="mx-auto sm:mx-0 max-h-[250px] w-full max-w-[320px] rounded-b-[10px] bg-[#ffffff]">
