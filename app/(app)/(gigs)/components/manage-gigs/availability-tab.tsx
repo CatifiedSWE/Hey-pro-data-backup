@@ -219,7 +219,7 @@ export function AvailabilityTab({ selectedGigIds }: AvailabilityTabProps) {
                                 <span className="flex items-center gap-1 justify-center text-[#000000]">
                                     <CalendarDays className="h-4 w-4" />
                                     {gig.dateWindows.map((window, index) => (
-                                        <span key={window.label} className="">
+                                        <span key={`${gigId}-window-${index}`} className="">
                                             <span className="font-[500] text-[14px]">
                                                 <span className="text-[#FA6E80] text-[14px]">{window.label.split(" ")[1]}</span>
                                                 <span className="bg-[#FA6E80] text-white px-2 py-0.5 rounded-full text-[12px] ml-1"> {window.label.split(" ")[0]}</span>
