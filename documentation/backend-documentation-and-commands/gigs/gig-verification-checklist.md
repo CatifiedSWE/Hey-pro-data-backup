@@ -10,7 +10,7 @@
 
 ### Environment Setup
 - [x] Create .env.local with Supabase credentials
-- [ ] Install npm dependencies
+- [x] Install npm dependencies (794 packages installed)
 - [ ] Start development server
 - [ ] Verify server runs without errors
 
