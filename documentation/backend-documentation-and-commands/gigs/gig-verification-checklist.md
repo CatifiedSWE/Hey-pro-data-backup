@@ -15,10 +15,10 @@
 - [x] Verify server runs without errors (Health check: ✅ API is healthy)
 
 ### API Endpoints Testing
-- [ ] Test GET /api/gigs (list gigs)
+- [x] Test GET /api/gigs (list gigs) - ✅ Returns 2 gigs with pagination
 - [ ] Test POST /api/gigs (create gig)
-- [ ] Test GET /api/gigs/[id] (get gig by ID)
-- [ ] Test GET /api/gigs/slug/[slug] (get gig by slug)
+- [x] Test GET /api/gigs/[id] (get gig by ID) - ✅ Working
+- [x] Test GET /api/gigs/slug/[slug] (get gig by slug) - ✅ Working
 - [ ] Test PATCH /api/gigs/[id] (update gig)
 - [ ] Test DELETE /api/gigs/[id] (delete gig)
 - [ ] Test GET /api/gigs/[id]/applications (get applications)
