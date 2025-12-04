@@ -11,8 +11,10 @@ import { Button } from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
+    DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import {
     Accordion,
     AccordionContent,
