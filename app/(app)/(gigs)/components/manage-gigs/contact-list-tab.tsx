@@ -57,10 +57,10 @@ export function ContactListTab({ selectedGigIds, actionIndicators }: ContactList
                                     <div className="flex items-center gap-4 text-sm text-[#444444]">
                                         <CalendarDays className="h-5 w-5 text-black" />
                                         <div className="flex flex-wrap gap-4">
-                                            {gig.dateWindows.map((window) => {
+                                            {gig.dateWindows.map((window, windowIndex) => {
                                                 const [month, year] = window.label.split(" ");
                                                 return (
-                                                    <div key={window.label} className="flex items-center gap-3  px-3 py-1 text-sm text-[#444444]">
+                                                    <div key={`${gig.id}-window-${windowIndex}`} className="flex items-center gap-3  px-3 py-1 text-sm text-[#444444]">
                                                         <span className="text-sm font-semibold text-[#444444]">{year}</span>
                                                         <span className="rounded-[31px] h-[27px] bg-[#FA6E80] px-4 py-0.5 text-sm font-semibold text-[#ffffff] items-center justify-center flex">
                                                             {month}
