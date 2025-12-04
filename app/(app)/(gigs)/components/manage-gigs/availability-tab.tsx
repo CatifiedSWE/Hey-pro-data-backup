@@ -294,7 +294,7 @@ export function AvailabilityTab({ selectedGigIds }: AvailabilityTabProps) {
                                                     const state = applicant.schedule[col.fullKey] || 'na';
                                                     return (
                                                         <td 
-                                                            key={cIdx} 
+                                                            key={`${applicant.applicantId}-${col.fullKey}`} 
                                                             className="border-b border-r border-gray-100 p-0 last:border-r-0"
                                                         >
                                                             {state === "na" && (
