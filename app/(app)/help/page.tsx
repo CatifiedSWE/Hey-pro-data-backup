@@ -154,14 +154,17 @@ export default function HelpPage() {
     return (
         <div 
             className={cn(
-                "flex flex-col gap-4 transition-all duration-300 ease-in-out",
+                "flex flex-col gap-4 transition-all duration-300 ease-in-out mx-auto",
                 isFullScreen 
-                    ? "fixed inset-0 z-[100] bg-white p-4 pt-16 md:p-6" 
-                    : "w-full h-[calc(100vh-8rem)] pb-2"
+                    ? "fixed inset-0 z-[100] bg-white p-4 pt-16 md:p-6 w-full max-w-none" 
+                    : "w-full h-[calc(100vh-8rem)] pb-2 max-w-5xl"
             )}
         >
             {/* Header Area - Compact */}
-            <div className="flex items-center justify-between shrink-0 px-1">
+            <div className={cn(
+                "flex items-center justify-between shrink-0 px-1",
+                 !isFullScreen && "md:px-0"
+            )}>
                 <div>
                     <h1 className="text-2xl font-bold bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC] bg-clip-text text-transparent inline-block">
                         Help Center
@@ -208,7 +211,7 @@ export default function HelpPage() {
 
                     {/* Messages Area - Native Scroll for reliability */}
                     <div className="flex-1 overflow-y-auto bg-gray-50/30 p-0 relative">
-                        <div className="flex flex-col gap-4 p-4 min-h-full">
+                        <div className="flex flex-col gap-4 p-4 min-h-full max-w-4xl mx-auto w-full">
                             {/* Welcome State */}
                             {messages.length === 1 && (
                                 <div className="flex flex-col items-center justify-center py-8 text-center text-gray-500 animate-fade-in mt-10">
@@ -298,7 +301,8 @@ export default function HelpPage() {
                     <div className="p-3 bg-white border-t border-gray-100 shrink-0" data-testid="chat-input-area">
                         <div className="max-w-3xl mx-auto relative">
                              {/* Suggested Topics - Chips above input */}
-                            <div className="flex gap-2 overflow-x-auto pb-2.5 px-1 no-scrollbar mask-fade-right">
+                             {/* Improved Layout: Mobile scrolling, Desktop wrap & centered */}
+                            <div className="flex gap-2 overflow-x-auto pb-2.5 px-1 no-scrollbar mask-fade-right md:mask-none md:flex-wrap md:justify-center md:overflow-visible">
                                 {TOPICS.map((topic) => (
                                     <button
                                         key={topic.label}
