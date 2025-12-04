@@ -48,10 +48,6 @@ export function SendRecommendationDialog({ className }: { className?: string }) 
                     route: '/explore',
                 })
 
-                console.log('API Response:', response)
-                console.log('Response status:', response.status)
-                console.log('Response data:', response.data)
-
                 // Check if response is successful and has profiles
                 if (response.status && response.data) {
                     // Handle the case where data might be nested differently
