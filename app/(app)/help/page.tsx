@@ -16,8 +16,17 @@ import {
     Calendar,
     ChevronRight,
     Maximize2,
-    Minimize2
+    Minimize2,
+    Plus
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import ReactMarkdown from "react-markdown";
 import axios from "axios";
 import { cn } from "@/lib/utils";
@@ -366,8 +375,36 @@ export default function HelpPage() {
                                     e.preventDefault();
                                     handleSendMessage();
                                 }}
-                                className="relative flex items-center gap-2"
+                                className="relative flex items-center"
                             >
+                                {/* Quick Topics Dropdown */}
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-10 w-10 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-[#31A7AC] shrink-0 mr-2"
+                                        >
+                                            <Plus className="h-5 w-5" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="start" className="w-60 mb-2 bg-white">
+                                        <DropdownMenuLabel>Common Questions</DropdownMenuLabel>
+                                        <DropdownMenuSeparator />
+                                        {TOPICS.map((topic) => (
+                                            <DropdownMenuItem 
+                                                key={topic.label}
+                                                onClick={() => handleTopicClick(topic)}
+                                                className="cursor-pointer gap-2 py-2.5"
+                                            >
+                                                <topic.icon className="h-4 w-4 text-[#6A89BE]" />
+                                                <span>{topic.label}</span>
+                                            </DropdownMenuItem>
+                                        ))}
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+
                                 <Input
                                     ref={inputRef}
                                     value={inputMessage}
@@ -381,7 +418,7 @@ export default function HelpPage() {
                                     disabled={!inputMessage.trim() || isTyping}
                                     size="icon"
                                     className={cn(
-                                        "h-10 w-10 rounded-full transition-all duration-200 shrink-0",
+                                        "h-10 w-10 rounded-full transition-all duration-200 shrink-0 ml-2",
                                         inputMessage.trim() 
                                             ? "bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC] hover:opacity-90 shadow-md" 
                                             : "bg-gray-100 text-gray-300 cursor-not-allowed"
