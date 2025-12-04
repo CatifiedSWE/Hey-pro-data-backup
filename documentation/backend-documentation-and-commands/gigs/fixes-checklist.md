@@ -30,7 +30,7 @@ Files to fix (Gigs-related):
 Files to fix:
 - [x] `/app/app/(app)/(gigs)/components/applygigs.tsx` - Added VisuallyHidden DialogTitle
 - [x] `/app/app/(app)/(gigs)/components/recommend-gigs.tsx` - Already has DialogTitle (line 63)
-- [ ] `/app/app/(app)/(gigs)/components/manage-gigs/see-all-referrals.tsx` - DialogContent needs DialogTitle
+- [x] `/app/app/(app)/(gigs)/components/manage-gigs/see-all-referrals.tsx` - Already has DialogTitle (line 56)
 
 ### Phase 4: Finalization
 - [ ] Run prettier to format code
