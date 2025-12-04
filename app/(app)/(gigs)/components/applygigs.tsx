@@ -275,7 +275,6 @@ export default function ApplyGigs({ gig }: ApplyGigsProps) {
             setIsSubmitting(true)
 
             // Get session token
-            const supabase = createClient()
             const { data: { session } } = await supabase.auth.getSession()
             
             if (!session?.access_token) {
