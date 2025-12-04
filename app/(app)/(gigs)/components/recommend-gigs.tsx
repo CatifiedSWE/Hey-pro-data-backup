@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import {
@@ -14,10 +14,20 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { RecommendationUser, recommendationUsers } from "@/data/recommendUsers"
 import { MapPin, Search, UserPlus } from "lucide-react"
 import Image from "next/image"
 import { Checkbox } from "@/components/ui/checkbox"
+import apiCalling from "@/lib/apiCalling"
+import { toast } from "sonner"
+
+type RecommendationUser = {
+    id: string
+    userId: string
+    avatar: string | null
+    name: string
+    location: string
+    roles: string[]
+}
 
 export function SendRecommendationDialog({ className }: { className?: string }) {
     const [searchTerm, setSearchTerm] = useState("")
