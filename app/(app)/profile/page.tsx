@@ -26,8 +26,6 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
-import { HighlightCard } from "@/app/(app)/profile/components/Highlights"
-import HighlightsText from "@/app/(app)/profile/components/highlights-text"
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import AboutSectionComponent from "./components/About";
 import VisaSection from "./components/visa";
@@ -328,29 +326,12 @@ export default function Profile() {
                   </div>
                 </DialogContent>
               </Dialog>
-              <div className="lg:hidden">
-                <Button
-                  variant="outline"
-                  className="h-11 rounded-[10px] mt-3 sm:mt-0 w-full border-[#31A7AC] text-black hover:bg-transparent px-4 flex-shrink-0 mb-3"
-                >
-                  Edit Highlights
-                </Button>
-                <div className="flex flex-col items-center gap-3 px-2">
-                  <div className="flex items-center gap-3 w-full">
-                    <HighlightsText direction="row" letterClassName="h-6 w-6" className="gap-1" />
-                    <span className="flex-1 h-px bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC]" />
-                  </div>
-                </div>
-                <div className="mt-4">
-                  <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 px-4">
-                    {highlights.map((highlight) => (
-                      <div key={highlight.id} className="flex-shrink-0 h-[400px] w-[275px]">
-                        <HighlightCard highlight={highlight} />
-                      </div>
-                    ))}
-                  </div>
-                </div>
+              
+              {/* Highlights Section - Shows on mobile, positioned above about/skills/credits */}
+              <div className="lg:hidden mb-8">
+                <Highlights highlights={highlights} />
               </div>
+              
               <div className="my-8" />
               {sectionOrder.map((section, index) => (
                 <div key={section}>
@@ -364,7 +345,8 @@ export default function Profile() {
           )}
         </div>
       </main>
-      <div className="w-full max-w-[336px]">
+      {/* Highlights Section - Shows on desktop as sidebar */}
+      <div className="hidden lg:block w-full max-w-[336px]">
         <Highlights highlights={highlights} />
       </div>
     </section>
