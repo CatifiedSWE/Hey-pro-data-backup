@@ -250,7 +250,28 @@ export default function HelpPage() {
                     </div>
 
                     {/* Messages Area - Native Scroll for reliability */}
-                    <div className="flex-1 overflow-y-auto bg-gray-50/30 p-0">
+                    <div className="flex-1 overflow-y-auto bg-gray-50/30 p-0 relative">
+                        {/* Mobile Quick Topics - Horizontal Scroll (Pinned at top of chat) */}
+                        <div className="lg:hidden sticky top-0 z-10 bg-white/95 backdrop-blur-sm border-b border-gray-100 py-3 px-4 overflow-x-auto whitespace-nowrap no-scrollbar shadow-sm">
+                            <div className="flex gap-2">
+                                {TOPICS.map((topic) => (
+                                    <button
+                                        key={topic.label}
+                                        onClick={() => handleTopicClick(topic)}
+                                        className={cn(
+                                            "inline-flex items-center gap-2 px-3.5 py-1.5 bg-white border rounded-full text-xs font-medium transition-all shadow-sm",
+                                            activeTopic === topic.label
+                                                ? "border-[#6A89BE] text-[#6A89BE] bg-[#6A89BE]/5 ring-1 ring-[#6A89BE]/20"
+                                                : "border-gray-200 text-gray-600 hover:border-[#6A89BE] hover:text-[#6A89BE] hover:bg-gray-50"
+                                        )}
+                                    >
+                                        <topic.icon className="h-3.5 w-3.5" />
+                                        {topic.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
                         <div className="flex flex-col gap-4 p-4 min-h-full">
                             {/* Welcome State */}
                             {messages.length === 1 && (
