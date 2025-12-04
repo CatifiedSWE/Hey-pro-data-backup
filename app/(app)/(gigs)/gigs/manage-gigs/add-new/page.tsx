@@ -651,8 +651,8 @@ export default function AddGigPage() {
                                             <p className="text-xs font-[400] uppercase tracking-wide text-[#8F8F8F]">Selected dates</p>
                                             {monthDateSummaries.length ? (
                                                 <div className="space-y-1">
-                                                    {monthDateSummaries.map((entry) => (
-                                                        <p key={`${entry.label}-${entry.ranges}`} className="text-sm text-[#4F4F4F]">
+                                                    {monthDateSummaries.map((entry, entryIndex) => (
+                                                        <p key={`date-summary-${entryIndex}`} className="text-sm text-[#4F4F4F]">
                                                             <span className="font-[400] text-[#1D1D1F]">{entry.label}</span>
                                                             <span className="px-2 text-[#A3A3A3]">|</span>
                                                             {entry.ranges}
