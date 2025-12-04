@@ -577,7 +577,8 @@ export default function ApplyGigs({ gig }: ApplyGigsProps) {
                                                     </div>
                                                 </DropdownMenuItem>
                                             )
-                                        })}
+                                        })
+                                        )}
                                     </DropdownMenuGroup>
                                 </DropdownMenuContent>
                             </DropdownMenu>
