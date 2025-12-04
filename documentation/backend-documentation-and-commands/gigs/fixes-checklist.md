@@ -20,7 +20,7 @@ Files to fix (Gigs-related):
 - [x] `/app/app/(app)/(gigs)/components/gig-details.tsx` - Fixed WEEKDAY_LABELS .map() to use index
 - [x] `/app/app/(app)/(gigs)/components/manage-gigs/contact-list-tab.tsx` - Fixed dateWindows .map() to use index
 - [x] `/app/app/(app)/(gigs)/components/manage-gigs/see-all-referrals.tsx` - Already correct (uses user.id and proper keys)
-- [ ] `/app/app/(app)/(gigs)/components/manage-gigs/application-tab.tsx` - .map() in applicants
+- [x] `/app/app/(app)/(gigs)/components/manage-gigs/application-tab.tsx` - Fixed dateWindows .map() to use index
 - [ ] `/app/app/(app)/(gigs)/components/manage-gigs/gig-list.tsx` - .map() in gigsData
 - [ ] `/app/app/(app)/(gigs)/gigs/page.tsx`
 - [ ] `/app/app/(app)/(gigs)/gigs/manage-gigs/add-new/page.tsx`
