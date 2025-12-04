@@ -166,6 +166,9 @@ export default function WorkStatusSection({ statusProp, initialIdentities }: Wor
                 </div>
             </DialogTrigger>
             <DialogContent className="border-none p-0">
+                <VisuallyHidden>
+                    <DialogTitle>Work Identities</DialogTitle>
+                </VisuallyHidden>
                 <form onSubmit={handleSubmit}>
                     <div className="mx-auto flex h-full max-h-[642px] w-full  flex-col rounded-[20px] bg-white px-5 pb-6 pt-[25px] shadow-[0_8px_18px_rgba(0,0,0,0.1)]">
                         <div className="mx-auto mb-6 h-[5px] w-[150px] rounded-full bg-[#868686]" />
