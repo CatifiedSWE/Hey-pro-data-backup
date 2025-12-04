@@ -148,7 +148,7 @@ export default function GigDetails(gig: GigsDataType[0]) {
           {visibleMonths.map((month, index) => {
             const monthDate = new Date(month.year, month.month, 1);
             const matrix = buildMonthMatrix(month.year, month.month);
-            const highlighted = new Set(month.highlightedDays);
+            const highlighted = new Set(month.highlightedDays || []);
 
             return (
               <div
