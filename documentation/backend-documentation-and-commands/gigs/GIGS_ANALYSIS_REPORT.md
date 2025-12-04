@@ -276,18 +276,13 @@ Some frontend components reference sample/mock data files:
 
 ---
 
-### 5. **Missing GET /api/gigs/[id]/applications/[applicationId]/status Route** (Verification Needed)
+### 5. **Application Status Route** ✅ **COMPLETE**
 
-The README.md mentions this endpoint in the API summary, but needs verification:
+**Status:** Verified - the dedicated status update route exists:
 
-```
-PATCH /api/gigs/[id]/applications/[applicationId]/status  # Update application status
-```
+✅ `/app/api/gigs/[id]/applications/[applicationId]/status/route.ts`
 
-**Expected File:**
-`/app/api/gigs/[id]/applications/[applicationId]/status/route.ts`
-
-**Status:** Found ✅ but needs testing
+This provides RESTful pattern for updating individual application status.
 
 ---
 
