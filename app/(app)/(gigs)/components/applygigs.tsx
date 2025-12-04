@@ -105,7 +105,6 @@ export default function ApplyGigs({ gig }: ApplyGigsProps) {
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                const supabase = createClient()
                 const { data: { session } } = await supabase.auth.getSession()
                 
                 if (!session?.access_token) {
