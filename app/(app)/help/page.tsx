@@ -144,7 +144,7 @@ export default function HelpPage() {
     };
 
     return (
-        <div className="flex flex-col gap-4 w-full h-[calc(100vh-4rem)] pb-2 px-0 md:px-4 pt-2">
+        <div className="flex flex-col gap-4 w-full h-[calc(100vh-4rem)] pb-2 px-2 md:px-4 pt-2">
             {/* Main Content */}
             <div className="flex-1 flex gap-4 h-full min-h-0 overflow-hidden">
                 {/* Main Chat Area */}
@@ -269,13 +269,13 @@ export default function HelpPage() {
                         <div className="max-w-3xl mx-auto relative">
                              {/* Suggested Topics - Chips above input */}
                              {/* Improved Layout: Mobile scrolling, Desktop wrap & centered */}
-                            <div className="flex gap-2 overflow-x-auto pb-2.5 px-1 no-scrollbar mask-fade-right md:mask-none md:flex-wrap md:justify-center md:overflow-visible">
+                            <div className="flex gap-2 overflow-x-auto pb-2.5 px-2 md:px-0 md:flex-wrap md:justify-center md:overflow-visible no-scrollbar">
                                 {TOPICS.map((topic) => (
                                     <button
                                         key={topic.label}
                                         onClick={() => handleTopicClick(topic)}
                                         className={cn(
-                                            "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all border",
+                                            "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all border flex-shrink-0",
                                             activeTopic === topic.label
                                                 ? "bg-[#6A89BE]/10 border-[#6A89BE] text-[#6A89BE]"
                                                 : "bg-white hover:bg-gray-50 border-gray-200 text-gray-600 hover:border-[#6A89BE] hover:text-[#6A89BE]",
