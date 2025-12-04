@@ -144,11 +144,9 @@ export default function HelpPage() {
     };
 
     return (
-        <div className="flex flex-col gap-4 w-full h-[calc(100vh-4rem)] pb-2 px-2 md:px-4 pt-2">
-            {/* Main Content */}
-            <div className="flex-1 flex gap-4 h-full min-h-0 overflow-hidden">
-                {/* Main Chat Area */}
-                <Card className="flex-1 flex flex-col overflow-hidden border-gray-200 bg-white shadow-sm h-full rounded-xl" data-testid="help-chat-container">
+        <div className="flex flex-col w-full h-screen max-h-screen pb-2 px-2 md:px-4 pt-2">
+            {/* Main Chat Area */}
+            <Card className="flex-1 flex flex-col overflow-hidden border-gray-200 bg-white shadow-sm rounded-xl min-h-0" data-testid="help-chat-container">
                     {/* Chat Header - Minimal */}
                     <div className="p-3 border-b border-gray-100 flex items-center justify-between bg-white z-10 shrink-0">
                         <div className="flex items-center gap-3">
@@ -168,25 +166,25 @@ export default function HelpPage() {
                     </div>
 
                     {/* Messages Area - Native Scroll for reliability */}
-                    <div className="flex-1 overflow-y-auto bg-gray-50/30 p-0 relative">
-                        <div className="flex flex-col gap-4 p-4 min-h-full max-w-4xl mx-auto w-full">
+                    <div className="flex-1 overflow-y-auto bg-gray-50/30 p-0 relative min-h-0">
+                        <div className="flex flex-col gap-4 p-4 max-w-4xl mx-auto w-full">
                             {/* Welcome State */}
                             {messages.length === 1 && (
-                                <div className="flex flex-col items-center justify-center py-8 text-center text-gray-500 animate-fade-in mt-10">
-                                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#FA6E80]/10 to-[#31A7AC]/10 flex items-center justify-center mb-4">
-                                        <Bot className="h-8 w-8 text-[#6A89BE]" />
+                                <div className="flex flex-col items-center justify-center py-4 md:py-8 text-center text-gray-500 animate-fade-in">
+                                    <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-gradient-to-br from-[#FA6E80]/10 to-[#31A7AC]/10 flex items-center justify-center mb-3">
+                                        <Bot className="h-6 w-6 md:h-8 md:w-8 text-[#6A89BE]" />
                                     </div>
                                     
                                     {/* Added Titles to Welcome Screen */}
-                                    <h1 className="text-2xl font-bold bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC] bg-clip-text text-transparent inline-block mb-1">
+                                    <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC] bg-clip-text text-transparent inline-block mb-1">
                                         Help Center
                                     </h1>
-                                    <p className="text-sm text-gray-500 font-medium mb-6">
+                                    <p className="text-xs md:text-sm text-gray-500 font-medium mb-4">
                                         Support & Assistant
                                     </p>
 
-                                    <h3 className="font-semibold text-gray-700 mb-1">How can we help?</h3>
-                                    <p className="text-sm text-gray-400 max-w-xs">
+                                    <h3 className="font-semibold text-gray-700 mb-1 text-sm md:text-base">How can we help?</h3>
+                                    <p className="text-xs md:text-sm text-gray-400 max-w-xs px-4">
                                         Ask about features, your account, or troubleshooting.
                                     </p>
                                 </div>
@@ -264,8 +262,8 @@ export default function HelpPage() {
                         </div>
                     </div>
 
-                    {/* Input Area */}
-                    <div className="p-3 bg-white border-t border-gray-100 shrink-0" data-testid="chat-input-area">
+                    {/* Input Area - Fixed at bottom */}
+                    <div className="p-2.5 md:p-3 bg-white border-t border-gray-100 flex-shrink-0" data-testid="chat-input-area">
                         <div className="max-w-3xl mx-auto relative">
                              {/* Suggested Topics - Chips above input */}
                              {/* Improved Layout: Mobile scrolling, Desktop wrap & centered */}
@@ -321,7 +319,6 @@ export default function HelpPage() {
                         </div>
                     </div>
                 </Card>
-            </div>
         </div>
     );
 }
