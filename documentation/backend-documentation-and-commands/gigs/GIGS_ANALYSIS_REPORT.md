@@ -385,11 +385,12 @@ All production blockers have been resolved:
 
 ### Optional Polish Items (Nice to Have)
 
-4. **Add calendarMonths to Listing Response**
-   - Update `GET /api/gigs` to include calendar data
+1. **Add calendarMonths to Listing Response** (Optional UX enhancement)
+   - Update `GET /api/gigs` to include calendar data for card previews
    - **File:** `/app/api/gigs/route.ts`
+   - **Impact:** Low - Only affects gig card preview, not core functionality
 
-5. **Remove Hardcoded Sample Data**
+2. **Remove Hardcoded Sample Data** (Code cleanup)
    - Review and remove sample-data.ts usage
    - Ensure all components fetch from API
    - **Files:** `application-tab.tsx`, `availability-tab.tsx`, `contact-list-tab.tsx`
