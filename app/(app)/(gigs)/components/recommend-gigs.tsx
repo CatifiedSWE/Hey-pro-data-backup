@@ -48,19 +48,34 @@ export function SendRecommendationDialog({ className }: { className?: string }) 
                     route: '/explore',
                 })
 
-                if (response.status && response.data?.data?.profiles) {
-                    const profiles = response.data.data.profiles.map((profile: any) => ({
-                        id: profile.id,
-                        userId: profile.userId,
-                        avatar: profile.avatar,
-                        name: profile.name || profile.displayName,
-                        location: profile.location,
-                        roles: profile.roles || []
-                    }))
-                    setUsers(profiles)
+                console.log('API Response:', response)
+                console.log('Response status:', response.status)
+                console.log('Response data:', response.data)
+
+                // Check if response is successful and has profiles
+                if (response.status && response.data) {
+                    // Handle the case where data might be nested differently
+                    const profilesData = response.data.data?.profiles || response.data.profiles
+                    
+                    if (profilesData && Array.isArray(profilesData)) {
+                        const profiles = profilesData.map((profile: any) => ({
+                            id: profile.id,
+                            userId: profile.userId,
+                            avatar: profile.avatar,
+                            name: profile.name || profile.displayName,
+                            location: profile.location,
+                            roles: profile.roles || []
+                        }))
+                        setUsers(profiles)
+                    } else {
+                        console.error('No profiles found in response:', response.data)
+                        setError('Failed to load users')
+                        toast.error('Failed to load users')
+                    }
                 } else {
-                    setError('Failed to load users')
-                    toast.error('Failed to load users')
+                    console.error('API call failed:', response)
+                    setError(response.message || 'Failed to load users')
+                    toast.error(response.message || 'Failed to load users')
                 }
             } catch (err) {
                 console.error('Error fetching users:', err)
