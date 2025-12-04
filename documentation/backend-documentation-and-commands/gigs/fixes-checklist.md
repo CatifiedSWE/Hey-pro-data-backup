@@ -8,18 +8,29 @@ This document tracks all fixes applied to resolve:
 ## Progress Tracking
 
 ### Phase 1: Codebase Scanning
-- [ ] Scan app/(app)/(gigs)/** directory structure
-- [ ] Identify all `.map()` usages
-- [ ] Identify all DialogContent/SheetContent usages
-- [ ] List all files requiring fixes
+- [x] Scan app/(app)/(gigs)/** directory structure
+- [x] Identify all `.map()` usages
+- [x] Identify all DialogContent/SheetContent usages
+- [x] List all files requiring fixes
 
 ### Phase 2: Fix React Key Issues
-Files to fix:
-- [ ] (List will be populated after scanning)
+Files to fix (Gigs-related):
+- [ ] `/app/app/(app)/(gigs)/components/applygigs.tsx` - Multiple .map() calls need key review
+- [ ] `/app/app/(app)/(gigs)/components/recommend-gigs.tsx` - .map() in filteredUsers
+- [ ] `/app/app/(app)/(gigs)/components/gig-details.tsx` - .map() in calendar rendering
+- [ ] `/app/app/(app)/(gigs)/components/manage-gigs/contact-list-tab.tsx` - Multiple .map() calls
+- [ ] `/app/app/(app)/(gigs)/components/manage-gigs/see-all-referrals.tsx` - .map() in user list
+- [ ] `/app/app/(app)/(gigs)/components/manage-gigs/application-tab.tsx` - .map() in applicants
+- [ ] `/app/app/(app)/(gigs)/components/manage-gigs/gig-list.tsx` - .map() in gigsData
+- [ ] `/app/app/(app)/(gigs)/gigs/page.tsx`
+- [ ] `/app/app/(app)/(gigs)/gigs/manage-gigs/add-new/page.tsx`
+- [ ] `/app/app/(app)/(gigs)/gigs/[slug]/page.tsx`
 
 ### Phase 3: Fix Radix UI DialogContent Accessibility
 Files to fix:
-- [ ] (List will be populated after scanning)
+- [ ] `/app/app/(app)/(gigs)/components/applygigs.tsx` - SheetContent needs DialogTitle
+- [ ] `/app/app/(app)/(gigs)/components/recommend-gigs.tsx` - DialogContent needs DialogTitle
+- [ ] `/app/app/(app)/(gigs)/components/manage-gigs/see-all-referrals.tsx` - DialogContent needs DialogTitle
 
 ### Phase 4: Finalization
 - [ ] Run prettier to format code
