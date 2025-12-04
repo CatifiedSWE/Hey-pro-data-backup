@@ -37,16 +37,36 @@ Files to fix:
 - [ ] Run prettier to format code
 - [ ] Verify all fixes applied correctly
 - [ ] Create clean commit with descriptive message
-- [ ] Summary of changes
+- [x] Summary of changes
 
 ---
 
 ## Detailed Changes Log
 
 ### Files Modified:
-(Will be updated as fixes are applied)
+
+#### React Key Fixes:
+1. **applygigs.tsx** - Fixed duplicate keys in WEEKDAY_LABELS .map() by using index
+2. **gig-details.tsx** - Fixed duplicate keys in WEEKDAY_LABELS .map() by using index
+3. **contact-list-tab.tsx** - Fixed dateWindows .map() to use index instead of window.label
+4. **application-tab.tsx** - Fixed dateWindows .map() to use index instead of window.label
+5. **gig-list.tsx** - Fixed dateWindows .map() to use index instead of window.label
+6. **availability-tab.tsx** - Fixed dateWindows .map() to use index instead of window.label
+7. **gigs/page.tsx** - Fixed dateWindows .map() to use index instead of window.label
+8. **gigs/manage-gigs/add-new/page.tsx** - Fixed duplicate keys in weekday labels and monthDateSummaries .map()
+
+#### Radix UI DialogContent Accessibility Fixes:
+1. **applygigs.tsx** - Added VisuallyHidden wrapper with DialogTitle for SheetContent
+2. **recommend-gigs.tsx** - Already had DialogTitle (no changes needed)
+3. **see-all-referrals.tsx** - Already had DialogTitle (no changes needed)
+
+#### New Component Created:
+- **/components/ui/visually-hidden.tsx** - Created new VisuallyHidden component using @radix-ui/react-visually-hidden
+
+#### Package Installed:
+- **@radix-ui/react-visually-hidden** - Added to support accessibility requirements
 
 ---
 
-**Started:** [Timestamp will be added]
-**Completed:** [Timestamp will be added]
+**Started:** In progress
+**Completed:** Ready for formatting and commit
