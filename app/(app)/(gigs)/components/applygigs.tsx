@@ -252,8 +252,8 @@ export default function ApplyGigs({ gig }: ApplyGigsProps) {
                                             </div>
                                             <div className=" bg-[#F8F8F8] pt-2">
                                                 <div className="grid grid-cols-7 gap-[6px] text-[11px] font-[400] text-[#FF4B82] rounded-[6px]  bg-[#F8F8F8]">
-                                                    {WEEKDAY_LABELS.map((label) => (
-                                                        <span key={`${gig.id}-${month.month}-${label}`} className="text-center">
+                                                    {WEEKDAY_LABELS.map((label, labelIndex) => (
+                                                        <span key={`${gig.id}-${month.month}-weekday-${labelIndex}`} className="text-center">
                                                             {label}
                                                         </span>
                                                     ))}
