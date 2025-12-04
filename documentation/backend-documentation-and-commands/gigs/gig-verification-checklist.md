@@ -108,8 +108,8 @@
 - [ ] Delete sample-data.ts file (optional cleanup)
 
 ### API Enhancements
-- [ ] Add calendarMonths to GET /api/gigs response
-- [ ] Update gigs listing to include calendar data
+- [x] Add calendarMonths to GET /api/gigs response - ✅ Implemented using transformCalendarMonths helper
+- [x] Update gigs listing to include calendar data - ✅ Added to gigsWithRelations
 - [ ] Test calendarMonths in frontend
 
 ### Error Handling Improvements
