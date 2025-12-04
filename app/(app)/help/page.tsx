@@ -3,30 +3,18 @@ import { useState, useRef, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
     Send, 
     Bot, 
     User, 
-    Sparkles, 
     Settings, 
     Briefcase,
     Users,
     Calendar,
-    ChevronRight,
     Maximize2,
     Minimize2,
-    Plus
 } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import ReactMarkdown from "react-markdown";
 import axios from "axios";
 import { cn } from "@/lib/utils";
@@ -198,46 +186,6 @@ export default function HelpPage() {
 
             {/* Main Content */}
             <div className="flex-1 flex gap-4 h-full min-h-0 overflow-hidden">
-                {/* Sidebar - Hidden on mobile, visible on lg */}
-                <Card className="hidden lg:flex w-72 flex-col overflow-hidden border-gray-200 bg-white shadow-sm h-full">
-                    <div className="p-3 border-b border-gray-100 bg-gray-50/50">
-                        <h2 className="font-semibold text-gray-700 flex items-center gap-2 text-sm">
-                            <Sparkles className="h-4 w-4 text-[#FA6E80]" />
-                            Quick Topics
-                        </h2>
-                    </div>
-                    <ScrollArea className="flex-1">
-                        <div className="p-2 space-y-1">
-                            {TOPICS.map((topic) => (
-                                <button
-                                    key={topic.label}
-                                    onClick={() => handleTopicClick(topic)}
-                                    className={cn(
-                                        "w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-all duration-200 group",
-                                        activeTopic === topic.label 
-                                            ? "bg-gray-100 text-gray-900 font-medium" 
-                                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                                    )}
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <div className={cn(
-                                            "p-1.5 rounded-md transition-colors",
-                                            activeTopic === topic.label ? "bg-white shadow-sm text-[#31A7AC]" : "bg-gray-100 text-gray-500 group-hover:text-[#31A7AC] group-hover:bg-white"
-                                        )}>
-                                            <topic.icon className="h-3.5 w-3.5" />
-                                        </div>
-                                        <span>{topic.label}</span>
-                                    </div>
-                                    <ChevronRight className={cn(
-                                        "h-3.5 w-3.5 text-gray-400 transition-transform",
-                                        activeTopic === topic.label ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0"
-                                    )} />
-                                </button>
-                            ))}
-                        </div>
-                    </ScrollArea>
-                </Card>
-
                 {/* Main Chat Area */}
                 <Card className="flex-1 flex flex-col overflow-hidden border-gray-200 bg-white shadow-sm h-full" data-testid="help-chat-container">
                     {/* Chat Header - Minimal */}
@@ -260,27 +208,6 @@ export default function HelpPage() {
 
                     {/* Messages Area - Native Scroll for reliability */}
                     <div className="flex-1 overflow-y-auto bg-gray-50/30 p-0 relative">
-                        {/* Mobile Quick Topics - Horizontal Scroll (Pinned at top of chat) */}
-                        <div className="lg:hidden sticky top-0 z-10 bg-white/95 backdrop-blur-sm border-b border-gray-100 py-3 px-4 overflow-x-auto whitespace-nowrap no-scrollbar shadow-sm">
-                            <div className="flex gap-2">
-                                {TOPICS.map((topic) => (
-                                    <button
-                                        key={topic.label}
-                                        onClick={() => handleTopicClick(topic)}
-                                        className={cn(
-                                            "inline-flex items-center gap-2 px-3.5 py-1.5 bg-white border rounded-full text-xs font-medium transition-all shadow-sm",
-                                            activeTopic === topic.label
-                                                ? "border-[#6A89BE] text-[#6A89BE] bg-[#6A89BE]/5 ring-1 ring-[#6A89BE]/20"
-                                                : "border-gray-200 text-gray-600 hover:border-[#6A89BE] hover:text-[#6A89BE] hover:bg-gray-50"
-                                        )}
-                                    >
-                                        <topic.icon className="h-3.5 w-3.5" />
-                                        {topic.label}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
                         <div className="flex flex-col gap-4 p-4 min-h-full">
                             {/* Welcome State */}
                             {messages.length === 1 && (
@@ -370,41 +297,33 @@ export default function HelpPage() {
                     {/* Input Area */}
                     <div className="p-3 bg-white border-t border-gray-100 shrink-0" data-testid="chat-input-area">
                         <div className="max-w-3xl mx-auto relative">
-                             <form 
+                             {/* Suggested Topics - Chips above input */}
+                            <div className="flex gap-2 overflow-x-auto pb-2.5 px-1 no-scrollbar mask-fade-right">
+                                {TOPICS.map((topic) => (
+                                    <button
+                                        key={topic.label}
+                                        onClick={() => handleTopicClick(topic)}
+                                        className={cn(
+                                            "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all border",
+                                            activeTopic === topic.label
+                                                ? "bg-[#6A89BE]/10 border-[#6A89BE] text-[#6A89BE]"
+                                                : "bg-white hover:bg-gray-50 border-gray-200 text-gray-600 hover:border-[#6A89BE] hover:text-[#6A89BE]",
+                                            "whitespace-nowrap shadow-sm"
+                                        )}
+                                    >
+                                        <topic.icon className="h-3.5 w-3.5" />
+                                        {topic.label}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <form 
                                 onSubmit={(e) => {
                                     e.preventDefault();
                                     handleSendMessage();
                                 }}
                                 className="relative flex items-center"
                             >
-                                {/* Quick Topics Dropdown */}
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="icon"
-                                            className="h-10 w-10 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-[#31A7AC] shrink-0 mr-2"
-                                        >
-                                            <Plus className="h-5 w-5" />
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="start" className="w-60 mb-2 bg-white">
-                                        <DropdownMenuLabel>Common Questions</DropdownMenuLabel>
-                                        <DropdownMenuSeparator />
-                                        {TOPICS.map((topic) => (
-                                            <DropdownMenuItem 
-                                                key={topic.label}
-                                                onClick={() => handleTopicClick(topic)}
-                                                className="cursor-pointer gap-2 py-2.5"
-                                            >
-                                                <topic.icon className="h-4 w-4 text-[#6A89BE]" />
-                                                <span>{topic.label}</span>
-                                            </DropdownMenuItem>
-                                        ))}
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-
                                 <Input
                                     ref={inputRef}
                                     value={inputMessage}
