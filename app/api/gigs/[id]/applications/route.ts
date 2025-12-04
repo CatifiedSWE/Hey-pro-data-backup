@@ -86,7 +86,10 @@ export async function GET(
           .from('user_profiles')
           .select(`
             user_id,
-            name,
+            first_name,
+            surname,
+            alias_first_name,
+            alias_surname,
             profile_photo_url,
             bio,
             country,
