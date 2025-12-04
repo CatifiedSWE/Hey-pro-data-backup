@@ -81,4 +81,37 @@ Files to fix:
 ---
 
 **Started:** In progress
-**Completed:** Ready for formatting and commit
+**Completed:** All fixes applied and verified
+
+---
+
+## Additional Fixes Applied (Beyond Gigs)
+
+### Phase 5: Profile Components DialogTitle Fixes
+
+Fixed Radix UI DialogContent accessibility warnings in profile components by adding VisuallyHidden DialogTitle:
+
+#### Profile Components Fixed:
+
+1. **/app/(app)/profile/components/AvalableCountryForTravel.tsx** - Added VisuallyHidden DialogTitle "Available to travel"
+2. **/app/(app)/profile/components/WorkStatus.tsx** - Added VisuallyHidden DialogTitle "Work Identities"
+3. **/app/(app)/profile/components/add-new-skill.tsx** - Added VisuallyHidden DialogTitle "Add Skills"
+4. **/app/(app)/profile/components/visa.tsx** - Added VisuallyHidden DialogTitle "Passport and Visa details"
+5. **/app/(app)/profile/components/CreditsEditor.tsx** - Added VisuallyHidden DialogTitle (dynamic based on mode)
+
+#### Profile-Design Components Fixed:
+
+6. **/app/(app)/profile-design/components/AvalableCountryForTravel.tsx** - Added VisuallyHidden DialogTitle "Available to travel"
+7. **/app/(app)/profile-design/components/WorkStatus.tsx** - Added VisuallyHidden DialogTitle "Work Identities"
+8. **/app/(app)/profile-design/components/add-new-skill.tsx** - Added VisuallyHidden DialogTitle "Add Skills"
+9. **/app/(app)/profile-design/components/visa.tsx** - Added VisuallyHidden DialogTitle "Passport and Visa details"
+10. **/app/(app)/profile-design/components/CreditsEditor.tsx** - Added VisuallyHidden DialogTitle "Manage Credits"
+
+### Verification:
+
+- [x] All DialogContent instances now have DialogTitle (visible or VisuallyHidden)
+- [x] All .map() usages verified to have unique keys
+- [x] No duplicate key warnings remain
+- [x] No Radix DialogTitle accessibility warnings remain
+
+**Date Completed:** $(date +%Y-%m-%d)
