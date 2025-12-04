@@ -105,7 +105,7 @@
 - [x] Update ApplicationTab to use real API - ✅ Already implemented
 - [x] Update AvailabilityTab to use real API - ✅ Already implemented
 - [x] Update ContactListTab to use real API - ✅ Already implemented
-- [ ] Delete sample-data.ts file (optional cleanup)
+- [x] Delete sample-data.ts file (optional cleanup) - ✅ File deleted
 
 ### API Enhancements
 - [x] Add calendarMonths to GET /api/gigs response - ✅ Implemented using transformCalendarMonths helper
