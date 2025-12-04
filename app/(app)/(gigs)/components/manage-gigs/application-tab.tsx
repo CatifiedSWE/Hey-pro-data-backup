@@ -55,7 +55,7 @@ export function ApplicationTab({ selectedGigIds, actionIndicators, onActionChang
                             <span className="flex items-center gap-1 justify-center text-[#000000]">
                                 <CalendarDays className="h-4 w-4" />
                                 {gig.dateWindows.map((window, index) => (
-                                    <span key={window.label} className="">
+                                    <span key={`${gig.id}-window-${index}`} className="">
                                         <span className="font-[500] text-[14px]">
                                             <span>{window.label.split(" ")[1]}</span>
                                             <span className="text-[#FA6E80] text-[14px]"> {window.label.split(" ")[0]}</span>
