@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     const offset = (page - 1) * limit;
 
     // Build base query
-    // Removed .eq('visible_in_explore', true) to show all profiles for now
+    // Query only basic columns that exist in the database
     let query = supabase
       .from('user_profiles')
       .select(`
@@ -48,10 +48,6 @@ export async function GET(request: NextRequest) {
         bio,
         country,
         city,
-        day_rate,
-        day_rate_currency,
-        experience_level,
-        available_for_work,
         created_at,
         updated_at
       `, { count: 'exact' });
