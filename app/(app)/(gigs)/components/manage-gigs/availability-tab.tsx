@@ -368,6 +368,66 @@ function GigAvailabilitySection({ gig, availability }: { gig: Gig; availability:
                     </table>
                 </div>
             )}
+
+            {/* Credits Dialog */}
+            <Dialog open={creditsDialog.open} onOpenChange={(open) => setCreditsDialog(prev => ({ ...prev, open }))}>
+                <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle className="text-xl font-semibold">
+                            {creditsDialog.applicantName}&apos;s Credits
+                        </DialogTitle>
+                        <DialogDescription>
+                            Professional work history and credits
+                        </DialogDescription>
+                    </DialogHeader>
+                    
+                    {creditsDialog.loading ? (
+                        <div className="flex justify-center py-10">
+                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FA6E80]"></div>
+                        </div>
+                    ) : creditsDialog.credits.length === 0 ? (
+                        <div className="text-center py-10 text-gray-500">
+                            No credits available for this applicant.
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {creditsDialog.credits.map((credit) => (
+                                <Card key={credit.id} className="p-4">
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between items-start">
+                                            <div className="flex-1">
+                                                <h3 className="font-semibold text-lg text-gray-900">
+                                                    {credit.title}
+                                                </h3>
+                                                <p className="text-sm text-gray-600 mt-1">
+                                                    {credit.role} • {credit.year}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        
+                                        {credit.description && (
+                                            <p className="text-sm text-gray-700 mt-2">
+                                                {credit.description}
+                                            </p>
+                                        )}
+                                        
+                                        {credit.imdbUrl && (
+                                            <a 
+                                                href={credit.imdbUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-sm text-[#31A7AC] hover:underline inline-block mt-2"
+                                            >
+                                                View on IMDb →
+                                            </a>
+                                        )}
+                                    </div>
+                                </Card>
+                            ))}
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
         </section>
     );
 }
