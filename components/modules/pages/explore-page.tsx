@@ -3,96 +3,17 @@ import { useRouter } from "next/navigation";
 import ProjectCard from "@/components/modules/common/projectCard";
 import { ProjectCardType } from "@/types";
 
-interface UserProfile {
-  id: string;
-  userId: string;
-  name: string;
-  displayName: string;
-  avatar: string;
-  banner: string;
-  bio: string;
-  location: string;
-  availableForWork: boolean;
-  roles: Array<{ id: string; roleName: string; category?: string }>;
-  credits: Array<{ 
-    id: string; 
-    creditTitle: string;
-    title?: string;
-    role: string; 
-    year?: string;
-    releaseYear?: string;
-    description?: string;
-    productionType?: string;
-    projectTitle?: string;
-    brandClient?: string;
-    imgUrl?: string;
-    localCompany?: string;
-    internationalCompany?: string;
-    country?: string;
-    headlineStats?: string;
-    awards?: Array<{ title: string; detail?: string }>;
-  }>;
-  skills: Array<{ id: string; skillName: string }>;
-  highlights: Array<{ 
-    id: string; 
-    highlight?: string;
-    title?: string;
-    description?: string;
-    imageUrl?: string;
-    sortOrder: number;
-  }>;
-  availability: Array<{ id: string; date: string; status: string }>;
-}
-
 export default function ExplorePage({
   projectsCardData,
 }: {
   projectsCardData: ProjectCardType[];
 }) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
-  const handleCardClick = async (project: ProjectCardType) => {
+  const handleCardClick = (project: ProjectCardType) => {
     if (!project.userId) return;
-    
-    setIsLoading(true);
-    setIsModalOpen(true);
-    
-    try {
-      const response = await axios.get(`/api/explore/${project.userId}`);
-      console.log("=== API Response ===");
-      console.log("Full Response:", response.data);
-      if (response.data.success) {
-        const userData = response.data.data;
-        console.log("User Data:", userData);
-        console.log("Credits Count:", userData.credits?.length);
-        console.log("Credits Data:", userData.credits);
-        console.log("Highlights Count:", userData.highlights?.length);
-        console.log("Highlights Data:", userData.highlights);
-        
-        // Log first credit if exists
-        if (userData.credits && userData.credits.length > 0) {
-          console.log("First Credit:", userData.credits[0]);
-        }
-        
-        // Log first highlight if exists
-        if (userData.highlights && userData.highlights.length > 0) {
-          console.log("First Highlight:", userData.highlights[0]);
-        }
-        
-        setSelectedUser(userData);
-      }
-    } catch (error) {
-      console.error("Error fetching user profile:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedUser(null);
+    // Navigate to the user's profile page
+    router.push(`/profile/${project.userId}`);
   };
 
   return (
