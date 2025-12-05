@@ -353,7 +353,13 @@ export function ApplicationTab({ selectedGigIds, actionIndicators, onActionChang
                                             </td>
                                             <td className="h-[60px] border border-[#DEDEDE] w-[60px] px-4 py-2 text-center bg-white">
                                                 <button className="flex items-center justify-center w-full">
-                                                    <MessageCircleMore className="h-5 w-5 text-gray-500" />
+                                                    <Image 
+                                                        src="/icons/chat-teal.png" 
+                                                        alt="Chat" 
+                                                        width={32} 
+                                                        height={32} 
+                                                        className="object-contain" 
+                                                    />
                                                 </button>
                                             </td>
                                             <td className="h-[60px] border border-[#DEDEDE] w-[80px] px-4 py-2 text-center bg-white">
