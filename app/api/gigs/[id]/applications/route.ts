@@ -102,7 +102,7 @@ export async function GET(
 
         // Get applicant skills
         const { data: skills } = await supabase
-          .from('user_skills')
+          .from('applicant_skills')
           .select('skill_name, proficiency_level')
           .eq('user_id', app.applicant_user_id)
           .order('sort_order');
