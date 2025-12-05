@@ -399,6 +399,74 @@ export function ApplicationTab({ selectedGigIds, actionIndicators, onActionChang
                     )}
                 </section>
             ))}
+
+            {/* Credits Dialog */}
+            <Dialog open={creditsDialog.open} onOpenChange={(open) => setCreditsDialog(prev => ({ ...prev, open }))}>
+                <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle className="text-xl font-semibold">
+                            {creditsDialog.applicantName}&apos;s Credits
+                        </DialogTitle>
+                        <DialogDescription>
+                            Professional work history and credits
+                        </DialogDescription>
+                    </DialogHeader>
+                    
+                    {creditsDialog.loading ? (
+                        <div className="flex justify-center py-10">
+                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FA6E80]"></div>
+                        </div>
+                    ) : creditsDialog.credits.length === 0 ? (
+                        <div className="text-center py-10 text-gray-500">
+                            No credits available for this applicant.
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {creditsDialog.credits.map((credit) => (
+                                <Card key={credit.id} className="p-4">
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between items-start">
+                                            <div className="flex-1">
+                                                <h3 className="font-semibold text-lg text-gray-900">
+                                                    {credit.title}
+                                                </h3>
+                                                {credit.role && (
+                                                    <p className="text-sm text-[#27B4BC] font-medium">
+                                                        {credit.role}
+                                                    </p>
+                                                )}
+                                            </div>
+                                            {credit.year && (
+                                                <span className="text-sm font-medium text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
+                                                    {credit.year}
+                                                </span>
+                                            )}
+                                        </div>
+                                        {credit.description && (
+                                            <p className="text-sm text-gray-600 mt-2">
+                                                {credit.description}
+                                            </p>
+                                        )}
+                                        {credit.imdbUrl && (
+                                            <a
+                                                href={credit.imdbUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-sm text-[#27B4BC] hover:underline inline-flex items-center gap-1 mt-2"
+                                            >
+                                                View on IMDb
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                                </svg>
+                                            </a>
+                                        )}
+                                    </div>
+                                </Card>
+                            ))}
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
