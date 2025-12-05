@@ -1,0 +1,127 @@
+"use client"
+
+import React, { useState, useEffect, useMemo } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import axios from "axios";
+import ProfileSkeleton from "../components/ProfileSkeleton";
+import ReadOnlyShortProfile from "./components/ReadOnlyShortProfile";
+import ReadOnlyAboutSection from "./components/ReadOnlyAboutSection";
+import ReadOnlySkillsSection from "./components/ReadOnlySkillsSection";
+import ReadOnlyCreditsSection from "./components/ReadOnlyCreditsSection";
+import ReadOnlyHighlights from "./components/ReadOnlyHighlights";
+import UserSlateView from "./components/UserSlateView";
+
+export default function UserProfilePage() {
+  const params = useParams();
+  const router = useRouter();
+  const userId = params.userId as string;
+  
+  const [activeTab, setActiveTab] = useState<"profile" | "slate">("profile");
+  const [profile, setProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(`/api/explore/${userId}`);
+        
+        if (response.data.success) {
+          setProfile(response.data.data);
+        } else {
+          setError(response.data.error || 'Failed to load profile');
+        }
+      } catch (err: any) {
+        console.error('Error fetching profile:', err);
+        setError(err.response?.data?.error || 'Failed to load profile');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (userId) {
+      fetchProfile();
+    }
+  }, [userId]);
+
+  if (loading) {
+    return <ProfileSkeleton />;
+  }
+
+  if (error || !profile) {
+    return (
+      <section className="relative mx-auto flex w-full max-w-[1180px] flex-col items-center gap-8 px-3 xs:px-4 sm:px-6 lg:flex-row lg:items-start lg:justify-center lg:gap-12 pt-6 pb-20">
+        <div className="flex w-full max-w-[600px] flex-col space-y-4">
+          <div className="text-center p-8">
+            <p className="text-red-500">{error || 'Profile not found'}</p>
+            <Button onClick={() => router.back()} className="mt-4">
+              Go Back
+            </Button>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="relative mx-auto flex w-full max-w-[1180px] flex-col items-center gap-8 px-3 xs:px-4 sm:px-6 lg:flex-row lg:items-start lg:justify-center lg:gap-12 pt-6 pb-20">
+      <main className="flex w-full max-w-[600px] flex-col space-y-4">
+        <ReadOnlyShortProfile profile={profile} />
+        <div className="w-full bg-slate-200 h-px sm:h-[1px] mb-5" />
+
+        <div className="space-y-2 mx-auto w-full">
+          <div className="flex flex-row gap-3 sm:gap-6 text-black mb-6 sm:mb-8">
+            <Button
+              onClick={() => setActiveTab("profile")}
+              className={`flex-1 min-h-[44px] text-sm sm:text-base font-semibold rounded-[12px] sm:rounded-[15px] ${
+                activeTab === "profile"
+                  ? "bg-[#FA6E80] text-white hover:bg-[#FA6E80] hover:text-white hover:opacity-100"
+                  : "bg-[#f3f4f6] shadow-sm text-foreground hover:bg-[#f3f4f6] hover:text-foreground hover:opacity-100"
+              }`}
+            >
+              Profile
+            </Button>
+            <Button
+              onClick={() => setActiveTab("slate")}
+              className={`flex-1 min-h-[44px] text-sm sm:text-base font-semibold rounded-[12px] sm:rounded-[15px] ${
+                activeTab === "slate"
+                  ? "bg-[#FA6E80] text-white hover:bg-[#FA6E80] hover:text-white hover:opacity-100"
+                  : "bg-[#ffffff] shadow-sm text-foreground hover:bg-[#ffffff] hover:text-foreground hover:opacity-100"
+              }`}
+            >
+              Slate
+            </Button>
+          </div>
+
+          {activeTab === "profile" ? (
+            <div className="max-w-[600px]">
+              {/* Profile Sections */}
+              <ReadOnlyAboutSection bio={profile.bio} />
+              <div className="my-8" />
+              <ReadOnlySkillsSection skills={profile.skills} />
+              <div className="my-8" />
+              <ReadOnlyCreditsSection credits={profile.credits} />
+            </div>
+          ) : (
+            <UserSlateView userId={userId} userName={profile.name} />
+          )}
+        </div>
+      </main>
+      
+      {/* Highlights Section - Shows on desktop as sidebar */}
+      <div className="hidden lg:block w-full max-w-[336px]">
+        <ReadOnlyHighlights highlights={profile.highlights} />
+      </div>
+      
+      {/* Highlights Section - Shows on mobile */}
+      {activeTab === "profile" && (
+        <div className="lg:hidden w-full max-w-[600px] mt-8">
+          <ReadOnlyHighlights highlights={profile.highlights} />
+        </div>
+      )}
+    </section>
+  );
+}
