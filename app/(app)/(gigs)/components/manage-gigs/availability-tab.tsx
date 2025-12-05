@@ -328,11 +328,15 @@ function GigAvailabilitySection({ gig, availability }: { gig: Gig; availability:
                                             <div className="flex flex-col gap-0.5">
                                                 <span className="font-medium text-gray-900 text-sm">{applicant.name}</span>
                                                 {applicant.creditsStatus === 'added' ? (
-                                                    <button className="text-xs text-[#31A7AC] hover:underline text-left">
-                                                        Credits added
+                                                    <button 
+                                                        onClick={() => handleViewCredits(applicant.applicantId, applicant.name)}
+                                                        className="text-xs text-[#31A7AC] hover:underline text-left"
+                                                        data-testid={`view-credits-${applicant.applicantId}`}
+                                                    >
+                                                        View credits
                                                     </button>
                                                 ) : (
-                                                    <span className="text-xs text-gray-400">N/A</span>
+                                                    <span className="text-xs text-gray-400">No credits</span>
                                                 )}
                                             </div>
                                         </div>
