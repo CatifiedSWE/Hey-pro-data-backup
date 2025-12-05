@@ -148,38 +148,36 @@ export function ApplicationTab({ selectedGigIds, actionIndicators, onActionChang
         fetchApplications();
     }, [selectedGigIds]);
 
-    const handleStatusChange = async (applicationId: string, gigId: string, newStatus: string) => {
-        try {
-            const response = await apiCalling({
-                method: 'patch',
-                route: `/gigs/${gigId}/applications/${applicationId}/status`,
-                data: { status: newStatus },
-            });
+    const handleStatusChange = (applicationId: string, gigId: string, newStatus: string) => {
+        // Store the pending status change locally
+        setPendingStatuses(prev => ({
+            ...prev,
+            [applicationId]: newStatus
+        }));
 
-            if (response.status) {
-                toast.success(`Application status updated to ${newStatus}`);
-                // Refresh applications
-                const appsResponse = await apiCalling({
-                    method: 'get',
-                    route: `/gigs/${gigId}/applications`,
-                });
+        // Notify parent component about the pending change
+        onAddPendingChange({
+            applicationId,
+            gigId,
+            newStatus
+        });
 
-                if (appsResponse.status) {
-                    setSelectedGigs(prev => ({
-                        ...prev,
-                        [gigId]: {
-                            ...prev[gigId],
-                            applications: appsResponse.data.data.applications || [],
-                        },
-                    }));
-                }
-            } else {
-                toast.error('Failed to update application status');
-            }
-        } catch (error) {
-            console.error('Error updating status:', error);
-            toast.error('Failed to update status');
+        // Update action indicators for visual feedback
+        const rowKey = `${gigId}-${applicationId}`;
+        let action: "release" | "shortlist" | "confirm";
+        
+        if (newStatus === 'released') {
+            action = 'release';
+        } else if (newStatus === 'shortlisted') {
+            action = 'shortlist';
+        } else {
+            action = 'confirm';
         }
+        
+        onActionChange(rowKey, action);
+
+        // Show feedback that change is pending
+        toast.info(`Status change pending. Click SAVE to apply.`);
     };
 
     const handleViewCredits = async (applicantId: string, applicantName: string) => {
