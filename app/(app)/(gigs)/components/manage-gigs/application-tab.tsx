@@ -381,13 +381,17 @@ export function ApplicationTab({ selectedGigIds, actionIndicators, onActionChang
                                             <td className="h-[60px] border border-[#DEDEDE] w-[80px] px-4 py-2 text-center bg-white">
                                                 <button 
                                                     onClick={() => handleStatusChange(app.id, gigId, 'shortlisted')}
-                                                    className={`h-8 w-8 flex items-center justify-center rounded border mx-auto transition-colors ${
-                                                        app.status === 'shortlisted' 
-                                                            ? 'bg-[#31A7AC] border-[#31A7AC] text-white' 
-                                                            : 'border-gray-200 text-[#31A7AC] hover:bg-gray-50'
-                                                    }`}
+                                                    className="mx-auto transition-opacity hover:opacity-80"
                                                 >
-                                                    <Plus className="h-4 w-4" />
+                                                    {app.status === 'shortlisted' ? (
+                                                        <div className="h-10 w-10 bg-[#31A7AC] rounded flex items-center justify-center">
+                                                            <Plus className="h-5 w-5 text-white" />
+                                                        </div>
+                                                    ) : (
+                                                        <div className="h-10 w-10 flex items-center justify-center">
+                                                            <Plus className="h-5 w-5 text-[#31A7AC]" />
+                                                        </div>
+                                                    )}
                                                 </button>
                                             </td>
                                             <td className="h-[60px] border border-[#DEDEDE] w-[80px] px-4 py-2 text-center bg-white">
