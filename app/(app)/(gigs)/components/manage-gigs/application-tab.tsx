@@ -246,12 +246,8 @@ export function ApplicationTab({ selectedGigIds, actionIndicators, onActionChang
         <div className="space-y-8 w-full sm:w-full mx-auto ">
             <div className="sm:px-4 mx-auto">
                 <div className="flex flex-wrap gap-3 mt-3 sm:w-full justify-between items-center sm:justify-start bg-white rounded-[10px] p-4">
-                    <button className="text-[#FA6E80] font-medium text-sm hover:underline">
-                        See referrals
-                    </button>
-                    <Button className="bg-[#FA6E80] hover:bg-[#e55b6d] text-white rounded-lg px-6">
-                        Invite crew for this Gig
-                    </Button>
+                    <SeeAllReferralsDialog selectedGigIds={selectedGigIds} />
+                    <SendRecommendationDialog selectedGigIds={selectedGigIds} />
                 </div>
             </div>
             {Object.entries(selectedGigs).map(([gigId, { gig, applications }]) => (
