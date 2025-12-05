@@ -180,6 +180,39 @@ export function ApplicationTab({ selectedGigIds, actionIndicators, onActionChang
         }
     };
 
+    const handleViewCredits = async (applicantId: string, applicantName: string) => {
+        try {
+            setCreditsDialog({
+                open: true,
+                loading: true,
+                applicantName,
+                credits: [],
+            });
+
+            const response = await apiCalling({
+                method: 'get',
+                route: `/explore/${applicantId}`,
+            });
+
+            if (response.status && response.data?.data) {
+                const credits = response.data.data.credits || [];
+                setCreditsDialog({
+                    open: true,
+                    loading: false,
+                    applicantName,
+                    credits,
+                });
+            } else {
+                toast.error('Failed to fetch credits');
+                setCreditsDialog(prev => ({ ...prev, open: false, loading: false }));
+            }
+        } catch (error) {
+            console.error('Error fetching credits:', error);
+            toast.error('Failed to load credits');
+            setCreditsDialog(prev => ({ ...prev, open: false, loading: false }));
+        }
+    };
+
     if (selectedGigIds.length === 0) {
         return (
             <Card className="bg-transparent border-none">
