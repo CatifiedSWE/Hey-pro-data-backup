@@ -128,6 +128,17 @@ const buildCalendarStructure = (windows: Array<{ label: string; range: string }>
 // Sub-component to handle individual gig rendering and state
 function GigAvailabilitySection({ gig, availability }: { gig: Gig; availability: AvailabilityData }) {
     const [activeSelection, setActiveSelection] = useState<{ year: number; month: string } | null>(null);
+    const [creditsDialog, setCreditsDialog] = useState<{
+        open: boolean;
+        loading: boolean;
+        applicantName: string;
+        credits: Credit[];
+    }>({
+        open: false,
+        loading: false,
+        applicantName: '',
+        credits: [],
+    });
 
     // Initialize active selection when gig data loads
     useEffect(() => {
