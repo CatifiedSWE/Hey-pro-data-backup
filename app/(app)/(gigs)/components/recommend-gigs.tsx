@@ -226,7 +226,7 @@ export function SendRecommendationDialog({ className, selectedGigIds }: SendReco
                             </p>
                         </DialogHeader>
 
-                        <div className="space-y-6 ">
+                        <div className="space-y-6">
                             <div className="relative">
                                 <Input
                                     id="user-search"
