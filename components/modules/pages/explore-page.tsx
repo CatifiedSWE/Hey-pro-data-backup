@@ -1,18 +1,7 @@
 "use client";
-import { useState } from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { useRouter } from "next/navigation";
 import ProjectCard from "@/components/modules/common/projectCard";
 import { ProjectCardType } from "@/types";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { VisuallyHidden } from "@/components/ui/visually-hidden";
-import Image from "next/image";
-import { MapPin, Briefcase, Calendar } from "lucide-react";
-import axios from "axios";
 
 interface UserProfile {
   id: string;
