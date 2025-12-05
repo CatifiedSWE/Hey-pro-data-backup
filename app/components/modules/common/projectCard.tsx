@@ -11,39 +11,55 @@ export default function ProjectCard(props: ProjectCardProps) {
   const hasBio = props.bio && props.bio.trim().length > 0;
   const hasSkills = props.skills && props.skills.length > 0;
 
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Card clicked!', props.userId);
+    if (props.onClick) {
+      props.onClick();
+    }
+  };
+
   return (
     <div 
       className="w-full h-[218px] bg-white shadow-sm hover:shadow-md transition-all duration-300 flex flex-col overflow-hidden border border-gray-100 min-w-0 cursor-pointer" 
       style={{ borderRadius: '8.5px' }}
       data-testid="profile-card"
-      onClick={props.onClick}
+      onClick={handleClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          handleClick(e as any);
+        }
+      }}
     >
       {/* Banner Image at top */}
-      <div className="relative h-[70px] w-full flex-shrink-0 bg-gray-100">
+      <div className="relative h-[70px] w-full flex-shrink-0 bg-gray-100 pointer-events-none">
         <Image
           src={props.banner || "/bg.jpg"}
           alt={`Banner image for ${props.name}`}
           fill
           sizes="(max-width: 768px) 50vw, 197px"
-          className="object-cover"
+          className="object-cover pointer-events-none"
         />
       </div>
 
       {/* Profile Picture - Centered, overlapping banner */}
-      <div className="flex justify-center items-center -mt-[26px] relative z-10">
+      <div className="flex justify-center items-center -mt-[26px] relative z-10 pointer-events-none">
         <div className="relative h-[52px] w-[52px] rounded-full overflow-hidden bg-white shadow-sm flex-shrink-0 border-[2px] border-white">
           <Image
             src={props.image || "/default-profile.png"}
             alt={props.name}
             fill
             sizes="52px"
-            className="object-cover"
+            className="object-cover pointer-events-none"
           />
         </div>
       </div>
 
       {/* Content Area */}
-      <div className="px-1.5 pt-1 pb-2 flex flex-col flex-1 min-w-0">
+      <div className="px-1.5 pt-1 pb-2 flex flex-col flex-1 min-w-0 pointer-events-none">
         {/* Name - Centered, bold */}
         <h1 className="text-[13px] font-bold text-gray-900 leading-tight mb-0.5 text-center truncate w-full px-1">
           {props.name}
