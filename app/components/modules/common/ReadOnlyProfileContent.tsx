@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
-import { MapPin, Link as LinkIcon, Calendar, Heart, MessageCircle, Send, Bookmark, Share2, MoreHorizontal } from "lucide-react";
+import { MapPin, Link as LinkIcon } from "lucide-react";
 import { countries } from "@/lib/countries";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Separator } from "@/components/ui/separator";
 
 // --- Interfaces ---
 
@@ -56,7 +55,7 @@ interface UserProfileData {
     proficiencyLevel?: string;
     description?: string;
     department?: string;
-    experienceLevel?: string; // Mapped from experience_level
+    experienceLevel?: string;
     sortOrder: number;
   }>;
   links: Array<{
@@ -121,18 +120,18 @@ interface ReadOnlyProfileProps {
 export default function ReadOnlyProfileContent({ profile }: ReadOnlyProfileProps) {
   const [activeTab, setActiveTab] = useState<"profile" | "slate">("profile");
 
-  // Layout mimics app/(app)/profile/page.tsx
   return (
     <section className="relative mx-auto flex w-full max-w-[1180px] flex-col items-center gap-8 px-3 xs:px-4 sm:px-6 lg:flex-row lg:items-start lg:justify-center lg:gap-12 pt-6 pb-20">
       {/* Main Column */}
       <main className="flex w-full max-w-[600px] flex-col space-y-4">
-        {/* Header */}
+        {/* Header (ShortProfile) */}
         <ReadOnlyShortProfile profile={profile} />
 
         <div className="w-full bg-slate-200 h-px sm:h-[1px] mb-5" />
 
-        {/* Tabs */}
+        {/* Tabs & Content */}
         <div className="space-y-2 mx-auto w-full">
+          {/* Tabs Buttons */}
           <div className="flex flex-row gap-3 sm:gap-6 text-black mb-6 sm:mb-8">
             <Button
               onClick={() => setActiveTab("profile")}
@@ -158,6 +157,7 @@ export default function ReadOnlyProfileContent({ profile }: ReadOnlyProfileProps
 
           {activeTab === "profile" ? (
             <div className="max-w-[600px]">
+              
               {/* Mobile Highlights */}
               <div className="lg:hidden mb-8">
                 <ReadOnlyHighlights highlights={profile.highlights} mobile />
@@ -215,29 +215,28 @@ function ReadOnlyShortProfile({ profile }: { profile: UserProfileData }) {
     
     return (
       <>
-        <LinkIcon className="h-5 w-5 text-[#FA6E80]" />
-        <span>{host}</span>
-        {extra > 0 && <span>& {extra} other link{extra > 1 ? "s" : ""}</span>}
+        <LinkIcon className="h-5 w-5" color="#FA6E80" />
+        {host} 
+        {extra > 0 && ` & ${extra} other link${extra > 1 ? "s" : ""}`}
       </>
     );
   })();
 
-  // Work Identity Logic
+  const isAvailable = profile.availableForWork;
+  const dotColor = isAvailable ? "bg-[#34A353]" : "bg-[#FA6E80]";
+  const statusTextColor = isAvailable ? "text-[#34A353]" : "text-[#FA6E80]";
+  const statusText = isAvailable ? "Available" : "Not Available";
+
   const workIdentities = profile.work_identities ? [
     profile.work_identities.freelance && "Freelance",
     profile.work_identities.employee?.enabled && `Employee at ${profile.work_identities.employee.company || 'Company'}`,
     profile.work_identities.businessOwner?.enabled && `Business Owner at ${profile.work_identities.businessOwner.businessName || 'Business'}`
   ].filter(Boolean).join(" • ") : "";
 
-  const isAvailable = profile.availableForWork;
-  const statusColor = isAvailable ? "text-[#34A353]" : "text-[#FA6E80]";
-  const dotColor = isAvailable ? "bg-[#34A353]" : "bg-[#FA6E80]";
-  const statusText = isAvailable ? "Available" : "Unavailable";
-
   return (
     <section className="relative w-full border-b border-[#DADADA] pb-6">
       <div className="relative h-[228px]">
-        <div className="relative sm:h-[150px] h-[88px] w-full overflow-hidden rounded-[20px] bg-gray-100">
+        <div className="relative sm:h-[150px] h-[88px] w-full overflow-hidden rounded-[20px]">
           {profile.banner ? (
             <Image
               src={profile.banner}
@@ -255,25 +254,25 @@ function ReadOnlyShortProfile({ profile }: { profile: UserProfileData }) {
       {/* Profile Avatar */}
       <div className="absolute inset-x-0 top-[38px] sm:top-[108px] left-[9px] sm:left-[58px] flex justify-start">
         <div className="relative flex h-[112px] w-[112px] items-center justify-center">
-           {/* Mimic ProfileProgress with simple border since we don't have the ring component here */}
-           <div className="relative h-full w-full rounded-full border-[4px] border-white shadow-sm overflow-hidden bg-white">
+           <div className="relative h-[112px] w-[112px] rounded-full overflow-hidden border-4 border-white shadow-lg bg-white">
              <Image
                 src={profile.avatar || '/default-profile.png'}
                 alt={profile.displayName}
                 fill
+                sizes="112px"
                 className="object-cover"
              />
            </div>
         </div>
       </div>
 
-      {/* Location & Status - Mobile/Desktop adaptive */}
+      {/* Location & Status - Desktop */}
       <div className="absolute inset-x-0 top-[160px] max-w-[450px] left-[200px] hidden justify-start font-[400] text-[11px] sm:flex">
         <div className="flex items-center gap-2 px-4 py-2 text-[#393939]">
           <MapPin className="h-3.5 w-3.5 text-[#393939]" />
           <span className="whitespace-nowrap">{locationDescriptor}</span>
         </div>
-        <div className={`flex items-center gap-2 bg-white px-4 py-2 ${statusColor}`}>
+        <div className={`flex items-center gap-2 bg-white px-4 py-2 ${statusTextColor}`}>
           <span className={`h-2.5 w-2.5 rounded-full ${dotColor}`} />
           <span>{statusText}</span>
         </div>
@@ -287,15 +286,14 @@ function ReadOnlyShortProfile({ profile }: { profile: UserProfileData }) {
               <div className="flex items-center gap-3">
                 <div className="flex -space-x-3">
                   {profile.recommendations.slice(0, 3).map((rec, index) => (
-                    <div key={`${rec.id}-${index}`} className="relative h-8 w-8 rounded-full border-2 border-white overflow-hidden bg-gray-200">
-                        {rec.recommenderPhotoUrl ? (
-                            <Image src={rec.recommenderPhotoUrl} alt={rec.recommenderName} fill className="object-cover" />
-                        ) : (
-                            <div className="flex items-center justify-center w-full h-full text-[10px] font-bold text-gray-500">
-                                {rec.recommenderName.charAt(0)}
-                            </div>
-                        )}
-                    </div>
+                    <Image
+                        key={`${rec.id}-${index}`}
+                        src={rec.recommenderPhotoUrl || '/default-profile.png'}
+                        alt={rec.recommenderName || "Recommender"}
+                        width={32}
+                        height={32}
+                        className="h-8 w-8 rounded-full border-2 border-white object-cover"
+                    />
                   ))}
                   {extraRecommendations > 0 && (
                     <span className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-white text-xs font-semibold text-[#444444]">
@@ -311,19 +309,18 @@ function ReadOnlyShortProfile({ profile }: { profile: UserProfileData }) {
           </div>
 
           {workIdentities && (
-            <div className="text-sm text-[#181818]">{workIdentities}</div>
+             <div className="text-sm text-[#181818]">{workIdentities}</div>
           )}
         </div>
 
         {/* Location/Status for Mobile */}
-        <div className="flex sm:hidden flex-wrap gap-3 text-[11px]">
-           <div className="flex items-center gap-1 text-[#393939]">
-               <MapPin className="h-3.5 w-3.5" />
+        <div className="flex sm:hidden flex-wrap items-center gap-3 text-[11px]">
+           <div className="flex items-center gap-1.5 text-[#393939]">
+               <MapPin className="h-3.5 w-3.5 text-[#393939]" />
                <span>{locationDescriptor}</span>
            </div>
-           <div className={`flex items-center gap-1.5 ${statusColor}`}>
-               <span className={`h-2 w-2 rounded-full ${dotColor}`} />
-               <span>{statusText}</span>
+           <div className={`flex items-center px-3 py-1.5 rounded-full text-xs font-medium border ${isAvailable ? 'bg-green-100 text-green-700 border-green-300' : 'bg-red-100 text-red-700 border-red-300'}`}>
+               {statusText}
            </div>
         </div>
 
@@ -346,7 +343,7 @@ function ReadOnlyShortProfile({ profile }: { profile: UserProfileData }) {
 
         {/* Links */}
         {profile.links.length > 0 && (
-             <div className="flex items-center gap-2 h-auto justify-start p-0 text-[12px] font-medium text-[#31A7AC]">
+             <div className="flex items-center gap-2 h-auto justify-start p-0 -ml-4 text-[12px] font-medium text-[#31A7AC]">
                  {linkSummary}
              </div>
         )}
@@ -389,7 +386,7 @@ function ReadOnlySkills({ skills }: { skills: UserProfileData['skills'] }) {
             {skill.description && <p className="text-sm leading-relaxed text-[#444444]">{skill.description}</p>}
             {skill.experienceLevel && (
               <div className="space-y-2 ml-10">
-                <div className="flex flex-wrap items-center justify-start gap-x-1 px-4 bg-[#FFFFFF] h-[31px] w-fit rounded-[5px]">
+                <div className="flex flex-wrap items-center justify-start gap-x-1 px-4 bg-[#FFFFFF] h-[31px] w-[233px] rounded-[5px]">
                   <h4 className="text-sm font-[600] text-[#000]">{skill.experienceLevel}</h4>
                 </div>
               </div>
@@ -421,8 +418,10 @@ function ReadOnlyCredits({ credits }: { credits: UserProfileData['credits'] }) {
 
   return (
     <section className="isolate w-full rounded-[20px] bg-[#FAFAFA] p-[29px] shadow-[0px_1px_10px_rgba(0,0,0,0.1)]">
-      <header className="mb-6">
-        <h2 className="text-[22px] font-[400] leading-[33px] text-black">Credits</h2>
+      <header className="mb-6 flex items-start justify-between gap-4">
+        <div>
+           <h2 className="text-[22px] font-[400] leading-[33px] text-black">Credits</h2>
+        </div>
       </header>
       
       <div className="flex flex-col gap-8">
@@ -439,6 +438,7 @@ function ReadOnlyCredits({ credits }: { credits: UserProfileData['credits'] }) {
             .join(" • ");
           const companyLine = [credit.internationalCompany, credit.country].filter(Boolean).join(" • ");
           const productionTimeline = [credit.productionType, formatRange(credit.startDate, credit.endDate)].filter(Boolean).join(" • ");
+          const awards = credit.awards ?? [];
 
           return (
             <div key={credit.id}>
@@ -461,7 +461,7 @@ function ReadOnlyCredits({ credits }: { credits: UserProfileData['credits'] }) {
                                 alt={credit.creditTitle || "Credit"}
                                 width={190}
                                 height={225}
-                                className="sm:h-[225px] h-[346px] sm:w-[190px] w-full rounded-[5px] object-cover"
+                                className="sm:h-[225px] h-[346px] sm:w-[190px] w-[293px] rounded-[5px] object-cover"
                             />
                         ) : (
                             <div className="relative h-[346px] sm:h-[225px] sm:w-[190px] w-full rounded-[5px] bg-[#ffffff] shadow-[4px_4px_6.4px_rgba(0,0,0,0.03)]">
@@ -483,10 +483,10 @@ function ReadOnlyCredits({ credits }: { credits: UserProfileData['credits'] }) {
                             {productionTimeline && <p className="text-[10px] font-semibold text-[#444444] uppercase">{productionTimeline}</p>}
                         </div>
                         <p className="text-sm font-[400] leading-[18px] text-[#393939]">{credit.description}</p>
-                        {credit.awards && credit.awards.length > 0 && (
+                        {awards.length > 0 && (
                             <div className="relative isolate rounded-r-[5px] bg-white px-2 py-2">
                                 <ul className="space-y-1">
-                                    {credit.awards.map((award, idx) => (
+                                    {awards.map((award, idx) => (
                                         <li key={`${credit.id}-award-${idx}`} className="text-[10px] font-semibold text-[#31A7AC]">
                                             <span>{award.title}</span>
                                             {award.detail && <span className="text-[#6B6B6B]"> {award.detail}</span>}
@@ -518,12 +518,10 @@ function ReadOnlyCredits({ credits }: { credits: UserProfileData['credits'] }) {
 }
 
 function ReadOnlyHighlights({ highlights, mobile }: { highlights: UserProfileData['highlights'], mobile?: boolean }) {
-    // Use prop highlights directly
     const displayHighlights = highlights || [];
 
     if (displayHighlights.length === 0) return null;
 
-    // Transform helper (same logic as Highlights.tsx)
     const transformHighlight = (highlight: any) => {
         if (highlight.sourceType === 'credit' && highlight.sourceData) {
             const credit = highlight.sourceData;
@@ -549,23 +547,28 @@ function ReadOnlyHighlights({ highlights, mobile }: { highlights: UserProfileDat
     };
 
     return (
-        <div className={cn("space-y-6", mobile ? "w-full" : "sticky top-24 self-start")}>
+        <div className={cn(mobile ? "w-full" : "sticky top-24 self-start space-y-6")}>
+            {/* Highlight Text & Line (Desktop Only) */}
             {!mobile && (
-                 <div className="flex flex-col items-center mb-6" style={{ gap: '15px' }}>
-                    <Image src="/heylights-vertical.png" alt="Highlights" width={20} height={100} className="h-auto w-auto" />
+                 <div className="flex flex-col items-center" style={{ gap: '15px' }}>
+                     {/* Highlight Text Graphic */}
+                    <div className="relative w-full h-[100px] flex items-center justify-center">
+                        <Image src="/heylights-vertical.png" alt="Highlights" width={40} height={200} className="h-full w-auto object-contain" />
+                    </div>
+                    {/* Vertical Gradient Line */}
                     <div
                         className="rounded-full"
                         style={{
                             width: '1px',
-                            height: '100px', // Shortened for view mode aesthetic
+                            height: '1000px', 
                             background: 'linear-gradient(180deg, #FA6E80 0%, #6A89BE 41.52%, #85AAB7 62.27%, #31A7AC 103.79%)',
                         }}
                     />
                 </div>
             )}
-            {mobile && <h2 className="text-[22px] font-semibold mb-4">Highlights</h2>}
 
-            <div className="space-y-8">
+            {/* Sidebar Card Container */}
+            <div className={cn("space-y-8", !mobile && "absolute top-0 left-12 w-[275px]")}>
                 {displayHighlights.map((item) => {
                     const data = transformHighlight(item);
                     const words = data.description.trim().split(/\s+/);
@@ -580,7 +583,8 @@ function ReadOnlyHighlights({ highlights, mobile }: { highlights: UserProfileDat
                                         src={data.imageUrl}
                                         alt={data.title}
                                         fill
-                                        className="object-cover hover:scale-105 transition-transform duration-500"
+                                        sizes="(max-width: 1024px) 100vw, 275px"
+                                        className="object-cover transition-transform duration-500 hover:scale-105"
                                     />
                                 )}
                             </div>
