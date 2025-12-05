@@ -360,17 +360,16 @@ export function ApplicationTab({ selectedGigIds, actionIndicators, onActionChang
                                                 <button 
                                                     onClick={() => handleStatusChange(app.id, gigId, 'released')}
                                                     className="mx-auto transition-opacity hover:opacity-80 flex items-center justify-center"
+                                                    data-testid={`release-button-${app.id}`}
                                                 >
-                                                    {app.status === 'released' ? (
-                                                        <div className="h-10 w-10 bg-[#FA596E] rounded flex items-center justify-center">
-                                                            <Image 
-                                                                src="/icons/mail-white.png" 
-                                                                alt="Released" 
-                                                                width={24} 
-                                                                height={24} 
-                                                                className="object-contain" 
-                                                            />
-                                                        </div>
+                                                    {(pendingStatuses[app.id] === 'released' || app.status === 'released') ? (
+                                                        <Image 
+                                                            src="/icons/mail-red.png" 
+                                                            alt="Released" 
+                                                            width={40} 
+                                                            height={40} 
+                                                            className="object-contain" 
+                                                        />
                                                     ) : (
                                                         <X className="h-6 w-6 text-[#FA6E80]" />
                                                     )}
@@ -380,8 +379,9 @@ export function ApplicationTab({ selectedGigIds, actionIndicators, onActionChang
                                                 <button 
                                                     onClick={() => handleStatusChange(app.id, gigId, 'shortlisted')}
                                                     className="mx-auto transition-opacity hover:opacity-80 flex items-center justify-center"
+                                                    data-testid={`shortlist-button-${app.id}`}
                                                 >
-                                                    {app.status === 'shortlisted' ? (
+                                                    {(pendingStatuses[app.id] === 'shortlisted' || app.status === 'shortlisted') ? (
                                                         <div className="h-10 w-10 bg-[#31A7AC] rounded flex items-center justify-center">
                                                             <Plus className="h-6 w-6 text-white" />
                                                         </div>
@@ -394,17 +394,16 @@ export function ApplicationTab({ selectedGigIds, actionIndicators, onActionChang
                                                 <button 
                                                     onClick={() => handleStatusChange(app.id, gigId, 'confirmed')}
                                                     className="mx-auto transition-opacity hover:opacity-80 flex items-center justify-center"
+                                                    data-testid={`confirm-button-${app.id}`}
                                                 >
-                                                    {app.status === 'confirmed' ? (
-                                                        <div className="h-10 w-10 bg-[#31A7AC] rounded flex items-center justify-center">
-                                                            <Image 
-                                                                src="/icons/mail-white.png" 
-                                                                alt="Confirmed" 
-                                                                width={24} 
-                                                                height={24} 
-                                                                className="object-contain" 
-                                                            />
-                                                        </div>
+                                                    {(pendingStatuses[app.id] === 'confirmed' || app.status === 'confirmed') ? (
+                                                        <Image 
+                                                            src="/icons/mail-blue.png" 
+                                                            alt="Confirmed" 
+                                                            width={40} 
+                                                            height={40} 
+                                                            className="object-contain" 
+                                                        />
                                                     ) : (
                                                         <Check className="h-6 w-6 text-[#31A7AC]" />
                                                     )}
