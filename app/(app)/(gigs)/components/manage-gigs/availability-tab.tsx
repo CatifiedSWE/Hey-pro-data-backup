@@ -116,6 +116,8 @@ type AvailabilityTabProps = {
 export function AvailabilityTab({ selectedGigIds }: AvailabilityTabProps) {
     const [availabilityData, setAvailabilityData] = useState<Record<string, { gig: Gig; availability: AvailabilityData }>>({});
     const [loading, setLoading] = useState(false);
+    // State to track active month selection per gig
+    const [activeSelections, setActiveSelections] = useState<Record<string, { year: number; month: string }>>({});
 
     useEffect(() => {
         const fetchAvailability = async () => {
@@ -154,6 +156,18 @@ export function AvailabilityTab({ selectedGigIds }: AvailabilityTabProps) {
                 );
 
                 setAvailabilityData(results);
+                
+                // Initialize active selections
+                const newSelections: Record<string, { year: number; month: string }> = {};
+                Object.entries(results).forEach(([gigId, data]) => {
+                    const firstWindow = data.gig.dateWindows[0];
+                    if (firstWindow) {
+                        const [month, year] = firstWindow.label.split(" ");
+                        newSelections[gigId] = { year: parseInt(year), month };
+                    }
+                });
+                setActiveSelections(newSelections);
+
             } catch (error) {
                 console.error('Error fetching availability:', error);
                 toast.error('Failed to load availability data');
@@ -164,6 +178,13 @@ export function AvailabilityTab({ selectedGigIds }: AvailabilityTabProps) {
 
         fetchAvailability();
     }, [selectedGigIds]);
+
+    const handleMonthSelect = (gigId: string, year: number, month: string) => {
+        setActiveSelections(prev => ({
+            ...prev,
+            [gigId]: { year, month }
+        }));
+    };
 
     if (selectedGigIds.length === 0) {
         return (
@@ -193,8 +214,9 @@ export function AvailabilityTab({ selectedGigIds }: AvailabilityTabProps) {
     return (
         <div className="space-y-12">
             {Object.entries(availabilityData).map(([gigId, { gig, availability }]) => {
-                const columns = buildCalendarStructure(gig.dateWindows);
+                const allColumns = buildCalendarStructure(gig.dateWindows);
                 const applicants = availability.applicantsAvailability || [];
+                const activeSelection = activeSelections[gigId];
 
                 // Group columns by Month/Year for the top navigation
                 const timelineGroups = useMemo(() => {
@@ -210,46 +232,66 @@ export function AvailabilityTab({ selectedGigIds }: AvailabilityTabProps) {
                             groups.push(yearGroup);
                         }
                         
-                        yearGroup.months.push({
-                            name: month,
-                            fullLabel: window.label,
-                            rangeText: window.range
-                        });
+                        // Avoid duplicates
+                        if (!yearGroup.months.find(m => m.name === month)) {
+                            yearGroup.months.push({
+                                name: month,
+                                fullLabel: window.label,
+                                rangeText: window.range
+                            });
+                        }
                     });
                     
                     return groups.sort((a, b) => a.year - b.year);
                 }, [gig.dateWindows]);
 
-                // Determine date range text for the first month (active one)
-                const firstMonthLabel = timelineGroups[0]?.months[0]?.fullLabel;
-                const lastMonthLabel = timelineGroups[timelineGroups.length - 1]?.months[timelineGroups[timelineGroups.length - 1]?.months.length - 1]?.fullLabel;
-                
-                const dateRangeTitle = firstMonthLabel && lastMonthLabel 
-                    ? `${firstMonthLabel} - ${lastMonthLabel}`
+                // Filter columns based on active selection
+                const filteredColumns = useMemo(() => {
+                    if (!activeSelection) return allColumns;
+                    return allColumns.filter(col => 
+                        col.year === activeSelection.year && 
+                        col.monthName === activeSelection.month
+                    );
+                }, [allColumns, activeSelection]);
+
+                // Get date range title for current view
+                const currentMonthData = timelineGroups
+                    .find(g => g.year === activeSelection?.year)
+                    ?.months.find(m => m.name === activeSelection?.month);
+                    
+                const dateRangeTitle = currentMonthData 
+                    ? `${activeSelection?.month} ${activeSelection?.year}` // Or "Sep 2025 - Oct 2025" if we want to show range? Design shows "Sep 2025 - Oct 2025"
                     : "";
+                
+                // Actually, the design shows "Sep 2025 - Oct 2025" as the title on the left.
+                // This might mean the VIEW covers that range, OR the TAB covers that range.
+                // If we filter to just "Sep", the title should probably reflect that or the whole Gig range.
+                // Let's show the Active Month + Year to be precise.
 
                 return (
                     <section key={gigId} className="space-y-6 bg-transparent">
                         <header className="overflow-x-auto no-scrollbar">
                             <div className="flex items-center gap-6 text-sm min-w-max">
-                                {timelineGroups.map((yearGroup, yearIdx) => (
+                                {timelineGroups.map((yearGroup) => (
                                     <div key={yearGroup.year} className="flex items-center gap-4">
                                         <span className="font-semibold text-lg text-black">{yearGroup.year}</span>
                                         
-                                        {yearGroup.months.map((month, monthIdx) => {
-                                            // Logic to determine if 'active' - for now, let's make the first one active as in design
-                                            const isActive = yearIdx === 0 && monthIdx === 0;
+                                        {yearGroup.months.map((month) => {
+                                            const isActive = activeSelection?.year === yearGroup.year && activeSelection?.month === month.name;
                                             
                                             return (
                                                 <div key={month.fullLabel} className="flex items-center gap-4">
-                                                    <span className={`
-                                                        px-4 py-1.5 rounded-full font-medium cursor-pointer transition-colors
-                                                        ${isActive 
-                                                            ? "bg-[#FA6E80] text-white" 
-                                                            : "text-gray-500 hover:bg-gray-100"}
-                                                    `}>
+                                                    <button 
+                                                        onClick={() => handleMonthSelect(gigId, yearGroup.year, month.name)}
+                                                        className={`
+                                                            px-4 py-1.5 rounded-full font-medium transition-colors
+                                                            ${isActive 
+                                                                ? "bg-[#FA6E80] text-white shadow-sm" 
+                                                                : "text-gray-500 hover:bg-gray-100"}
+                                                        `}
+                                                    >
                                                         {month.name}
-                                                    </span>
+                                                    </button>
                                                     
                                                     {isActive && (
                                                         <span className="text-gray-900 font-medium">
@@ -283,7 +325,7 @@ export function AvailabilityTab({ selectedGigIds }: AvailabilityTabProps) {
                                             </th>
                                             
                                             {/* Date Columns */}
-                                            {columns.map((col, idx) => (
+                                            {filteredColumns.map((col) => (
                                                 <th 
                                                     key={`${gigId}-col-${col.fullKey}`} 
                                                     className="min-w-[60px] border-b border-r border-gray-100 p-2 text-center h-[70px] last:border-r-0"
@@ -301,7 +343,7 @@ export function AvailabilityTab({ selectedGigIds }: AvailabilityTabProps) {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {applicants.map((applicant, idx) => (
+                                        {applicants.map((applicant) => (
                                             <tr key={applicant.applicantId} className="group hover:bg-gray-50">
                                                 <td className="sticky left-0 z-10 border-b border-r bg-white group-hover:bg-gray-50 h-[80px]">
                                                     <div className="flex items-center gap-3 px-6 h-full">
@@ -330,7 +372,7 @@ export function AvailabilityTab({ selectedGigIds }: AvailabilityTabProps) {
                                                         </div>
                                                     </div>
                                                 </td>
-                                                {columns.map((col, cIdx) => {
+                                                {filteredColumns.map((col) => {
                                                     const state = applicant.schedule[col.fullKey] || 'na';
                                                     return (
                                                         <td 
