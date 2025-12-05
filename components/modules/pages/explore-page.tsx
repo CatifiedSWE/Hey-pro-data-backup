@@ -96,66 +96,91 @@ export default function ExplorePage({
               <p className="text-gray-500">Loading profile...</p>
             </div>
           ) : selectedUser ? (
-            <div className="w-full h-full">
-              {/* Banner */}
-              <div className="relative sm:h-48 md:h-64 h-32 w-full">
-                <Image
-                  src={selectedUser.banner || "/default-banner.png"}
-                  alt="Profile banner"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-
-              {/* Main Content Container */}
-              <div className="max-w-6xl mx-auto px-4 sm:px-6 relative">
-                {/* Profile Photo and Header Info */}
-                <div className="relative -mt-12 sm:-mt-16 md:-mt-20 mb-4 sm:mb-8">
-                  <div className="flex flex-col sm:flex-row sm:items-end gap-4 sm:gap-6">
-                    <div className="relative h-24 w-24 sm:h-32 sm:w-32 md:h-40 md:w-40 rounded-full overflow-hidden bg-white border-4 border-white shadow-xl flex-shrink-0">
-                      <Image
-                        src={selectedUser.avatar || "/default-profile.png"}
-                        alt={selectedUser.name}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div className="flex-1 pb-0 sm:pb-2">
-                      <DialogHeader>
-                        <DialogTitle className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
-                          {selectedUser.name}
-                        </DialogTitle>
-                      </DialogHeader>
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-2">
-                        <div className="flex items-center gap-2 text-gray-600">
-                          <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
-                          <span className="text-sm sm:text-base">{selectedUser.location}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span
-                            className={`inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${
-                              selectedUser.availableForWork
-                                ? "bg-green-100 text-green-800"
-                                : "bg-gray-100 text-gray-800"
-                            }`}
-                          >
-                            {selectedUser.availableForWork ? "Available for Work" : "Not Available"}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
+            <div className="w-full h-full bg-gray-50">
+              {/* Banner Section - matching profile page */}
+              <div className="relative h-[228px]">
+                <div className="relative sm:h-[150px] h-[88px] w-full overflow-hidden">
+                  <Image
+                    src={selectedUser.banner || "/default-banner.png"}
+                    alt="Profile banner"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                
+                {/* Profile Photo - positioned absolutely like profile page */}
+                <div className="absolute inset-x-0 top-[38px] sm:top-[108px] left-[9px] sm:left-[58px] flex justify-start z-10">
+                  <div className="relative h-[112px] w-[112px] sm:h-[140px] sm:w-[140px] rounded-full overflow-hidden bg-white border-4 border-white shadow-xl">
+                    <Image
+                      src={selectedUser.avatar || "/default-profile.png"}
+                      alt={selectedUser.name}
+                      fill
+                      className="object-cover"
+                    />
                   </div>
                 </div>
+              </div>
+
+              {/* Main Content Container - matching profile page */}
+              <div className="w-full max-w-6xl mx-auto">
+                {/* Header Info Section */}
+                <div className="flex sm:mt-10 -mt-10 flex-col gap-4 px-4 sm:px-[58px]">
+                  <div className="space-y-2">
+                    <DialogHeader className="p-0 space-y-0">
+                      <DialogTitle className="text-[22px] sm:text-3xl md:text-4xl font-semibold leading-[33px] text-black">
+                        {selectedUser.name}
+                      </DialogTitle>
+                    </DialogHeader>
+                    
+                    {/* Location and Availability */}
+                    <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+                      <div className="flex items-center gap-2 text-gray-600">
+                        <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <span className="text-sm sm:text-base">{selectedUser.location}</span>
+                      </div>
+                      <span
+                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${
+                          selectedUser.availableForWork
+                            ? "bg-green-100 text-green-800"
+                            : "bg-gray-100 text-gray-800"
+                        }`}
+                      >
+                        {selectedUser.availableForWork ? "Available for Work" : "Not Available"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Role Badges */}
+                  {selectedUser.roles && selectedUser.roles.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {selectedUser.roles.slice(0, 6).map((role) => (
+                        <span
+                          key={role.id}
+                          className="flex items-center rounded-[29px] h-[19px] bg-[#FA6E80] px-4 py-1 text-[10px] font-[400] tracking-wide text-white"
+                        >
+                          {role.roleName}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Bio Preview */}
+                  {selectedUser.bio && (
+                    <p className="text-[14px] leading-[21px] text-[#181818] line-clamp-3">{selectedUser.bio}</p>
+                  )}
+                </div>
+
+                <div className="w-full bg-slate-200 h-px sm:h-[1px] my-6" />
 
                 {/* Content Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 pb-8 sm:pb-12">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 px-4 sm:px-[58px] pb-8 sm:pb-12">
                   {/* Left Column - Main Content */}
-                  <div className="lg:col-span-2 space-y-4 sm:space-y-6">
-                    {/* Bio */}
+                  <div className="lg:col-span-2 space-y-4 sm:space-y-6 order-2 lg:order-1">
+                    {/* Bio - Full Version */}
                     {selectedUser.bio && (
                       <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
                         <h3 className="font-semibold text-lg sm:text-xl mb-2 sm:mb-3">About</h3>
-                        <p className="text-gray-700 text-sm sm:text-base leading-relaxed">
+                        <p className="text-gray-700 text-sm sm:text-base leading-relaxed whitespace-pre-line">
                           {selectedUser.bio}
                         </p>
                       </div>
@@ -233,24 +258,7 @@ export default function ExplorePage({
                   </div>
 
                   {/* Right Column - Sidebar */}
-                  <div className="space-y-4 sm:space-y-6">
-                    {/* Roles */}
-                    {selectedUser.roles && selectedUser.roles.length > 0 && (
-                      <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
-                        <h3 className="font-semibold text-lg sm:text-xl mb-3 sm:mb-4">Professional Roles</h3>
-                        <div className="flex flex-wrap gap-2">
-                          {selectedUser.roles.map((role) => (
-                            <span
-                              key={role.id}
-                              className="text-[#31A7AC] bg-[#31A7AC]/10 border border-[#31A7AC] text-xs sm:text-sm font-medium px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg"
-                            >
-                              {role.roleName}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
+                  <div className="space-y-4 sm:space-y-6 order-1 lg:order-2">
                     {/* Skills */}
                     {selectedUser.skills && selectedUser.skills.length > 0 && (
                       <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
