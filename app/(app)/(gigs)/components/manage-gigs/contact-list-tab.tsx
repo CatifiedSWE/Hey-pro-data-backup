@@ -16,6 +16,8 @@ import { toast } from "sonner";
 type Gig = {
     id: string;
     title: string;
+    role: string;
+    department: string;
     dateWindows: Array<{
         label: string;
         range: string;
@@ -62,20 +64,58 @@ export function ContactListTab({ selectedGigIds, actionIndicators }: ContactList
                             route: `/gigs/${gigId}`,
                         });
 
-                        // Fetch contacts
-                        const contactsResponse = await apiCalling({
+                        // Fetch shortlisted applications for this gig
+                        const applicationsResponse = await apiCalling({
                             method: 'get',
-                            route: `/contacts/gig/${gigId}`,
+                            route: `/gigs/${gigId}/applications?status=shortlisted`,
                         });
 
-                        if (gigResponse.status && contactsResponse.status) {
+                        if (gigResponse.status && applicationsResponse.status) {
+                            const gigData = gigResponse.data.data;
+                            const applications = applicationsResponse.data.data.applications || [];
+
+                            // Transform applications into contacts format
+                            const contacts: Contact[] = applications.map((app: any) => {
+                                // Extract company from work_identities if available
+                                let company = 'N/A';
+                                try {
+                                    if (app.applicant.workIdentities) {
+                                        const workIds = typeof app.applicant.workIdentities === 'string' 
+                                            ? JSON.parse(app.applicant.workIdentities) 
+                                            : app.applicant.workIdentities;
+                                        
+                                        if (workIds.employee?.enabled && workIds.employee?.company) {
+                                            company = workIds.employee.company;
+                                        } else if (workIds.businessOwner?.enabled && workIds.businessOwner?.businessName) {
+                                            company = workIds.businessOwner.businessName;
+                                        }
+                                    }
+                                } catch (e) {
+                                    console.error('Error parsing work_identities:', e);
+                                }
+
+                                return {
+                                    id: app.id,
+                                    gig_id: gigId,
+                                    role: gigData.role || 'N/A',
+                                    company: company,
+                                    name: app.applicant.name || 'Unknown',
+                                    phone: app.applicant.phone || 'N/A',
+                                    email: app.applicant.email || 'N/A',
+                                    avatar: app.applicant.profilePhoto || null,
+                                    department: gigData.department || 'N/A',
+                                };
+                            });
+
                             results[gigId] = {
                                 gig: {
-                                    id: gigResponse.data.data.id,
-                                    title: gigResponse.data.data.title,
-                                    dateWindows: gigResponse.data.data.dateWindows || [],
+                                    id: gigData.id,
+                                    title: gigData.title,
+                                    role: gigData.role,
+                                    department: gigData.department,
+                                    dateWindows: gigData.dateWindows || [],
                                 },
-                                contacts: contactsResponse.data.data || [],
+                                contacts: contacts,
                             };
                         }
                     })
