@@ -64,29 +64,15 @@ export function ContactListTab({ selectedGigIds, actionIndicators }: ContactList
                             route: `/gigs/${gigId}`,
                         });
 
-                        // Fetch shortlisted applications for this gig
-                        const shortlistedResponse = await apiCalling({
-                            method: 'get',
-                            route: `/gigs/${gigId}/applications?status=shortlisted`,
-                        });
-
                         // Fetch confirmed applications for this gig
-                        const confirmedResponse = await apiCalling({
+                        const applicationsResponse = await apiCalling({
                             method: 'get',
                             route: `/gigs/${gigId}/applications?status=confirmed`,
                         });
 
-                        if (gigResponse.status && (shortlistedResponse.status || confirmedResponse.status)) {
+                        if (gigResponse.status && applicationsResponse.status) {
                             const gigData = gigResponse.data.data;
-                            const shortlistedApps = shortlistedResponse.status 
-                                ? (shortlistedResponse.data.data.applications || [])
-                                : [];
-                            const confirmedApps = confirmedResponse.status 
-                                ? (confirmedResponse.data.data.applications || [])
-                                : [];
-                            
-                            // Combine shortlisted and confirmed applications
-                            const applications = [...shortlistedApps, ...confirmedApps];
+                            const applications = applicationsResponse.data.data.applications || [];
 
                             // Transform applications into contacts format
                             const contacts: Contact[] = applications.map((app: any) => {
