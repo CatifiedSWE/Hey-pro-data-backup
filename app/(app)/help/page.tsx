@@ -144,9 +144,9 @@ export default function HelpPage() {
     };
 
     return (
-        <div className="flex flex-col w-full h-[calc(100vh-6rem)] max-h-[calc(100vh-6rem)] md:h-[calc(100vh-7rem)] md:max-h-[calc(100vh-7rem)] pb-1 md:pb-2 px-0 md:px-2">
+        <div className="flex flex-col w-full -mt-10 h-[calc(100vh-9rem)] max-h-[calc(100vh-9rem)] md:mt-0 md:h-[calc(100vh-7rem)] md:max-h-[calc(100vh-7rem)] pb-1 md:pb-2 px-0 md:px-2">
             {/* Main Chat Area */}
-            <Card className="flex-1 flex flex-col overflow-hidden border-gray-200 bg-white shadow-sm rounded-lg md:rounded-xl min-h-0 max-h-full" data-testid="help-chat-container">
+            <Card className="flex-1 flex flex-col overflow-hidden border-0 md:border md:border-gray-200 bg-white shadow-none md:shadow-sm rounded-none md:rounded-xl min-h-0 max-h-full" data-testid="help-chat-container">
                     {/* Chat Header - Minimal */}
                     <div className="p-3 md:p-3 border-b border-gray-100 flex items-center justify-between bg-white z-10 shrink-0">
                         <div className="flex items-center gap-3 md:gap-3">
