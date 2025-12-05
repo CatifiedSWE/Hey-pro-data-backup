@@ -137,9 +137,9 @@ export function ContactListTab({ selectedGigIds, actionIndicators }: ContactList
         return (
             <Card className="bg-transparent border-none">
                 <CardHeader>
-                    <CardTitle>Select gigs to review contacts</CardTitle>
+                    <CardTitle>Select gigs to review shortlisted applicants</CardTitle>
                     <CardDescription>
-                        Choose at least one gig in the Gigs tab to view assigned department contacts.
+                        Choose at least one gig in the Gigs tab to view contact details of shortlisted applicants.
                     </CardDescription>
                 </CardHeader>
             </Card>
