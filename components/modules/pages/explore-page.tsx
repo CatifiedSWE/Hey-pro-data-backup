@@ -47,8 +47,13 @@ export default function ExplorePage({
     
     try {
       const response = await axios.get(`/api/explore/${project.userId}`);
+      console.log("API Response:", response.data);
       if (response.data.success) {
-        setSelectedUser(response.data.data);
+        const userData = response.data.data;
+        console.log("User Data:", userData);
+        console.log("Credits:", userData.credits);
+        console.log("Highlights:", userData.highlights);
+        setSelectedUser(userData);
       }
     } catch (error) {
       console.error("Error fetching user profile:", error);
@@ -82,7 +87,10 @@ export default function ExplorePage({
 
       {/* Profile Modal - Full Screen */}
       <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>
-        <DialogContent className="max-w-full w-screen h-screen max-h-screen overflow-y-auto p-0" data-testid="profile-modal">
+        <DialogContent 
+          className="!max-w-none !w-screen !h-screen !max-h-screen !p-0 !m-0 !rounded-none !border-0 !top-0 !left-0 !translate-x-0 !translate-y-0 overflow-y-auto" 
+          data-testid="profile-modal"
+        >
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
               <p className="text-gray-500">Loading profile...</p>
@@ -152,11 +160,11 @@ export default function ExplorePage({
                     )}
 
                     {/* Credits */}
-                    {selectedUser.credits && selectedUser.credits.length > 0 && (
+                    {selectedUser.credits && selectedUser.credits.length > 0 ? (
                       <div className="bg-white rounded-lg shadow-sm p-6">
                         <h3 className="font-semibold text-xl mb-4 flex items-center gap-2">
                           <Briefcase className="w-6 h-6 text-[#31A7AC]" />
-                          Credits & Work History
+                          Credits & Work History ({selectedUser.credits.length})
                         </h3>
                         <div className="space-y-4">
                           {selectedUser.credits.map((credit) => (
@@ -188,12 +196,20 @@ export default function ExplorePage({
                           ))}
                         </div>
                       </div>
+                    ) : (
+                      <div className="bg-white rounded-lg shadow-sm p-6">
+                        <h3 className="font-semibold text-xl mb-4 flex items-center gap-2">
+                          <Briefcase className="w-6 h-6 text-[#31A7AC]" />
+                          Credits & Work History
+                        </h3>
+                        <p className="text-gray-500 text-sm">No credits added yet.</p>
+                      </div>
                     )}
 
                     {/* Highlights */}
-                    {selectedUser.highlights && selectedUser.highlights.length > 0 && (
+                    {selectedUser.highlights && selectedUser.highlights.length > 0 ? (
                       <div className="bg-white rounded-lg shadow-sm p-6">
-                        <h3 className="font-semibold text-xl mb-4">Highlights</h3>
+                        <h3 className="font-semibold text-xl mb-4">Highlights ({selectedUser.highlights.length})</h3>
                         <ul className="space-y-3">
                           {selectedUser.highlights.map((highlight) => (
                             <li
@@ -205,6 +221,11 @@ export default function ExplorePage({
                             </li>
                           ))}
                         </ul>
+                      </div>
+                    ) : (
+                      <div className="bg-white rounded-lg shadow-sm p-6">
+                        <h3 className="font-semibold text-xl mb-4">Highlights</h3>
+                        <p className="text-gray-500 text-sm">No highlights added yet.</p>
                       </div>
                     )}
                   </div>
