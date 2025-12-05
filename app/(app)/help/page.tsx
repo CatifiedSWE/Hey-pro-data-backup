@@ -308,12 +308,12 @@ export default function HelpPage() {
                                     className={cn(
                                         "h-10 w-10 md:h-10 md:w-10 rounded-full transition-all duration-200 shrink-0 ml-2 md:ml-2",
                                         inputMessage.trim() 
-                                            ? "bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC] hover:opacity-90 shadow-md" 
+                                            ? "bg-[#FA6E80]/10 hover:bg-[#FA6E80]/20 shadow-sm" 
                                             : "bg-gray-100 text-gray-300 cursor-not-allowed"
                                     )}
                                     data-testid="send-message-button"
                                 >
-                                    <Send className="h-4 w-4 md:h-4 md:w-4 text-white" />
+                                    <Send className={cn("h-4 w-4 md:h-4 md:w-4", inputMessage.trim() ? "text-[#FA6E80]" : "text-gray-300")} />
                                 </Button>
                             </form>
                         </div>
