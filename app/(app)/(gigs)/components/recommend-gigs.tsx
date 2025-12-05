@@ -230,7 +230,7 @@ export function SendRecommendationDialog({ className, selectedGigIds }: SendReco
                             <div className="relative">
                                 <Input
                                     id="user-search"
-                                    placeholder="Start typing to recommend for this role"
+                                    placeholder="Start typing to search for crew members"
                                     value={searchTerm}
                                     onChange={(event) => setSearchTerm(event.target.value)}
                                     className="h-12 rounded-full border border-[#FA6E80] bg-white pr-14 text-[14px] text-[#646464] placeholder:text-[#646464]"
