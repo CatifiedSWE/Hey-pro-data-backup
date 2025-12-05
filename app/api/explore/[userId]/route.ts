@@ -90,6 +90,13 @@ export async function GET(
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
+    // Fetch availability (public access for profile viewing)
+    const { data: availability } = await supabase
+      .from('crew_availability')
+      .select('*')
+      .eq('user_id', userId)
+      .order('availability_date', { ascending: true });
+
     // Build display name with priority: alias_first_name + alias_surname (1st), first_name + surname (2nd)
     const aliasName = `${profile.alias_first_name || ''} ${profile.alias_surname || ''}`.trim();
     const realName = `${profile.first_name || ''} ${profile.surname || ''}`.trim();
@@ -167,6 +174,11 @@ export async function GET(
         recommenderRole: r.recommender_role,
         recommendation: r.recommendation,
         createdAt: r.created_at
+      })) || [],
+      availability: availability?.map(a => ({
+        id: a.id,
+        date: a.availability_date,
+        status: a.status
       })) || [],
       createdAt: profile.created_at,
       updatedAt: profile.updated_at
