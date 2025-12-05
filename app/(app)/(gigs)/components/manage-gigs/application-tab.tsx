@@ -365,16 +365,18 @@ export function ApplicationTab({ selectedGigIds, actionIndicators, onActionChang
                                             <td className="h-[60px] border border-[#DEDEDE] w-[80px] px-4 py-2 text-center bg-white">
                                                 <button 
                                                     onClick={() => handleStatusChange(app.id, gigId, 'released')}
-                                                    className="mx-auto transition-opacity hover:opacity-80"
+                                                    className="mx-auto transition-opacity hover:opacity-80 flex items-center justify-center"
                                                 >
                                                     {app.status === 'released' ? (
-                                                        <div className="h-10 w-10 bg-[#FA6E80] rounded flex items-center justify-center">
-                                                            <X className="h-5 w-5 text-white" />
-                                                        </div>
+                                                        <Image 
+                                                            src="/icons/mail-red.png" 
+                                                            alt="Released" 
+                                                            width={40} 
+                                                            height={40} 
+                                                            className="object-contain" 
+                                                        />
                                                     ) : (
-                                                        <div className="h-10 w-10 flex items-center justify-center">
-                                                            <X className="h-5 w-5 text-[#FA6E80]" />
-                                                        </div>
+                                                        <X className="h-6 w-6 text-[#FA6E80]" />
                                                     )}
                                                 </button>
                                             </td>
