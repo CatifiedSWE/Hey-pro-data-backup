@@ -24,9 +24,26 @@ interface UserProfile {
   location: string;
   availableForWork: boolean;
   roles: Array<{ id: string; roleName: string; category?: string }>;
-  credits: Array<{ id: string; title: string; role: string; year: string; description?: string }>;
+  credits: Array<{ 
+    id: string; 
+    creditTitle: string;
+    title?: string;
+    role: string; 
+    year?: string;
+    releaseYear?: string;
+    description?: string;
+    productionType?: string;
+    projectTitle?: string;
+    brandClient?: string;
+  }>;
   skills: Array<{ id: string; skillName: string }>;
-  highlights: Array<{ id: string; highlight: string; sortOrder: number }>;
+  highlights: Array<{ 
+    id: string; 
+    highlight?: string;
+    title?: string;
+    description?: string;
+    sortOrder: number;
+  }>;
   availability: Array<{ id: string; date: string; status: string }>;
 }
 
@@ -195,33 +212,56 @@ export default function ExplorePage({
                           Credits & Work History ({selectedUser.credits.length})
                         </h3>
                         <div className="space-y-4">
-                          {selectedUser.credits.map((credit) => (
-                            <div
-                              key={credit.id}
-                              className="border-l-4 border-[#31A7AC] pl-4 py-3 hover:bg-gray-50 transition-colors rounded-r"
-                            >
-                              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
-                                <div className="flex-1">
-                                  <h4 className="font-semibold text-base text-gray-900">
-                                    {credit.title}
-                                  </h4>
-                                  <p className="text-sm text-[#31A7AC] font-medium mt-1">
-                                    {credit.role}
-                                  </p>
-                                  {credit.description && (
-                                    <p className="text-sm text-gray-600 mt-2">
-                                      {credit.description}
-                                    </p>
-                                  )}
+                          {selectedUser.credits.map((credit) => {
+                            // Build the heading from available fields
+                            const headingParts = [
+                              credit.brandClient || credit.projectTitle || credit.creditTitle || credit.title
+                            ].filter(Boolean);
+                            const heading = headingParts.join(" • ") || "Untitled";
+                            
+                            // Get production type for display
+                            const productionType = credit.productionType || '';
+                            
+                            // Get year from releaseYear or year field
+                            const displayYear = credit.releaseYear || credit.year;
+                            
+                            return (
+                              <div
+                                key={credit.id}
+                                className="border-l-4 border-[#31A7AC] pl-4 py-3 hover:bg-gray-50 transition-colors rounded-r"
+                              >
+                                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                                  <div className="flex-1">
+                                    <div className="flex items-start gap-2">
+                                      <h4 className="font-semibold text-base text-gray-900">
+                                        {heading}
+                                      </h4>
+                                      {displayYear && (
+                                        <span className="text-sm text-gray-500 font-semibold">
+                                          ({displayYear})
+                                        </span>
+                                      )}
+                                    </div>
+                                    {productionType && (
+                                      <p className="text-xs text-[#31A7AC] font-medium mt-1 uppercase">
+                                        {productionType}
+                                      </p>
+                                    )}
+                                    {credit.role && (
+                                      <p className="text-sm text-[#31A7AC] font-medium mt-1">
+                                        {credit.role}
+                                      </p>
+                                    )}
+                                    {credit.description && (
+                                      <p className="text-sm text-gray-600 mt-2">
+                                        {credit.description}
+                                      </p>
+                                    )}
+                                  </div>
                                 </div>
-                                {credit.year && (
-                                  <span className="text-sm text-gray-500 font-semibold">
-                                    {credit.year}
-                                  </span>
-                                )}
                               </div>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       </div>
                     ) : (
@@ -239,15 +279,27 @@ export default function ExplorePage({
                       <div className="bg-white rounded-lg shadow-sm p-6">
                         <h3 className="font-semibold text-xl mb-4">Highlights ({selectedUser.highlights.length})</h3>
                         <ul className="space-y-3">
-                          {selectedUser.highlights.map((highlight) => (
-                            <li
-                              key={highlight.id}
-                              className="flex items-start gap-3 text-gray-700"
-                            >
-                              <span className="text-[#31A7AC] text-lg mt-0.5">★</span>
-                              <span className="text-sm flex-1">{highlight.highlight}</span>
-                            </li>
-                          ))}
+                          {selectedUser.highlights.map((highlight) => {
+                            // Get the text to display - prioritize description, then title, then highlight field
+                            const displayText = highlight.description || highlight.highlight || highlight.title || '';
+                            
+                            return (
+                              <li
+                                key={highlight.id}
+                                className="flex items-start gap-3 text-gray-700"
+                              >
+                                <span className="text-[#31A7AC] text-lg mt-0.5">★</span>
+                                <div className="flex-1">
+                                  {highlight.title && highlight.description && (
+                                    <p className="text-sm font-semibold text-gray-900 mb-1">
+                                      {highlight.title}
+                                    </p>
+                                  )}
+                                  <span className="text-sm">{displayText}</span>
+                                </div>
+                              </li>
+                            );
+                          })}
                         </ul>
                       </div>
                     ) : (
