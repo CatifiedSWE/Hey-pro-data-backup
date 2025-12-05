@@ -69,12 +69,34 @@ export async function GET(
       .select('*')
       .eq('user_id', userId);
 
-    // Fetch credits
+    // Fetch credits with full details
     const { data: credits } = await supabase
       .from('user_credits')
-      .select('*')
+      .select(`
+        id,
+        user_id,
+        credit_title,
+        description,
+        start_date,
+        end_date,
+        image_url,
+        sort_order,
+        production_type,
+        role,
+        project_title,
+        brand_client,
+        local_company,
+        international_company,
+        country,
+        release_year,
+        is_unreleased,
+        headline_stats,
+        awards,
+        created_at,
+        updated_at
+      `)
       .eq('user_id', userId)
-      .order('year', { ascending: false });
+      .order('start_date', { ascending: false });
 
     // Fetch highlights
     const { data: highlights } = await supabase
@@ -82,6 +104,47 @@ export async function GET(
       .select('*')
       .eq('user_id', userId)
       .order('sort_order', { ascending: true });
+
+    // Enrich highlights with source data
+    const enrichedHighlights = await Promise.all(
+      (highlights || []).map(async (highlight) => {
+        let sourceData = null;
+
+        if (highlight.source_type === 'credit' && highlight.source_id) {
+          const { data: credit } = await supabase
+            .from('user_credits')
+            .select('*')
+            .eq('id', highlight.source_id)
+            .single();
+          sourceData = credit;
+        } else if (highlight.source_type === 'slate_post' && highlight.source_id) {
+          const { data: post } = await supabase
+            .from('slate_posts')
+            .select(`
+              id,
+              content,
+              slug,
+              likes_count,
+              comments_count,
+              created_at,
+              media:slate_media(
+                id,
+                media_url,
+                media_type,
+                sort_order
+              )
+            `)
+            .eq('id', highlight.source_id)
+            .single();
+          sourceData = post;
+        }
+
+        return {
+          ...highlight,
+          source_data: sourceData
+        };
+      })
+    );
 
     // Fetch recommendations
     const { data: recommendations } = await supabase
@@ -157,16 +220,36 @@ export async function GET(
       })) || [],
       credits: credits?.map(c => ({
         id: c.id,
-        title: c.title,
-        role: c.role,
-        year: c.year,
+        creditTitle: c.credit_title,
         description: c.description,
-        imdbUrl: c.imdb_url
+        startDate: c.start_date,
+        endDate: c.end_date,
+        imgUrl: c.image_url,
+        sortOrder: c.sort_order,
+        productionType: c.production_type,
+        role: c.role,
+        projectTitle: c.project_title,
+        brandClient: c.brand_client,
+        localCompany: c.local_company,
+        internationalCompany: c.international_company,
+        country: c.country,
+        releaseYear: c.release_year,
+        isUnreleased: c.is_unreleased,
+        headlineStats: c.headline_stats,
+        awards: c.awards || [],
+        createdAt: c.created_at,
+        updatedAt: c.updated_at
       })) || [],
-      highlights: highlights?.map(h => ({
+      highlights: enrichedHighlights?.map(h => ({
         id: h.id,
         highlight: h.highlight,
-        sortOrder: h.sort_order
+        sortOrder: h.sort_order,
+        sourceType: h.source_type,
+        sourceId: h.source_id,
+        sourceData: h.source_data,
+        title: h.title,
+        description: h.description,
+        imageUrl: h.image_url
       })) || [],
       recommendations: recommendations?.map(r => ({
         id: r.id,

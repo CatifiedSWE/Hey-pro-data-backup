@@ -39,16 +39,39 @@ interface ReadOnlyProfileProps {
     }>;
     credits: Array<{
       id: string;
-      title: string;
-      role: string;
-      year: number;
+      creditTitle?: string;
+      title?: string;
+      role?: string;
+      year?: number;
       description?: string;
       imdbUrl?: string;
+      imgUrl?: string;
+      startDate?: string;
+      endDate?: string;
+      productionType?: string;
+      projectTitle?: string;
+      brandClient?: string;
+      localCompany?: string;
+      internationalCompany?: string;
+      country?: string;
+      releaseYear?: string;
+      isUnreleased?: boolean;
+      headlineStats?: string;
+      awards?: Array<{
+        title: string;
+        detail?: string;
+      }>;
     }>;
     highlights: Array<{
       id: string;
-      highlight: string;
+      highlight?: string;
       sortOrder: number;
+      sourceType?: string;
+      sourceId?: string;
+      sourceData?: any;
+      title?: string;
+      description?: string;
+      imageUrl?: string;
     }>;
     recommendations: Array<{
       id: string;
@@ -226,23 +249,108 @@ export default function ReadOnlyProfileContent({ profile }: ReadOnlyProfileProps
         {profile.credits.length > 0 && (
           <div className="w-full rounded-[20px] bg-[#FAFAFA] px-6 py-7 shadow-[0_1px_10px_rgba(0,0,0,0.1)] sm:px-10 sm:py-9 mt-8">
             <div className="mb-5">
-              <h2 className="text-[22px] font-semibold leading-[33px] text-[#000]">Credits</h2>
+              <h2 className="text-[22px] font-semibold leading-[33px] text-[#000]">Credits & Work History</h2>
             </div>
             <div className="space-y-6">
-              {profile.credits.map((credit) => (
-                <div key={credit.id} className="space-y-2">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1">
-                      <h3 className="text-base font-semibold text-[#000] sm:text-lg">{credit.title}</h3>
-                      <p className="text-sm text-[#444444]">{credit.role}</p>
-                      <p className="text-xs text-[#666666]">{credit.year}</p>
+              {profile.credits.map((credit, index) => {
+                const headingParts = [credit.brandClient || credit.creditTitle || credit.title];
+                if (credit.projectTitle && credit.projectTitle !== credit.brandClient) {
+                  headingParts.push(credit.projectTitle);
+                }
+                const heading = headingParts.filter(Boolean).join(" • ");
+                const releaseSuffix = credit.releaseYear 
+                  ? ` (${credit.releaseYear}${credit.isUnreleased ? " • Unreleased" : ""})`
+                  : credit.year ? ` (${credit.year})` : "";
+
+                const formatDate = (value?: Date | string) => {
+                  if (!value) return "";
+                  const date = value instanceof Date ? value : new Date(value);
+                  if (Number.isNaN(date.getTime())) return String(value);
+                  return date.toLocaleString("en-US", { month: "short", year: "numeric" });
+                };
+
+                const formatRange = (start?: Date | string, end?: Date | string) => {
+                  const startLabel = formatDate(start);
+                  const endLabel = formatDate(end);
+                  if (!startLabel && !endLabel) return "--";
+                  if (startLabel && endLabel) return `${startLabel} - ${endLabel}`;
+                  return startLabel || endLabel;
+                };
+
+                const roleLine = [credit.role, credit.localCompany || credit.internationalCompany]
+                  .filter(Boolean)
+                  .join(" • ");
+                const companyLine = [credit.internationalCompany, credit.country].filter(Boolean).join(" • ");
+                const productionTimeline = [credit.productionType, formatRange(credit.startDate, credit.endDate)]
+                  .filter(Boolean)
+                  .join(" • ");
+                const awards = credit.awards ?? [];
+
+                return (
+                  <article key={credit.id} className="flex flex-col gap-4 border-b border-[#E6E6E6] pb-6 last:border-b-0">
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1">
+                          <p className="text-[18px] font-semibold text-[#181818]">
+                            {heading}
+                            {releaseSuffix}
+                          </p>
+                          {credit.headlineStats && (
+                            <p className="text-[12px] font-semibold text-[#31A7AC]">{credit.headlineStats}</p>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  {credit.description && (
-                    <p className="text-sm leading-relaxed text-[#444444]">{credit.description}</p>
-                  )}
-                </div>
-              ))}
+
+                    <div className="flex flex-col sm:flex-row gap-5">
+                      <div className="relative sm:w-[190px] flex-shrink-0">
+                        {credit.imgUrl ? (
+                          <Image
+                            src={credit.imgUrl}
+                            alt={credit.creditTitle || credit.title || 'Credit'}
+                            width={190}
+                            height={225}
+                            className="sm:h-[225px] h-[346px] sm:w-[190px] w-[293px] rounded-[5px] object-cover"
+                          />
+                        ) : (
+                          <div className="relative h-[346px] sm:h-[225px] sm:w-[190px] w-full rounded-[5px] bg-[#ffffff] shadow-[4px_4px_6.4px_rgba(0,0,0,0.03)]">
+                            <div className="absolute left-3 top-3 flex items-center gap-[6px]">
+                              <span className="relative inline-flex h-[22px] w-[22px] items-center justify-center rounded-full border-[2px] border-[#25C9D0] bg-white" />
+                              <span className="relative inline-flex h-[22px] w-[22px] items-center justify-center rounded-full border-[2px] border-[#FF5168] bg-white" />
+                            </div>
+                            <p className="absolute inset-0 flex items-center justify-center px-4 text-center text-[20px] font-medium text-[#444444]">
+                              Too busy to take a pic..!
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex flex-1 flex-col gap-4">
+                        <div className="space-y-0 text-[#181818]">
+                          {roleLine && <p className="text-sm leading-[21px]">{roleLine}</p>}
+                          {companyLine && <p className="text-xs text-[#444444]">{companyLine}</p>}
+                          {productionTimeline && <p className="text-[10px] font-semibold text-[#444444] uppercase">{productionTimeline}</p>}
+                        </div>
+                        {credit.description && (
+                          <p className="text-sm font-[400] leading-[18px] text-[#393939]">{credit.description}</p>
+                        )}
+                        {awards.length > 0 && (
+                          <div className="relative isolate rounded-r-[5px] bg-white px-2 py-2">
+                            <ul className="space-y-1 max-h-[85px] overflow-y-auto">
+                              {awards.map((award, awardIndex) => (
+                                <li key={`${credit.id}-award-${awardIndex}`} className="text-[10px] font-semibold text-[#31A7AC]">
+                                  <span>{award.title}</span>
+                                  {award.detail && <span className="text-[#6B6B6B]"> {award.detail}</span>}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
           </div>
         )}
@@ -253,13 +361,68 @@ export default function ReadOnlyProfileContent({ profile }: ReadOnlyProfileProps
         <div className="hidden lg:block w-full max-w-[336px]">
           <div className="sticky top-24 self-start space-y-6">
             <div className="space-y-8">
-              {profile.highlights.map((highlight) => (
-                <div key={highlight.id} className="space-y-3">
-                  <p className="text-sm text-gray-600 leading-relaxed">
-                    {highlight.highlight}
-                  </p>
-                </div>
-              ))}
+              {profile.highlights.map((highlight) => {
+                // Transform highlight data based on source type
+                const getHighlightData = () => {
+                  if (highlight.sourceType === 'credit' && highlight.sourceData) {
+                    const credit = highlight.sourceData;
+                    return {
+                      title: credit.credit_title || 'Untitled Credit',
+                      description: credit.description || '',
+                      imageUrl: credit.image_url || '/placeholder.png'
+                    };
+                  } else if (highlight.sourceType === 'slate_post' && highlight.sourceData) {
+                    const post = highlight.sourceData;
+                    const firstMedia = post.media?.[0];
+                    return {
+                      title: 'Slate Post',
+                      description: post.content || '',
+                      imageUrl: firstMedia?.media_url || '/placeholder.png'
+                    };
+                  } else if (highlight.title && highlight.description) {
+                    // Legacy format
+                    return {
+                      title: highlight.title,
+                      description: highlight.description,
+                      imageUrl: highlight.imageUrl || '/placeholder.png'
+                    };
+                  }
+                  // Fallback to text-only highlight
+                  return {
+                    title: '',
+                    description: highlight.highlight || '',
+                    imageUrl: null
+                  };
+                };
+
+                const highlightData = getHighlightData();
+                const words = highlightData.description.trim().split(/\s+/);
+                const truncated = words.slice(0, 20).join(" ");
+                const hasMore = words.length > 20;
+
+                return (
+                  <article key={highlight.id} className="space-y-3">
+                    {highlightData.imageUrl && (
+                      <div className="relative w-full h-[263px] overflow-hidden rounded-[8px] bg-gray-100">
+                        <Image
+                          src={highlightData.imageUrl}
+                          alt={highlightData.title}
+                          fill
+                          sizes="336px"
+                          className="object-cover transition-transform duration-500 hover:scale-105"
+                        />
+                      </div>
+                    )}
+                    {highlightData.title && (
+                      <h3 className="text-lg font-semibold text-gray-900">{highlightData.title}</h3>
+                    )}
+                    <p className="text-sm text-gray-600 leading-relaxed">
+                      {truncated}
+                      {hasMore && "…"}
+                    </p>
+                  </article>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -270,14 +433,71 @@ export default function ReadOnlyProfileContent({ profile }: ReadOnlyProfileProps
         <div className="lg:hidden w-full max-w-[600px] mt-8">
           <div className="w-full rounded-[20px] bg-[#FAFAFA] px-6 py-7 shadow-[0_1px_10px_rgba(0,0,0,0.1)] sm:px-10 sm:py-9">
             <div className="mb-5">
-              <h2 className="text-[22px] font-semibold leading-[33px] text-[#000]">Highlights</h2>
+              <h2 className="text-[22px] font-semibold leading-[33px] text-[#000]">Highlights ({profile.highlights.length})</h2>
             </div>
-            <div className="space-y-4">
-              {profile.highlights.map((highlight) => (
-                <p key={highlight.id} className="text-sm text-gray-600 leading-relaxed">
-                  {highlight.highlight}
-                </p>
-              ))}
+            <div className="space-y-8">
+              {profile.highlights.map((highlight) => {
+                // Transform highlight data based on source type
+                const getHighlightData = () => {
+                  if (highlight.sourceType === 'credit' && highlight.sourceData) {
+                    const credit = highlight.sourceData;
+                    return {
+                      title: credit.credit_title || 'Untitled Credit',
+                      description: credit.description || '',
+                      imageUrl: credit.image_url || '/placeholder.png'
+                    };
+                  } else if (highlight.sourceType === 'slate_post' && highlight.sourceData) {
+                    const post = highlight.sourceData;
+                    const firstMedia = post.media?.[0];
+                    return {
+                      title: 'Slate Post',
+                      description: post.content || '',
+                      imageUrl: firstMedia?.media_url || '/placeholder.png'
+                    };
+                  } else if (highlight.title && highlight.description) {
+                    // Legacy format
+                    return {
+                      title: highlight.title,
+                      description: highlight.description,
+                      imageUrl: highlight.imageUrl || '/placeholder.png'
+                    };
+                  }
+                  // Fallback to text-only highlight
+                  return {
+                    title: '',
+                    description: highlight.highlight || '',
+                    imageUrl: null
+                  };
+                };
+
+                const highlightData = getHighlightData();
+                const words = highlightData.description.trim().split(/\s+/);
+                const truncated = words.slice(0, 20).join(" ");
+                const hasMore = words.length > 20;
+
+                return (
+                  <article key={highlight.id} className="space-y-3">
+                    {highlightData.imageUrl && (
+                      <div className="relative w-full h-[263px] overflow-hidden rounded-[8px] bg-gray-100">
+                        <Image
+                          src={highlightData.imageUrl}
+                          alt={highlightData.title}
+                          fill
+                          sizes="(max-width: 1024px) 100vw, 600px"
+                          className="object-cover transition-transform duration-500 hover:scale-105"
+                        />
+                      </div>
+                    )}
+                    {highlightData.title && (
+                      <h3 className="text-lg font-semibold text-gray-900">{highlightData.title}</h3>
+                    )}
+                    <p className="text-sm text-gray-600 leading-relaxed">
+                      {truncated}
+                      {hasMore && "…"}
+                    </p>
+                  </article>
+                );
+              })}
             </div>
           </div>
         </div>
