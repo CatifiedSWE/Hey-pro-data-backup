@@ -291,7 +291,7 @@ export default function ReadOnlyProfileContent({ profile }: ReadOnlyProfileProps
         {profile.credits.length > 0 && (
           <div className="w-full rounded-[20px] bg-[#FAFAFA] px-6 py-7 shadow-[0_1px_10px_rgba(0,0,0,0.1)] sm:px-10 sm:py-9 mt-8">
             <div className="mb-5">
-              <h2 className="text-[22px] font-semibold leading-[33px] text-[#000]">Credits & Work History</h2>
+              <h2 className="text-[22px] font-semibold leading-[33px] text-[#000]">Credits & Work History ({profile.credits.length})</h2>
             </div>
             <div className="space-y-6">
               {profile.credits.map((credit, index) => {
@@ -345,17 +345,17 @@ export default function ReadOnlyProfileContent({ profile }: ReadOnlyProfileProps
                     </div>
 
                     <div className="flex flex-col sm:flex-row gap-5">
-                      <div className="relative sm:w-[190px] flex-shrink-0">
+                      <div className="relative w-full sm:w-[190px] flex-shrink-0">
                         {credit.imgUrl ? (
                           <Image
                             src={credit.imgUrl}
                             alt={credit.creditTitle || credit.title || 'Credit'}
                             width={190}
                             height={225}
-                            className="sm:h-[225px] h-[346px] sm:w-[190px] w-[293px] rounded-[5px] object-cover"
+                            className="w-full h-auto sm:h-[225px] sm:w-[190px] rounded-[5px] object-cover aspect-[293/346] sm:aspect-[190/225]"
                           />
                         ) : (
-                          <div className="relative h-[346px] sm:h-[225px] sm:w-[190px] w-full rounded-[5px] bg-[#ffffff] shadow-[4px_4px_6.4px_rgba(0,0,0,0.03)]">
+                          <div className="relative w-full aspect-[293/346] sm:aspect-[190/225] sm:h-[225px] sm:w-[190px] rounded-[5px] bg-[#ffffff] shadow-[4px_4px_6.4px_rgba(0,0,0,0.03)]">
                             <div className="absolute left-3 top-3 flex items-center gap-[6px]">
                               <span className="relative inline-flex h-[22px] w-[22px] items-center justify-center rounded-full border-[2px] border-[#25C9D0] bg-white" />
                               <span className="relative inline-flex h-[22px] w-[22px] items-center justify-center rounded-full border-[2px] border-[#FF5168] bg-white" />
