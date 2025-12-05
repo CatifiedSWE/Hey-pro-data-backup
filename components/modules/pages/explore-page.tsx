@@ -35,6 +35,12 @@ interface UserProfile {
     productionType?: string;
     projectTitle?: string;
     brandClient?: string;
+    imgUrl?: string;
+    localCompany?: string;
+    internationalCompany?: string;
+    country?: string;
+    headlineStats?: string;
+    awards?: Array<{ title: string; detail?: string }>;
   }>;
   skills: Array<{ id: string; skillName: string }>;
   highlights: Array<{ 
@@ -42,6 +48,7 @@ interface UserProfile {
     highlight?: string;
     title?: string;
     description?: string;
+    imageUrl?: string;
     sortOrder: number;
   }>;
   availability: Array<{ id: string; date: string; status: string }>;
@@ -64,12 +71,26 @@ export default function ExplorePage({
     
     try {
       const response = await axios.get(`/api/explore/${project.userId}`);
-      console.log("API Response:", response.data);
+      console.log("=== API Response ===");
+      console.log("Full Response:", response.data);
       if (response.data.success) {
         const userData = response.data.data;
         console.log("User Data:", userData);
-        console.log("Credits:", userData.credits);
-        console.log("Highlights:", userData.highlights);
+        console.log("Credits Count:", userData.credits?.length);
+        console.log("Credits Data:", userData.credits);
+        console.log("Highlights Count:", userData.highlights?.length);
+        console.log("Highlights Data:", userData.highlights);
+        
+        // Log first credit if exists
+        if (userData.credits && userData.credits.length > 0) {
+          console.log("First Credit:", userData.credits[0]);
+        }
+        
+        // Log first highlight if exists
+        if (userData.highlights && userData.highlights.length > 0) {
+          console.log("First Highlight:", userData.highlights[0]);
+        }
+        
         setSelectedUser(userData);
       }
     } catch (error) {
@@ -211,7 +232,7 @@ export default function ExplorePage({
                           <Briefcase className="w-5 h-5 text-[#31A7AC]" />
                           Credits & Work History ({selectedUser.credits.length})
                         </h3>
-                        <div className="space-y-4">
+                        <div className="space-y-6">
                           {selectedUser.credits.map((credit) => {
                             // Build the heading from available fields
                             const headingParts = [
@@ -225,41 +246,82 @@ export default function ExplorePage({
                             // Get year from releaseYear or year field
                             const displayYear = credit.releaseYear || credit.year;
                             
+                            // Build role line
+                            const roleLine = [credit.role, credit.localCompany || credit.internationalCompany]
+                              .filter(Boolean)
+                              .join(" • ");
+                            const companyLine = [credit.internationalCompany, credit.country].filter(Boolean).join(" • ");
+                            
                             return (
-                              <div
+                              <article
                                 key={credit.id}
-                                className="border-l-4 border-[#31A7AC] pl-4 py-3 hover:bg-gray-50 transition-colors rounded-r"
+                                className="relative flex flex-col gap-4 border-b border-[#E6E6E6] pb-6 last:border-b-0"
                               >
-                                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
-                                  <div className="flex-1">
-                                    <div className="flex items-start gap-2">
-                                      <h4 className="font-semibold text-base text-gray-900">
+                                <div className="flex flex-col gap-1">
+                                  <div className="flex items-start justify-between gap-2">
+                                    <div className="flex-1">
+                                      <p className="text-lg font-semibold text-[#181818]">
                                         {heading}
-                                      </h4>
-                                      {displayYear && (
-                                        <span className="text-sm text-gray-500 font-semibold">
-                                          ({displayYear})
-                                        </span>
+                                        {displayYear && ` (${displayYear})`}
+                                      </p>
+                                      {credit.headlineStats && (
+                                        <p className="text-xs font-semibold text-[#31A7AC]">{credit.headlineStats}</p>
                                       )}
                                     </div>
-                                    {productionType && (
-                                      <p className="text-xs text-[#31A7AC] font-medium mt-1 uppercase">
-                                        {productionType}
-                                      </p>
+                                  </div>
+                                </div>
+
+                                <div className="flex flex-col gap-5 lg:flex-row">
+                                  <div className="relative sm:w-[190px] flex-shrink-0">
+                                    {credit.imgUrl ? (
+                                      <Image
+                                        src={credit.imgUrl}
+                                        alt={credit.creditTitle}
+                                        width={190}
+                                        height={225}
+                                        className="sm:h-[225px] h-[346px] sm:w-[190px] w-full rounded-[5px] object-cover"
+                                      />
+                                    ) : (
+                                      <div className="relative h-[346px] sm:h-[225px] sm:w-[190px] w-full rounded-[5px] bg-[#ffffff] shadow-[4px_4px_6.4px_rgba(0,0,0,0.03)]">
+                                        <div className="absolute left-3 top-3 flex items-center gap-[6px]">
+                                          <span className="relative inline-flex h-[22px] w-[22px] items-center justify-center rounded-full border-[2px] border-[#25C9D0] bg-white" />
+                                          <span className="relative inline-flex h-[22px] w-[22px] items-center justify-center rounded-full border-[2px] border-[#FF5168] bg-white" />
+                                        </div>
+                                        <p className="absolute inset-0 flex items-center justify-center px-4 text-center text-xl font-medium text-[#444444]">
+                                          Too busy to take a pic..!
+                                        </p>
+                                      </div>
                                     )}
-                                    {credit.role && (
-                                      <p className="text-sm text-[#31A7AC] font-medium mt-1">
-                                        {credit.role}
-                                      </p>
-                                    )}
+                                  </div>
+
+                                  <div className="flex flex-1 flex-col gap-4">
+                                    <div className="space-y-0 text-[#181818]">
+                                      {roleLine && <p className="text-sm leading-[21px]">{roleLine}</p>}
+                                      {companyLine && <p className="text-xs text-[#444444]">{companyLine}</p>}
+                                      {productionType && <p className="text-[10px] font-semibold text-[#444444] uppercase">{productionType}</p>}
+                                    </div>
                                     {credit.description && (
-                                      <p className="text-sm text-gray-600 mt-2">
+                                      <p className="text-sm font-normal leading-[18px] text-[#393939]">
                                         {credit.description}
                                       </p>
                                     )}
+                                    {credit.awards && credit.awards.length > 0 && (
+                                      <div className="relative isolate rounded-r-[5px] bg-white px-2 py-2">
+                                        <ScrollArea className="max-h-[85px] p-2 pr-2">
+                                          <ul className="space-y-1">
+                                            {credit.awards.map((award, index) => (
+                                              <li key={`${credit.id}-award-${index}`} className="text-[10px] font-semibold text-[#31A7AC]">
+                                                <span>{award.title}</span>
+                                                {award.detail && <span className="text-[#6B6B6B]"> {award.detail}</span>}
+                                              </li>
+                                            ))}
+                                          </ul>
+                                        </ScrollArea>
+                                      </div>
+                                    )}
                                   </div>
                                 </div>
-                              </div>
+                              </article>
                             );
                           })}
                         </div>
@@ -278,24 +340,28 @@ export default function ExplorePage({
                     {selectedUser.highlights && selectedUser.highlights.length > 0 ? (
                       <div className="bg-white rounded-lg shadow-sm p-6">
                         <h3 className="font-semibold text-xl mb-4">Highlights ({selectedUser.highlights.length})</h3>
-                        <ul className="space-y-3">
+                        <ul className="space-y-4">
                           {selectedUser.highlights.map((highlight) => {
-                            // Get the text to display - prioritize description, then title, then highlight field
-                            const displayText = highlight.description || highlight.highlight || highlight.title || '';
+                            // Get the text to display
+                            // Check for the 'highlight' field first (which is the main text field in the API)
+                            const displayText = highlight.highlight || highlight.description || highlight.title || '';
+                            const hasTitle = highlight.title && highlight.highlight;
+                            
+                            if (!displayText) return null;
                             
                             return (
                               <li
                                 key={highlight.id}
-                                className="flex items-start gap-3 text-gray-700"
+                                className="flex items-start gap-3 text-gray-700 border-l-4 border-[#31A7AC] pl-4 py-2"
                               >
                                 <span className="text-[#31A7AC] text-lg mt-0.5">★</span>
                                 <div className="flex-1">
-                                  {highlight.title && highlight.description && (
+                                  {hasTitle && (
                                     <p className="text-sm font-semibold text-gray-900 mb-1">
                                       {highlight.title}
                                     </p>
                                   )}
-                                  <span className="text-sm">{displayText}</span>
+                                  <p className="text-sm text-gray-700 leading-relaxed">{displayText}</p>
                                 </div>
                               </li>
                             );
