@@ -397,16 +397,18 @@ export function ApplicationTab({ selectedGigIds, actionIndicators, onActionChang
                                             <td className="h-[60px] border border-[#DEDEDE] w-[80px] px-4 py-2 text-center bg-white">
                                                 <button 
                                                     onClick={() => handleStatusChange(app.id, gigId, 'confirmed')}
-                                                    className="mx-auto transition-opacity hover:opacity-80"
+                                                    className="mx-auto transition-opacity hover:opacity-80 flex items-center justify-center"
                                                 >
                                                     {app.status === 'confirmed' ? (
-                                                        <div className="h-10 w-10 bg-[#31A7AC] rounded flex items-center justify-center">
-                                                            <Check className="h-5 w-5 text-white" />
-                                                        </div>
+                                                        <Image 
+                                                            src="/icons/mail-blue.png" 
+                                                            alt="Confirmed" 
+                                                            width={40} 
+                                                            height={40} 
+                                                            className="object-contain" 
+                                                        />
                                                     ) : (
-                                                        <div className="h-10 w-10 flex items-center justify-center">
-                                                            <Check className="h-5 w-5 text-[#31A7AC]" />
-                                                        </div>
+                                                        <Check className="h-6 w-6 text-[#31A7AC]" />
                                                     )}
                                                 </button>
                                             </td>
