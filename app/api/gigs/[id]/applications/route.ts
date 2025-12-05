@@ -95,7 +95,8 @@ export async function GET(
             country,
             city,
             email,
-            phone
+            phone,
+            work_identities
           `)
           .eq('user_id', app.applicant_user_id)
           .maybeSingle();
