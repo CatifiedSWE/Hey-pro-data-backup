@@ -110,7 +110,7 @@ export default function ExplorePage({
               {/* Main Content Container */}
               <div className="max-w-6xl mx-auto px-6 -mt-20 relative z-10">
                 {/* Profile Photo and Header Info */}
-                <div className="flex items-start gap-6 mb-8">
+                <div className="flex flex-col md:flex-row items-center md:items-start gap-6 mb-8">
                   <div className="relative h-40 w-40 rounded-full overflow-hidden bg-white border-4 border-white shadow-xl flex-shrink-0">
                     <Image
                       src={selectedUser.avatar || "/default-profile.png"}
@@ -119,13 +119,13 @@ export default function ExplorePage({
                       className="object-cover"
                     />
                   </div>
-                  <div className="mt-16 flex-1">
+                  <div className="mt-4 md:mt-16 flex-1 text-center md:text-left w-full">
                     <DialogHeader>
-                      <DialogTitle className="text-4xl font-bold text-gray-900">
+                      <DialogTitle className="text-2xl md:text-4xl font-bold text-gray-900">
                         {selectedUser.name}
                       </DialogTitle>
                     </DialogHeader>
-                    <div className="flex items-center gap-4 mt-2">
+                    <div className="flex flex-col md:flex-row items-center gap-4 mt-2 justify-center md:justify-start">
                       <div className="flex items-center gap-2 text-gray-600">
                         <MapPin className="w-5 h-5" />
                         <span className="text-base">{selectedUser.location}</span>
