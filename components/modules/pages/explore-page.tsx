@@ -123,9 +123,9 @@ export default function ExplorePage({
               </div>
 
               {/* Main Content Container */}
-              <div className="w-full max-w-6xl mx-auto">
+              <div className="w-full max-w-7xl mx-auto">
                 {/* Header Info Section */}
-                <div className="flex flex-col gap-4 pt-16 sm:pt-20 px-4 sm:px-8">
+                <div className="flex flex-col gap-4 pt-14 sm:pt-20 px-4 sm:px-12">
                   <div className="space-y-3">
                     <DialogHeader className="p-0 space-y-1 text-left">
                       <DialogTitle className="text-2xl sm:text-3xl md:text-4xl font-semibold text-black text-left">
