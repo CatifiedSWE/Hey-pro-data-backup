@@ -137,7 +137,7 @@ export default function GigDetails(gig: GigsDataType[0]) {
         </div>
 
         <div className="flex flex-wrap gap-3">
-          <SendRecommendationDialog />
+          <SendRecommendationDialog selectedGigIds={[gig.id]} />
           {!isOwnGig && <ApplyGigs gig={gig} />}
         </div>
       </div>
