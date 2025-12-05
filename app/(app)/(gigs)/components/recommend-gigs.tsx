@@ -222,7 +222,7 @@ export function SendRecommendationDialog({ className, selectedGigIds }: SendReco
                                 Make someone’s day!
                             </DialogTitle>
                             <p className="text-[16px] text-black">
-                                Invite someone for this Gig
+                                Invite someone for {selectedGigIds.length} selected gig{selectedGigIds.length > 1 ? 's' : ''}
                             </p>
                         </DialogHeader>
 
