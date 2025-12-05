@@ -29,6 +29,15 @@ type Gig = {
     }>;
 };
 
+type Credit = {
+    id: string;
+    title: string;
+    role: string;
+    year: string | number;
+    description?: string;
+    imdbUrl?: string;
+};
+
 type ApplicantAvailability = {
     applicantId: string;
     name: string;
