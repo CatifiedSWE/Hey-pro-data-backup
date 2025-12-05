@@ -62,9 +62,10 @@ type ApplicationTabProps = {
     selectedGigIds: string[];
     actionIndicators: Record<string, Partial<Record<"release" | "shortlist" | "confirm", boolean>>>;
     onActionChange: (rowKey: string, action: "release" | "shortlist" | "confirm") => void;
+    onAddPendingChange: (change: { applicationId: string; gigId: string; newStatus: string }) => void;
 };
 
-export function ApplicationTab({ selectedGigIds, actionIndicators, onActionChange }: ApplicationTabProps) {
+export function ApplicationTab({ selectedGigIds, actionIndicators, onActionChange, onAddPendingChange }: ApplicationTabProps) {
     const [selectedGigs, setSelectedGigs] = useState<Record<string, { gig: Gig; applications: Applicant[] }>>({});
     const [loading, setLoading] = useState(false);
     const [creditsDialog, setCreditsDialog] = useState<{
