@@ -100,7 +100,7 @@ export default function ExplorePage({
               {/* Banner Section */}
               <div className="relative w-full">
                 {/* Banner Image */}
-                <div className="relative h-[140px] sm:h-[200px] w-full overflow-hidden">
+                <div className="relative h-[120px] sm:h-[180px] md:h-[220px] w-full overflow-hidden">
                   <Image
                     src={selectedUser.banner || "/default-banner.png"}
                     alt="Profile banner"
@@ -110,8 +110,8 @@ export default function ExplorePage({
                 </div>
                 
                 {/* Profile Photo - positioned at bottom of banner */}
-                <div className="absolute bottom-0 left-4 sm:left-8 transform translate-y-1/2 z-10">
-                  <div className="relative h-[100px] w-[100px] sm:h-[140px] sm:w-[140px] rounded-full overflow-hidden bg-white border-4 border-white shadow-lg">
+                <div className="absolute bottom-0 left-4 sm:left-12 transform translate-y-1/2 z-10">
+                  <div className="relative h-[90px] w-[90px] sm:h-[130px] sm:w-[130px] md:h-[150px] md:w-[150px] rounded-full overflow-hidden bg-white border-4 border-white shadow-xl">
                     <Image
                       src={selectedUser.avatar || "/default-profile.png"}
                       alt={selectedUser.name}
