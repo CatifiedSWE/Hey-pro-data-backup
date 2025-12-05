@@ -127,8 +127,8 @@ export default function ExplorePage({
                 {/* Header Info Section */}
                 <div className="flex flex-col gap-4 pt-16 sm:pt-20 px-4 sm:px-8">
                   <div className="space-y-3">
-                    <DialogHeader className="p-0 space-y-1">
-                      <DialogTitle className="text-2xl sm:text-3xl md:text-4xl font-semibold text-black">
+                    <DialogHeader className="p-0 space-y-1 text-left">
+                      <DialogTitle className="text-2xl sm:text-3xl md:text-4xl font-semibold text-black text-left">
                         {selectedUser.name}
                       </DialogTitle>
                     </DialogHeader>
@@ -157,7 +157,7 @@ export default function ExplorePage({
                       {selectedUser.roles.slice(0, 6).map((role) => (
                         <span
                           key={role.id}
-                          className="inline-flex items-center rounded-full bg-[#FA6E80] px-4 py-1.5 text-xs font-medium text-white"
+                          className="inline-flex items-center rounded-full bg-[#FA6E80] px-4 py-1.5 text-xs sm:text-sm font-medium text-white"
                         >
                           {role.roleName}
                         </span>
