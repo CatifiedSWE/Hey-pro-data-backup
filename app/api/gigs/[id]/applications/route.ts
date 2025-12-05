@@ -169,11 +169,10 @@ export async function GET(
             })),
             recentExperience: (experience || []).map(exp => ({
               id: exp.id,
-              title: exp.job_title,
-              company: exp.company_name,
+              title: exp.credit_title,
+              role: exp.role,
               startDate: exp.start_date,
-              endDate: exp.end_date,
-              isCurrent: exp.is_current
+              endDate: exp.end_date
             })),
             referrals: {
               count: referrals?.length || 0,
