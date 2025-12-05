@@ -98,7 +98,7 @@ export default function ExplorePage({
           ) : selectedUser ? (
             <div className="w-full h-full">
               {/* Banner */}
-              <div className="relative h-64 w-full">
+              <div className="relative sm:h-48 md:h-64 h-32 w-full">
                 <Image
                   src={selectedUser.banner || "/default-banner.png"}
                   alt="Profile banner"
@@ -108,52 +108,54 @@ export default function ExplorePage({
               </div>
 
               {/* Main Content Container */}
-              <div className="max-w-6xl mx-auto px-6 -mt-20 relative z-10">
+              <div className="max-w-6xl mx-auto px-4 sm:px-6 relative">
                 {/* Profile Photo and Header Info */}
-                <div className="flex items-start gap-6 mb-8">
-                  <div className="relative h-40 w-40 rounded-full overflow-hidden bg-white border-4 border-white shadow-xl flex-shrink-0">
-                    <Image
-                      src={selectedUser.avatar || "/default-profile.png"}
-                      alt={selectedUser.name}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <div className="mt-16 md:mt-24 flex-1">
-                    <DialogHeader>
-                      <DialogTitle className="text-4xl font-bold text-gray-900">
-                        {selectedUser.name}
-                      </DialogTitle>
-                    </DialogHeader>
-                    <div className="flex items-center gap-4 mt-2">
-                      <div className="flex items-center gap-2 text-gray-600">
-                        <MapPin className="w-5 h-5" />
-                        <span className="text-base">{selectedUser.location}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                            selectedUser.availableForWork
-                              ? "bg-green-100 text-green-800"
-                              : "bg-gray-100 text-gray-800"
-                          }`}
-                        >
-                          {selectedUser.availableForWork ? "Available for Work" : "Not Available"}
-                        </span>
+                <div className="relative -mt-12 sm:-mt-16 md:-mt-20 mb-4 sm:mb-8">
+                  <div className="flex flex-col sm:flex-row sm:items-end gap-4 sm:gap-6">
+                    <div className="relative h-24 w-24 sm:h-32 sm:w-32 md:h-40 md:w-40 rounded-full overflow-hidden bg-white border-4 border-white shadow-xl flex-shrink-0">
+                      <Image
+                        src={selectedUser.avatar || "/default-profile.png"}
+                        alt={selectedUser.name}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <div className="flex-1 pb-0 sm:pb-2">
+                      <DialogHeader>
+                        <DialogTitle className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
+                          {selectedUser.name}
+                        </DialogTitle>
+                      </DialogHeader>
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-2">
+                        <div className="flex items-center gap-2 text-gray-600">
+                          <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
+                          <span className="text-sm sm:text-base">{selectedUser.location}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${
+                              selectedUser.availableForWork
+                                ? "bg-green-100 text-green-800"
+                                : "bg-gray-100 text-gray-800"
+                            }`}
+                          >
+                            {selectedUser.availableForWork ? "Available for Work" : "Not Available"}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Content Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pb-12">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 pb-8 sm:pb-12">
                   {/* Left Column - Main Content */}
-                  <div className="lg:col-span-2 space-y-6">
+                  <div className="lg:col-span-2 space-y-4 sm:space-y-6">
                     {/* Bio */}
                     {selectedUser.bio && (
-                      <div className="bg-white rounded-lg shadow-sm p-6">
-                        <h3 className="font-semibold text-xl mb-3">About</h3>
-                        <p className="text-gray-700 text-base leading-relaxed">
+                      <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+                        <h3 className="font-semibold text-lg sm:text-xl mb-2 sm:mb-3">About</h3>
+                        <p className="text-gray-700 text-sm sm:text-base leading-relaxed">
                           {selectedUser.bio}
                         </p>
                       </div>
@@ -161,33 +163,33 @@ export default function ExplorePage({
 
                     {/* Credits */}
                     {selectedUser.credits && selectedUser.credits.length > 0 ? (
-                      <div className="bg-white rounded-lg shadow-sm p-6">
-                        <h3 className="font-semibold text-xl mb-4 flex items-center gap-2">
-                          <Briefcase className="w-6 h-6 text-[#31A7AC]" />
+                      <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+                        <h3 className="font-semibold text-lg sm:text-xl mb-3 sm:mb-4 flex items-center gap-2">
+                          <Briefcase className="w-5 h-5 sm:w-6 sm:h-6 text-[#31A7AC]" />
                           Credits & Work History ({selectedUser.credits.length})
                         </h3>
-                        <div className="space-y-4">
+                        <div className="space-y-3 sm:space-y-4">
                           {selectedUser.credits.map((credit) => (
                             <div
                               key={credit.id}
-                              className="border-l-4 border-[#31A7AC] pl-5 py-3 hover:bg-gray-50 transition-colors"
+                              className="border-l-4 border-[#31A7AC] pl-3 sm:pl-5 py-2 sm:py-3 hover:bg-gray-50 transition-colors"
                             >
-                              <div className="flex items-start justify-between">
+                              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 sm:gap-0">
                                 <div className="flex-1">
-                                  <h4 className="font-semibold text-lg text-gray-900">
+                                  <h4 className="font-semibold text-base sm:text-lg text-gray-900">
                                     {credit.title}
                                   </h4>
-                                  <p className="text-base text-[#31A7AC] font-medium mt-1">
+                                  <p className="text-sm sm:text-base text-[#31A7AC] font-medium mt-1">
                                     {credit.role}
                                   </p>
                                   {credit.description && (
-                                    <p className="text-sm text-gray-600 mt-2">
+                                    <p className="text-xs sm:text-sm text-gray-600 mt-1 sm:mt-2">
                                       {credit.description}
                                     </p>
                                   )}
                                 </div>
                                 {credit.year && (
-                                  <span className="text-base text-gray-500 font-semibold ml-4">
+                                  <span className="text-sm sm:text-base text-gray-500 font-semibold sm:ml-4">
                                     {credit.year}
                                   </span>
                                 )}
@@ -197,50 +199,50 @@ export default function ExplorePage({
                         </div>
                       </div>
                     ) : (
-                      <div className="bg-white rounded-lg shadow-sm p-6">
-                        <h3 className="font-semibold text-xl mb-4 flex items-center gap-2">
-                          <Briefcase className="w-6 h-6 text-[#31A7AC]" />
+                      <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+                        <h3 className="font-semibold text-lg sm:text-xl mb-3 sm:mb-4 flex items-center gap-2">
+                          <Briefcase className="w-5 h-5 sm:w-6 sm:h-6 text-[#31A7AC]" />
                           Credits & Work History
                         </h3>
-                        <p className="text-gray-500 text-sm">No credits added yet.</p>
+                        <p className="text-gray-500 text-xs sm:text-sm">No credits added yet.</p>
                       </div>
                     )}
 
                     {/* Highlights */}
                     {selectedUser.highlights && selectedUser.highlights.length > 0 ? (
-                      <div className="bg-white rounded-lg shadow-sm p-6">
-                        <h3 className="font-semibold text-xl mb-4">Highlights ({selectedUser.highlights.length})</h3>
-                        <ul className="space-y-3">
+                      <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+                        <h3 className="font-semibold text-lg sm:text-xl mb-3 sm:mb-4">Highlights ({selectedUser.highlights.length})</h3>
+                        <ul className="space-y-2 sm:space-y-3">
                           {selectedUser.highlights.map((highlight) => (
                             <li
                               key={highlight.id}
-                              className="flex items-start gap-3 text-gray-700"
+                              className="flex items-start gap-2 sm:gap-3 text-gray-700"
                             >
-                              <span className="text-[#31A7AC] mt-1">★</span>
-                              <span className="text-base">{highlight.highlight}</span>
+                              <span className="text-[#31A7AC] mt-0.5 sm:mt-1">★</span>
+                              <span className="text-sm sm:text-base">{highlight.highlight}</span>
                             </li>
                           ))}
                         </ul>
                       </div>
                     ) : (
-                      <div className="bg-white rounded-lg shadow-sm p-6">
-                        <h3 className="font-semibold text-xl mb-4">Highlights</h3>
-                        <p className="text-gray-500 text-sm">No highlights added yet.</p>
+                      <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+                        <h3 className="font-semibold text-lg sm:text-xl mb-3 sm:mb-4">Highlights</h3>
+                        <p className="text-gray-500 text-xs sm:text-sm">No highlights added yet.</p>
                       </div>
                     )}
                   </div>
 
                   {/* Right Column - Sidebar */}
-                  <div className="space-y-6">
+                  <div className="space-y-4 sm:space-y-6">
                     {/* Roles */}
                     {selectedUser.roles && selectedUser.roles.length > 0 && (
-                      <div className="bg-white rounded-lg shadow-sm p-6">
-                        <h3 className="font-semibold text-xl mb-4">Professional Roles</h3>
+                      <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+                        <h3 className="font-semibold text-lg sm:text-xl mb-3 sm:mb-4">Professional Roles</h3>
                         <div className="flex flex-wrap gap-2">
                           {selectedUser.roles.map((role) => (
                             <span
                               key={role.id}
-                              className="text-[#31A7AC] bg-[#31A7AC]/10 border border-[#31A7AC] text-sm font-medium px-3 py-2 rounded-lg"
+                              className="text-[#31A7AC] bg-[#31A7AC]/10 border border-[#31A7AC] text-xs sm:text-sm font-medium px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg"
                             >
                               {role.roleName}
                             </span>
@@ -251,13 +253,13 @@ export default function ExplorePage({
 
                     {/* Skills */}
                     {selectedUser.skills && selectedUser.skills.length > 0 && (
-                      <div className="bg-white rounded-lg shadow-sm p-6">
-                        <h3 className="font-semibold text-xl mb-4">Skills</h3>
+                      <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+                        <h3 className="font-semibold text-lg sm:text-xl mb-3 sm:mb-4">Skills</h3>
                         <div className="flex flex-wrap gap-2">
                           {selectedUser.skills.map((skill) => (
                             <span
                               key={skill.id}
-                              className="bg-gray-100 text-gray-700 text-sm px-3 py-2 rounded-lg font-medium"
+                              className="bg-gray-100 text-gray-700 text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg font-medium"
                             >
                               {skill.skillName}
                             </span>
@@ -268,9 +270,9 @@ export default function ExplorePage({
 
                     {/* Availability Calendar */}
                     {selectedUser.availability && selectedUser.availability.length > 0 && (
-                      <div className="bg-white rounded-lg shadow-sm p-6">
-                        <h3 className="font-semibold text-xl mb-4 flex items-center gap-2">
-                          <Calendar className="w-6 h-6 text-[#31A7AC]" />
+                      <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+                        <h3 className="font-semibold text-lg sm:text-xl mb-3 sm:mb-4 flex items-center gap-2">
+                          <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-[#31A7AC]" />
                           Availability
                         </h3>
                         <div className="space-y-2 max-h-64 overflow-y-auto">
@@ -288,9 +290,9 @@ export default function ExplorePage({
                             return (
                               <div
                                 key={avail.id}
-                                className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-lg"
+                                className="flex items-center justify-between py-2 px-2 sm:px-3 bg-gray-50 rounded-lg"
                               >
-                                <span className="text-sm text-gray-700">
+                                <span className="text-xs sm:text-sm text-gray-700">
                                   {new Date(avail.date).toLocaleDateString('en-US', {
                                     weekday: 'short',
                                     year: 'numeric',
@@ -299,7 +301,7 @@ export default function ExplorePage({
                                   })}
                                 </span>
                                 <span
-                                  className={`text-xs px-2 py-1 rounded-full border font-medium ${
+                                  className={`text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full border font-medium ${
                                     statusColors[avail.status as keyof typeof statusColors] || "bg-gray-100 text-gray-800"
                                   }`}
                                 >
@@ -310,7 +312,7 @@ export default function ExplorePage({
                           })}
                         </div>
                         {selectedUser.availability.length > 30 && (
-                          <p className="text-xs text-gray-500 mt-2 text-center">
+                          <p className="text-[10px] sm:text-xs text-gray-500 mt-2 text-center">
                             Showing first 30 dates
                           </p>
                         )}
