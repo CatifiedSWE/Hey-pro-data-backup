@@ -234,7 +234,7 @@ export default function WhatsOnHeader() {
                     <Link href="/whats-on/manage-whats-on" className="ml-2 text-white bg-[#31A7AC] border rounded-[10px] sm:w-auto w-[192px] px-4 py-2 "> <span className="text-[16px] font-[400]">Manage What’s On</span></Link>
                 </div>
 
-                <div className="flex flex-row mx-auto  justify-center w-full items-center gap-0.5 space-x-4 mt-4 sm:w-full">
+                <div className="flex flex-row mx-auto w-full items-center gap-2 mt-4 px-4 sm:px-0 sm:justify-center sm:gap-0.5 sm:space-x-4 sm:w-full">
                     <div
                         className={`sm:flex items-center hidden justify-center space-x-2 h-[48px] border rounded-full px-4 py-2 cursor-pointer transition-all ${isFilterOpen ? 'w-[150px] bg-[#FA6E80]' : 'w-[150px] bg-[#f7f7f700] border-[#FA6E80] '}`}
                         onClick={() => setIsFilterOpen(!isFilterOpen)}
@@ -244,7 +244,7 @@ export default function WhatsOnHeader() {
                         </button>
                         <Filter className={`h-5 w-5 ${isFilterOpen ? 'text-white' : 'text-[#FA6E80]'}`} />
                     </div>
-                    <div className="flex flex-row border rounded-full px-1 py-2 justify-between items-center h-[48px] w-[240px] sm:w-[960px]">
+                    <div className="flex flex-row border rounded-full px-1 py-2 justify-between items-center h-[48px] flex-1 sm:flex-none sm:w-[960px]">
                         <input
                             placeholder="Search events..."
                             className=" px-2 border-none outline-none focus:ring-0 text-sm bg-transparent"
@@ -492,7 +492,7 @@ function MobileFilter({
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <div
-                        className={`flex items-center sm:hidden  justify-center space-x-1 h-[48px] w-[111px] border rounded-full px-4 py-2 cursor-pointer transition-all  bg-[#ffffff] border-[#FA6E80]`}
+                        className={`flex shrink-0 items-center sm:hidden  justify-center space-x-1 h-[48px] w-[111px] border rounded-full px-4 py-2 cursor-pointer transition-all  bg-[#ffffff] border-[#FA6E80]`}
                     >
                         <button className={`text-[10px] font-medium text-[#FA6E80]`}>
                             Filter {getActiveFilterCount() > 0 ? `(${getActiveFilterCount()})` : ''}
