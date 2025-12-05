@@ -327,7 +327,10 @@ function SlateCard({ post, onLike, onSave, onShare }: SlateCardProps) {
 
         <div className="border-gray-300 rounded-lg p-4 md:p-7 bg-white">
             <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center mb-4">
+                <div 
+                    className="flex items-center mb-4 cursor-pointer hover:opacity-80 transition-opacity"
+                    onClick={() => window.location.href = `/profile/${post.author.id}`}
+                >
                     <Image
                         src={post.author.avatar || "/default-profile.png"}
                         alt={post.author.name}
