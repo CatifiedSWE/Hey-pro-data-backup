@@ -209,10 +209,11 @@ export function SendRecommendationDialog({ className, selectedGigIds }: SendReco
                 <DialogTrigger asChild>
                     <Button 
                         type="button" 
-                        className="bg-[#FA6E80] hover:bg-[#e55b6d] text-white rounded-lg px-6"
+                        className="bg-[#31A7AC] hover:bg-[#2a9398] text-white rounded-lg px-6 flex items-center gap-2"
                         disabled={selectedGigIds.length === 0}
                     >
-                        Invite crew for this Gig
+                        <UserPlus className="h-5 w-5" />
+                        Recommend
                     </Button>
                 </DialogTrigger>
                 <DialogContent className="w-[582px] max-w-[90vw] border-0 bg-[#F8F8F8] p-0 sm:rounded-[20px] max-h-[90vh] overflow-y-auto">
