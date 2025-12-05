@@ -3,6 +3,11 @@
 ## Overview
 Successfully implemented AI-powered chat functionality for the HeyProData help page (`/help`) that integrates with an n8n webhook for intelligent responses.
 
+## ✅ FIXED: Context Token Issue (Latest Update)
+**Issue**: Section ID was regenerating on every message, preventing proper context tracking and model training.
+
+**Solution**: Section ID is now generated ONCE per session and persists for all messages in that conversation, allowing the AI backend to properly track context and maintain conversation continuity.
+
 ## Implementation Details
 
 ### 1. **AI Integration**
@@ -10,12 +15,15 @@ Successfully implemented AI-powered chat functionality for the HeyProData help p
 - **Method**: GET request
 - **Parameters**:
   - `question`: User's question/query
-  - `section_id`: Randomly generated 10-character alphanumeric ID (e.g., `7tvua7qeit`)
+  - `section_id`: **Persistent** 10-character alphanumeric ID generated once per session (e.g., `7tvua7qeit`)
   
 ### 2. **Key Features Implemented**
 
-#### Random Section ID Generator
+#### Session ID Management (FIXED)
 ```typescript
+// Generate section ID ONCE per session
+const [sectionId] = useState<string>(() => generateSectionId());
+
 const generateSectionId = (): string => {
     const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
     let sectionId = '';
@@ -25,6 +33,8 @@ const generateSectionId = (): string => {
     return sectionId;
 };
 ```
+
+**Key Change**: Section ID is now stored in React state and initialized only once when the component mounts. This same ID is reused for all messages in the conversation, enabling proper context tracking.
 
 #### Async API Integration
 - Replaced mock `getBotResponse()` function with real API call to n8n webhook

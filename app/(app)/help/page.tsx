@@ -60,6 +60,8 @@ export default function HelpPage() {
     const [inputMessage, setInputMessage] = useState("");
     const [isTyping, setIsTyping] = useState(false);
     const [activeTopic, setActiveTopic] = useState<string | null>(null);
+    // Generate section_id ONCE per session and persist it
+    const [sectionId] = useState<string>(() => generateSectionId());
     
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -90,7 +92,8 @@ export default function HelpPage() {
         setActiveTopic(null); 
 
         try {
-            const sectionId = generateSectionId();
+            // Use persistent section_id for the entire session
+            // This allows the AI backend to track conversation context
             
             // Call n8n webhook
             const response = await axios.get(
