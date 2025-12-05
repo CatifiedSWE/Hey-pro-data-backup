@@ -164,6 +164,7 @@ export async function GET(
               : profile?.country || 'Not specified',
             email: profile?.email || null,
             phone: profile?.phone || null,
+            workIdentities: profile?.work_identities || null,
             skills: (skills || []).map(s => ({
               name: s.skill_name,
               level: s.proficiency_level
