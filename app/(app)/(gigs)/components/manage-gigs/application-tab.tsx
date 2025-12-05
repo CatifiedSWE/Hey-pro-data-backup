@@ -68,6 +68,7 @@ type ApplicationTabProps = {
 export function ApplicationTab({ selectedGigIds, actionIndicators, onActionChange, onAddPendingChange }: ApplicationTabProps) {
     const [selectedGigs, setSelectedGigs] = useState<Record<string, { gig: Gig; applications: Applicant[] }>>({});
     const [loading, setLoading] = useState(false);
+    const [pendingStatuses, setPendingStatuses] = useState<Record<string, string>>({});
     const [creditsDialog, setCreditsDialog] = useState<{
         open: boolean;
         loading: boolean;
