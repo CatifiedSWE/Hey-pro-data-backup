@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import Image from "next/image";
 import { MapPin, Briefcase, Calendar } from "lucide-react";
 import axios from "axios";
@@ -129,6 +130,12 @@ export default function ExplorePage({
           className="!max-w-none !w-screen !h-screen !max-h-screen !p-0 !m-0 !rounded-none !border-0 !top-0 !left-0 !translate-x-0 !translate-y-0 overflow-y-auto overflow-x-hidden [&>button]:bg-white [&>button]:shadow-lg [&>button]:rounded-full [&>button]:w-10 [&>button]:h-10 [&>button]:flex [&>button]:items-center [&>button]:justify-center [&>button]:z-50" 
           data-testid="profile-modal"
         >
+          <VisuallyHidden>
+            <DialogTitle>
+              {selectedUser ? `${selectedUser.name} Profile` : 'User Profile'}
+            </DialogTitle>
+          </VisuallyHidden>
+          
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
               <p className="text-gray-500">Loading profile...</p>
@@ -165,11 +172,9 @@ export default function ExplorePage({
                 {/* Header Info Section */}
                 <div className="flex flex-col gap-4 pt-2 sm:pt-4 px-4 sm:px-12 overflow-x-hidden">
                   <div className="space-y-3">
-                    <DialogHeader className="p-0 space-y-1 text-left">
-                      <DialogTitle className="text-2xl sm:text-3xl md:text-4xl font-semibold text-black text-left">
-                        {selectedUser.name}
-                      </DialogTitle>
-                    </DialogHeader>
+                    <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-black text-left">
+                      {selectedUser.name}
+                    </h2>
                     
                     {/* Location and Availability */}
                     <div className="flex flex-wrap items-center gap-2 sm:gap-3">
