@@ -253,22 +253,23 @@ export function ApplicationTab({ selectedGigIds, actionIndicators, onActionChang
             {Object.entries(selectedGigs).map(([gigId, { gig, applications }]) => (
                 <section key={gigId} className="space-y-4 ">
                     <header className="space-y-3">
-                        <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600 no-scrollbar overflow-x-auto">
-                            <p className="text-lg font-semibold text-gray-900">{gig.title}</p>
-                            <span className="flex items-center gap-1 justify-center text-[#000000]">
-                                <CalendarDays className="h-4 w-4" />
-                                {gig.dateWindows.map((window, index) => (
-                                    <span key={`${gigId}-window-${index}`} className="">
-                                        <span className="font-[500] text-[14px]">
-                                            <span>{window.label.split(" ")[1]}</span>
-                                            <span className="bg-[#FA6E80] text-white px-2 py-0.5 rounded-full text-[12px] ml-1"> {window.label.split(" ")[0]}</span>
-                                        </span>
-                                        <span className="mx-1">|</span>
-                                        {window.range}
-                                        {index < gig.dateWindows.length - 1 && <span className="mx-1">·</span>}
+                        <div className="flex flex-wrap items-center gap-2 text-sm text-gray-600 no-scrollbar overflow-x-auto">
+                            <p className="text-xl font-normal text-black">{gig.title}</p>
+                            <CalendarDays className="h-5 w-5 text-black" />
+                            {gig.dateWindows.map((window, index) => (
+                                <span key={`${gigId}-window-${index}`} className="flex items-center gap-1">
+                                    <span className="text-[#FA6E80] font-normal text-sm">
+                                        {window.label.split(" ")[0]}
                                     </span>
-                                ))}
-                            </span>
+                                    <span className="text-black font-normal text-sm">
+                                        {window.label.split(" ")[1]}
+                                    </span>
+                                    <span className="bg-[#FA6E80] text-white px-3 py-1 rounded-full text-xs font-medium">
+                                        {window.range}
+                                    </span>
+                                    {index < gig.dateWindows.length - 1 && <span className="mx-1 text-black">·</span>}
+                                </span>
+                            ))}
                         </div>
                     </header>
 
