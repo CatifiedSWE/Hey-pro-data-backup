@@ -15,10 +15,16 @@ export default function ExplorePage({
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // Debug: Check if userId is present in the data
+  console.log('Projects data sample:', projectsCardData[0]);
+
   const handleProfileClick = (userId: string | undefined) => {
+    console.log('Profile clicked, userId:', userId);
     if (userId) {
       setSelectedUserId(userId);
       setIsModalOpen(true);
+    } else {
+      console.warn('No userId provided for profile click');
     }
   };
 

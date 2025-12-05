@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
  * Fetch explore data directly from Supabase
  * Filtered by search params and excludes current user
  */
-async function getExploreData(searchParams: { [key: string]: string | string[] | undefined }): Promise<ProjectCardType[]> {
+async function getExploreData(searchParams: { [key: string]: string | string[] | undefined }): Promise<(ProjectCardType & { userId?: string })[]> {
   try {
     const supabase = createServerClient();
     
