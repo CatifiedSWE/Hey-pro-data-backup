@@ -69,7 +69,7 @@ export default function ExplorePage({
 
   return (
     <div className="w-full">
-      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4">
         {projectsCardData.length > 0 ? (
           projectsCardData.map((project) => (
             <ProjectCard 
@@ -96,10 +96,11 @@ export default function ExplorePage({
               <p className="text-gray-500">Loading profile...</p>
             </div>
           ) : selectedUser ? (
-            <div className="w-full h-full bg-gray-50">
-              {/* Banner Section - matching profile page */}
-              <div className="relative h-[228px]">
-                <div className="relative sm:h-[150px] h-[88px] w-full overflow-hidden">
+            <div className="w-full h-full bg-gray-50 overflow-y-auto">
+              {/* Banner Section */}
+              <div className="relative w-full">
+                {/* Banner Image */}
+                <div className="relative h-[140px] sm:h-[200px] w-full overflow-hidden">
                   <Image
                     src={selectedUser.banner || "/default-banner.png"}
                     alt="Profile banner"
@@ -108,9 +109,9 @@ export default function ExplorePage({
                   />
                 </div>
                 
-                {/* Profile Photo - positioned absolutely like profile page */}
-                <div className="absolute inset-x-0 top-[38px] sm:top-[108px] left-[9px] sm:left-[58px] flex justify-start z-10">
-                  <div className="relative h-[112px] w-[112px] sm:h-[140px] sm:w-[140px] rounded-full overflow-hidden bg-white border-4 border-white shadow-xl">
+                {/* Profile Photo - positioned at bottom of banner */}
+                <div className="absolute bottom-0 left-4 sm:left-8 transform translate-y-1/2 z-10">
+                  <div className="relative h-[100px] w-[100px] sm:h-[140px] sm:w-[140px] rounded-full overflow-hidden bg-white border-4 border-white shadow-lg">
                     <Image
                       src={selectedUser.avatar || "/default-profile.png"}
                       alt={selectedUser.name}
@@ -121,31 +122,31 @@ export default function ExplorePage({
                 </div>
               </div>
 
-              {/* Main Content Container - matching profile page */}
+              {/* Main Content Container */}
               <div className="w-full max-w-6xl mx-auto">
                 {/* Header Info Section */}
-                <div className="flex sm:mt-10 -mt-10 flex-col gap-4 px-4 sm:px-[58px]">
-                  <div className="space-y-2">
-                    <DialogHeader className="p-0 space-y-0">
-                      <DialogTitle className="text-[22px] sm:text-3xl md:text-4xl font-semibold leading-[33px] text-black">
+                <div className="flex flex-col gap-4 pt-16 sm:pt-20 px-4 sm:px-8">
+                  <div className="space-y-3">
+                    <DialogHeader className="p-0 space-y-1">
+                      <DialogTitle className="text-2xl sm:text-3xl md:text-4xl font-semibold text-black">
                         {selectedUser.name}
                       </DialogTitle>
                     </DialogHeader>
                     
                     {/* Location and Availability */}
-                    <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-                      <div className="flex items-center gap-2 text-gray-600">
-                        <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
-                        <span className="text-sm sm:text-base">{selectedUser.location}</span>
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                      <div className="flex items-center gap-1.5 text-gray-600">
+                        <MapPin className="w-4 h-4" />
+                        <span className="text-sm">{selectedUser.location}</span>
                       </div>
                       <span
-                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${
+                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
                           selectedUser.availableForWork
-                            ? "bg-green-100 text-green-800"
-                            : "bg-gray-100 text-gray-800"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-gray-200 text-gray-700"
                         }`}
                       >
-                        {selectedUser.availableForWork ? "Available for Work" : "Not Available"}
+                        {selectedUser.availableForWork ? "Available" : "Not Available"}
                       </span>
                     </div>
                   </div>
@@ -156,7 +157,7 @@ export default function ExplorePage({
                       {selectedUser.roles.slice(0, 6).map((role) => (
                         <span
                           key={role.id}
-                          className="flex items-center rounded-[29px] h-[19px] bg-[#FA6E80] px-4 py-1 text-[10px] font-[400] tracking-wide text-white"
+                          className="inline-flex items-center rounded-full bg-[#FA6E80] px-4 py-1.5 text-xs font-medium text-white"
                         >
                           {role.roleName}
                         </span>
@@ -166,21 +167,21 @@ export default function ExplorePage({
 
                   {/* Bio Preview */}
                   {selectedUser.bio && (
-                    <p className="text-[14px] leading-[21px] text-[#181818] line-clamp-3">{selectedUser.bio}</p>
+                    <p className="text-sm leading-relaxed text-gray-700 line-clamp-2">{selectedUser.bio}</p>
                   )}
                 </div>
 
-                <div className="w-full bg-slate-200 h-px sm:h-[1px] my-6" />
+                <div className="w-full bg-gray-200 h-px my-6" />
 
                 {/* Content Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 px-4 sm:px-[58px] pb-8 sm:pb-12">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 px-4 sm:px-8 pb-12">
                   {/* Left Column - Main Content */}
-                  <div className="lg:col-span-2 space-y-4 sm:space-y-6 order-2 lg:order-1">
+                  <div className="lg:col-span-2 space-y-6 order-2 lg:order-1">
                     {/* Bio - Full Version */}
                     {selectedUser.bio && (
-                      <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
-                        <h3 className="font-semibold text-lg sm:text-xl mb-2 sm:mb-3">About</h3>
-                        <p className="text-gray-700 text-sm sm:text-base leading-relaxed whitespace-pre-line">
+                      <div className="bg-white rounded-lg shadow-sm p-6">
+                        <h3 className="font-semibold text-xl mb-3">About</h3>
+                        <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
                           {selectedUser.bio}
                         </p>
                       </div>
@@ -188,33 +189,33 @@ export default function ExplorePage({
 
                     {/* Credits */}
                     {selectedUser.credits && selectedUser.credits.length > 0 ? (
-                      <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
-                        <h3 className="font-semibold text-lg sm:text-xl mb-3 sm:mb-4 flex items-center gap-2">
-                          <Briefcase className="w-5 h-5 sm:w-6 sm:h-6 text-[#31A7AC]" />
+                      <div className="bg-white rounded-lg shadow-sm p-6">
+                        <h3 className="font-semibold text-xl mb-4 flex items-center gap-2">
+                          <Briefcase className="w-5 h-5 text-[#31A7AC]" />
                           Credits & Work History ({selectedUser.credits.length})
                         </h3>
-                        <div className="space-y-3 sm:space-y-4">
+                        <div className="space-y-4">
                           {selectedUser.credits.map((credit) => (
                             <div
                               key={credit.id}
-                              className="border-l-4 border-[#31A7AC] pl-3 sm:pl-5 py-2 sm:py-3 hover:bg-gray-50 transition-colors"
+                              className="border-l-4 border-[#31A7AC] pl-4 py-3 hover:bg-gray-50 transition-colors rounded-r"
                             >
-                              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 sm:gap-0">
+                              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
                                 <div className="flex-1">
-                                  <h4 className="font-semibold text-base sm:text-lg text-gray-900">
+                                  <h4 className="font-semibold text-base text-gray-900">
                                     {credit.title}
                                   </h4>
-                                  <p className="text-sm sm:text-base text-[#31A7AC] font-medium mt-1">
+                                  <p className="text-sm text-[#31A7AC] font-medium mt-1">
                                     {credit.role}
                                   </p>
                                   {credit.description && (
-                                    <p className="text-xs sm:text-sm text-gray-600 mt-1 sm:mt-2">
+                                    <p className="text-sm text-gray-600 mt-2">
                                       {credit.description}
                                     </p>
                                   )}
                                 </div>
                                 {credit.year && (
-                                  <span className="text-sm sm:text-base text-gray-500 font-semibold sm:ml-4">
+                                  <span className="text-sm text-gray-500 font-semibold">
                                     {credit.year}
                                   </span>
                                 )}
@@ -224,53 +225,53 @@ export default function ExplorePage({
                         </div>
                       </div>
                     ) : (
-                      <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
-                        <h3 className="font-semibold text-lg sm:text-xl mb-3 sm:mb-4 flex items-center gap-2">
-                          <Briefcase className="w-5 h-5 sm:w-6 sm:h-6 text-[#31A7AC]" />
+                      <div className="bg-white rounded-lg shadow-sm p-6">
+                        <h3 className="font-semibold text-xl mb-4 flex items-center gap-2">
+                          <Briefcase className="w-5 h-5 text-[#31A7AC]" />
                           Credits & Work History
                         </h3>
-                        <p className="text-gray-500 text-xs sm:text-sm">No credits added yet.</p>
+                        <p className="text-gray-500 text-sm">No credits added yet.</p>
                       </div>
                     )}
 
                     {/* Highlights */}
                     {selectedUser.highlights && selectedUser.highlights.length > 0 ? (
-                      <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
-                        <h3 className="font-semibold text-lg sm:text-xl mb-3 sm:mb-4">Highlights ({selectedUser.highlights.length})</h3>
-                        <ul className="space-y-2 sm:space-y-3">
+                      <div className="bg-white rounded-lg shadow-sm p-6">
+                        <h3 className="font-semibold text-xl mb-4">Highlights ({selectedUser.highlights.length})</h3>
+                        <ul className="space-y-3">
                           {selectedUser.highlights.map((highlight) => (
                             <li
                               key={highlight.id}
-                              className="flex items-start gap-2 sm:gap-3 text-gray-700"
+                              className="flex items-start gap-3 text-gray-700"
                             >
-                              <span className="text-[#31A7AC] mt-0.5 sm:mt-1">★</span>
-                              <span className="text-sm sm:text-base">{highlight.highlight}</span>
+                              <span className="text-[#31A7AC] text-lg mt-0.5">★</span>
+                              <span className="text-sm flex-1">{highlight.highlight}</span>
                             </li>
                           ))}
                         </ul>
                       </div>
                     ) : (
-                      <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
-                        <h3 className="font-semibold text-lg sm:text-xl mb-3 sm:mb-4">Highlights</h3>
-                        <p className="text-gray-500 text-xs sm:text-sm">No highlights added yet.</p>
+                      <div className="bg-white rounded-lg shadow-sm p-6">
+                        <h3 className="font-semibold text-xl mb-4">Highlights</h3>
+                        <p className="text-gray-500 text-sm">No highlights added yet.</p>
                       </div>
                     )}
                   </div>
 
                   {/* Right Column - Sidebar */}
-                  <div className="space-y-4 sm:space-y-6 order-1 lg:order-2">
+                  <div className="space-y-6 order-1 lg:order-2">
                     {/* Skills */}
                     {selectedUser.skills && selectedUser.skills.length > 0 && (
-                      <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
-                        <h3 className="font-semibold text-lg sm:text-xl mb-3 sm:mb-4">Skills</h3>
-                        <div className="flex flex-wrap gap-2">
+                      <div className="bg-white rounded-lg shadow-sm p-6">
+                        <h3 className="font-semibold text-xl mb-4">Skills</h3>
+                        <div className="flex flex-col gap-3">
                           {selectedUser.skills.map((skill) => (
-                            <span
+                            <div
                               key={skill.id}
-                              className="bg-gray-100 text-gray-700 text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg font-medium"
+                              className="bg-gray-100 text-gray-800 text-sm px-4 py-3 rounded-lg font-medium"
                             >
                               {skill.skillName}
-                            </span>
+                            </div>
                           ))}
                         </div>
                       </div>
@@ -278,17 +279,17 @@ export default function ExplorePage({
 
                     {/* Availability Calendar */}
                     {selectedUser.availability && selectedUser.availability.length > 0 && (
-                      <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
-                        <h3 className="font-semibold text-lg sm:text-xl mb-3 sm:mb-4 flex items-center gap-2">
-                          <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-[#31A7AC]" />
+                      <div className="bg-white rounded-lg shadow-sm p-6">
+                        <h3 className="font-semibold text-xl mb-4 flex items-center gap-2">
+                          <Calendar className="w-5 h-5 text-[#31A7AC]" />
                           Availability
                         </h3>
-                        <div className="space-y-2 max-h-64 overflow-y-auto">
+                        <div className="space-y-2 max-h-80 overflow-y-auto">
                           {selectedUser.availability.slice(0, 30).map((avail) => {
                             const statusColors = {
-                              available: "bg-green-100 text-green-800 border-green-300",
-                              hold: "bg-yellow-100 text-yellow-800 border-yellow-300",
-                              na: "bg-red-100 text-red-800 border-red-300"
+                              available: "bg-green-50 text-green-700 border-green-200",
+                              hold: "bg-yellow-50 text-yellow-700 border-yellow-200",
+                              na: "bg-red-50 text-red-700 border-red-200"
                             };
                             const statusLabels = {
                               available: "Available",
@@ -298,9 +299,9 @@ export default function ExplorePage({
                             return (
                               <div
                                 key={avail.id}
-                                className="flex items-center justify-between py-2 px-2 sm:px-3 bg-gray-50 rounded-lg"
+                                className="flex items-center justify-between py-2.5 px-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                               >
-                                <span className="text-xs sm:text-sm text-gray-700">
+                                <span className="text-sm text-gray-700 font-medium">
                                   {new Date(avail.date).toLocaleDateString('en-US', {
                                     weekday: 'short',
                                     year: 'numeric',
@@ -309,7 +310,7 @@ export default function ExplorePage({
                                   })}
                                 </span>
                                 <span
-                                  className={`text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full border font-medium ${
+                                  className={`text-xs px-2.5 py-1 rounded-full border font-medium ${
                                     statusColors[avail.status as keyof typeof statusColors] || "bg-gray-100 text-gray-800"
                                   }`}
                                 >
@@ -320,7 +321,7 @@ export default function ExplorePage({
                           })}
                         </div>
                         {selectedUser.availability.length > 30 && (
-                          <p className="text-[10px] sm:text-xs text-gray-500 mt-2 text-center">
+                          <p className="text-xs text-gray-500 mt-3 text-center">
                             Showing first 30 dates
                           </p>
                         )}
