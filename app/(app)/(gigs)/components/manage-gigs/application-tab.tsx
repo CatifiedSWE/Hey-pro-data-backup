@@ -330,7 +330,11 @@ export function ApplicationTab({ selectedGigIds, actionIndicators, onActionChang
                                                 </div>
                                             </td>
                                             <td className="h-[60px] border border-[#DEDEDE] w-[100px] px-4 py-2 bg-white">
-                                                <button className="text-[#27B4BC] hover:underline text-sm">
+                                                <button 
+                                                    onClick={() => handleViewCredits(app.applicant.id, app.applicant.name)}
+                                                    className="text-[#27B4BC] hover:underline text-sm"
+                                                    data-testid={`view-credits-${app.applicant.id}`}
+                                                >
                                                     View credits
                                                 </button>
                                             </td>
