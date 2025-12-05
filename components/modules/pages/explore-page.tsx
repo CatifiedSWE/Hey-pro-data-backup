@@ -98,7 +98,7 @@ export default function ExplorePage({
           ) : selectedUser ? (
             <div className="w-full h-full bg-gray-50 overflow-y-auto overflow-x-hidden">
               {/* Banner Section */}
-              <div className="relative w-full overflow-x-hidden">
+              <div className="relative w-full overflow-x-hidden pb-12 sm:pb-16 md:pb-20">
                 {/* Banner Image */}
                 <div className="relative h-[120px] sm:h-[180px] md:h-[220px] w-full overflow-hidden">
                   <Image
@@ -110,7 +110,7 @@ export default function ExplorePage({
                 </div>
                 
                 {/* Profile Photo - positioned at bottom of banner */}
-                <div className="absolute bottom-0 left-4 sm:left-12 transform translate-y-1/2 z-10">
+                <div className="absolute top-[75px] sm:top-[115px] md:top-[145px] left-4 sm:left-12 z-10">
                   <div className="relative h-[90px] w-[90px] sm:h-[130px] sm:w-[130px] md:h-[150px] md:w-[150px] rounded-full overflow-hidden bg-white border-4 border-white shadow-xl">
                     <Image
                       src={selectedUser.avatar || "/default-profile.png"}
@@ -125,7 +125,7 @@ export default function ExplorePage({
               {/* Main Content Container */}
               <div className="w-full max-w-7xl mx-auto overflow-x-hidden">
                 {/* Header Info Section */}
-                <div className="flex flex-col gap-4 pt-14 sm:pt-20 md:pt-24 px-4 sm:px-12 overflow-x-hidden">
+                <div className="flex flex-col gap-4 pt-2 sm:pt-4 px-4 sm:px-12 overflow-x-hidden">
                   <div className="space-y-3">
                     <DialogHeader className="p-0 space-y-1 text-left">
                       <DialogTitle className="text-2xl sm:text-3xl md:text-4xl font-semibold text-black text-left">
