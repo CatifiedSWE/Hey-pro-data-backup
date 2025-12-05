@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 import {
     Card,
@@ -39,24 +39,23 @@ type AvailabilityData = {
     applicantsAvailability: ApplicantAvailability[];
 };
 
-// Helper to build the calendar structure
 type DateColumn = {
     fullKey: string; // "Sep 2025-12"
     day: string; // "12"
-    dayName: string; // "F" (Friday) etc - For now assuming we simulate day names or calculate them
+    dayName: string; // "M", "T", "W"...
     monthLabel: string; // "Sep 2025"
+    year: number;
+    monthName: string; // "Sep"
+    dateObj: Date;
 };
 
 const buildCalendarStructure = (windows: Array<{ label: string; range: string }>) => {
     const columns: DateColumn[] = [];
     
-    // Mapping of windows to parsed dates
-    // Window label example: "Sep 2025"
-    
     windows.forEach((window) => {
-        const [month, year] = window.label.split(" ");
-        const monthIndex = new Date(`${month} 1, 2000`).getMonth(); // simplistic
-        const yearNum = parseInt(year);
+        const [month, yearStr] = window.label.split(" ");
+        const monthIndex = new Date(`${month} 1, 2000`).getMonth();
+        const yearNum = parseInt(yearStr);
         
         const tokens = window.range
             .split(",")
@@ -77,7 +76,10 @@ const buildCalendarStructure = (windows: Array<{ label: string; range: string }>
                             fullKey,
                             day: day.toString(),
                             dayName: dayName || 'D',
-                            monthLabel: window.label
+                            monthLabel: window.label,
+                            year: yearNum,
+                            monthName: month,
+                            dateObj: date
                         });
                     }
                 }
@@ -91,35 +93,20 @@ const buildCalendarStructure = (windows: Array<{ label: string; range: string }>
                         fullKey,
                         day: day.toString(),
                         dayName: dayName || 'D',
-                        monthLabel: window.label
+                        monthLabel: window.label,
+                        year: yearNum,
+                        monthName: month,
+                        dateObj: date
                     });
                 }
             }
         });
     });
+
+    // Sort columns by date
+    columns.sort((a, b) => a.dateObj.getTime() - b.dateObj.getTime());
     
-    // Group by month label for the header
-    const months: { label: string; colspan: number }[] = [];
-    let currentMonth = "";
-    let count = 0;
-    
-    columns.forEach((col, index) => {
-        if (col.monthLabel !== currentMonth) {
-            if (currentMonth) {
-                months.push({ label: currentMonth, colspan: count });
-            }
-            currentMonth = col.monthLabel;
-            count = 1;
-        } else {
-            count++;
-        }
-        
-        if (index === columns.length - 1) {
-            months.push({ label: currentMonth, colspan: count });
-        }
-    });
-    
-    return { columns, months };
+    return columns;
 };
 
 type AvailabilityTabProps = {
@@ -143,13 +130,11 @@ export function AvailabilityTab({ selectedGigIds }: AvailabilityTabProps) {
 
                 await Promise.all(
                     selectedGigIds.map(async (gigId) => {
-                        // Fetch gig details
                         const gigResponse = await apiCalling({
                             method: 'get',
                             route: `/gigs/${gigId}`,
                         });
 
-                        // Fetch availability
                         const availabilityResponse = await apiCalling({
                             method: 'get',
                             route: `/gigs/${gigId}/availability`,
@@ -206,30 +191,76 @@ export function AvailabilityTab({ selectedGigIds }: AvailabilityTabProps) {
     }
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-12">
             {Object.entries(availabilityData).map(([gigId, { gig, availability }]) => {
-                const { columns, months } = buildCalendarStructure(gig.dateWindows);
+                const columns = buildCalendarStructure(gig.dateWindows);
                 const applicants = availability.applicantsAvailability || [];
+
+                // Group columns by Month/Year for the top navigation
+                const timelineGroups = useMemo(() => {
+                    const groups: { year: number; months: { name: string; fullLabel: string; rangeText: string }[] }[] = [];
+                    
+                    gig.dateWindows.forEach(window => {
+                        const [month, yearStr] = window.label.split(" ");
+                        const year = parseInt(yearStr);
+                        
+                        let yearGroup = groups.find(g => g.year === year);
+                        if (!yearGroup) {
+                            yearGroup = { year, months: [] };
+                            groups.push(yearGroup);
+                        }
+                        
+                        yearGroup.months.push({
+                            name: month,
+                            fullLabel: window.label,
+                            rangeText: window.range
+                        });
+                    });
+                    
+                    return groups.sort((a, b) => a.year - b.year);
+                }, [gig.dateWindows]);
+
+                // Determine date range text for the first month (active one)
+                const firstMonthLabel = timelineGroups[0]?.months[0]?.fullLabel;
+                const lastMonthLabel = timelineGroups[timelineGroups.length - 1]?.months[timelineGroups[timelineGroups.length - 1]?.months.length - 1]?.fullLabel;
+                
+                const dateRangeTitle = firstMonthLabel && lastMonthLabel 
+                    ? `${firstMonthLabel} - ${lastMonthLabel}`
+                    : "";
 
                 return (
                     <section key={gigId} className="space-y-6 bg-transparent">
-                        <header className="space-y-3 overflow-x-auto no-scrollbar">
-                            <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
-                                <p className="text-lg font-semibold text-gray-900">{gig.title}</p>
-                                <span className="flex items-center gap-1 justify-center text-[#000000]">
-                                    <CalendarDays className="h-4 w-4" />
-                                    {gig.dateWindows.map((window, index) => (
-                                        <span key={`${gigId}-window-${index}`} className="">
-                                            <span className="font-[500] text-[14px]">
-                                                <span className="text-[#FA6E80] text-[14px]">{window.label.split(" ")[1]}</span>
-                                                <span className="bg-[#FA6E80] text-white px-2 py-0.5 rounded-full text-[12px] ml-1"> {window.label.split(" ")[0]}</span>
-                                            </span>
-                                            <span className="mx-1">|</span>
-                                            {window.range}
-                                            {index < gig.dateWindows.length - 1 && <span className="mx-1">·</span>}
-                                        </span>
-                                    ))}
-                                </span>
+                        <header className="overflow-x-auto no-scrollbar">
+                            <div className="flex items-center gap-6 text-sm min-w-max">
+                                {timelineGroups.map((yearGroup, yearIdx) => (
+                                    <div key={yearGroup.year} className="flex items-center gap-4">
+                                        <span className="font-semibold text-lg text-black">{yearGroup.year}</span>
+                                        
+                                        {yearGroup.months.map((month, monthIdx) => {
+                                            // Logic to determine if 'active' - for now, let's make the first one active as in design
+                                            const isActive = yearIdx === 0 && monthIdx === 0;
+                                            
+                                            return (
+                                                <div key={month.fullLabel} className="flex items-center gap-4">
+                                                    <span className={`
+                                                        px-4 py-1.5 rounded-full font-medium cursor-pointer transition-colors
+                                                        ${isActive 
+                                                            ? "bg-[#FA6E80] text-white" 
+                                                            : "text-gray-500 hover:bg-gray-100"}
+                                                    `}>
+                                                        {month.name}
+                                                    </span>
+                                                    
+                                                    {isActive && (
+                                                        <span className="text-gray-900 font-medium">
+                                                            {month.rangeText}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                ))}
                             </div>
                         </header>
 
@@ -240,23 +271,30 @@ export function AvailabilityTab({ selectedGigIds }: AvailabilityTabProps) {
                                 </CardHeader>
                             </Card>
                         ) : (
-                            <div className="overflow-x-auto no-scrollbar bg-white rounded-[10px]">
-                                <table className="min-w-full border-separate border-spacing-0 text-sm">
+                            <div className="overflow-x-auto no-scrollbar bg-white rounded-[10px] border border-gray-200">
+                                <table className="min-w-max border-separate border-spacing-0 text-sm">
                                     <thead>
-                                        <tr className="bg-[#FFF0F2]">
-                                            <th className="sticky left-0 z-20 w-[200px] border-b border-r bg-[#FFF0F2] p-0">
-                                                <div className="p-4 text-left font-medium text-[#FA6E80]">
-                                                    {months.map(m => m.label).join(' - ')}
+                                        <tr>
+                                            {/* Sticky User Column Header */}
+                                            <th className="sticky left-0 z-20 w-[280px] border-b border-r bg-white p-0 h-[70px]">
+                                                <div className="h-full w-full flex items-center px-6 font-medium text-gray-900 border-r-4 border-[#FA6E80] bg-gray-50">
+                                                    {dateRangeTitle}
                                                 </div>
                                             </th>
+                                            
+                                            {/* Date Columns */}
                                             {columns.map((col, idx) => (
                                                 <th 
                                                     key={`${gigId}-col-${col.fullKey}`} 
-                                                    className="min-w-[40px] border-b border-r border-[#FFE4E8] p-2 text-center last:border-r-0"
+                                                    className="min-w-[60px] border-b border-r border-gray-100 p-2 text-center h-[70px] last:border-r-0"
                                                 >
-                                                    <div className="flex flex-col items-center gap-1">
-                                                        <span className="text-xs text-[#FA6E80] font-medium">{col.dayName}</span>
-                                                        <span className="text-sm font-bold text-gray-700">{col.day}</span>
+                                                    <div className="flex flex-col items-center justify-center gap-1 h-full">
+                                                        <span className={`text-xs font-bold ${['S', 'Sun', 'Sat'].some(s => col.dayName.startsWith(s)) ? 'text-[#FA6E80]' : 'text-[#31A7AC]'}`}>
+                                                            {col.dayName}
+                                                        </span>
+                                                        <span className={`text-base font-bold ${['S', 'Sun', 'Sat'].some(s => col.dayName.startsWith(s)) ? 'text-[#FA6E80]' : 'text-black'}`}>
+                                                            {col.day}
+                                                        </span>
                                                     </div>
                                                 </th>
                                             ))}
@@ -265,8 +303,8 @@ export function AvailabilityTab({ selectedGigIds }: AvailabilityTabProps) {
                                     <tbody>
                                         {applicants.map((applicant, idx) => (
                                             <tr key={applicant.applicantId} className="group hover:bg-gray-50">
-                                                <td className="sticky left-0 z-10 border-b border-r bg-white group-hover:bg-gray-50">
-                                                    <div className="flex items-center gap-3 p-4">
+                                                <td className="sticky left-0 z-10 border-b border-r bg-white group-hover:bg-gray-50 h-[80px]">
+                                                    <div className="flex items-center gap-3 px-6 h-full">
                                                         {applicant.avatar ? (
                                                             <Image
                                                                 src={applicant.avatar}
@@ -276,14 +314,16 @@ export function AvailabilityTab({ selectedGigIds }: AvailabilityTabProps) {
                                                                 className="h-10 w-10 rounded-full object-cover"
                                                             />
                                                         ) : (
-                                                            <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
+                                                            <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-medium">
                                                                 {applicant.name.charAt(0)}
                                                             </div>
                                                         )}
-                                                        <div className="flex flex-col">
-                                                            <span className="font-medium text-gray-900">{applicant.name}</span>
+                                                        <div className="flex flex-col gap-0.5">
+                                                            <span className="font-medium text-gray-900 text-sm">{applicant.name}</span>
                                                             {applicant.creditsStatus === 'added' ? (
-                                                                <span className="text-xs text-[#31A7AC]">Credits added</span>
+                                                                <button className="text-xs text-[#31A7AC] hover:underline text-left">
+                                                                    Credits added
+                                                                </button>
                                                             ) : (
                                                                 <span className="text-xs text-gray-400">N/A</span>
                                                             )}
@@ -295,23 +335,19 @@ export function AvailabilityTab({ selectedGigIds }: AvailabilityTabProps) {
                                                     return (
                                                         <td 
                                                             key={`${applicant.applicantId}-${col.fullKey}`} 
-                                                            className="border-b border-r border-gray-100 p-0 last:border-r-0"
+                                                            className="border-b border-r border-gray-100 p-0 last:border-r-0 h-[80px]"
                                                         >
-                                                            {state === "na" && (
-                                                                <div className="h-[72px] w-full flex items-center justify-center">
-                                                                    <span className="text-xs text-gray-300">N/A</span>
-                                                                </div>
-                                                            )}
-                                                            {state === "hold" && (
-                                                                <div className="h-[72px] w-full bg-white flex items-center justify-center">
-                                                                    {/* Use blank or specific style */}
-                                                                </div>
-                                                            )}
-                                                            {state === "available" && (
-                                                                <div className="h-[72px] w-full bg-white flex items-center justify-center">
-                                                                    {/* Available cell content if needed */}
-                                                                </div>
-                                                            )}
+                                                            <div className="h-full w-full flex items-center justify-center">
+                                                                {state === "na" && (
+                                                                    <span className="text-sm text-gray-400">N/A</span>
+                                                                )}
+                                                                {state === "available" && (
+                                                                    <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                                                                )}
+                                                                {state === "hold" && (
+                                                                    <div className="h-2 w-2 rounded-full bg-yellow-500"></div>
+                                                                )}
+                                                            </div>
                                                         </td>
                                                     );
                                                 })}
