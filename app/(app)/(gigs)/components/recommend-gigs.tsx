@@ -55,12 +55,20 @@ type ExploreApiResponse = {
     }
 }
 
-export function SendRecommendationDialog({ className }: { className?: string }) {
+type SendRecommendationDialogProps = {
+    className?: string
+    selectedGigIds: string[]
+}
+
+export function SendRecommendationDialog({ className, selectedGigIds }: SendRecommendationDialogProps) {
     const [searchTerm, setSearchTerm] = useState("")
     const [selectedUsers, setSelectedUsers] = useState<RecommendationUser[]>([])
     const [users, setUsers] = useState<RecommendationUser[]>([])
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    const [message, setMessage] = useState("")
+    const [sending, setSending] = useState(false)
+    const [open, setOpen] = useState(false)
 
     // Fetch users from API
     useEffect(() => {
