@@ -216,7 +216,7 @@ export function SendRecommendationDialog({ className, selectedGigIds }: SendReco
                     </Button>
                 </DialogTrigger>
                 <DialogContent className="w-[582px] max-w-[90vw] border-0 bg-[#F8F8F8] p-0 sm:rounded-[20px] max-h-[90vh] overflow-y-auto">
-                    <div className="relative flex  flex-col gap-6 p-6">
+                    <div className="relative flex flex-col gap-6 p-6">
                         <DialogHeader className="items-start gap-1 border-b border-[#C8C8C8] pb-5">
                             <DialogTitle className="text-[18px] font-normal text-black">
                                 Make someone’s day!
