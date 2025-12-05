@@ -104,26 +104,32 @@ export function SeeAllReferralsDialog({ selectedGigIds }: SeeAllReferralsDialogP
     }, [searchTerm, referrals])
 
     return (
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
             <div>
                 <DialogTrigger asChild>
-                    <Button className="bg-[#fbfbfb] text-[#FA6E80] rounded-[10px] ">
+                    <button 
+                        className="text-[#FA6E80] font-medium text-sm hover:underline"
+                        disabled={selectedGigIds.length === 0}
+                    >
                         See referrals
-                    </Button>
+                    </button>
                 </DialogTrigger>
-                <DialogContent className=" rounded-[28px] px-10 ">
+                <DialogContent className="rounded-[28px] px-10">
                     <div className="space-y-6 p-2 mt-10">
                         <DialogHeader className="space-y-1 text-left">
                             <DialogTitle className="text-2xl font-semibold text-[#1D1D1F]">
-                                Referred people for your Gig
+                                Referred people for your Gig{selectedGigIds.length > 1 ? 's' : ''}
                             </DialogTitle>
+                            <p className="text-sm text-gray-600">
+                                Showing referrals for {selectedGigIds.length} selected gig{selectedGigIds.length > 1 ? 's' : ''}
+                            </p>
                         </DialogHeader>
 
                         <div className="">
                             <div className="relative">
                                 <Input
                                     id="user-search"
-                                    placeholder="Search people who all are recommended"
+                                    placeholder="Search referred people"
                                     value={searchTerm}
                                     onChange={(event) => setSearchTerm(event.target.value)}
                                     className="h-12 rounded-full border border-[#F7C7D2] bg-white pl-5 pr-16 text-sm text-[#515151] focus-visible:ring-0"
@@ -137,74 +143,75 @@ export function SeeAllReferralsDialog({ selectedGigIds }: SeeAllReferralsDialogP
                                 </button>
                             </div>
                         </div>
-                        <div>
-
-                        </div>
 
                         <ScrollArea className="max-h-[460px]">
-                            {filteredUsers.length === 0 ? (
+                            {loading ? (
+                                <div className="flex items-center justify-center py-20">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FA6E80]"></div>
+                                </div>
+                            ) : error ? (
+                                <div className="flex items-center justify-center py-20">
+                                    <p className="text-sm text-red-500">{error}</p>
+                                </div>
+                            ) : filteredReferrals.length === 0 ? (
                                 <p className="rounded-2xl bg-white px-4 py-10 text-center text-sm text-muted-foreground">
-                                    No users match your search.
+                                    {searchTerm ? 'No referrals match your search.' : 'No referrals found for the selected gig(s).'}
                                 </p>
                             ) : (
-                                <div className="space-y-8 p-6">
-                                    {Object.entries(groupedUsers).map(([category, users]) => (
-                                        <section key={category} className="space-y-3">
-                                            <p className="text-sm font-semibold text-[#E05082]">
-                                                {category}
-                                            </p>
-                                            <div className="rounded-[22px] divide-y divide-[#F4F4F4]">
-                                                {users.map((user) => (
-                                                    <div
-                                                        key={user.id}
-                                                        className="flex flex-wrap items-center gap-4 py-4"
-                                                    >
-                                                        <div className="flex flex-1 items-center gap-3 min-w-[220px]">
-                                                            <Image
-                                                                src={user.avatar}
-                                                                alt={user.name}
-                                                                width={48}
-                                                                height={48}
-                                                                className="h-12 w-12 rounded-full object-cover"
-                                                            />
-                                                            <div>
-                                                                <p className="text-base font-semibold text-[#1D1D1F]">
-                                                                    {user.name}
-                                                                </p>
-                                                                <div className="flex items-center gap-1 text-sm text-[#6F6F6F]">
-                                                                    <MapPin className="h-4 w-4 text-[#8F8F8F]" />
-                                                                    <span>{user.location}</span>
-                                                                </div>
-                                                            </div>
+                                <div className="space-y-4 p-6">
+                                    {filteredReferrals.map((referral) => {
+                                        const user = referral.referred
+                                        const referrer = referral.referrer
+                                        
+                                        if (!user) return null
+
+                                        return (
+                                            <div
+                                                key={referral.id}
+                                                className="flex flex-col gap-3 py-4 border-b border-[#F4F4F4] last:border-0"
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    {user.avatar ? (
+                                                        <Image
+                                                            src={user.avatar}
+                                                            alt={user.name}
+                                                            width={48}
+                                                            height={48}
+                                                            className="h-12 w-12 rounded-full object-cover"
+                                                        />
+                                                    ) : (
+                                                        <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center text-lg font-semibold text-gray-600">
+                                                            {user.name.charAt(0).toUpperCase()}
                                                         </div>
-                                                        <div className="flex items-center gap-2">
-                                                            <div className="flex items-center -space-x-3">
-                                                                {user.mutualAvatars.map((avatar, index) => (
-                                                                    <Image
-                                                                        key={`${user.id}-mutual-${index}`}
-                                                                        src={avatar}
-                                                                        alt="mutual connection"
-                                                                        width={32}
-                                                                        height={32}
-                                                                        className="h-8 w-8 rounded-full border-2 border-white object-cover"
-                                                                    />
-                                                                ))}
-                                                                <span className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-[#15B5B0] text-xs font-bold text-white">
-                                                                    {user.mutualCount}
-                                                                </span>
-                                                            </div>
+                                                    )}
+                                                    <div className="flex-1">
+                                                        <p className="text-base font-semibold text-[#1D1D1F]">
+                                                            {user.name}
+                                                        </p>
+                                                        <div className="flex items-center gap-2 text-sm text-[#6F6F6F]">
+                                                            {referrer && (
+                                                                <span>Referred by: <span className="font-medium text-[#31A7AC]">{referrer.name}</span></span>
+                                                            )}
                                                         </div>
-                                                        <Button
-                                                            type="button"
-                                                            className="h-[44px] rounded-2xl bg-[#2AA9A7] px-5 text-sm font-semibold capitalize text-white shadow-md hover:bg-[#249694]"
-                                                        >
-                                                            Send Invite
-                                                        </Button>
                                                     </div>
-                                                ))}
+                                                    <div className="flex items-center gap-2">
+                                                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                                            referral.status === 'accepted' ? 'bg-green-100 text-green-700' :
+                                                            referral.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                                                            'bg-gray-100 text-gray-700'
+                                                        }`}>
+                                                            {referral.status}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                {referral.message && (
+                                                    <p className="text-sm text-gray-600 ml-[60px] italic">
+                                                        &quot;{referral.message}&quot;
+                                                    </p>
+                                                )}
                                             </div>
-                                        </section>
-                                    ))}
+                                        )
+                                    })}
                                 </div>
                             )}
                         </ScrollArea>
