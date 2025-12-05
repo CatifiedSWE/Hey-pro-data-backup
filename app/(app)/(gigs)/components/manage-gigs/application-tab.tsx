@@ -40,6 +40,15 @@ type Applicant = {
     };
 };
 
+type Credit = {
+    id: string;
+    title: string;
+    role: string;
+    year: string | number;
+    description?: string;
+    imdbUrl?: string;
+};
+
 type Gig = {
     id: string;
     title: string;
