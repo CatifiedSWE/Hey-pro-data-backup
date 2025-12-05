@@ -345,14 +345,31 @@ export function ApplicationTab({ selectedGigIds, actionIndicators, onActionChang
                                             </td>
                                             <td className="h-[60px] border border-[#DEDEDE] w-[120px] px-4 py-2 bg-white">
                                                 <div className="flex items-center gap-1">
-                                                    <div className="flex -space-x-2">
-                                                        <div className="h-6 w-6 rounded-full border-2 border-white bg-gray-200"></div>
-                                                        <div className="h-6 w-6 rounded-full border-2 border-white bg-gray-300"></div>
-                                                        <div className="h-6 w-6 rounded-full border-2 border-white bg-gray-400"></div>
-                                                    </div>
-                                                    <span className="bg-[#31A7AC] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center ml-1">
-                                                        15
-                                                    </span>
+                                                    {app.applicant.referrals.count > 0 ? (
+                                                        <>
+                                                            <div className="flex -space-x-2">
+                                                                {app.applicant.referrals.avatars.map((avatar, idx) => (
+                                                                    avatar ? (
+                                                                        <Image
+                                                                            key={idx}
+                                                                            src={avatar}
+                                                                            alt={`Referrer ${idx + 1}`}
+                                                                            width={24}
+                                                                            height={24}
+                                                                            className="h-6 w-6 rounded-full border-2 border-white object-cover"
+                                                                        />
+                                                                    ) : (
+                                                                        <div key={idx} className="h-6 w-6 rounded-full border-2 border-white bg-gray-300"></div>
+                                                                    )
+                                                                ))}
+                                                            </div>
+                                                            <span className="bg-[#31A7AC] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center ml-1">
+                                                                {app.applicant.referrals.count}
+                                                            </span>
+                                                        </>
+                                                    ) : (
+                                                        <span className="text-gray-400 text-sm">No referrals</span>
+                                                    )}
                                                 </div>
                                             </td>
                                             <td className="h-[60px] border border-[#DEDEDE] w-[60px] px-4 py-2 text-center bg-white">
