@@ -70,54 +70,56 @@ export function SendRecommendationDialog({ className, selectedGigIds }: SendReco
     const [sending, setSending] = useState(false)
     const [open, setOpen] = useState(false)
 
-    // Fetch users from API
+    // Fetch users from API when dialog opens
     useEffect(() => {
-        const fetchUsers = async () => {
-            try {
-                setLoading(true)
-                setError(null)
-                
-                const response = await apiCalling<ExploreApiResponse>({
-                    method: 'get',
-                    route: '/explore',
-                })
-
-                // Check if response is successful and has profiles
-                if (response.status && response.data) {
-                    // Handle the case where data might be nested differently
-                    const profilesData = (response.data as ExploreApiResponse).data?.profiles || (response.data as any).profiles
+        if (open) {
+            const fetchUsers = async () => {
+                try {
+                    setLoading(true)
+                    setError(null)
                     
-                    if (profilesData && Array.isArray(profilesData)) {
-                        const profiles = profilesData.map((profile: any) => ({
-                            id: profile.id,
-                            userId: profile.userId,
-                            avatar: profile.avatar,
-                            name: profile.name || profile.displayName,
-                            location: profile.location,
-                            roles: profile.roles || []
-                        }))
-                        setUsers(profiles)
-                    } else {
-                        console.error('No profiles found in response:', response.data)
-                        setError('Failed to load users')
-                        toast.error('Failed to load users')
-                    }
-                } else {
-                    console.error('API call failed:', response)
-                    setError(response.message || 'Failed to load users')
-                    toast.error(response.message || 'Failed to load users')
-                }
-            } catch (err) {
-                console.error('Error fetching users:', err)
-                setError('Failed to load users')
-                toast.error('Failed to load users')
-            } finally {
-                setLoading(false)
-            }
-        }
+                    const response = await apiCalling<ExploreApiResponse>({
+                        method: 'get',
+                        route: '/explore',
+                    })
 
-        fetchUsers()
-    }, [])
+                    // Check if response is successful and has profiles
+                    if (response.status && response.data) {
+                        // Handle the case where data might be nested differently
+                        const profilesData = (response.data as ExploreApiResponse).data?.profiles || (response.data as any).profiles
+                        
+                        if (profilesData && Array.isArray(profilesData)) {
+                            const profiles = profilesData.map((profile: any) => ({
+                                id: profile.id,
+                                userId: profile.userId,
+                                avatar: profile.avatar,
+                                name: profile.name || profile.displayName,
+                                location: profile.location,
+                                roles: profile.roles || []
+                            }))
+                            setUsers(profiles)
+                        } else {
+                            console.error('No profiles found in response:', response.data)
+                            setError('Failed to load users')
+                            toast.error('Failed to load users')
+                        }
+                    } else {
+                        console.error('API call failed:', response)
+                        setError(response.message || 'Failed to load users')
+                        toast.error(response.message || 'Failed to load users')
+                    }
+                } catch (err) {
+                    console.error('Error fetching users:', err)
+                    setError('Failed to load users')
+                    toast.error('Failed to load users')
+                } finally {
+                    setLoading(false)
+                }
+            }
+
+            fetchUsers()
+        }
+    }, [open])
 
     const filteredUsers = useMemo(() => {
         const query = searchTerm.trim().toLowerCase()
