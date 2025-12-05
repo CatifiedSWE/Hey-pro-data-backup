@@ -195,7 +195,7 @@ export function ContactListTab({ selectedGigIds, actionIndicators }: ContactList
                             </div>
 
                             {contacts.length === 0 ? (
-                                <p className="px-2 text-sm text-gray-500">No contacts added yet for this gig.</p>
+                                <p className="px-2 text-sm text-gray-500">No shortlisted applicants for this gig yet.</p>
                             ) : (
                                 <div className="space-y-4">
                                     {Object.entries(contactsByDepartment).map(([department, deptContacts]) => (
