@@ -145,8 +145,62 @@ export function SendRecommendationDialog({ className, selectedGigIds }: SendReco
         })
     }
 
-    const handleSend = () => {
-        console.log("Recommendation recipients:", selectedUsers)
+    const handleSend = async () => {
+        if (selectedUsers.length === 0 || selectedGigIds.length === 0) {
+            toast.error('Please select at least one user and ensure gigs are selected')
+            return
+        }
+
+        setSending(true)
+        let successCount = 0
+        let errorCount = 0
+
+        try {
+            // Send referrals for each selected user to each selected gig
+            for (const gigId of selectedGigIds) {
+                for (const user of selectedUsers) {
+                    try {
+                        const response = await apiCalling({
+                            method: 'post',
+                            route: '/referrals',
+                            data: {
+                                referred_user_id: user.userId,
+                                context_type: 'gig',
+                                context_id: gigId,
+                                message: message.trim() || 'You have been invited to apply for this gig'
+                            }
+                        })
+
+                        if (response.status) {
+                            successCount++
+                        } else {
+                            errorCount++
+                            console.error('Failed to send referral:', response.message)
+                        }
+                    } catch (error) {
+                        errorCount++
+                        console.error('Error sending referral:', error)
+                    }
+                }
+            }
+
+            // Show results
+            if (errorCount === 0) {
+                toast.success(`Successfully sent ${successCount} invitation${successCount > 1 ? 's' : ''}`)
+                setOpen(false)
+                setSelectedUsers([])
+                setMessage('')
+            } else if (successCount > 0) {
+                toast.warning(`Sent ${successCount} invitation${successCount > 1 ? 's' : ''}, but ${errorCount} failed`)
+            } else {
+                toast.error('Failed to send invitations')
+            }
+        } catch (error) {
+            console.error('Error sending invitations:', error)
+            toast.error('Failed to send invitations')
+        } finally {
+            setSending(false)
+        }
     }
 
     return (
