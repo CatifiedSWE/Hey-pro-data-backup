@@ -137,14 +137,15 @@ export default function ViewProfileModal({ isOpen, onClose, userId }: ViewProfil
         className="relative w-full max-w-[1180px] min-h-screen bg-white"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close Button - Overlapping navbar area */}
+        {/* Close Button - High visibility with contrast */}
         <Button
           onClick={onClose}
-          className="fixed top-4 right-4 z-[60] h-12 w-12 rounded-full bg-white shadow-lg hover:bg-gray-100 border-2 border-gray-200"
+          className="fixed top-4 right-4 z-[60] h-12 w-12 rounded-full bg-white shadow-2xl hover:bg-gray-50 border-2 border-gray-300 transition-all hover:scale-110"
           size="icon"
           data-testid="close-profile-modal"
+          aria-label="Close profile"
         >
-          <X className="h-6 w-6 text-gray-700" />
+          <X className="h-7 w-7 text-gray-900 stroke-[2.5]" />
         </Button>
 
         {/* Content Area */}

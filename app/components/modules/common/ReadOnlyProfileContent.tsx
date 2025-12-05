@@ -17,6 +17,7 @@ interface ReadOnlyProfileProps {
     country: string;
     city: string;
     location: string;
+    availableForWork: boolean;
     profileCompletionPercentage: number;
     roles: Array<{
       id: string;
@@ -90,6 +91,12 @@ export default function ReadOnlyProfileContent({ profile }: ReadOnlyProfileProps
   const highlightedRoles = profile.roles.slice(0, 6);
   const extraRecommendations = Math.max(profile.recommendations.length - 3, 0);
   
+  // Availability status display
+  const availabilityStatus = profile.availableForWork ? "Available" : "Not Available";
+  const availabilityColor = profile.availableForWork 
+    ? "bg-green-100 text-green-700 border-green-300" 
+    : "bg-red-100 text-red-700 border-red-300";
+  
   const primaryLink = profile.links[0]?.url ?? "";
   
   const linkSummary = (() => {
@@ -147,14 +154,19 @@ export default function ReadOnlyProfileContent({ profile }: ReadOnlyProfileProps
             </div>
           </div>
 
-          <div className="absolute inset-x-0 top-[160px] max-w-[367.8px] left-[200px] hidden justify-center font-[400] text-[11px] sm:flex">
-            <div className="flex items-center gap-2 px-4 py-2 text-[#393939]">
-              <MapPin className="h-3.5 w-3.5 text-[#393939]" />
-              <span className="whitespace-nowrap">{locationDescriptor}</span>
+          <div className="absolute inset-x-0 top-[160px] max-w-[450px] left-[200px] hidden justify-start font-[400] text-[11px] sm:flex">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 px-4 py-2 text-[#393939]">
+                <MapPin className="h-3.5 w-3.5 text-[#393939]" />
+                <span className="whitespace-nowrap">{locationDescriptor}</span>
+              </div>
+              <div className={`flex items-center px-3 py-1.5 rounded-full text-xs font-medium border ${availabilityColor}`}>
+                {availabilityStatus}
+              </div>
             </div>
           </div>
 
-          <div className="flex sm:mt-10 -mt-10 flex-col gap-4 px-4 sm:px-[58px]">
+          <div className="flex sm:mt-10 mt-4 flex-col gap-4 px-4 sm:px-[58px]">
             <div className="space-y-2">
               <div className="flex flex-wrap items-center gap-4">
                 <h1 className="text-[22px] font-semibold leading-[33px] text-black">{profile.displayName}</h1>
@@ -183,6 +195,17 @@ export default function ReadOnlyProfileContent({ profile }: ReadOnlyProfileProps
               </div>
             </div>
 
+            {/* Mobile Location & Availability - shown only on small screens */}
+            <div className="flex sm:hidden flex-wrap items-center gap-3 text-[11px]">
+              <div className="flex items-center gap-1.5 text-[#393939]">
+                <MapPin className="h-3.5 w-3.5 text-[#393939]" />
+                <span>{locationDescriptor}</span>
+              </div>
+              <div className={`flex items-center px-3 py-1.5 rounded-full text-xs font-medium border ${availabilityColor}`}>
+                {availabilityStatus}
+              </div>
+            </div>
+
             <div className="flex flex-wrap gap-2">
               {highlightedRoles.map((role) => (
                 <span
@@ -208,9 +231,28 @@ export default function ReadOnlyProfileContent({ profile }: ReadOnlyProfileProps
 
         <div className="w-full bg-slate-200 h-px sm:h-[1px] mb-5" />
 
+        {/* Professional Roles Section */}
+        {profile.roles.length > 0 && (
+          <div className="w-full rounded-[20px] bg-[#FAFAFA] px-6 py-7 shadow-[0_1px_10px_rgba(0,0,0,0.1)] sm:px-10 sm:py-9">
+            <div className="mb-5">
+              <h2 className="text-[22px] font-semibold leading-[33px] text-[#000]">Professional Roles</h2>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {profile.roles.map((role) => (
+                <span
+                  key={role.id}
+                  className="inline-flex items-center rounded-[5px] border-2 border-[#31A7AC] bg-white px-4 py-2 text-sm font-medium text-[#31A7AC]"
+                >
+                  {role.roleName}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* About Section */}
         {profile.bio && (
-          <div className="w-full rounded-[20px] bg-[#FAFAFA] px-6 py-7 shadow-[0_1px_10px_rgba(0,0,0,0.1)] sm:px-10 sm:py-9">
+          <div className="w-full rounded-[20px] bg-[#FAFAFA] px-6 py-7 shadow-[0_1px_10px_rgba(0,0,0,0.1)] sm:px-10 sm:py-9 mt-8">
             <div className="mb-6">
               <h2 className="text-[22px] font-semibold leading-[33px] text-[#000]">About</h2>
             </div>
@@ -367,9 +409,9 @@ export default function ReadOnlyProfileContent({ profile }: ReadOnlyProfileProps
                   if (highlight.sourceType === 'credit' && highlight.sourceData) {
                     const credit = highlight.sourceData;
                     return {
-                      title: credit.credit_title || 'Untitled Credit',
+                      title: credit.creditTitle || credit.credit_title || 'Untitled Credit',
                       description: credit.description || '',
-                      imageUrl: credit.image_url || '/placeholder.png'
+                      imageUrl: credit.imgUrl || credit.image_url || '/placeholder.png'
                     };
                   } else if (highlight.sourceType === 'slate_post' && highlight.sourceData) {
                     const post = highlight.sourceData;
@@ -377,14 +419,14 @@ export default function ReadOnlyProfileContent({ profile }: ReadOnlyProfileProps
                     return {
                       title: 'Slate Post',
                       description: post.content || '',
-                      imageUrl: firstMedia?.media_url || '/placeholder.png'
+                      imageUrl: firstMedia?.media_url || firstMedia?.mediaUrl || '/placeholder.png'
                     };
                   } else if (highlight.title && highlight.description) {
                     // Legacy format
                     return {
                       title: highlight.title,
                       description: highlight.description,
-                      imageUrl: highlight.imageUrl || '/placeholder.png'
+                      imageUrl: highlight.imageUrl || highlight.image_url || '/placeholder.png'
                     };
                   }
                   // Fallback to text-only highlight
@@ -396,7 +438,7 @@ export default function ReadOnlyProfileContent({ profile }: ReadOnlyProfileProps
                 };
 
                 const highlightData = getHighlightData();
-                const words = highlightData.description.trim().split(/\s+/);
+                const words = (highlightData.description || '').trim().split(/\s+/);
                 const truncated = words.slice(0, 20).join(" ");
                 const hasMore = words.length > 20;
 
@@ -406,7 +448,7 @@ export default function ReadOnlyProfileContent({ profile }: ReadOnlyProfileProps
                       <div className="relative w-full h-[263px] overflow-hidden rounded-[8px] bg-gray-100">
                         <Image
                           src={highlightData.imageUrl}
-                          alt={highlightData.title}
+                          alt={highlightData.title || 'Highlight'}
                           fill
                           sizes="336px"
                           className="object-cover transition-transform duration-500 hover:scale-105"
@@ -442,9 +484,9 @@ export default function ReadOnlyProfileContent({ profile }: ReadOnlyProfileProps
                   if (highlight.sourceType === 'credit' && highlight.sourceData) {
                     const credit = highlight.sourceData;
                     return {
-                      title: credit.credit_title || 'Untitled Credit',
+                      title: credit.creditTitle || credit.credit_title || 'Untitled Credit',
                       description: credit.description || '',
-                      imageUrl: credit.image_url || '/placeholder.png'
+                      imageUrl: credit.imgUrl || credit.image_url || '/placeholder.png'
                     };
                   } else if (highlight.sourceType === 'slate_post' && highlight.sourceData) {
                     const post = highlight.sourceData;
@@ -452,14 +494,14 @@ export default function ReadOnlyProfileContent({ profile }: ReadOnlyProfileProps
                     return {
                       title: 'Slate Post',
                       description: post.content || '',
-                      imageUrl: firstMedia?.media_url || '/placeholder.png'
+                      imageUrl: firstMedia?.media_url || firstMedia?.mediaUrl || '/placeholder.png'
                     };
                   } else if (highlight.title && highlight.description) {
                     // Legacy format
                     return {
                       title: highlight.title,
                       description: highlight.description,
-                      imageUrl: highlight.imageUrl || '/placeholder.png'
+                      imageUrl: highlight.imageUrl || highlight.image_url || '/placeholder.png'
                     };
                   }
                   // Fallback to text-only highlight
@@ -471,7 +513,7 @@ export default function ReadOnlyProfileContent({ profile }: ReadOnlyProfileProps
                 };
 
                 const highlightData = getHighlightData();
-                const words = highlightData.description.trim().split(/\s+/);
+                const words = (highlightData.description || '').trim().split(/\s+/);
                 const truncated = words.slice(0, 20).join(" ");
                 const hasMore = words.length > 20;
 
@@ -481,7 +523,7 @@ export default function ReadOnlyProfileContent({ profile }: ReadOnlyProfileProps
                       <div className="relative w-full h-[263px] overflow-hidden rounded-[8px] bg-gray-100">
                         <Image
                           src={highlightData.imageUrl}
-                          alt={highlightData.title}
+                          alt={highlightData.title || 'Highlight'}
                           fill
                           sizes="(max-width: 1024px) 100vw, 600px"
                           className="object-cover transition-transform duration-500 hover:scale-105"
