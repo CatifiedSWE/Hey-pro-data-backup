@@ -138,7 +138,18 @@ export default function ManageGigsPage() {
                             Add Gigs
                         </Link>
                     </Button>
-                    <Button className="bg-[#31A7AC] h-[44px] w-[80px]">Save</Button>
+                    <Button 
+                        onClick={handleSaveChanges}
+                        disabled={!hasChanges || isSaving}
+                        className={`h-[44px] w-[80px] ${
+                            hasChanges && !isSaving
+                                ? "bg-[#21B2C4] hover:bg-[#1AA5B8]"
+                                : "bg-gray-300 cursor-not-allowed"
+                        }`}
+                        data-testid="save-button"
+                    >
+                        {isSaving ? "Saving..." : "Save"}
+                    </Button>
                 </div>
             </div>
             <Tabs value={currentTab} onValueChange={setCurrentTab} className="space-y-6">
