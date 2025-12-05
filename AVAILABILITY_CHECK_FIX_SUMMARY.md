@@ -229,12 +229,60 @@ Implemented a comprehensive modal dialog that:
 - TypeScript type safety maintained
 - Accessibility considerations with test IDs
 
+## Additional Fix: Profile Name Fetching Issue
+
+### Problem
+The availability check was showing "Unknown" for all applicants because the API was querying for a non-existent `name` field in the database.
+
+### Root Cause
+The `/api/gigs/[id]/availability` endpoint was selecting `name` from `user_profiles` table, but the actual schema uses separate fields: `first_name`, `surname`, `alias_first_name`, and `alias_surname`.
+
+### Solution
+Updated `/app/app/api/gigs/[id]/availability/route.ts`:
+
+**Before:**
+```typescript
+const { data: profile } = await supabase
+  .from('user_profiles')
+  .select('name, profile_photo_url')
+  .eq('user_id', app.applicant_user_id)
+  .maybeSingle();
+
+return {
+  applicantId: app.applicant_user_id,
+  name: profile?.name || 'Unknown',
+  avatar: profile?.profile_photo_url || null,
+  ...
+};
+```
+
+**After:**
+```typescript
+const { data: profile } = await supabase
+  .from('user_profiles')
+  .select('first_name, surname, alias_first_name, alias_surname, profile_photo_url')
+  .eq('user_id', app.applicant_user_id)
+  .maybeSingle();
+
+return {
+  applicantId: app.applicant_user_id,
+  name: profile 
+    ? `${profile.alias_first_name || profile.first_name || ''} ${profile.alias_surname || profile.surname || ''}`.trim() || 'Unknown'
+    : 'Unknown',
+  avatar: profile?.profile_photo_url || null,
+  ...
+};
+```
+
+This matches the pattern used in the `/api/gigs/[id]/applications` endpoint and ensures proper name construction with alias support.
+
 ## Files Modified
-- `/app/app/(app)/(gigs)/components/manage-gigs/availability-tab.tsx`
+- `/app/app/(app)/(gigs)/components/manage-gigs/availability-tab.tsx` (Frontend component)
+- `/app/app/api/gigs/[id]/availability/route.ts` (Backend API endpoint)
 
 ## Related Files (Reference)
 - `/app/app/(app)/(gigs)/components/manage-gigs/application-tab.tsx` (Pattern reference)
-- `/app/app/api/gigs/[id]/availability/route.ts` (API endpoint)
+- `/app/app/api/gigs/[id]/applications/route.ts` (Name construction pattern reference)
 - `/app/app/api/explore/[userId]/route.ts` (Credits data source)
 
 ## Deployment Notes
