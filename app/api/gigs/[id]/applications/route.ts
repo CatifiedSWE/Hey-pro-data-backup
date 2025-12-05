@@ -122,6 +122,27 @@ export async function GET(
           .order('start_date', { ascending: false })
           .limit(3); // Get latest 3 experiences
 
+        // Get gig-specific referrals for this applicant
+        const { data: referrals } = await supabase
+          .from('referrals')
+          .select('referrer_user_id')
+          .eq('referred_user_id', app.applicant_user_id)
+          .eq('context_type', 'gig')
+          .eq('context_id', gigId);
+
+        // Fetch referrer profiles for the first 3 referrals
+        const referralProfiles = await Promise.all(
+          (referrals || []).slice(0, 3).map(async (referral) => {
+            const { data: referrerProfile } = await supabase
+              .from('user_profiles')
+              .select('profile_photo_url')
+              .eq('user_id', referral.referrer_user_id)
+              .maybeSingle();
+            
+            return referrerProfile?.profile_photo_url || null;
+          })
+        );
+
         return {
           id: app.id,
           gigId: app.gig_id,
@@ -154,7 +175,11 @@ export async function GET(
               startDate: exp.start_date,
               endDate: exp.end_date,
               isCurrent: exp.is_current
-            }))
+            })),
+            referrals: {
+              count: referrals?.length || 0,
+              avatars: referralProfiles
+            }
           }
         };
       })
