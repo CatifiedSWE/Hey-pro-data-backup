@@ -107,20 +107,19 @@ export async function GET(
           .eq('user_id', app.applicant_user_id)
           .order('sort_order');
 
-        // Get applicant experience
+        // Get applicant experience/credits
         const { data: experience } = await supabase
-          .from('user_experience')
+          .from('user_credits')
           .select(`
             id,
-            job_title,
-            company_name,
+            credit_title,
+            role,
             start_date,
-            end_date,
-            is_current
+            end_date
           `)
           .eq('user_id', app.applicant_user_id)
           .order('start_date', { ascending: false })
-          .limit(3); // Get latest 3 experiences
+          .limit(3); // Get latest 3 credits
 
         // Get gig-specific referrals for this applicant
         const { data: referrals } = await supabase
