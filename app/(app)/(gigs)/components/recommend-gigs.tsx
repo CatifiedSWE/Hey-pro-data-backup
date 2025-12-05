@@ -209,7 +209,7 @@ export function SendRecommendationDialog({ className, selectedGigIds }: SendReco
                 <DialogTrigger asChild>
                     <Button 
                         type="button" 
-                        className="bg-[#31A7AC] hover:bg-[#2a9398] text-white rounded-lg px-6 flex items-center gap-2"
+                        className="inline-flex h-[44px] items-center gap-2 rounded-[14px] bg-[#31A7AC] hover:bg-[#2a9398] px-6 py-3 text-sm font-medium text-white shadow-md"
                         disabled={selectedGigIds.length === 0}
                     >
                         <UserPlus className="h-5 w-5" />
