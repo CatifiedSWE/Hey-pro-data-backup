@@ -243,6 +243,20 @@ export function SendRecommendationDialog({ className, selectedGigIds }: SendReco
                                     <Search className="h-4 w-4 text-white" />
                                 </button>
                             </div>
+                            <div className="space-y-2">
+                                <label htmlFor="invitation-message" className="text-sm font-medium text-black">
+                                    Personal Message (Optional)
+                                </label>
+                                <textarea
+                                    id="invitation-message"
+                                    placeholder="Add a personal message to your invitation..."
+                                    value={message}
+                                    onChange={(e) => setMessage(e.target.value)}
+                                    className="w-full min-h-[80px] px-4 py-3 rounded-lg border border-gray-300 bg-white text-sm text-gray-700 placeholder:text-gray-400 focus:border-[#FA6E80] focus:outline-none focus:ring-1 focus:ring-[#FA6E80] resize-none"
+                                    maxLength={500}
+                                />
+                                <p className="text-xs text-gray-500 text-right">{message.length}/500</p>
+                            </div>
 
                             <div className="space-y-4">
                                 <p className="text-sm font-medium text-black">Crew members to recommend</p>
