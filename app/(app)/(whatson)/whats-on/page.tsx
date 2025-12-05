@@ -229,14 +229,15 @@ export default function WhatsOnHeader() {
     return (
         <>
             <div className=" w-full overflow-x-hidden overflow-hidden">
-                <div className="flex flex-row mx-auto px-1 gap-2 sm:gap-0 sm:items-center sm:justify-between justify-center">
+                <div className="flex flex-row mx-auto px-4 sm:px-0 gap-2 sm:gap-0 items-center justify-between sm:justify-between sm:w-full sm:max-w-7xl">
                     <span className="bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC] bg-clip-text text-transparent text-[26px] font-semibold">{"What's On"}</span>
-                    <Link href="/whats-on/manage-whats-on" className="ml-2 text-white bg-[#31A7AC] border rounded-[10px] sm:w-auto w-[192px] px-4 py-2 "> <span className="text-[16px] font-[400]">Manage What’s On</span></Link>
+                    <Link href="/whats-on/manage-whats-on" className="ml-2 text-white bg-[#31A7AC] border rounded-[10px] sm:w-auto w-auto whitespace-nowrap px-4 py-2"> <span className="text-[14px] sm:text-[16px] font-[400]">Manage What’s On</span></Link>
                 </div>
 
-                <div className="flex flex-row mx-auto w-full items-center gap-2 mt-4 px-4 sm:px-0 sm:justify-center sm:gap-0.5 sm:space-x-4 sm:w-full">
+                <div className="flex flex-row w-full items-center gap-2 mt-4 px-4 sm:px-0 sm:justify-center sm:gap-4">
+                    {/* Desktop Filter Button */}
                     <div
-                        className={`sm:flex items-center hidden justify-center space-x-2 h-[48px] border rounded-full px-4 py-2 cursor-pointer transition-all ${isFilterOpen ? 'w-[150px] bg-[#FA6E80]' : 'w-[150px] bg-[#f7f7f700] border-[#FA6E80] '}`}
+                        className={`sm:flex items-center hidden justify-center space-x-2 h-[48px] border rounded-full px-4 py-2 cursor-pointer transition-all shrink-0 ${isFilterOpen ? 'w-[150px] bg-[#FA6E80]' : 'w-[150px] bg-[#f7f7f700] border-[#FA6E80] '}`}
                         onClick={() => setIsFilterOpen(!isFilterOpen)}
                     >
                         <button className={`text-sm font-medium whitespace-nowrap ${isFilterOpen ? 'text-white' : 'text-[#FA6E80]'}`}>
@@ -244,21 +245,25 @@ export default function WhatsOnHeader() {
                         </button>
                         <Filter className={`h-5 w-5 ${isFilterOpen ? 'text-white' : 'text-[#FA6E80]'}`} />
                     </div>
-                    <div className="flex flex-row border rounded-full px-1 py-2 justify-between items-center h-[48px] flex-1 sm:flex-none sm:w-[960px]">
+                    
+                    {/* Search Bar */}
+                    <div className="flex flex-row border rounded-full px-3 py-2 justify-between items-center h-[48px] flex-1 min-w-0 sm:flex-none sm:w-full sm:max-w-[800px] lg:max-w-[960px]">
                         <input
                             placeholder="Search events..."
-                            className=" px-2 border-none outline-none focus:ring-0 text-sm bg-transparent"
+                            className="w-full px-2 border-none outline-none focus:ring-0 text-sm bg-transparent"
                             value={searchKeyword}
                             onChange={handleSearchChange}
                             onKeyPress={(e) => e.key === 'Enter' && handleSearchSubmit()}
                         />
                         <button 
                             onClick={handleSearchSubmit}
-                            className="relative flex items-center justify-center border rounded-full h-[34px] w-[34px] bg-[#FA6E80] cursor-pointer hover:bg-[#e85f71] transition-colors"
+                            className="relative shrink-0 flex items-center justify-center border rounded-full h-[34px] w-[34px] bg-[#FA6E80] cursor-pointer hover:bg-[#e85f71] transition-colors"
                         >
                             <Search className="h-5 w-5 text-white" />
                         </button>
                     </div>
+
+                    {/* Mobile Filter Button */}
                     <MobileFilter
                         filterForm={filterForm}
                         calendarCells={calendarCells}
