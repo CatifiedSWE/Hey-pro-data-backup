@@ -16,11 +16,23 @@ import { ContactListTab } from "../../components/manage-gigs/contact-list-tab";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Package } from "lucide-react";
+import apiCalling from "@/lib/apiCalling";
+import { toast } from "sonner";
+
+type PendingChange = {
+    applicationId: string;
+    gigId: string;
+    newStatus: string;
+};
 
 export default function ManageGigsPage() {
     const [selectedGigIds, setSelectedGigIds] = useState<string[]>([]);
     const [currentTab, setCurrentTab] = useState<string>("gigs");
     const [actionIndicators, setActionIndicators] = useState<Record<string, Partial<Record<"release" | "shortlist" | "confirm", boolean>>>>({});
+    const [hasChanges, setHasChanges] = useState(false);
+    const [pendingChanges, setPendingChanges] = useState<PendingChange[]>([]);
+    const [isSaving, setIsSaving] = useState(false);
+
     const handleToggleGig = (gigId: string, checked: boolean) => {
         setSelectedGigIds((prev) => {
             if (checked) {
@@ -41,6 +53,74 @@ export default function ManageGigsPage() {
                 [action]: !prev[rowKey]?.[action],
             },
         }));
+        // Mark that there are unsaved changes
+        setHasChanges(true);
+    };
+
+    const handleAddPendingChange = (change: PendingChange) => {
+        setPendingChanges((prev) => {
+            // Remove any existing change for the same application
+            const filtered = prev.filter(c => c.applicationId !== change.applicationId);
+            // Add the new change
+            return [...filtered, change];
+        });
+        setHasChanges(true);
+    };
+
+    const handleSaveChanges = async () => {
+        if (pendingChanges.length === 0) {
+            toast.info("No changes to save");
+            return;
+        }
+
+        setIsSaving(true);
+        let successCount = 0;
+        let errorCount = 0;
+
+        try {
+            // Process all pending changes
+            for (const change of pendingChanges) {
+                try {
+                    const response = await apiCalling({
+                        method: 'patch',
+                        route: `/gigs/${change.gigId}/applications/${change.applicationId}/status`,
+                        data: { status: change.newStatus },
+                    });
+
+                    if (response.status) {
+                        successCount++;
+                    } else {
+                        errorCount++;
+                        console.error('Failed to update application:', response.message);
+                    }
+                } catch (error) {
+                    errorCount++;
+                    console.error('Error updating application:', error);
+                }
+            }
+
+            // Show results
+            if (errorCount === 0) {
+                toast.success(`Successfully saved ${successCount} change${successCount > 1 ? 's' : ''}`);
+            } else if (successCount > 0) {
+                toast.warning(`Saved ${successCount} change${successCount > 1 ? 's' : ''}, but ${errorCount} failed`);
+            } else {
+                toast.error('Failed to save changes');
+            }
+
+            // Reset state after successful save
+            if (successCount > 0) {
+                setPendingChanges([]);
+                setHasChanges(false);
+                // Force refresh by updating selectedGigIds
+                setSelectedGigIds([...selectedGigIds]);
+            }
+        } catch (error) {
+            console.error('Error saving changes:', error);
+            toast.error('Failed to save changes');
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     return (
