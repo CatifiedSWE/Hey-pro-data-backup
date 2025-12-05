@@ -169,6 +169,7 @@ export default function ManageGigsPage() {
                         selectedGigIds={selectedGigIds}
                         actionIndicators={actionIndicators}
                         onActionChange={handleApplicantAction}
+                        onAddPendingChange={handleAddPendingChange}
                     />
                 </TabsContent>
 
