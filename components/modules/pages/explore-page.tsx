@@ -68,7 +68,7 @@ export default function ExplorePage({
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full overflow-x-hidden">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4">
         {projectsCardData.length > 0 ? (
           projectsCardData.map((project) => (
@@ -88,7 +88,7 @@ export default function ExplorePage({
       {/* Profile Modal - Full Screen */}
       <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>
         <DialogContent 
-          className="!max-w-none !w-screen !h-screen !max-h-screen !p-0 !m-0 !rounded-none !border-0 !top-0 !left-0 !translate-x-0 !translate-y-0 overflow-y-auto" 
+          className="!max-w-none !w-screen !h-screen !max-h-screen !p-0 !m-0 !rounded-none !border-0 !top-0 !left-0 !translate-x-0 !translate-y-0 overflow-y-auto overflow-x-hidden [&>button]:bg-white [&>button]:shadow-lg [&>button]:rounded-full [&>button]:w-10 [&>button]:h-10 [&>button]:flex [&>button]:items-center [&>button]:justify-center [&>button]:z-50" 
           data-testid="profile-modal"
         >
           {isLoading ? (
@@ -96,9 +96,9 @@ export default function ExplorePage({
               <p className="text-gray-500">Loading profile...</p>
             </div>
           ) : selectedUser ? (
-            <div className="w-full h-full bg-gray-50 overflow-y-auto">
+            <div className="w-full h-full bg-gray-50 overflow-y-auto overflow-x-hidden">
               {/* Banner Section */}
-              <div className="relative w-full">
+              <div className="relative w-full overflow-x-hidden">
                 {/* Banner Image */}
                 <div className="relative h-[120px] sm:h-[180px] md:h-[220px] w-full overflow-hidden">
                   <Image
@@ -123,9 +123,9 @@ export default function ExplorePage({
               </div>
 
               {/* Main Content Container */}
-              <div className="w-full max-w-7xl mx-auto">
+              <div className="w-full max-w-7xl mx-auto overflow-x-hidden">
                 {/* Header Info Section */}
-                <div className="flex flex-col gap-4 pt-14 sm:pt-20 md:pt-24 px-4 sm:px-12">
+                <div className="flex flex-col gap-4 pt-14 sm:pt-20 md:pt-24 px-4 sm:px-12 overflow-x-hidden">
                   <div className="space-y-3">
                     <DialogHeader className="p-0 space-y-1 text-left">
                       <DialogTitle className="text-2xl sm:text-3xl md:text-4xl font-semibold text-black text-left">
@@ -171,10 +171,10 @@ export default function ExplorePage({
                   )}
                 </div>
 
-                <div className="w-full bg-gray-200 h-px my-6 mx-4 sm:mx-12" />
+                <div className="w-[calc(100%-2rem)] sm:w-[calc(100%-6rem)] bg-gray-200 h-px my-6 mx-4 sm:mx-12" />
 
                 {/* Content Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 px-4 sm:px-12 pb-12">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 px-4 sm:px-12 pb-12 overflow-x-hidden">
                   {/* Left Column - Main Content */}
                   <div className="lg:col-span-2 space-y-6 order-2 lg:order-1">
                     {/* Bio - Full Version */}
