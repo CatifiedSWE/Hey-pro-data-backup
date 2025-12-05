@@ -383,16 +383,14 @@ export function ApplicationTab({ selectedGigIds, actionIndicators, onActionChang
                                             <td className="h-[60px] border border-[#DEDEDE] w-[80px] px-4 py-2 text-center bg-white">
                                                 <button 
                                                     onClick={() => handleStatusChange(app.id, gigId, 'shortlisted')}
-                                                    className="mx-auto transition-opacity hover:opacity-80"
+                                                    className="mx-auto transition-opacity hover:opacity-80 flex items-center justify-center"
                                                 >
                                                     {app.status === 'shortlisted' ? (
                                                         <div className="h-10 w-10 bg-[#31A7AC] rounded flex items-center justify-center">
-                                                            <Plus className="h-5 w-5 text-white" />
+                                                            <Plus className="h-6 w-6 text-white" />
                                                         </div>
                                                     ) : (
-                                                        <div className="h-10 w-10 flex items-center justify-center">
-                                                            <Plus className="h-5 w-5 text-[#31A7AC]" />
-                                                        </div>
+                                                        <Plus className="h-6 w-6 text-[#31A7AC]" />
                                                     )}
                                                 </button>
                                             </td>
