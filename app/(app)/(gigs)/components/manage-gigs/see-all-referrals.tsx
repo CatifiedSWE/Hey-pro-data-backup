@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
     Dialog,
@@ -11,36 +11,97 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { RecommendationUser, recommendationUsers } from "@/data/recommendUsers"
 import { MapPin, Search } from "lucide-react"
 import Image from "next/image"
+import apiCalling from "@/lib/apiCalling"
+import { toast } from "sonner"
 
-export function SeeAllReferralsDialog() {
+type ReferralUser = {
+    id: string
+    name: string
+    avatar: string | null
+    location: string
+    gigTitle?: string
+}
+
+type Referral = {
+    id: string
+    referrer: {
+        id: string
+        name: string
+        avatar: string | null
+    } | null
+    referred: {
+        id: string
+        name: string
+        avatar: string | null
+    } | null
+    contextType: string
+    contextId: string
+    message: string | null
+    status: string
+    createdAt: string
+}
+
+type SeeAllReferralsDialogProps = {
+    selectedGigIds: string[]
+}
+
+export function SeeAllReferralsDialog({ selectedGigIds }: SeeAllReferralsDialogProps) {
     const [searchTerm, setSearchTerm] = useState("")
+    const [referrals, setReferrals] = useState<Referral[]>([])
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState<string | null>(null)
+    const [open, setOpen] = useState(false)
 
-    const filteredUsers = useMemo(() => {
+    useEffect(() => {
+        if (open && selectedGigIds.length > 0) {
+            fetchReferrals()
+        }
+    }, [open, selectedGigIds])
+
+    const fetchReferrals = async () => {
+        try {
+            setLoading(true)
+            setError(null)
+
+            const response = await apiCalling({
+                method: 'get',
+                route: '/referrals',
+            })
+
+            if (response.status && response.data?.data) {
+                // Filter referrals for selected gigs only
+                const gigReferrals = response.data.data.filter((ref: Referral) => 
+                    ref.contextType === 'gig' && selectedGigIds.includes(ref.contextId)
+                )
+                setReferrals(gigReferrals)
+            } else {
+                setError(response.message || 'Failed to load referrals')
+                toast.error(response.message || 'Failed to load referrals')
+            }
+        } catch (err) {
+            console.error('Error fetching referrals:', err)
+            setError('Failed to load referrals')
+            toast.error('Failed to load referrals')
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const filteredReferrals = useMemo(() => {
         const query = searchTerm.trim().toLowerCase()
         if (!query) {
-            return recommendationUsers
+            return referrals
         }
 
-        return recommendationUsers.filter((user) => {
+        return referrals.filter((ref) => {
             return (
-                user.name.toLowerCase().includes(query) ||
-                user.handle.toLowerCase().includes(query)
+                ref.referred?.name.toLowerCase().includes(query) ||
+                ref.referrer?.name.toLowerCase().includes(query)
             )
         })
-    }, [searchTerm])
-
-    const groupedUsers = useMemo(() => {
-        return filteredUsers.reduce<Record<string, RecommendationUser[]>>((acc, user) => {
-            if (!acc[user.category]) {
-                acc[user.category] = []
-            }
-            acc[user.category].push(user)
-            return acc
-        }, {})
-    }, [filteredUsers])
+    }, [searchTerm, referrals])
 
     return (
         <Dialog>
