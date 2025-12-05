@@ -2,6 +2,7 @@
 
 export type ProjectCardType = {
   id: number | string;
+  userId?: string;
   name: string;
   banner: string;
   image: string;

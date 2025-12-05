@@ -117,6 +117,7 @@ async function getExploreData(searchParams: { [key: string]: string | string[] |
 
             return {
             id: profile.id,
+            userId: profile.user_id,
             name: displayName,
             banner: profile.banner_url || '',
             image: profileImage,

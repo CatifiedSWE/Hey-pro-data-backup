@@ -2,15 +2,21 @@ import { ProjectCardType } from "@/types";
 import { MapPin } from "lucide-react";
 import Image from "next/image";
 
-export default function ProjectCard(props: ProjectCardType) {
+interface ProjectCardProps extends ProjectCardType {
+  onClick?: () => void;
+  userId?: string;
+}
+
+export default function ProjectCard(props: ProjectCardProps) {
   const hasBio = props.bio && props.bio.trim().length > 0;
   const hasSkills = props.skills && props.skills.length > 0;
 
   return (
     <div 
-      className="w-full h-[218px] bg-white shadow-sm hover:shadow-md transition-all duration-300 flex flex-col overflow-hidden border border-gray-100 min-w-0" 
+      className="w-full h-[218px] bg-white shadow-sm hover:shadow-md transition-all duration-300 flex flex-col overflow-hidden border border-gray-100 min-w-0 cursor-pointer" 
       style={{ borderRadius: '8.5px' }}
       data-testid="profile-card"
+      onClick={props.onClick}
     >
       {/* Banner Image at top */}
       <div className="relative h-[70px] w-full flex-shrink-0 bg-gray-100">
