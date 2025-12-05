@@ -171,10 +171,10 @@ export default function ExplorePage({
                   )}
                 </div>
 
-                <div className="w-full bg-gray-200 h-px my-6" />
+                <div className="w-full bg-gray-200 h-px my-6 mx-4 sm:mx-12" />
 
                 {/* Content Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 px-4 sm:px-8 pb-12">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 px-4 sm:px-12 pb-12">
                   {/* Left Column - Main Content */}
                   <div className="lg:col-span-2 space-y-6 order-2 lg:order-1">
                     {/* Bio - Full Version */}
