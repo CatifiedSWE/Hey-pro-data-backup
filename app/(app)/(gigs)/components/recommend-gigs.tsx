@@ -328,25 +328,23 @@ export function SendRecommendationDialog({ className, selectedGigIds }: SendReco
                     </div>
 
                     <DialogFooter className="flex flex-row w-full items-center justify-between border-t border-[#C8C8C8] px-6 py-4">
-                        <DialogClose asChild>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                className="h-[47px] rounded-[10px] border-[#828282] px-6 font-semibold text-[#828282]"
-                            >
-                                Cancel
-                            </Button>
-                        </DialogClose>
-                        <DialogClose asChild>
-                            <Button
-                                type="button"
-                                disabled={selectedUsers.length === 0}
-                                onClick={handleSend}
-                                className="h-[47px] rounded-[10px] bg-[#31A7AC] px-6 font-semibold text-white disabled:opacity-50"
-                            >
-                                Recommend
-                            </Button>
-                        </DialogClose>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setOpen(false)}
+                            disabled={sending}
+                            className="h-[47px] rounded-[10px] border-[#828282] px-6 font-semibold text-[#828282]"
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            type="button"
+                            disabled={selectedUsers.length === 0 || sending}
+                            onClick={handleSend}
+                            className="h-[47px] rounded-[10px] bg-[#FA6E80] hover:bg-[#e55b6d] px-6 font-semibold text-white disabled:opacity-50"
+                        >
+                            {sending ? 'Sending...' : `Invite ${selectedUsers.length > 0 ? `(${selectedUsers.length})` : ''}`}
+                        </Button>
                     </DialogFooter>
 
                 </DialogContent>
