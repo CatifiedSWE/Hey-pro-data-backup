@@ -362,13 +362,15 @@ export function ApplicationTab({ selectedGigIds, actionIndicators, onActionChang
                                                     className="mx-auto transition-opacity hover:opacity-80 flex items-center justify-center"
                                                 >
                                                     {app.status === 'released' ? (
-                                                        <Image 
-                                                            src="/icons/mail-red.png" 
-                                                            alt="Released" 
-                                                            width={40} 
-                                                            height={40} 
-                                                            className="object-contain" 
-                                                        />
+                                                        <div className="h-10 w-10 bg-[#FA596E] rounded flex items-center justify-center">
+                                                            <Image 
+                                                                src="/icons/mail-white.png" 
+                                                                alt="Released" 
+                                                                width={24} 
+                                                                height={24} 
+                                                                className="object-contain" 
+                                                            />
+                                                        </div>
                                                     ) : (
                                                         <X className="h-6 w-6 text-[#FA6E80]" />
                                                     )}
@@ -394,13 +396,15 @@ export function ApplicationTab({ selectedGigIds, actionIndicators, onActionChang
                                                     className="mx-auto transition-opacity hover:opacity-80 flex items-center justify-center"
                                                 >
                                                     {app.status === 'confirmed' ? (
-                                                        <Image 
-                                                            src="/icons/mail-blue.png" 
-                                                            alt="Confirmed" 
-                                                            width={40} 
-                                                            height={40} 
-                                                            className="object-contain" 
-                                                        />
+                                                        <div className="h-10 w-10 bg-[#31A7AC] rounded flex items-center justify-center">
+                                                            <Image 
+                                                                src="/icons/mail-white.png" 
+                                                                alt="Confirmed" 
+                                                                width={24} 
+                                                                height={24} 
+                                                                className="object-contain" 
+                                                            />
+                                                        </div>
                                                     ) : (
                                                         <Check className="h-6 w-6 text-[#31A7AC]" />
                                                     )}
