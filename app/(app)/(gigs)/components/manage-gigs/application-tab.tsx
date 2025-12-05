@@ -37,6 +37,10 @@ type Applicant = {
         phone: string | null;
         skills: Array<{ name: string; level: string }>;
         recentExperience: any[];
+        referrals: {
+            count: number;
+            avatars: (string | null)[];
+        };
     };
 };
 
