@@ -354,10 +354,10 @@ export function ApplicationTab({ selectedGigIds, actionIndicators, onActionChang
                                             <td className="h-[60px] border border-[#DEDEDE] w-[60px] px-4 py-2 text-center bg-white">
                                                 <button className="flex items-center justify-center w-full">
                                                     <Image 
-                                                        src="/icons/chat-teal.png" 
+                                                        src="/icons/chat-transparent.png" 
                                                         alt="Chat" 
-                                                        width={32} 
-                                                        height={32} 
+                                                        width={40} 
+                                                        height={40} 
                                                         className="object-contain" 
                                                     />
                                                 </button>
