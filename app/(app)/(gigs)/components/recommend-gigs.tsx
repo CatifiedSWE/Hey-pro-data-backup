@@ -259,7 +259,9 @@ export function SendRecommendationDialog({ className, selectedGigIds }: SendReco
                             </div>
 
                             <div className="space-y-4">
-                                <p className="text-sm font-medium text-black">Crew members to recommend</p>
+                                <p className="text-sm font-medium text-black">
+                                    Crew members to invite ({selectedUsers.length} selected)
+                                </p>
                                 <ScrollArea className="h-72 pr-2">
                                     {loading ? (
                                         <div className="flex items-center justify-center h-full">
