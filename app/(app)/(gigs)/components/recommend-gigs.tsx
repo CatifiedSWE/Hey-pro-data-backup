@@ -204,7 +204,7 @@ export function SendRecommendationDialog({ className, selectedGigIds }: SendReco
     }
 
     return (
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
             <div>
                 <DialogTrigger asChild>
                     <Button type="button" className={cn("inline-flex items-center h-[44px] gap-2 rounded-[14px] bg-[#31A7AC] hover:bg-[#31A7AC]/90 px-6 py-3 text-sm font-medium text-white shadow-md", className)}>
