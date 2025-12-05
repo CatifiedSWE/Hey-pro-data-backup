@@ -67,6 +67,17 @@ type ApplicationTabProps = {
 export function ApplicationTab({ selectedGigIds, actionIndicators, onActionChange }: ApplicationTabProps) {
     const [selectedGigs, setSelectedGigs] = useState<Record<string, { gig: Gig; applications: Applicant[] }>>({});
     const [loading, setLoading] = useState(false);
+    const [creditsDialog, setCreditsDialog] = useState<{
+        open: boolean;
+        loading: boolean;
+        applicantName: string;
+        credits: Credit[];
+    }>({
+        open: false,
+        loading: false,
+        applicantName: '',
+        credits: [],
+    });
 
     useEffect(() => {
         const fetchApplications = async () => {
