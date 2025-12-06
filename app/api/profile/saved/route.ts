@@ -55,8 +55,7 @@ export async function GET(request: NextRequest) {
             profile_photo_url,
             bio,
             city,
-            country,
-            available_for_work
+            country
           `)
           .eq('user_id', save.profile_user_id)
           .single();
