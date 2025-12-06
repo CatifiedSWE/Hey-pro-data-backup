@@ -25,15 +25,12 @@ const makeValues = (arr: string[]): FilterValue[] =>
 
 const filterOptions: FilterOption[] = [
     {
-        label: "Director",
+        label: "Camera Operator",
         value: makeValues([
-            "Director",
-            "Director | Commercial",
-            "Assistant Director",
-            "Assistant Director | TV",
-            "1st Assistant Director (1st AD)",
-            "2nd Assistant Director (2nd AD)",
-            "3rd Assistant Director (3rd AD)"
+            "Camera Operator",
+            "Steadicam Operator",
+            "Gimbal Operator",
+            "Drone Operator"
         ])
     },
     {
@@ -52,6 +49,27 @@ const filterOptions: FilterOption[] = [
         ])
     },
     {
+        label: "Colorist",
+        value: makeValues([
+            "Colorist",
+            "Color Timer",
+            "Colorist (Color Grading)",
+            "Colorist (Color Correction)"
+        ])
+    },
+    {
+        label: "Director",
+        value: makeValues([
+            "Director",
+            "Director | Commercial",
+            "Assistant Director",
+            "Assistant Director | TV",
+            "1st Assistant Director (1st AD)",
+            "2nd Assistant Director (2nd AD)",
+            "3rd Assistant Director (3rd AD)"
+        ])
+    },
+    {
         label: "Editor",
         value: makeValues([
             "Editor",
@@ -63,52 +81,6 @@ const filterOptions: FilterOption[] = [
             "Sound Designer",
             "Foley Artist",
             "Re-Recording Mixer"
-        ])
-    },
-    {
-        label: "Producer",
-        value: makeValues([
-            "Producer",
-            "Executive Producer",
-            "Line Producer",
-            "Production Manager",
-            "Production Coordinator",
-            "Production Assistant"
-        ])
-    },
-    {
-        label: "Writer",
-        value: makeValues(["Writer", "Screenwriter", "Script Supervisor", "Story Editor"])
-    },
-    {
-        label: "Production Designer",
-        value: makeValues([
-            "Production Designer",
-            "Art Director",
-            "Set Designer",
-            "Set Decorator",
-            "Props Master",
-            "Costume Designer",
-            "Makeup Artist",
-            "Hair Stylist"
-        ])
-    },
-    {
-        label: "Sound Designer",
-        value: makeValues([
-            "Sound Designer",
-            "Sound Mixer",
-            "Boom Operator",
-            "Location Sound Recordist"
-        ])
-    },
-    {
-        label: "Camera Operator",
-        value: makeValues([
-            "Camera Operator",
-            "Steadicam Operator",
-            "Gimbal Operator",
-            "Drone Operator"
         ])
     },
     {
@@ -135,35 +107,6 @@ const filterOptions: FilterOption[] = [
         ])
     },
     {
-        label: "VFX Artist",
-        value: makeValues([
-            "VFX Artist",
-            "VFX Supervisor",
-            "VFX Assistant",
-            "VFX Assistant (VA)",
-            "VFX Assistant (VA) | Commercial",
-            "VFX Assistant (VA) | TV"
-        ])
-    },
-    {
-        label: "Colorist",
-        value: makeValues([
-            "Colorist",
-            "Color Timer",
-            "Colorist (Color Grading)",
-            "Colorist (Color Correction)"
-        ])
-    },
-    {
-        label: "Sound Engineer",
-        value: makeValues([
-            "Sound Engineer",
-            "Sound Technician",
-            "Sound Engineer | Commercial",
-            "Sound Engineer | TV"
-        ])
-    },
-    {
         label: "Makeup Artist",
         value: makeValues([
             "Makeup Artist",
@@ -179,6 +122,63 @@ const filterOptions: FilterOption[] = [
             "Other | TV",
             "Other | Commercial | TV"
         ])
+    },
+    {
+        label: "Producer",
+        value: makeValues([
+            "Producer",
+            "Executive Producer",
+            "Line Producer",
+            "Production Manager",
+            "Production Coordinator",
+            "Production Assistant"
+        ])
+    },
+    {
+        label: "Production Designer",
+        value: makeValues([
+            "Production Designer",
+            "Art Director",
+            "Set Designer",
+            "Set Decorator",
+            "Props Master",
+            "Costume Designer",
+            "Makeup Artist",
+            "Hair Stylist"
+        ])
+    },
+    {
+        label: "Sound Designer",
+        value: makeValues([
+            "Sound Designer",
+            "Sound Mixer",
+            "Boom Operator",
+            "Location Sound Recordist"
+        ])
+    },
+    {
+        label: "Sound Engineer",
+        value: makeValues([
+            "Sound Engineer",
+            "Sound Technician",
+            "Sound Engineer | Commercial",
+            "Sound Engineer | TV"
+        ])
+    },
+    {
+        label: "VFX Artist",
+        value: makeValues([
+            "VFX Artist",
+            "VFX Supervisor",
+            "VFX Assistant",
+            "VFX Assistant (VA)",
+            "VFX Assistant (VA) | Commercial",
+            "VFX Assistant (VA) | TV"
+        ])
+    },
+    {
+        label: "Writer",
+        value: makeValues(["Writer", "Screenwriter", "Script Supervisor", "Story Editor"])
     }
 ];
 
