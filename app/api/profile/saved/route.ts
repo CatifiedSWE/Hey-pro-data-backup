@@ -97,6 +97,12 @@ export async function GET(request: NextRequest) {
     // Filter out null entries (profiles that weren't found)
     const validProfiles = profiles.filter((item: any) => item !== null);
 
+    console.log('[DEBUG] Final response:', {
+      totalSaved: savedProfiles?.length || 0,
+      validProfiles: validProfiles.length,
+      returning: validProfiles
+    });
+
     return NextResponse.json(
       successResponse(
         {
