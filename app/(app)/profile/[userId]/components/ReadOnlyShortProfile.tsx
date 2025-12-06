@@ -77,11 +77,11 @@ export default function ReadOnlyShortProfile({ profile, initialSaved = false }: 
     setSaveLoading(true);
     try {
       if (isSaved) {
-        await unsaveProfile(profile.id);
+        await unsaveProfile(profile.userId || profile.user_id);
         setIsSaved(false);
         toast.success('Profile removed from saved');
       } else {
-        await saveProfile(profile.id);
+        await saveProfile(profile.userId || profile.user_id);
         setIsSaved(true);
         toast.success('Profile saved successfully');
       }
