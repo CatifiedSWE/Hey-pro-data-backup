@@ -54,11 +54,6 @@ export async function GET(request: NextRequest) {
           .eq('user_id', save.profile_user_id)
           .single();
 
-        console.log('[DEBUG] Profile lookup for user_id:', save.profile_user_id, {
-          found: !!profile,
-          error: profileError
-        });
-
         if (!profile) return null;
 
         // Build display name
