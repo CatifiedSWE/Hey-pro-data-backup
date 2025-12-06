@@ -70,12 +70,43 @@ export default function ReadOnlyHighlights({ highlights }: ReadOnlyHighlightsPro
 
   if (!displayHighlights || displayHighlights.length === 0) {
     return (
-      <div className="w-full rounded-[20px] bg-[#FAFAFA] px-6 py-7 shadow-[0_1px_10px_rgba(0,0,0,0.1)]">
-        <h2 className="text-[22px] font-semibold leading-[33px] text-[#000] mb-5">Highlights</h2>
-        <div className="text-center py-8 text-gray-500">
-          <p>Still working for their masterpiece</p>
+      <section className="w-full">
+        {/* Desktop View */}
+        <div className="hidden lg:flex gap-6">
+          <aside className="sticky top-24 self-start w-full max-w-[336px] space-y-6">
+            <div className="w-full rounded-[20px] bg-[#FAFAFA] px-6 py-7 shadow-[0_1px_10px_rgba(0,0,0,0.1)]">
+              <div className="text-center py-8 text-gray-500">
+                <p>Still working for their masterpiece</p>
+              </div>
+            </div>
+          </aside>
+
+          <div className="flex flex-col items-center" style={{ gap: '15px' }}>
+            <HighlightsText />
+            <div
+              className="rounded-full"
+              style={{
+                width: '1px',
+                height: '1501px',
+                background: 'linear-gradient(180deg, #FA6E80 0%, #6A89BE 41.52%, #85AAB7 62.27%, #31A7AC 103.79%)',
+                opacity: 1
+              }}
+              aria-hidden
+            />
+          </div>
         </div>
-      </div>
+
+        {/* Mobile View */}
+        <div className="lg:hidden flex flex-col gap-6 pb-10">
+          <HighlightsText className="w-full" />
+          
+          <div className="w-full rounded-[20px] bg-[#FAFAFA] px-6 py-7 shadow-[0_1px_10px_rgba(0,0,0,0.1)]">
+            <div className="text-center py-8 text-gray-500">
+              <p>Still working for their masterpiece</p>
+            </div>
+          </div>
+        </div>
+      </section>
     );
   }
 
