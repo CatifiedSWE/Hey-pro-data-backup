@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { Heart, MessageCircle, Send, MapPin, Calendar, Users, Bookmark, ArrowRight } from "lucide-react";
+import { Heart, MessageCircle, Send, MapPin, Calendar, Users, Bookmark, ArrowRight, User } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import axios from "@/lib/axios";
@@ -96,21 +96,41 @@ interface SavedEvent {
     user_has_saved: boolean;
 }
 
+interface SavedProfile {
+    save_id: string;
+    saved_at: string;
+    user_id: string;
+    profile: {
+        id: string;
+        user_id: string;
+        name: string;
+        avatar: string;
+        bio: string;
+        location: string;
+        city: string;
+        country: string;
+        available_from: string | null;
+    };
+}
+
 export default function SavedPage() {
     const { user } = useAuth();
     const router = useRouter();
     const [savedSlates, setSavedSlates] = useState<SavedSlate[]>([]);
     const [savedCollabs, setSavedCollabs] = useState<SavedCollab[]>([]);
     const [savedWhatsOn, setSavedWhatsOn] = useState<SavedEvent[]>([]);
+    const [savedProfiles, setSavedProfiles] = useState<SavedProfile[]>([]);
     const [loading, setLoading] = useState({
         slates: true,
         collabs: true,
-        whatsOn: true
+        whatsOn: true,
+        profiles: true
     });
     const [errors, setErrors] = useState({
         slates: null as string | null,
         collabs: null as string | null,
-        whatsOn: null as string | null
+        whatsOn: null as string | null,
+        profiles: null as string | null
     });
     const [commentsModal, setCommentsModal] = useState<{
         open: boolean;
@@ -187,6 +207,27 @@ export default function SavedPage() {
         };
         
         fetchSavedWhatsOn();
+    }, [user]);
+
+    // Fetch saved profiles
+    useEffect(() => {
+        const fetchSavedProfiles = async () => {
+            if (!user) return;
+            
+            try {
+                setLoading(prev => ({ ...prev, profiles: true }));
+                const response = await axios.get('/profile/saved');
+                setSavedProfiles(response.data.data.profiles || []);
+                setErrors(prev => ({ ...prev, profiles: null }));
+            } catch (error: any) {
+                console.error('Error fetching saved profiles:', error);
+                setErrors(prev => ({ ...prev, profiles: error.response?.data?.error || 'Failed to load saved profiles' }));
+            } finally {
+                setLoading(prev => ({ ...prev, profiles: false }));
+            }
+        };
+        
+        fetchSavedProfiles();
     }, [user]);
 
     // Format relative time
@@ -312,6 +353,36 @@ export default function SavedPage() {
         }
     };
 
+    // Handle unsave profile
+    const handleUnsaveProfile = async (userId: string) => {
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) throw new Error('Authentication required');
+
+            const response = await fetch(`/api/profile/${userId}/save`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${session.access_token}`,
+                },
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Failed to unsave profile');
+            }
+
+            setSavedProfiles(prev => prev.filter(profile => profile.user_id !== userId));
+            toast.success('Profile removed from saved');
+        } catch (error: any) {
+            toast.error(error.message || 'Failed to unsave profile');
+        }
+    };
+
+    // Handle view profile
+    const handleViewProfile = (userId: string) => {
+        router.push(`/explore/${userId}`);
+    };
+
     return (
         <div className="container mx-auto px-4 py-8 max-w-7xl min-h-screen bg-gray-50/50">
             <div className="mb-8">
@@ -322,10 +393,11 @@ export default function SavedPage() {
             </div>
 
             <Tabs defaultValue="slates" className="w-full">
-                <TabsList className="grid w-full grid-cols-3 mb-8 bg-white p-1 border rounded-xl shadow-sm h-12" data-testid="saved-tabs">
+                <TabsList className="grid w-full grid-cols-4 mb-8 bg-white p-1 border rounded-xl shadow-sm h-12" data-testid="saved-tabs">
                     <TabsTrigger value="slates" className="data-[state=active]:bg-[#FA6E80]/10 data-[state=active]:text-[#FA6E80] rounded-lg transition-all" data-testid="slates-tab">Slates</TabsTrigger>
                     <TabsTrigger value="collabs" className="data-[state=active]:bg-[#6A89BE]/10 data-[state=active]:text-[#6A89BE] rounded-lg transition-all" data-testid="collabs-tab">Collabs</TabsTrigger>
                     <TabsTrigger value="whats-on" className="data-[state=active]:bg-[#31A7AC]/10 data-[state=active]:text-[#31A7AC] rounded-lg transition-all" data-testid="whats-on-tab">What's On</TabsTrigger>
+                    <TabsTrigger value="profiles" className="data-[state=active]:bg-purple-500/10 data-[state=active]:text-purple-600 rounded-lg transition-all" data-testid="profiles-tab">Profiles</TabsTrigger>
                 </TabsList>
 
                 {/* Slates Tab */}
@@ -602,6 +674,92 @@ export default function SavedPage() {
                         </div>
                     )}
                 </TabsContent>
+
+                {/* Profiles Tab */}
+                <TabsContent value="profiles" data-testid="profiles-content" className="mt-0">
+                    {errors.profiles && (
+                        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                            <p className="text-red-600 text-sm">{errors.profiles}</p>
+                        </div>
+                    )}
+                    {loading.profiles ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {[1, 2, 3, 4, 5, 6].map((i) => <ProfileSkeleton key={i} />)}
+                        </div>
+                    ) : savedProfiles.length === 0 ? (
+                        <EmptyState 
+                            icon={<User className="h-12 w-12" />}
+                            title="No saved profiles yet"
+                            description="Start saving profiles to see them here"
+                        />
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {savedProfiles.map((savedProfile) => (
+                                <Card 
+                                    key={savedProfile.save_id} 
+                                    className="p-0 gap-0 border-0 shadow-sm hover:shadow-md transition-all duration-300 group bg-white overflow-hidden flex flex-col h-full" 
+                                    data-testid="saved-profile-card"
+                                >
+                                    <div className="p-6 flex-1 flex flex-col">
+                                        <div className="flex items-start justify-between mb-4">
+                                            <div className="flex items-center gap-3 flex-1">
+                                                <Image
+                                                    src={savedProfile.profile.avatar || "/default-profile.png"}
+                                                    alt={savedProfile.profile.name}
+                                                    width={56}
+                                                    height={56}
+                                                    className="w-14 h-14 rounded-full object-cover ring-2 ring-purple-100"
+                                                />
+                                                <div className="flex-1 min-w-0">
+                                                    <h3 className="font-bold text-lg text-gray-900 group-hover:text-purple-600 transition-colors line-clamp-1">
+                                                        {savedProfile.profile.name}
+                                                    </h3>
+                                                    {(savedProfile.profile.city || savedProfile.profile.country) && (
+                                                        <div className="flex items-center gap-1 text-sm text-gray-500 mt-0.5">
+                                                            <MapPin className="h-3.5 w-3.5" />
+                                                            <span className="truncate">
+                                                                {[savedProfile.profile.city, savedProfile.profile.country].filter(Boolean).join(', ')}
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <button
+                                                onClick={() => handleUnsaveProfile(savedProfile.user_id)}
+                                                className="text-gray-300 hover:text-[#FA6E80] transition-colors p-1 -mt-1 -mr-1"
+                                                title="Remove from saved"
+                                                data-testid="unsave-profile-button"
+                                            >
+                                                <Bookmark className="h-5 w-5 fill-purple-500 text-purple-500" />
+                                            </button>
+                                        </div>
+                                        
+                                        {savedProfile.profile.bio && (
+                                            <p className="text-sm text-gray-600 mb-4 line-clamp-3 flex-1">
+                                                {savedProfile.profile.bio}
+                                            </p>
+                                        )}
+                                        
+                                        <div className="flex items-center justify-between pt-4 border-t border-gray-100 mt-auto">
+                                            <div className="text-xs text-gray-500">
+                                                Saved {formatRelativeTime(savedProfile.saved_at)}
+                                            </div>
+                                            <Button 
+                                                variant="ghost" 
+                                                size="sm" 
+                                                className="h-8 text-xs group/btn hover:bg-purple-50 hover:text-purple-600"
+                                                onClick={() => handleViewProfile(savedProfile.user_id)}
+                                                data-testid="view-profile-button"
+                                            >
+                                                View Profile <ArrowRight className="h-3 w-3 ml-1 group-hover/btn:translate-x-0.5 transition-transform" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </Card>
+                            ))}
+                        </div>
+                    )}
+                </TabsContent>
             </Tabs>
 
             {/* Comments Modal */}
@@ -676,6 +834,33 @@ function EventSkeleton() {
                 <div className="mt-auto pt-4 flex justify-between items-center">
                     <Skeleton className="h-8 w-24" />
                     <Skeleton className="h-8 w-20" />
+                </div>
+            </div>
+        </Card>
+    );
+}
+
+function ProfileSkeleton() {
+    return (
+        <Card className="p-0 gap-0 border-0 shadow-sm rounded-lg bg-white h-[220px] flex flex-col">
+            <div className="p-6 space-y-4">
+                <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3 flex-1">
+                        <Skeleton className="h-14 w-14 rounded-full" />
+                        <div className="space-y-2 flex-1">
+                            <Skeleton className="h-5 w-32" />
+                            <Skeleton className="h-4 w-24" />
+                        </div>
+                    </div>
+                    <Skeleton className="h-5 w-5 rounded" />
+                </div>
+                <div className="space-y-2">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-2/3" />
+                </div>
+                <div className="pt-4 border-t flex justify-between items-center">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-8 w-24 rounded" />
                 </div>
             </div>
         </Card>

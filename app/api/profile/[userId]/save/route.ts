@@ -34,8 +34,8 @@ export async function POST(
     // Check if profile user exists
     const { data: profileUser, error: profileError } = await supabase
       .from('user_profiles')
-      .select('id')
-      .eq('id', profileUserId)
+      .select('id, user_id')
+      .eq('user_id', profileUserId)
       .single();
 
     if (profileError || !profileUser) {
