@@ -311,6 +311,12 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
         updateUrl(newFilters);
     };
 
+    const handleRateRangeReset = () => {
+        const newFilters = { ...filterForm, minRate: 0, maxRate: 5000 };
+        setFilterForm(newFilters);
+        updateUrl(newFilters);
+    };
+
     const handleFilterSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         setIsFilterOpen(false);
@@ -332,11 +338,21 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
         router.push(`${pathname}?${params.toString()}`);
     }
 
+    const handleClearAllFilters = () => {
+        // Reset all filters to initial state
+        setFilterForm(initialFilterState);
+        setSearchTerm("");
+        setActiveRole("");
+        
+        // Clear all URL params except keep the base path
+        router.push(pathname);
+    }
+
     return (
         <>
             <div className="max-w-7xl mx-auto">
                 <span className="hidden p-2 md:inline-block bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC] bg-clip-text text-transparent text-3xl font-semibold">Crew Directory</span>
-                <div className="sticky top-0 z-20 flex w-full flex-row gap-4 bg-white/90 p-4 backdrop-blur sm:flex-row sm:items-center">
+                <div className="sticky top-0 z-20 flex w-full flex-row gap-2 bg-white/90 p-4 backdrop-blur sm:flex-row sm:items-center">
 
                     <DropdownMenu open={isFilterOpen} onOpenChange={setIsFilterOpen}>
                         <DropdownMenuTrigger asChild>
@@ -351,6 +367,19 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-[273px] border-none" align="start">
                             <form onSubmit={handleFilterSubmit} className=" space-y-2 rounded-[10px] bg-[#F8F8F8] p-4 text-[#017A7C]">
+                                {/* Clear Filters Button */}
+                                {activeFilterCount > 0 && (
+                                    <div className="flex justify-end mb-2">
+                                        <button
+                                            type="button"
+                                            onClick={handleClearAllFilters}
+                                            className="text-xs text-[#FA6E80] hover:text-[#fa5a6e] font-medium underline"
+                                        >
+                                            Clear all filters
+                                        </button>
+                                    </div>
+                                )}
+                                
                                 <div className="space-y-1 rounded-[5.71px]  border border-[#017A7C]/30 px-4 py-2 justify-center items-center flex ">
                                     <label className="text-sm font-[400] w-full">Availability</label>
                                     <select 
@@ -393,15 +422,31 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                                 <div className="space-y-3">
                                     <div className="flex items-center justify-between">
                                         <label className="text-sm font-[400]">Experience</label>
-                                        <ChevronDown className="h-4 w-4 text-[#017A7C]" />
+                                        {filterForm.experience && (
+                                            <button
+                                                type="button"
+                                                onClick={() => handleFilterChange("experience", "")}
+                                                className="text-xs text-[#FA6E80] hover:text-[#fa5a6e] font-medium"
+                                            >
+                                                Clear
+                                            </button>
+                                        )}
                                     </div>
                                     <div className="space-y-3 rounded-xl border border-[#017A7C]/20 px-4 py-3 bg-white">
                                         {experienceOptions.map((exp) => (
                                             <button
                                                 key={exp.title}
                                                 type="button"
-                                                onClick={() => handleFilterChange("experience", exp.title)}
-                                                className={`w-full text-left text-sm ${filterForm.experience === exp.title ? "text-[#017A7C] font-semibold" : "text-gray-700"}`}
+                                                onClick={() => {
+                                                    // Toggle: if already selected, deselect; otherwise select
+                                                    const newValue = filterForm.experience === exp.title ? "" : exp.title;
+                                                    handleFilterChange("experience", newValue);
+                                                }}
+                                                className={`w-full text-left text-sm transition-colors ${
+                                                    filterForm.experience === exp.title 
+                                                        ? "text-[#017A7C] font-semibold" 
+                                                        : "text-gray-700 hover:text-[#017A7C]"
+                                                }`}
                                             >
                                                 <div className="font-bold">{exp.title}</div>
                                                 <div className="text-xs text-gray-500">{exp.description}</div>
@@ -411,7 +456,18 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                                 </div>
 
                                 <div className="space-y-3">
-                                    <p className="text-sm font-semibold text-gray-700">Rate Range</p>
+                                    <div className="flex items-center justify-between">
+                                        <p className="text-sm font-semibold text-gray-700">Rate Range</p>
+                                        {(filterForm.minRate > 0 || filterForm.maxRate < 5000) && (
+                                            <button
+                                                type="button"
+                                                onClick={handleRateRangeReset}
+                                                className="text-xs text-[#FA6E80] hover:text-[#fa5a6e] font-medium"
+                                            >
+                                                Reset
+                                            </button>
+                                        )}
+                                    </div>
                                     <div className="flex items-center justify-between text-sm font-semibold">
                                         <span className="text-[#FA6E80]">{filterForm.minRate}</span>
                                         <span className="text-[#31A7AC]">{filterForm.maxRate}</span>
@@ -521,6 +577,18 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                             </form>
                         </DropdownMenuContent>
                     </DropdownMenu>
+
+                    {/* Clear All Filters Button - visible when filters are active */}
+                    {activeFilterCount > 0 && (
+                        <Button
+                            onClick={handleClearAllFilters}
+                            className="flex h-12 items-center justify-center rounded-full border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all whitespace-nowrap"
+                        >
+                            <X className="h-4 w-4 mr-1" />
+                            Clear All
+                        </Button>
+                    )}
+
                     <div className="flex h-12 flex-row w-full items-center justify-between rounded-full border px-3 py-2">
                         <input
                             type="text"
