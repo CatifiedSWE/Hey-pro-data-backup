@@ -26,12 +26,6 @@ export async function GET(request: NextRequest) {
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
-    console.log('[DEBUG] Saved profiles query result:', {
-      count: savedProfiles?.length || 0,
-      savedProfiles: savedProfiles,
-      error: savedError
-    });
-
     if (savedError) {
       console.error('Error fetching saved profiles:', savedError);
       return NextResponse.json(
