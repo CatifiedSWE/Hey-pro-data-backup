@@ -23,6 +23,7 @@ export default function UserProfilePage() {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -32,6 +33,10 @@ export default function UserProfilePage() {
         
         if (response.data.success) {
           setProfile(response.data.data);
+          // Check if profile is saved (if available in response)
+          if (response.data.data.userHasSaved !== undefined) {
+            setIsSaved(response.data.data.userHasSaved);
+          }
         } else {
           setError(response.data.error || 'Failed to load profile');
         }
@@ -80,7 +85,7 @@ export default function UserProfilePage() {
           <span>Back to Crew Directory</span>
         </Button>
         
-        <ReadOnlyShortProfile profile={profile} />
+        <ReadOnlyShortProfile profile={profile} initialSaved={isSaved} />
         <div className="w-full bg-slate-200 h-px sm:h-[1px] mb-5" />
 
         <div className="space-y-2 mx-auto w-full">

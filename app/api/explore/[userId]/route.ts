@@ -14,6 +14,16 @@ export async function GET(
     const supabase = createServerClient();
     const { userId } = await params;
 
+    // Get current authenticated user (if any)
+    let currentUserId: string | null = null;
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      currentUserId = user?.id || null;
+    } catch (err) {
+      // User not authenticated, continue as public access
+      console.log('User not authenticated, proceeding with public access');
+    }
+
     // Fetch user profile
     const { data: profile, error: profileError } = await supabase
       .from('user_profiles')
@@ -171,6 +181,19 @@ export async function GET(
       console.error('Error fetching Google avatar:', err);
     }
 
+    // Check if current user has saved this profile
+    let userHasSaved = false;
+    if (currentUserId) {
+      const { data: savedProfile } = await supabase
+        .from('profile_saves')
+        .select('id')
+        .eq('profile_user_id', userId)
+        .eq('user_id', currentUserId)
+        .maybeSingle();
+      
+      userHasSaved = !!savedProfile;
+    }
+
     // Build display name with priority: alias_first_name + alias_surname (1st), first_name + surname (2nd)
     const aliasName = `${profile.alias_first_name || ''} ${profile.alias_surname || ''}`.trim();
     const realName = `${profile.first_name || ''} ${profile.surname || ''}`.trim();
@@ -277,6 +300,7 @@ export async function GET(
         date: a.availability_date,
         status: a.status
       })) || [],
+      userHasSaved: userHasSaved,
       createdAt: profile.created_at,
       updatedAt: profile.updated_at
     };

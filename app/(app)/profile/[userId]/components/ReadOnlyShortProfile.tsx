@@ -1,17 +1,23 @@
 "use client"
 
-import React, { useRef, useEffect } from "react"
+import React, { useRef, useEffect, useState } from "react"
 import Image from "next/image"
-import { LinkIcon, MapPin, Calendar as CalendarIcon } from "lucide-react"
+import { LinkIcon, MapPin, Calendar as CalendarIcon, Heart, MessageCircle, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { countries } from "@/lib/countries"
+import { ProfileShareModal } from "@/components/profile/ProfileShareModal"
+import { saveProfile, unsaveProfile } from "@/lib/api/profile-save"
+import { toast } from "sonner"
 
 interface ReadOnlyShortProfileProps {
   profile: any;
+  initialSaved?: boolean;
 }
 
-export default function ReadOnlyShortProfile({ profile }: ReadOnlyShortProfileProps) {
+export default function ReadOnlyShortProfile({ profile, initialSaved = false }: ReadOnlyShortProfileProps) {
   const filterScrollRef = useRef<HTMLDivElement>(null)
+  const [isSaved, setIsSaved] = useState(initialSaved);
+  const [saveLoading, setSaveLoading] = useState(false);
   
   const displayName = profile?.name || 'User Profile';
   const nationality = countries.find((country) => country.code === profile?.country)?.name ?? profile?.country ?? "Unknown"
@@ -66,6 +72,32 @@ export default function ReadOnlyShortProfile({ profile }: ReadOnlyShortProfilePr
   const statusText = isAvailable ? "Available" : "Not Available";
   const statusTextColor = isAvailable ? "text-[#34A353]" : "text-[#FA6E80]";
 
+  // Handle save/unsave profile
+  const handleSaveToggle = async () => {
+    setSaveLoading(true);
+    try {
+      if (isSaved) {
+        await unsaveProfile(profile.id);
+        setIsSaved(false);
+        toast.success('Profile removed from saved');
+      } else {
+        await saveProfile(profile.id);
+        setIsSaved(true);
+        toast.success('Profile saved successfully');
+      }
+    } catch (error) {
+      console.error('Failed to toggle save:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to update save');
+    } finally {
+      setSaveLoading(false);
+    }
+  };
+
+  // Handle message button click
+  const handleMessageClick = () => {
+    toast.info('Preparing soon');
+  };
+
   return (
     <section className="relative w-full border-b border-[#DADADA] pb-6">
       <div className="relative h-[228px]">
@@ -93,14 +125,48 @@ export default function ReadOnlyShortProfile({ profile }: ReadOnlyShortProfilePr
         </div>
       </div>
 
-      <div className="absolute inset-x-0 top-[160px] max-w-[367.8px] left-[200px] hidden justify-center font-[400] text-[11px] sm:flex">
-        <div className="flex items-center gap-2 px-4 py-2 text-[#393939]">
-          <MapPin className="h-3.5 w-3.5 text-[#393939]" />
-          <span className="whitespace-nowrap">{locationDescriptor}</span>
+      <div className="absolute inset-x-0 top-[160px] max-w-[600px] left-[200px] hidden justify-between items-center font-[400] text-[11px] sm:flex px-4">
+        <div className="flex items-center gap-0">
+          <div className="flex items-center gap-2 px-4 py-2 text-[#393939]">
+            <MapPin className="h-3.5 w-3.5 text-[#393939]" />
+            <span className="whitespace-nowrap">{locationDescriptor}</span>
+          </div>
+          <div className={`flex items-center gap-2 bg-white px-4 py-2 ${statusTextColor}`}>
+            <span className={`h-2.5 w-2.5 rounded-full ${dotColor}`} />
+            <span className="whitespace-nowrap">{statusText}</span>
+          </div>
         </div>
-        <div className={`flex items-center gap-2 bg-white px-4 py-2 ${statusTextColor}`}>
-          <span className={`h-2.5 w-2.5 rounded-full ${dotColor}`} />
-          <span className="whitespace-nowrap">{statusText}</span>
+        
+        {/* Action buttons: Heart, Share, Message */}
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={handleSaveToggle}
+            disabled={saveLoading}
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-50 text-[#FA6E80] hover:bg-[#FA6E80]/10 transition-colors disabled:opacity-50 border border-gray-200"
+            title={isSaved ? "Unsave profile" : "Save profile"}
+            data-testid="save-profile-button"
+          >
+            {saveLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Heart className={`h-4 w-4 ${isSaved ? 'fill-current' : ''}`} />
+            )}
+          </button>
+          
+          <ProfileShareModal
+            profileUserId={profile.id}
+            profileName={displayName}
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-50 text-[#31A7AC] hover:bg-[#31A7AC]/10 transition-colors border border-gray-200"
+          />
+          
+          <button 
+            onClick={handleMessageClick}
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-50 text-[#FA6E80] hover:bg-[#FA6E80]/10 transition-colors border border-gray-200"
+            title="Send message"
+            data-testid="message-button"
+          >
+            <MessageCircle className="h-4 w-4" />
+          </button>
         </div>
       </div>
       
@@ -155,6 +221,40 @@ export default function ReadOnlyShortProfile({ profile }: ReadOnlyShortProfilePr
             {linkSummary}
           </div>
         )}
+
+        {/* Mobile action buttons */}
+        <div className="flex sm:hidden items-center gap-3 pt-4 border-t border-gray-200">
+          <button 
+            onClick={handleSaveToggle}
+            disabled={saveLoading}
+            className="flex-1 flex items-center justify-center gap-2 h-10 rounded-full bg-gray-50 text-[#FA6E80] hover:bg-[#FA6E80]/10 transition-colors disabled:opacity-50 border border-gray-200 font-medium text-sm"
+            data-testid="save-profile-button-mobile"
+          >
+            {saveLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <>
+                <Heart className={`h-4 w-4 ${isSaved ? 'fill-current' : ''}`} />
+                {isSaved ? 'Saved' : 'Save'}
+              </>
+            )}
+          </button>
+          
+          <ProfileShareModal
+            profileUserId={profile.id}
+            profileName={displayName}
+            className="flex-1 flex items-center justify-center gap-2 h-10 rounded-full bg-gray-50 text-[#31A7AC] hover:bg-[#31A7AC]/10 transition-colors border border-gray-200 font-medium text-sm"
+          />
+          
+          <button 
+            onClick={handleMessageClick}
+            className="flex-1 flex items-center justify-center gap-2 h-10 rounded-full bg-gray-50 text-[#FA6E80] hover:bg-[#FA6E80]/10 transition-colors border border-gray-200 font-medium text-sm"
+            data-testid="message-button-mobile"
+          >
+            <MessageCircle className="h-4 w-4" />
+            Message
+          </button>
+        </div>
       </div>
     </section>
   )
