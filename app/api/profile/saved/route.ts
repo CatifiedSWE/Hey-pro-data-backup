@@ -86,8 +86,7 @@ export async function GET(request: NextRequest) {
               ? `${profile.city}, ${profile.country}` 
               : profile.country || 'Not specified',
             city: profile.city || '',
-            country: profile.country || '',
-            available_for_work: profile.available_for_work
+            country: profile.country || ''
           }
         };
       })
