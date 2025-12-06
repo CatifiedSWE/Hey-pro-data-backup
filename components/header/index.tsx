@@ -317,7 +317,7 @@ export default function Header() {
                           </Link>
                         </Button>
                         <Button variant="ghost" className="w-full justify-start gap-3 h-12 text-base" asChild>
-                          <Link href="/profile/saved" onClick={() => setUserMenuOpen(false)}>
+                          <Link href="/saved" onClick={() => setUserMenuOpen(false)}>
                             <span className="font-[400]">
                               Saved
                             </span>
@@ -330,6 +330,7 @@ export default function Header() {
                             </span>
                           </Link>
                         </Button>
+{/*  settings
                         <Button variant="ghost" className="w-full justify-start gap-3 h-12 text-base" asChild>
                           <Link href="/settings" onClick={() => setUserMenuOpen(false)}>
                             <span className="font-[400]">
@@ -337,6 +338,9 @@ export default function Header() {
                             </span>
                           </Link>
                         </Button>
+                         */}
+                        
+                        
                         <Separator className="mt-2 mb-0" />
                         <Button
                           variant="ghost"
@@ -353,7 +357,7 @@ export default function Header() {
 
                         </Button>
                       </div>
-                      <div className="group relative flex w-[141px] h-[41px] items-center mx-auto justify-center overflow-hidden rounded-[10px] p-[1px]">
+                      {/* <div className="group relative flex w-[141px] h-[41px] items-center mx-auto justify-center overflow-hidden rounded-[10px] p-[1px]">
                         <div className="absolute inset-0 h-full w-full bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC]" />
                         <Button className="relative flex h-full w-full items-center justify-center gap-3 rounded-[inherit] bg-white text-transparent shadow-none hover:bg-gray-50 dark:bg-slate-950 dark:hover:bg-slate-900">
                           <span className="bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC] bg-clip-text text-transparent">
@@ -361,7 +365,7 @@ export default function Header() {
                           </span>
 
                         </Button>
-                      </div>
+                      </div> */}
                     </div>
                   </>
                 )}
