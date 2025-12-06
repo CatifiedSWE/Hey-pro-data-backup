@@ -216,11 +216,6 @@ export default function SavedPage() {
             try {
                 setLoading(prev => ({ ...prev, profiles: true }));
                 const response = await axios.get('/profile/saved');
-                console.log('[DEBUG Frontend] Saved profiles response:', {
-                    fullResponse: response.data,
-                    profiles: response.data.data.profiles,
-                    count: response.data.data.count
-                });
                 setSavedProfiles(response.data.data.profiles || []);
                 setErrors(prev => ({ ...prev, profiles: null }));
             } catch (error: any) {
