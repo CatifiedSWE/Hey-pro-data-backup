@@ -125,7 +125,7 @@ export default function ReadOnlyShortProfile({ profile, initialSaved = false }: 
         </div>
       </div>
 
-      <div className="absolute top-[160px] right-0 left-[200px] hidden sm:flex items-center justify-between font-[400] text-[11px] pr-4 sm:pr-0">
+      <div className="absolute top-[160px] right-0 left-[200px] hidden sm:flex items-center justify-between font-[400] text-[11px] pr-4 sm:pr-6">
         <div className="flex items-center gap-0">
           <div className="flex items-center gap-2 px-4 py-2 text-[#393939]">
             <MapPin className="h-3.5 w-3.5 text-[#393939]" />
