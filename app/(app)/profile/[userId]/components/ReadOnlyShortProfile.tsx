@@ -125,8 +125,8 @@ export default function ReadOnlyShortProfile({ profile, initialSaved = false }: 
         </div>
       </div>
 
-      <div className="absolute top-[160px] right-0 left-[200px] hidden sm:flex items-center justify-between font-[400] text-[11px] pr-4 sm:pr-6">
-        <div className="flex items-center gap-0">
+      <div className="absolute top-[160px] right-4 sm:right-6 hidden sm:flex items-center justify-end font-[400] text-[11px] gap-4 max-w-[calc(100%-200px)]">
+        <div className="flex items-center gap-0 flex-shrink-0">
           <div className="flex items-center gap-2 px-4 py-2 text-[#393939]">
             <MapPin className="h-3.5 w-3.5 text-[#393939]" />
             <span className="whitespace-nowrap">{locationDescriptor}</span>
@@ -138,7 +138,7 @@ export default function ReadOnlyShortProfile({ profile, initialSaved = false }: 
         </div>
         
         {/* Action buttons: Heart, Share, Message */}
-        <div className="flex items-center gap-2 ml-4">
+        <div className="flex items-center gap-2 flex-shrink-0">
           <button 
             onClick={handleSaveToggle}
             disabled={saveLoading}
