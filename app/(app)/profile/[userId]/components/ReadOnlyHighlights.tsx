@@ -3,6 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import HighlightsText from "../../components/highlights-text";
 
 interface Highlight {
   id: string;
@@ -81,19 +82,39 @@ export default function ReadOnlyHighlights({ highlights }: ReadOnlyHighlightsPro
   return (
     <section className="w-full">
       {/* Desktop View */}
-      <div className="hidden lg:block w-full max-w-[336px] space-y-6">
-        <div className="space-y-8">
-          {displayHighlights.map((highlight) => (
-            <HighlightCard key={highlight.id} highlight={highlight} />
-          ))}
+      <div className="hidden lg:flex gap-6">
+        <aside className="sticky top-24 self-start w-full max-w-[336px] space-y-6">
+          <div className="space-y-8">
+            {displayHighlights.map((highlight) => (
+              <HighlightCard key={highlight.id} highlight={highlight} />
+            ))}
+          </div>
+        </aside>
+
+        <div className="flex flex-col items-center" style={{ gap: '15px' }}>
+          <HighlightsText />
+          <div
+            className="rounded-full"
+            style={{
+              width: '1px',
+              height: '1501px',
+              background: 'linear-gradient(180deg, #FA6E80 0%, #6A89BE 41.52%, #85AAB7 62.27%, #31A7AC 103.79%)',
+              opacity: 1
+            }}
+            aria-hidden
+          />
         </div>
       </div>
 
       {/* Mobile View */}
-      <div className="lg:hidden w-full space-y-8">
-        {displayHighlights.map((highlight) => (
-          <HighlightCard key={highlight.id} highlight={highlight} className="w-full" />
-        ))}
+      <div className="lg:hidden flex flex-col gap-6 pb-10">
+        <HighlightsText className="w-full" />
+        
+        <div className="space-y-8">
+          {displayHighlights.map((highlight) => (
+            <HighlightCard key={highlight.id} highlight={highlight} className="w-full" />
+          ))}
+        </div>
       </div>
     </section>
   );
