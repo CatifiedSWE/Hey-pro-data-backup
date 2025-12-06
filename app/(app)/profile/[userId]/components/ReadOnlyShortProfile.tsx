@@ -154,7 +154,7 @@ export default function ReadOnlyShortProfile({ profile, initialSaved = false }: 
           </button>
           
           <ProfileShareModal
-            profileUserId={profile.id}
+            profileUserId={profile.userId || profile.user_id}
             profileName={displayName}
             className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-50 text-[#31A7AC] hover:bg-[#31A7AC]/10 transition-colors border border-gray-200"
           />
