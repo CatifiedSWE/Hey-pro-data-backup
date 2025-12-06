@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import axios from "axios";
+import { ArrowLeft } from "lucide-react";
 import ProfileSkeleton from "../components/ProfileSkeleton";
 import ReadOnlyShortProfile from "./components/ReadOnlyShortProfile";
 import ReadOnlyAboutSection from "./components/ReadOnlyAboutSection";
@@ -69,6 +70,16 @@ export default function UserProfilePage() {
   return (
     <section className="relative mx-auto flex w-full max-w-[1180px] flex-col items-center gap-8 px-3 xs:px-4 sm:px-6 lg:flex-row lg:items-start lg:justify-center lg:gap-12 pt-6 pb-20">
       <main className="flex w-full max-w-[600px] flex-col space-y-4">
+        {/* Back Button */}
+        <Button
+          onClick={() => router.back()}
+          variant="ghost"
+          className="self-start flex items-center gap-2 text-[#FA6E80] hover:text-[#fa5a6e] hover:bg-[#FA6E80]/10 mb-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span>Back to Crew Directory</span>
+        </Button>
+        
         <ReadOnlyShortProfile profile={profile} />
         <div className="w-full bg-slate-200 h-px sm:h-[1px] mb-5" />
 
@@ -101,6 +112,12 @@ export default function UserProfilePage() {
               {/* Profile Sections */}
               <ReadOnlyAboutSection bio={profile.bio} />
               <div className="my-8" />
+              
+              {/* Highlights Section - Shows on mobile above skills */}
+              <div className="lg:hidden mb-8">
+                <ReadOnlyHighlights highlights={profile.highlights} />
+              </div>
+              
               <ReadOnlySkillsSection skills={profile.skills} />
               <div className="my-8" />
               <ReadOnlyCreditsSection credits={profile.credits} />
@@ -115,13 +132,6 @@ export default function UserProfilePage() {
       <div className="hidden lg:block w-full max-w-[336px]">
         <ReadOnlyHighlights highlights={profile.highlights} />
       </div>
-      
-      {/* Highlights Section - Shows on mobile */}
-      {activeTab === "profile" && (
-        <div className="lg:hidden w-full max-w-[600px] mt-8">
-          <ReadOnlyHighlights highlights={profile.highlights} />
-        </div>
-      )}
     </section>
   );
 }

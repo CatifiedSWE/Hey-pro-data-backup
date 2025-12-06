@@ -15,10 +15,16 @@ async function getExploreData(searchParams: { [key: string]: string | string[] |
     const { data: { user: currentUser } } = await supabase.auth.getUser();
     const currentUserId = currentUser?.id;
     
+    // Extract all filter parameters
     const keyword = searchParams?.keyword as string;
     const role = searchParams?.role as string;
     const category = searchParams?.category as string;
-    // Add other filters as needed
+    const location = searchParams?.location as string;
+    const availability = searchParams?.availability as string;
+    const productionType = searchParams?.productionType as string;
+    const experience = searchParams?.experience as string;
+    const minRate = searchParams?.minRate as string;
+    const maxRate = searchParams?.maxRate as string;
     
     let query = supabase
       .from('user_profiles')
@@ -53,8 +59,13 @@ async function getExploreData(searchParams: { [key: string]: string | string[] |
       }
     }
     
-    // Apply location search if passed in keyword (simple heuristic) or specific param
-    // For now just basic keyword search
+    // Apply location filter
+    if (location) {
+      const sanitizedLocation = location.replace(/[^a-zA-Z0-9 ]/g, "");
+      if (sanitizedLocation) {
+        query = query.or(`country.ilike.%${sanitizedLocation}%,city.ilike.%${sanitizedLocation}%`);
+      }
+    }
 
     const { data: profiles, error } = await query;
 
@@ -84,10 +95,11 @@ async function getExploreData(searchParams: { [key: string]: string | string[] |
       });
     }
 
-    // Enrich profiles with roles and Google avatars
+    // Enrich profiles with roles, skills, and Google avatars
     const enrichedProfiles = await Promise.all(
       profiles.map(async (profile) => {
         try {
+            // Fetch user roles
             const { data: roles } = await supabase
             .from('user_roles')
             .select('role_name')
@@ -103,12 +115,86 @@ async function getExploreData(searchParams: { [key: string]: string | string[] |
                 }
             }
 
+            // Fetch user skills for experience and rate filtering
+            const { data: skills } = await supabase
+            .from('user_skills')
+            .select('skill_name, experience_level, rate_per_day')
+            .eq('user_id', profile.user_id);
+
+            // Filter by experience level if specified
+            if (experience && skills) {
+                const hasMatchingExperience = skills.some(skill => 
+                    skill.experience_level && 
+                    skill.experience_level.toLowerCase().includes(experience.toLowerCase())
+                );
+                if (!hasMatchingExperience) {
+                    return null;
+                }
+            }
+
+            // Filter by rate range if specified
+            if ((minRate || maxRate) && skills) {
+                const min = minRate ? parseInt(minRate) : 0;
+                const max = maxRate ? parseInt(maxRate) : 5000;
+                
+                const hasMatchingRate = skills.some(skill => {
+                    if (!skill.rate_per_day) return false;
+                    const rate = parseFloat(skill.rate_per_day.toString());
+                    return rate >= min && rate <= max;
+                });
+                
+                if (!hasMatchingRate) {
+                    return null;
+                }
+            }
+
+            // Filter by production type if specified
+            // Production type is typically part of the role name (e.g., "Director | Commercial")
+            if (productionType && roles) {
+                const prodType = productionType.toLowerCase();
+                const hasMatchingProdType = roles.some(r => 
+                    r.role_name.toLowerCase().includes(prodType)
+                );
+                if (!hasMatchingProdType) {
+                    return null;
+                }
+            }
+
+            // Check availability if specified
+            // Note: This requires checking the availability table
+            if (availability) {
+                const today = new Date().toISOString().split('T')[0];
+                const { data: availabilityData } = await supabase
+                    .from('availability')
+                    .select('status, start_date, end_date')
+                    .eq('user_id', profile.user_id)
+                    .gte('end_date', today)
+                    .order('start_date', { ascending: true })
+                    .limit(1);
+
+                if (availability === 'available') {
+                    // User should be marked as available
+                    const isAvailable = availabilityData && availabilityData.length > 0 && 
+                        availabilityData[0].status === 'available';
+                    if (!isAvailable) {
+                        return null;
+                    }
+                } else if (availability === 'unavailable') {
+                    // User should be marked as unavailable
+                    const isUnavailable = availabilityData && availabilityData.length > 0 && 
+                        availabilityData[0].status === 'unavailable';
+                    if (!isUnavailable) {
+                        return null;
+                    }
+                }
+            }
+
             // Build display name with priority: alias_first_name + alias_surname (1st), first_name + surname (2nd)
             const aliasName = `${profile.alias_first_name || ''} ${profile.alias_surname || ''}`.trim();
             const realName = `${profile.first_name || ''} ${profile.surname || ''}`.trim();
             const displayName = aliasName || realName || 'Anonymous';
             
-            const location = profile.city && profile.country 
+            const profileLocation = profile.city && profile.country 
             ? `${profile.city}, ${profile.country}` 
             : profile.country || 'Not specified';
 
@@ -122,7 +208,7 @@ async function getExploreData(searchParams: { [key: string]: string | string[] |
             banner: profile.banner_url || '',
             image: profileImage,
             bio: profile.bio || '',
-            location: location,
+            location: profileLocation,
             skills: roles?.map(r => r.role_name) || []
             };
         } catch (innerError) {
