@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
     // Fetch user profile details for each saved profile
     const profiles = await Promise.all(
       (savedProfiles || []).map(async (save: any) => {
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
           .from('user_profiles')
           .select(`
             id,
@@ -60,6 +60,11 @@ export async function GET(request: NextRequest) {
           `)
           .eq('user_id', save.profile_user_id)
           .single();
+
+        console.log('[DEBUG] Profile lookup for user_id:', save.profile_user_id, {
+          found: !!profile,
+          error: profileError
+        });
 
         if (!profile) return null;
 
