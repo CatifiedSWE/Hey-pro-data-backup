@@ -37,6 +37,7 @@ export default function ShortProfile({ profile, links, roles = [], recommendatio
     const [localAvailability, setLocalAvailability] = useState<string>(profile?.availability || "Available")
 
     const { user } = useAuth();
+    const { updateProfile } = useProfile();
 
     // Sync local state when profile prop changes
     useEffect(() => {
@@ -108,6 +109,30 @@ export default function ShortProfile({ profile, links, roles = [], recommendatio
             if (bannerInputRef.current) {
                 bannerInputRef.current.value = '';
             }
+        }
+    };
+
+    const handleBannerRemove = async () => {
+        if (!profile?.banner_url) {
+            toast.error('No banner to remove');
+            return;
+        }
+
+        setUploadingBanner(true);
+        try {
+            const result = await updateProfile({ banner_url: null });
+            
+            if (result.success) {
+                toast.success('Banner removed successfully!');
+                // Trigger parent refetch if available
+                onLinksUpdate?.();
+            } else {
+                toast.error(result.message || 'Failed to remove banner');
+            }
+        } catch (error) {
+            toast.error('Failed to remove banner');
+        } finally {
+            setUploadingBanner(false);
         }
     };
 
@@ -192,8 +217,9 @@ export default function ShortProfile({ profile, links, roles = [], recommendatio
                         className="hidden" 
                         onChange={handleBannerUpload}
                     />
+                    {/* Desktop hover overlay */}
                     <div
-                        className={`absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-[20px] bg-black/60 text-center text-white transition-opacity ${coverImageHovered ? "opacity-100" : "opacity-0"}`}
+                        className={`absolute inset-0 hidden sm:flex flex-col items-center justify-center gap-3 rounded-[20px] bg-black/60 text-center text-white transition-opacity ${coverImageHovered ? "opacity-100" : "opacity-0"}`}
                     >
                         <p className="text-sm font-semibold">Replace Banner Image</p>
                         <span className="text-xs opacity-80">Optimal dimensions: 3000x759px (Max 2MB)</span>
@@ -201,7 +227,7 @@ export default function ShortProfile({ profile, links, roles = [], recommendatio
                             <label htmlFor="cover-image-upload">
                                 <Button 
                                     variant="default" 
-                                    className="rounded-full bg-[#FA6E80] hover:bg-[#FA6E80]" 
+                                    className="rounded-full bg-[#FA6E80] hover:bg-[#FA6E80] min-h-[44px] px-6" 
                                     disabled={uploadingBanner}
                                     asChild
                                 >
@@ -211,11 +237,43 @@ export default function ShortProfile({ profile, links, roles = [], recommendatio
                                 </Button>
                             </label>
                             {profile?.banner_url && (
-                                <Button variant="ghost" className="rounded-full border border-white text-white">
+                                <Button 
+                                    variant="ghost" 
+                                    className="rounded-full border border-white text-white hover:bg-white/20 min-h-[44px] px-6"
+                                    onClick={handleBannerRemove}
+                                    disabled={uploadingBanner}
+                                >
                                     Remove
                                 </Button>
                             )}
                         </div>
+                    </div>
+                    {/* Mobile always-visible buttons */}
+                    <div className="absolute sm:hidden bottom-2 right-2 flex gap-2">
+                        <label htmlFor="cover-image-upload">
+                            <Button 
+                                variant="default" 
+                                size="sm"
+                                className="rounded-full bg-[#FA6E80] hover:bg-[#FA6E80] min-h-[44px] min-w-[44px] px-4 shadow-lg" 
+                                disabled={uploadingBanner}
+                                asChild
+                            >
+                                <span className="cursor-pointer text-xs sm:text-sm">
+                                    {uploadingBanner ? 'Uploading...' : 'Edit'}
+                                </span>
+                            </Button>
+                        </label>
+                        {profile?.banner_url && (
+                            <Button 
+                                variant="ghost" 
+                                size="sm"
+                                className="rounded-full border border-white bg-black/40 text-white hover:bg-black/60 min-h-[44px] min-w-[44px] px-4 shadow-lg"
+                                onClick={handleBannerRemove}
+                                disabled={uploadingBanner}
+                            >
+                                <span className="text-xs sm:text-sm">Remove</span>
+                            </Button>
+                        )}
                     </div>
                 </div>
             </div>
