@@ -22,12 +22,20 @@ export default function HighlightsText({ className = "" }) {
         />
       </div>
 
-      {/* Mobile: gradient text (visible < lg) */}
-      <div
-        className="block lg:hidden w-full h-11 rounded-[10px] border-[#31A7AC] font-medium flex items-center justify-center bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC] text-transparent bg-clip-text"
-        style={{ WebkitBackgroundClip: 'text', backgroundClip: 'text' }}
-      >
-        HEYLIGHTS
+      {/* Mobile: gradient text with line (visible < lg) */}
+      <div className="block lg:hidden w-full flex items-center gap-3">
+        <div
+          className="text-2xl font-bold bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC] text-transparent bg-clip-text"
+          style={{ WebkitBackgroundClip: 'text', backgroundClip: 'text' }}
+        >
+          HIGHLIGHTS
+        </div>
+        <div 
+          className="flex-1 h-[3px] rounded-full"
+          style={{
+            background: 'linear-gradient(90deg, #31A7AC 0%, #85AAB7 30%, #6A89BE 60%, #FA6E80 100%)',
+          }}
+        />
       </div>
 
       {/*
