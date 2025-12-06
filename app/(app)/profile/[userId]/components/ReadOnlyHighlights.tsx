@@ -110,9 +110,11 @@ export default function ReadOnlyHighlights({ highlights }: ReadOnlyHighlightsPro
       <div className="lg:hidden flex flex-col gap-6 pb-10">
         <HighlightsText className="w-full" />
         
-        <div className="space-y-8">
+        <div className="flex flex-row overflow-x-auto gap-x-6 scrollbar-hide pb-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           {displayHighlights.map((highlight) => (
-            <HighlightCard key={highlight.id} highlight={highlight} className="w-full" />
+            <div key={highlight.id} className="flex-none w-[280px]">
+              <HighlightCard highlight={highlight} />
+            </div>
           ))}
         </div>
       </div>

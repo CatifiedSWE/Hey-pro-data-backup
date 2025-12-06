@@ -165,13 +165,15 @@ export default function Highlights({ highlights: propHighlights }: HighlightsPro
                     Edit Highlights
                 </Button>
 
-                <div className="space-y-8">
+                <div className="flex flex-row overflow-x-auto gap-x-6 scrollbar-hide pb-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                     {displayHighlights.length > 0 ? (
                         displayHighlights.map((highlight) => (
-                            <HighlightCard key={highlight.id} highlight={highlight} className="w-full" />
+                            <div key={highlight.id} className="flex-none w-[280px]">
+                                <HighlightCard highlight={highlight} />
+                            </div>
                         ))
                     ) : (
-                         <div className="p-8 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center text-center gap-3 text-gray-500 bg-gray-50/50">
+                         <div className="flex-none w-full p-8 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center text-center gap-3 text-gray-500 bg-gray-50/50">
                             <p className="text-sm font-medium">Showcase your best work</p>
                             <Button 
                                 variant="ghost" 
