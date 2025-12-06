@@ -119,9 +119,11 @@ export default function UserProfilePage() {
               <div className="my-8" />
               
               {/* Highlights Section - Shows on mobile above skills */}
-              <div className="lg:hidden mb-8">
-                <ReadOnlyHighlights highlights={profile.highlights} />
-              </div>
+              {profile.highlights && profile.highlights.length > 0 && (
+                <div className="lg:hidden mb-8">
+                  <ReadOnlyHighlights highlights={profile.highlights} />
+                </div>
+              )}
               
               <ReadOnlySkillsSection skills={profile.skills} />
               <div className="my-8" />
@@ -134,9 +136,11 @@ export default function UserProfilePage() {
       </main>
       
       {/* Highlights Section - Shows on desktop as sidebar */}
-      <div className="hidden lg:block w-full max-w-[336px]">
-        <ReadOnlyHighlights highlights={profile.highlights} />
-      </div>
+      {profile.highlights && profile.highlights.length > 0 && (
+        <div className="hidden lg:block w-full max-w-[336px]">
+          <ReadOnlyHighlights highlights={profile.highlights} />
+        </div>
+      )}
     </section>
   );
 }
