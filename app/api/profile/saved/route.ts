@@ -89,8 +89,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       successResponse(
         {
-          profiles,
-          count: profiles.length
+          profiles: validProfiles,
+          count: validProfiles.length
         },
         'Saved profiles fetched successfully'
       ),
