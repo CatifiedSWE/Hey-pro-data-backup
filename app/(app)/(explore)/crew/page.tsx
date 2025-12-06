@@ -124,13 +124,22 @@ async function getExploreData(searchParams: { [key: string]: string | string[] |
 
             // Filter by experience level if specified
             if (experience && skills) {
-                // Normalize experience search term
-                const searchExp = experience.toLowerCase().trim();
+                // Map frontend experience titles to database values
+                const experienceMap: { [key: string]: string } = {
+                    "Intern": "intern",
+                    "Learning | Assisted": "learning",
+                    "Competent | Independent": "competent",
+                    "Expert | Lead": "expert"
+                };
+                
+                // Get database value from frontend title, or use as-is if not in map
+                const dbExperience = experienceMap[experience] || experience.toLowerCase().trim();
+                
                 const hasMatchingExperience = skills.some(skill => {
                     if (!skill.experience_level) return false;
                     const skillExp = skill.experience_level.toLowerCase().trim();
-                    // Check for exact match or partial match (e.g., "intern" matches "Intern")
-                    return skillExp.includes(searchExp) || searchExp.includes(skillExp);
+                    // Check for exact match
+                    return skillExp === dbExperience;
                 });
                 if (!hasMatchingExperience) {
                     return null;
@@ -168,28 +177,28 @@ async function getExploreData(searchParams: { [key: string]: string | string[] |
             }
 
             // Check availability if specified
-            // Note: This requires checking the availability table
+            // Note: This requires checking the crew_availability table
             if (availability) {
                 const today = new Date().toISOString().split('T')[0];
                 const { data: availabilityData } = await supabase
-                    .from('availability')
-                    .select('status, start_date, end_date')
+                    .from('crew_availability')
+                    .select('status, availability_date')
                     .eq('user_id', profile.user_id)
-                    .gte('end_date', today)
-                    .order('start_date', { ascending: true })
-                    .limit(1);
+                    .gte('availability_date', today)
+                    .order('availability_date', { ascending: true })
+                    .limit(10);
 
                 if (availability === 'available') {
-                    // User should be marked as available
+                    // User should have at least one date marked as available
                     const isAvailable = availabilityData && availabilityData.length > 0 && 
-                        availabilityData[0].status === 'available';
+                        availabilityData.some(record => record.status === 'available');
                     if (!isAvailable) {
                         return null;
                     }
                 } else if (availability === 'unavailable') {
-                    // User should be marked as unavailable
-                    const isUnavailable = availabilityData && availabilityData.length > 0 && 
-                        availabilityData[0].status === 'unavailable';
+                    // User should have no available dates (all records are 'na' or 'hold' or no records)
+                    const isUnavailable = !availabilityData || availabilityData.length === 0 || 
+                        !availabilityData.some(record => record.status === 'available');
                     if (!isUnavailable) {
                         return null;
                     }

@@ -416,11 +416,72 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                                         <span className="text-[#FA6E80]">{filterForm.minRate}</span>
                                         <span className="text-[#31A7AC]">{filterForm.maxRate}</span>
                                     </div>
-                                    <div className="relative pt-2 h-6">
+                                    <div className="relative pt-2 h-8">
+                                        <style jsx>{`
+                                            .range-slider-min {
+                                                -webkit-appearance: none;
+                                                -moz-appearance: none;
+                                                appearance: none;
+                                                background: transparent;
+                                                pointer-events: none;
+                                            }
+                                            .range-slider-min::-webkit-slider-thumb {
+                                                -webkit-appearance: none;
+                                                appearance: none;
+                                                width: 18px;
+                                                height: 18px;
+                                                border-radius: 50%;
+                                                background: #FA6E80;
+                                                border: 2px solid white;
+                                                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                                                cursor: pointer;
+                                                pointer-events: auto;
+                                            }
+                                            .range-slider-min::-moz-range-thumb {
+                                                width: 18px;
+                                                height: 18px;
+                                                border-radius: 50%;
+                                                background: #FA6E80;
+                                                border: 2px solid white;
+                                                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                                                cursor: pointer;
+                                                pointer-events: auto;
+                                            }
+                                            .range-slider-max {
+                                                -webkit-appearance: none;
+                                                -moz-appearance: none;
+                                                appearance: none;
+                                                background: transparent;
+                                                pointer-events: none;
+                                            }
+                                            .range-slider-max::-webkit-slider-thumb {
+                                                -webkit-appearance: none;
+                                                appearance: none;
+                                                width: 18px;
+                                                height: 18px;
+                                                border-radius: 50%;
+                                                background: #31A7AC;
+                                                border: 2px solid white;
+                                                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                                                cursor: pointer;
+                                                pointer-events: auto;
+                                            }
+                                            .range-slider-max::-moz-range-thumb {
+                                                width: 18px;
+                                                height: 18px;
+                                                border-radius: 50%;
+                                                background: #31A7AC;
+                                                border: 2px solid white;
+                                                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                                                cursor: pointer;
+                                                pointer-events: auto;
+                                            }
+                                        `}</style>
                                         <input
                                             type="range"
                                             min={0}
                                             max={5000}
+                                            step={100}
                                             value={filterForm.minRate}
                                             onChange={(e) => {
                                                 const value = Number(e.target.value);
@@ -428,13 +489,14 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                                                     handleFilterChange("minRate", value);
                                                 }
                                             }}
-                                            className="absolute w-full h-2 bg-transparent appearance-none pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#FA6E80] [&::-webkit-slider-thumb]:cursor-pointer"
+                                            className="range-slider-min absolute w-full h-2"
                                             style={{ zIndex: 3 }}
                                         />
                                         <input
                                             type="range"
                                             min={0}
                                             max={5000}
+                                            step={100}
                                             value={filterForm.maxRate}
                                             onChange={(e) => {
                                                 const value = Number(e.target.value);
@@ -442,10 +504,10 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
                                                     handleFilterChange("maxRate", value);
                                                 }
                                             }}
-                                            className="absolute w-full h-2 bg-transparent appearance-none pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#31A7AC] [&::-webkit-slider-thumb]:cursor-pointer"
+                                            className="range-slider-max absolute w-full h-2"
                                             style={{ zIndex: 4 }}
                                         />
-                                        <div className="absolute w-full h-2 bg-gray-200 rounded-full top-1">
+                                        <div className="absolute w-full h-2 bg-gray-200 rounded-full top-2">
                                             <div
                                                 className="absolute h-2 bg-gradient-to-r from-[#FA6E80] to-[#31A7AC] rounded-full"
                                                 style={{
