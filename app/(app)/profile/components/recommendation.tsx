@@ -192,7 +192,7 @@ export default function RecommendationsComponent({
                         </svg>
                     </div>
                     <h3 className="mb-2 text-lg font-semibold text-gray-900">
-                        No recommendations yet
+                        Build your credibility
                     </h3>
                     <p className="mb-4 text-sm text-gray-600">
                         Add recommendations to showcase professional connections.

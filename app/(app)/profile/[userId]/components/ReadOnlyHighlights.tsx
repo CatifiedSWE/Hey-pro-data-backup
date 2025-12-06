@@ -72,7 +72,7 @@ export default function ReadOnlyHighlights({ highlights }: ReadOnlyHighlightsPro
       <div className="w-full rounded-[20px] bg-[#FAFAFA] px-6 py-7 shadow-[0_1px_10px_rgba(0,0,0,0.1)]">
         <h2 className="text-[22px] font-semibold leading-[33px] text-[#000] mb-5">Highlights</h2>
         <div className="text-center py-8 text-gray-500">
-          <p>No highlights added yet.</p>
+          <p>Still working for their masterpiece</p>
         </div>
       </div>
     );

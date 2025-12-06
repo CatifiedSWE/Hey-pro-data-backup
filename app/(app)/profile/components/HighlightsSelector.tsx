@@ -215,7 +215,7 @@ export function HighlightsSelector({
                                             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                                                 <Clapperboard className="w-8 h-8 text-gray-400" />
                                             </div>
-                                            <h3 className="text-lg font-semibold text-gray-900">No credits found</h3>
+                                            <h3 className="text-lg font-semibold text-gray-900">Ready to shine?</h3>
                                             <p className="text-sm text-gray-500 mt-2 max-w-xs">
                                                 Add credits to your profile first to feature them as highlights.
                                             </p>
@@ -244,7 +244,7 @@ export function HighlightsSelector({
                                             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                                                 <LayoutGrid className="w-8 h-8 text-gray-400" />
                                             </div>
-                                            <h3 className="text-lg font-semibold text-gray-900">No slate posts found</h3>
+                                            <h3 className="text-lg font-semibold text-gray-900">Your canvas awaits</h3>
                                             <p className="text-sm text-gray-500 mt-2 max-w-xs">
                                                 Create posts on your Slate to feature them here.
                                             </p>

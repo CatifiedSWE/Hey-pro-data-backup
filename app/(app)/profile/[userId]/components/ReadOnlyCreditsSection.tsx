@@ -35,7 +35,7 @@ export default function ReadOnlyCreditsSection({ credits }: ReadOnlyCreditsSecti
           <h2 className="text-[22px] font-semibold leading-[33px] text-[#000]">Credits</h2>
         </div>
         <div className="text-center py-8 text-gray-500">
-          <p>No credits added yet.</p>
+          <p>Fresh seed</p>
         </div>
       </div>
     );

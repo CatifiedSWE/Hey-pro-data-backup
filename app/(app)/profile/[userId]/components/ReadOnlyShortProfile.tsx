@@ -25,7 +25,7 @@ export default function ReadOnlyShortProfile({ profile }: ReadOnlyShortProfilePr
   const primaryLink = links[0]?.url ?? "";
   
   const linkSummary = (() => {
-    if (!primaryLink) return "No links added"
+    if (!primaryLink) return "Keeping it mysterious"
     
     const icon = <LinkIcon className="h-5 w-5" color="#FA6E80" />
     let host = primaryLink

@@ -227,7 +227,7 @@ export default function CreditsSection() {
 
             {!error && credits.length === 0 && (
                 <div className="text-center py-8 text-gray-500">
-                    <p>No credits added yet. Click the + button to add your first credit.</p>
+                    <p>Showcase your art works that won the world</p>
                 </div>
             )}
 

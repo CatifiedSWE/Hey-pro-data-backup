@@ -29,7 +29,7 @@ export default function ExplorePage({
           ))
         ) : (
           <div className="col-span-full text-center text-gray-500 mt-10">
-            <p>No profiles found matching your criteria.</p>
+            <p>Seems like people don't match your vibe</p>
           </div>
         )}
       </div>

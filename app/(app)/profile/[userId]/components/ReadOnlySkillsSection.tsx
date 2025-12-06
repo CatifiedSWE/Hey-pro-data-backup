@@ -20,7 +20,7 @@ export default function ReadOnlySkillsSection({ skills }: ReadOnlySkillsSectionP
           <h2 className="text-[22px] font-semibold leading-[33px] text-[#000]">Skills</h2>
         </div>
         <div className="text-center py-8 text-gray-500">
-          <p>No skills added yet.</p>
+          <p>Life long learner</p>
         </div>
       </div>
     );

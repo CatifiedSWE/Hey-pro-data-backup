@@ -124,7 +124,7 @@ export default function Highlights({ highlights: propHighlights }: HighlightsPro
                             ))
                         ) : (
                             <div className="p-6 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center text-center gap-3 text-gray-500">
-                                <p className="text-sm">No highlights selected yet</p>
+                                <p className="text-sm">It is time to flex with your masterpiece</p>
                                 <Button 
                                     variant="ghost" 
                                     size="sm" 

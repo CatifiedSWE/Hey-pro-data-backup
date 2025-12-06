@@ -25,7 +25,7 @@ export default function ShortProfile({ Profile }: { Profile: ProfileDataTypes })
     const extraRecommendations = Math.max(Profile.recomendPeoples.length - 2, 0)
     const primaryLink = Profile.persionalDetails.links[0]?.url ?? ""
     const linkSummary = (() => {
-        if (!primaryLink) return "No links added"
+        if (!primaryLink) return "Tell the world about you"
         try {
             const host = new URL(primaryLink).hostname.replace(/^www\./, "")
             const extra = Profile.persionalDetails.links.length - 1

@@ -251,7 +251,7 @@ export default function ResumePortfolio({
                                 ) : (
                                     <>
                                         <p className="text-sm text-gray-600 mb-3">
-                                            No resume uploaded yet
+                                            Upload your resume to get noticed
                                         </p>
                                         <Dialog open={isResumeDialogOpen} onOpenChange={setIsResumeDialogOpen}>
                                             <DialogTrigger asChild>
@@ -397,7 +397,7 @@ export default function ResumePortfolio({
                                 ) : (
                                     <>
                                         <p className="text-sm text-gray-600 mb-3">
-                                            No portfolio uploaded yet
+                                            Show the world your best work
                                         </p>
                                         <Dialog open={isPortfolioDialogOpen} onOpenChange={setIsPortfolioDialogOpen}>
                                             <DialogTrigger asChild>

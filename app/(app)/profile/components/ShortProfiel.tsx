@@ -61,7 +61,7 @@ export default function ShortProfile({ profile, links, roles = [], recommendatio
     const primaryLink = links[0]?.url ?? "";
     
     const linkSummary = (() => {
-        if (!primaryLink) return "No links added"
+        if (!primaryLink) return "Tell the world about you"
         
         const icon = <LinkIcon className="h-5 w-5" color="#FA6E80" />
         let host = primaryLink

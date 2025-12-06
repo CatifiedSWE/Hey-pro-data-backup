@@ -467,7 +467,7 @@ function SkillsSectionWrapper({ skills, onUpdate }: { skills: any[]; onUpdate: (
           </div>
         </div>
         <div className="text-center py-8 text-gray-500">
-          <p>No skills added yet. Click the + button to add your first skill.</p>
+          <p>Showcase your skills by adding one</p>
         </div>
       </div>
     );
