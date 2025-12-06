@@ -177,17 +177,13 @@ export default function ShortProfile({ profile, links, roles = [], recommendatio
                 onMouseLeave={() => setCoverImageHovered(false)}
             >
                 <div className="relative sm:h-[150px] h-[88px] w-full overflow-hidden rounded-[20px]">
-                    {profile?.banner_url ? (
-                        <Image
-                            src={profile.banner_url}
-                            alt="Cover image"
-                            fill
-                            sizes="600px"
-                            className="object-cover"
-                        />
-                    ) : (
-                        <div className="w-full h-full bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC]" />
-                    )}
+                    <Image
+                        src={profile?.banner_url || '/default-banner.png'}
+                        alt="Cover image"
+                        fill
+                        sizes="600px"
+                        className="object-cover"
+                    />
                     <input 
                         ref={bannerInputRef}
                         type="file" 
@@ -230,7 +226,11 @@ export default function ShortProfile({ profile, links, roles = [], recommendatio
                 >
                     <ProfileProgress 
                         value={profile?.profile_completion_percentage || 0} 
-                        imageUrl={profile?.profile_photo_url || user?.user_metadata?.avatar_url || '/default-profile.png'} 
+                        imageUrl={
+                            profile?.profile_photo_url || 
+                            user?.user_metadata?.avatar_url || 
+                            '/default-profile.png'
+                        } 
                         className="rounded-full" 
                     />
                      <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">

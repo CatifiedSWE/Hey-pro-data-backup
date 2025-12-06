@@ -160,10 +160,24 @@ export async function GET(
       .eq('user_id', userId)
       .order('availability_date', { ascending: true });
 
+    // Fetch Google OAuth avatar as fallback
+    let googleAvatar = null;
+    try {
+      const { data: authUser } = await supabase.auth.admin.getUserById(userId);
+      if (authUser?.user?.user_metadata?.avatar_url || authUser?.user?.user_metadata?.picture) {
+        googleAvatar = authUser.user.user_metadata.avatar_url || authUser.user.user_metadata.picture;
+      }
+    } catch (err) {
+      console.error('Error fetching Google avatar:', err);
+    }
+
     // Build display name with priority: alias_first_name + alias_surname (1st), first_name + surname (2nd)
     const aliasName = `${profile.alias_first_name || ''} ${profile.alias_surname || ''}`.trim();
     const realName = `${profile.first_name || ''} ${profile.surname || ''}`.trim();
     const displayName = aliasName || realName || 'Anonymous';
+    
+    // Priority: profile_photo_url > Google metadata avatar > null
+    const profileAvatar = profile.profile_photo_url || googleAvatar || null;
     
     // Build comprehensive profile response
     const completeProfile = {
@@ -171,7 +185,7 @@ export async function GET(
       userId: profile.user_id,
       name: displayName,
       displayName: displayName,
-      avatar: profile.profile_photo_url,
+      avatar: profileAvatar,
       banner: profile.banner_url,
       bio: profile.bio,
       country: profile.country,

@@ -70,22 +70,18 @@ export default function ReadOnlyShortProfile({ profile }: ReadOnlyShortProfilePr
     <section className="relative w-full border-b border-[#DADADA] pb-6">
       <div className="relative h-[228px]">
         <div className="relative sm:h-[150px] h-[88px] w-full overflow-hidden rounded-[20px]">
-          {profile?.banner ? (
-            <Image
-              src={profile.banner}
-              alt="Cover image"
-              fill
-              sizes="600px"
-              className="object-cover"
-            />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-r from-[#FA6E80] via-[#6A89BE] to-[#31A7AC]" />
-          )}
+          <Image
+            src={profile?.banner || '/default-banner.png'}
+            alt="Cover image"
+            fill
+            sizes="600px"
+            className="object-cover"
+          />
         </div>
       </div>
       <div className="absolute inset-x-0 top-[38px] sm:top-[108px] left-[9px] sm:left-[58px] flex justify-start">
         <div className="relative flex h-[112px] w-[112px] items-center justify-center">
-          <div className="relative h-[112px] w-[112px] rounded-full overflow-hidden border-4 border-white">
+          <div className="relative h-[112px] w-[112px] rounded-full overflow-hidden border-4 border-white bg-gray-100">
             <Image
               src={profile?.avatar || '/default-profile.png'}
               alt={displayName}
