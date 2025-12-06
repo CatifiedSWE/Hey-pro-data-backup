@@ -19,25 +19,10 @@ export async function GET(request: NextRequest) {
 
     const supabase = createServerClient();
 
-    // Fetch saved profiles with profile details
+    // Fetch saved profiles
     const { data: savedProfiles, error: savedError } = await supabase
       .from('profile_saves')
-      .select(`
-        id,
-        profile_user_id,
-        created_at,
-        user_profiles!profile_saves_profile_user_id_fkey (
-          id,
-          user_id,
-          name,
-          avatar,
-          bio,
-          location,
-          city,
-          country,
-          available_from
-        )
-      `)
+      .select('id, profile_user_id, created_at')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
@@ -49,26 +34,57 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Format the response
-    const profiles = (savedProfiles || []).map((save: any) => {
-      const profile = save.user_profiles;
-      return {
-        save_id: save.id,
-        saved_at: save.created_at,
-        user_id: save.profile_user_id,
-        profile: profile ? {
-          id: profile.id,
-          user_id: profile.user_id,
-          name: profile.name || 'Anonymous',
-          avatar: profile.avatar || '/default-profile.png',
-          bio: profile.bio || '',
-          location: profile.location || '',
-          city: profile.city || '',
-          country: profile.country || '',
-          available_from: profile.available_from
-        } : null
-      };
-    }).filter((item: any) => item.profile !== null);
+    // Fetch user profile details for each saved profile
+    const profiles = await Promise.all(
+      (savedProfiles || []).map(async (save: any) => {
+        const { data: profile } = await supabase
+          .from('user_profiles')
+          .select(`
+            id,
+            user_id,
+            first_name,
+            surname,
+            alias_first_name,
+            alias_surname,
+            profile_photo_url,
+            bio,
+            city,
+            country,
+            available_for_work
+          `)
+          .eq('user_id', save.profile_user_id)
+          .single();
+
+        if (!profile) return null;
+
+        // Build display name
+        const aliasName = `${profile.alias_first_name || ''} ${profile.alias_surname || ''}`.trim();
+        const realName = `${profile.first_name || ''} ${profile.surname || ''}`.trim();
+        const displayName = aliasName || realName || 'Anonymous';
+
+        return {
+          save_id: save.id,
+          saved_at: save.created_at,
+          user_id: save.profile_user_id,
+          profile: {
+            id: profile.id,
+            user_id: profile.user_id,
+            name: displayName,
+            avatar: profile.profile_photo_url || '/default-profile.png',
+            bio: profile.bio || '',
+            location: profile.city && profile.country 
+              ? `${profile.city}, ${profile.country}` 
+              : profile.country || 'Not specified',
+            city: profile.city || '',
+            country: profile.country || '',
+            available_for_work: profile.available_for_work
+          }
+        };
+      })
+    );
+
+    // Filter out null entries (profiles that weren't found)
+    const validProfiles = profiles.filter((item: any) => item !== null);
 
     return NextResponse.json(
       successResponse(
