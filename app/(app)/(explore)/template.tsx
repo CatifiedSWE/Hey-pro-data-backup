@@ -209,6 +209,8 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
     const [searchTerm, setSearchTerm] = React.useState("");
     const [activeFilterCount, setActiveFilterCount] = React.useState(0);
     const [activeRole, setActiveRole] = React.useState<string>("");
+    // Track if user is actively typing to prevent URL sync from overwriting input
+    const isTypingRef = React.useRef(false);
 
     // Initialize form from URL params
     useEffect(() => {
@@ -230,7 +232,11 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
             minRate,
             maxRate
         });
-        setSearchTerm(keyword);
+        // Only update searchTerm from URL if user is not actively typing
+        // This prevents the circular update that causes letters to stack
+        if (!isTypingRef.current) {
+            setSearchTerm(keyword);
+        }
         setActiveRole(role);
 
         // Calculate active filters count
@@ -279,14 +285,24 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
 
     // Handle search input debounce
     useEffect(() => {
+        // Mark that user is typing
+        isTypingRef.current = true;
+        
         const timer = setTimeout(() => {
             if (searchTerm !== filterForm.keyword) {
                 const newFilters = { ...filterForm, keyword: searchTerm };
                 setFilterForm(newFilters);
                 updateUrl(newFilters);
             }
+            // After debounce completes, user is no longer typing
+            isTypingRef.current = false;
         }, 500);
-        return () => clearTimeout(timer);
+        
+        return () => {
+            clearTimeout(timer);
+            // Reset typing flag on cleanup
+            isTypingRef.current = false;
+        };
     }, [searchTerm, filterForm, updateUrl]);
 
     const handleFilterChange = (field: keyof typeof initialFilterState, value: string | number) => {

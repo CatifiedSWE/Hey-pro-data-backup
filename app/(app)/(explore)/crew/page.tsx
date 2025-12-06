@@ -108,25 +108,30 @@ async function getExploreData(searchParams: { [key: string]: string | string[] |
             
             // Filter by role if specified
             if (role || category) {
-                const roleNames = roles?.map(r => r.role_name.toLowerCase()) || [];
-                const searchRole = (role || category).toLowerCase();
-                if (!roleNames.some(r => r.includes(searchRole))) {
+                const roleNames = roles?.map(r => r.role_name.toLowerCase().trim()) || [];
+                const searchRole = (role || category).toLowerCase().trim();
+                // Check for partial match in either direction
+                if (!roleNames.some(r => r.includes(searchRole) || searchRole.includes(r))) {
                     return null;
                 }
             }
 
             // Fetch user skills for experience and rate filtering
             const { data: skills } = await supabase
-            .from('user_skills')
-            .select('skill_name, experience_level, rate_per_day')
+            .from('applicant_skills')
+            .select('skill_name, experience_level, day_rate, day_rate_currency')
             .eq('user_id', profile.user_id);
 
             // Filter by experience level if specified
             if (experience && skills) {
-                const hasMatchingExperience = skills.some(skill => 
-                    skill.experience_level && 
-                    skill.experience_level.toLowerCase().includes(experience.toLowerCase())
-                );
+                // Normalize experience search term
+                const searchExp = experience.toLowerCase().trim();
+                const hasMatchingExperience = skills.some(skill => {
+                    if (!skill.experience_level) return false;
+                    const skillExp = skill.experience_level.toLowerCase().trim();
+                    // Check for exact match or partial match (e.g., "intern" matches "Intern")
+                    return skillExp.includes(searchExp) || searchExp.includes(skillExp);
+                });
                 if (!hasMatchingExperience) {
                     return null;
                 }
@@ -138,8 +143,8 @@ async function getExploreData(searchParams: { [key: string]: string | string[] |
                 const max = maxRate ? parseInt(maxRate) : 5000;
                 
                 const hasMatchingRate = skills.some(skill => {
-                    if (!skill.rate_per_day) return false;
-                    const rate = parseFloat(skill.rate_per_day.toString());
+                    if (!skill.day_rate) return false;
+                    const rate = parseFloat(skill.day_rate.toString());
                     return rate >= min && rate <= max;
                 });
                 
@@ -151,10 +156,12 @@ async function getExploreData(searchParams: { [key: string]: string | string[] |
             // Filter by production type if specified
             // Production type is typically part of the role name (e.g., "Director | Commercial")
             if (productionType && roles) {
-                const prodType = productionType.toLowerCase();
-                const hasMatchingProdType = roles.some(r => 
-                    r.role_name.toLowerCase().includes(prodType)
-                );
+                const prodType = productionType.toLowerCase().trim();
+                const hasMatchingProdType = roles.some(r => {
+                    const roleName = r.role_name.toLowerCase().trim();
+                    // Check for partial match - handles "commercial", "tv", "film", "social"
+                    return roleName.includes(prodType);
+                });
                 if (!hasMatchingProdType) {
                     return null;
                 }
