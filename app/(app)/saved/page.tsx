@@ -380,7 +380,7 @@ export default function SavedPage() {
 
     // Handle view profile
     const handleViewProfile = (userId: string) => {
-        router.push(`/explore/${userId}`);
+        router.push(`/profile/${userId}`);
     };
 
     return (
