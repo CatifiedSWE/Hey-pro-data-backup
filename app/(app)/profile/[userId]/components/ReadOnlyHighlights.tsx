@@ -74,10 +74,8 @@ export default function ReadOnlyHighlights({ highlights }: ReadOnlyHighlightsPro
         {/* Desktop View */}
         <div className="hidden lg:flex gap-6">
           <aside className="sticky top-24 self-start w-full max-w-[336px] space-y-6">
-            <div className="w-full rounded-[20px] bg-[#FAFAFA] px-6 py-7 shadow-[0_1px_10px_rgba(0,0,0,0.1)]">
-              <div className="text-center py-8 text-gray-500">
-                <p>Still working for their masterpiece</p>
-              </div>
+            <div className="text-center py-8 text-gray-500">
+              <p>Still working for their masterpiece</p>
             </div>
           </aside>
 
@@ -100,10 +98,8 @@ export default function ReadOnlyHighlights({ highlights }: ReadOnlyHighlightsPro
         <div className="lg:hidden flex flex-col gap-6 pb-10">
           <HighlightsText className="w-full" />
           
-          <div className="w-full rounded-[20px] bg-[#FAFAFA] px-6 py-7 shadow-[0_1px_10px_rgba(0,0,0,0.1)]">
-            <div className="text-center py-8 text-gray-500">
-              <p>Still working for their masterpiece</p>
-            </div>
+          <div className="text-center py-8 text-gray-500">
+            <p>Still working for their masterpiece</p>
           </div>
         </div>
       </section>
