@@ -109,7 +109,6 @@ interface SavedProfile {
         location: string;
         city: string;
         country: string;
-        available_for_work: boolean | null;
     };
 }
 
